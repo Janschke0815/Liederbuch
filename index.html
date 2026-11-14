@@ -313,58 +313,104 @@
 
   <dialog id="settings-dialog" class="settings-dialog">
     <form method="dialog" class="settings-form">
-      <div class="settings-head">
+      <header class="settings-head">
         <h2>Einstellungen</h2>
-        <span class="spacer"></span>
-        <button type="button" id="st-reset">Standard</button>
-        <button value="cancel" formnovalidate>Abbrechen</button>
-        <button value="ok" class="primary">Speichern</button>
-      </div>
+        <p class="hint">Änderungen siehst du sofort im Muster und in der Vorschau. Sie gelten für Vorschau, Spielmodus und Druck.</p>
+      </header>
       <div class="settings-body">
-        <div class="settings-fields">
-          <fieldset>
-            <legend>Liedtext</legend>
-            <label>Schrift <select id="st-lyricFont"></select></label>
-            <label>Größe (pt) <input id="st-lyricSize" type="number" min="7" max="28" step="0.5"></label>
-            <label>Zeilenabstand
-              <select id="st-lineSpacing">
-                <option value="compact">eng</option><option value="normal">normal</option><option value="wide">weit</option>
-              </select>
-            </label>
-          </fieldset>
-          <fieldset>
-            <legend>Akkorde</legend>
-            <label>Schrift <select id="st-chordFont"></select></label>
-            <label>Größe (pt) <input id="st-chordSize" type="number" min="6" max="28" step="0.5"></label>
-            <label>Farbe
-              <span class="color-row">
-                <input id="st-chordColor" type="color">
-                <button type="button" class="swatch" data-color="#b3261e" style="--c:#b3261e" title="Rot"></button>
-                <button type="button" class="swatch" data-color="#1f4e9c" style="--c:#1f4e9c" title="Blau"></button>
-                <button type="button" class="swatch" data-color="#2e7d32" style="--c:#2e7d32" title="Grün"></button>
-                <button type="button" class="swatch" data-color="#000000" style="--c:#000000" title="Schwarz"></button>
-              </span>
-            </label>
-            <label class="check"><input id="st-chordBold" type="checkbox"> fett</label>
-            <label class="check"><input id="st-showDiagrams" type="checkbox"> Griffbilder im Liedkopf (auch im Druck)</label>
-          </fieldset>
-          <fieldset>
-            <legend>Abschnitte</legend>
-            <label>Refrain <select id="st-chorusStyle"></select></label>
-            <label class="check"><input id="st-showLabels" type="checkbox"> Abschnittsnamen anzeigen (Strophe 1, Refrain …)</label>
-          </fieldset>
-          <fieldset>
-            <legend>Druck</legend>
-            <label>Papier <select id="st-paper"><option>A4</option><option>A5</option><option>Letter</option></select></label>
-            <label>Spalten <select id="st-columns"><option value="1">einspaltig</option><option value="2">zweispaltig</option></select></label>
-            <label>Seitenrand (mm) <input id="st-margin" type="number" min="5" max="40" step="1"></label>
-          </fieldset>
+        <nav class="st-nav" aria-label="Bereiche">
+          <a href="#st-sec-text" class="active"><span>Aa</span>Liedtext</a>
+          <a href="#st-sec-chords"><span>C<sup>7</sup></span>Akkorde</a>
+          <a href="#st-sec-parts"><span>¶</span>Abschnitte</a>
+          <a href="#st-sec-print"><span>⎙</span>Druck</a>
+        </nav>
+        <div class="settings-fields" id="st-fields">
+          <section class="st-card" id="st-sec-text">
+            <h3>Liedtext</h3>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Schrift</span><span class="st-hint">Für Text und Titel</span></div>
+                <div class="st-control"><select id="st-lyricFont"></select></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Größe</span></div>
+                <div class="st-control"><input id="st-lyricSize" type="range" min="7" max="28" step="0.5"><output class="range-val" data-for="st-lyricSize" data-unit="pt"></output></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Zeilenabstand</span><span class="st-hint">Abstand zwischen Akkord- und Textzeilen</span></div>
+                <div class="st-control"><select id="st-lineSpacing" data-segmented><option value="compact">eng</option><option value="normal">normal</option><option value="wide">weit</option></select></div>
+              </div>
+          </section>
+
+          <section class="st-card" id="st-sec-chords">
+            <h3>Akkorde</h3>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Schrift</span></div>
+                <div class="st-control"><select id="st-chordFont"></select></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Größe</span></div>
+                <div class="st-control"><input id="st-chordSize" type="range" min="6" max="28" step="0.5"><output class="range-val" data-for="st-chordSize" data-unit="pt"></output></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Farbe</span></div>
+                <div class="st-control"><span class="color-row">
+                  <button type="button" class="swatch" data-color="#b3261e" style="--c:#b3261e" title="Rot"></button>
+                  <button type="button" class="swatch" data-color="#1f4e9c" style="--c:#1f4e9c" title="Blau"></button>
+                  <button type="button" class="swatch" data-color="#2e7d32" style="--c:#2e7d32" title="Grün"></button>
+                  <button type="button" class="swatch" data-color="#6a1b9a" style="--c:#6a1b9a" title="Lila"></button>
+                  <button type="button" class="swatch" data-color="#000000" style="--c:#000000" title="Schwarz"></button>
+                  <input id="st-chordColor" type="color" title="Eigene Farbe">
+                </span></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Fett</span><span class="st-hint">Akkorde kräftiger hervorheben</span></div>
+                <div class="st-control"><label class="switch"><input id="st-chordBold" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Griffbilder</span><span class="st-hint">Diagramme aller Akkorde im Liedkopf – auch im Druck</span></div>
+                <div class="st-control"><label class="switch"><input id="st-showDiagrams" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+          </section>
+
+          <section class="st-card" id="st-sec-parts">
+            <h3>Abschnitte</h3>
+              <div class="st-row st-row-stack">
+                <div class="st-text"><span class="st-title">Refrain hervorheben</span><span class="st-hint">Wie sich der Refrain von den Strophen abhebt</span></div>
+                <div class="st-control"><select id="st-chorusStyle" data-segmented></select></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Abschnittsnamen</span><span class="st-hint">„Strophe 1“, „Refrain“ … über den Abschnitten</span></div>
+                <div class="st-control"><label class="switch"><input id="st-showLabels" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+          </section>
+
+          <section class="st-card" id="st-sec-print">
+            <h3>Druck</h3>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Papier</span></div>
+                <div class="st-control"><select id="st-paper" data-segmented><option>A4</option><option>A5</option><option>Letter</option></select></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Spalten</span><span class="st-hint">Zwei Spalten sparen Seiten bei kurzen Zeilen</span></div>
+                <div class="st-control"><select id="st-columns" data-segmented><option value="1">einspaltig</option><option value="2">zweispaltig</option></select></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Seitenrand</span></div>
+                <div class="st-control"><input id="st-margin" type="range" min="5" max="40" step="1"><output class="range-val" data-for="st-margin" data-unit="mm"></output></div>
+              </div>
+          </section>
         </div>
-        <div class="settings-sample">
+        <aside class="settings-sample">
           <div class="settings-sample-label">Muster</div>
           <div id="st-sample" class="songbook"></div>
-        </div>
+        </aside>
       </div>
+      <footer class="dialog-foot">
+        <button type="button" id="st-reset" class="link-btn">Auf Standard zurücksetzen</button>
+        <span class="spacer"></span>
+        <button value="cancel" formnovalidate>Abbrechen</button>
+        <button value="ok" class="primary">Speichern</button>
+      </footer>
     </form>
   </dialog>
 

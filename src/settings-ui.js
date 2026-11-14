@@ -58,6 +58,59 @@ export function setupSettings({ targets }) {
   fillSelect($('#st-chorusStyle'), Object.entries(CHORUS_STYLES));
   sample.replaceChildren(renderSong(parseChordPro(SAMPLE)));
 
+  // Auswahllisten mit wenigen Werten als Knopfgruppe (die Liste bleibt versteckt die Quelle)
+  for (const sel of dlg.querySelectorAll('select[data-segmented]')) {
+    const group = document.createElement('div');
+    group.className = 'seg-group';
+    group.setAttribute('role', 'radiogroup');
+    for (const o of sel.options) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'radio');
+      b.dataset.value = o.value;
+      b.textContent = o.textContent;
+      b.onclick = () => {
+        sel.value = o.value;
+        dlg.dispatchEvent(new Event('input'));
+      };
+      group.append(b);
+    }
+    sel.hidden = true;
+    sel.after(group);
+  }
+
+  /** Knopfgruppen, Zahlenanzeigen der Schieber und gewählte Farbe angleichen. */
+  function syncControls() {
+    for (const sel of dlg.querySelectorAll('select[data-segmented]')) {
+      for (const b of sel.nextElementSibling.children) b.setAttribute('aria-checked', String(b.dataset.value === sel.value));
+    }
+    for (const out of dlg.querySelectorAll('output.range-val')) {
+      const v = Number($(`#${out.dataset.for}`).value);
+      out.textContent = `${String(v).replace('.', ',')} ${out.dataset.unit}`;
+    }
+    const color = input('chordColor').value.toLowerCase();
+    for (const sw of dlg.querySelectorAll('.swatch')) sw.setAttribute('aria-pressed', String(sw.dataset.color === color));
+  }
+
+  // Bereichs-Navigation: springen und beim Scrollen mitführen
+  const fields = $('#st-fields');
+  const navLinks = [...dlg.querySelectorAll('.st-nav a')];
+  for (const a of navLinks) {
+    a.onclick = (e) => {
+      e.preventDefault();
+      const target = $(a.getAttribute('href'));
+      fields.scrollTo({ top: target.offsetTop - fields.offsetTop - 8, behavior: 'smooth' });
+      setTimeout(() => fields.scrollTop !== target.offsetTop - fields.offsetTop - 8 && (fields.scrollTop = target.offsetTop - fields.offsetTop - 8), 400);
+    };
+  }
+  fields.addEventListener('scroll', () => {
+    const y = fields.scrollTop + fields.offsetTop + 40;
+    let current = navLinks[0];
+    for (const a of navLinks) if ($(a.getAttribute('href')).offsetTop <= y) current = a;
+    if (fields.scrollTop + fields.clientHeight >= fields.scrollHeight - 4) current = navLinks.at(-1);
+    for (const a of navLinks) a.classList.toggle('active', a === current);
+  }, { passive: true });
+
   const applyAll = (s) => {
     applySettings(sample, s);
     for (const el of targets()) applySettings(el, s);
@@ -71,13 +124,14 @@ export function setupSettings({ targets }) {
       if (el.type === 'checkbox') el.checked = s[key];
       else el.value = String(s[key]);
     }
+    syncControls();
   }
 
   function readForm() {
     const raw = {};
     for (const key of FIELDS) {
       const el = input(key);
-      raw[key] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? Number(el.value) : el.value;
+      raw[key] = el.type === 'checkbox' ? el.checked : el.type === 'number' || el.type === 'range' ? Number(el.value) : el.value;
     }
     return sanitize(raw);
   }
@@ -85,6 +139,7 @@ export function setupSettings({ targets }) {
   dlg.addEventListener('input', () => {
     draft = readForm();
     applyAll(draft);
+    syncControls();
   });
 
   for (const sw of dlg.querySelectorAll('.swatch')) {
@@ -115,6 +170,8 @@ export function setupSettings({ targets }) {
     applyAll(saved);
     dlg.returnValue = '';
     dlg.showModal();
+    fields.scrollTop = 0;
+    fields.dispatchEvent(new Event('scroll'));
   };
 
   applyAll(saved);
