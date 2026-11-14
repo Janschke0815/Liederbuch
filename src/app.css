@@ -744,3 +744,13 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 .ctx-hint { color: var(--muted); font-size: .82em; margin-left: 1em; }
 .ctx-sep { height: 1px; background: var(--border); margin: .3em .4em; }
 @media (pointer: coarse) { .ctx-item { min-height: 2.7rem; } .ctx-menu { font-size: 1rem; } }
+
+/* Handy: Leiste über dem Lied darf nicht überlaufen */
+@media (max-width: 760px) {
+  #time-chip { display: none !important; }
+  .view-bar { gap: .3em; padding-inline: .4em; }
+  .view-bar .stepper button { min-width: 2rem; }
+  .view-bar .segmented button { min-width: 1.9rem; padding-inline: .45em; }
+  #tr-value { min-width: 2.1em; }
+  .info-chip { padding: .2em .5em; }
+}
