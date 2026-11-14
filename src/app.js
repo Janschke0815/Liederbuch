@@ -12,6 +12,7 @@ import { setupSettings } from './settings-ui.js';
 import { setupSync } from './sync-ui.js';
 import { bumpRepeat } from './core/repeat.js';
 import { activeBook } from './books.js';
+import { setupPlayMode } from './play-mode.js';
 import { getAllMeta, setMeta } from './core/meta-edit.js';
 import { transposeChord } from './core/chords.js';
 import { applySettings, loadSettings } from './settings/settings.js';
@@ -58,7 +59,8 @@ function setStatus(text, state = '') {
 }
 
 const isTyping = (el) => el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
-const anyDialogOpen = () => Boolean(document.querySelector('dialog[open]')) || !$('#print-view').hidden;
+const anyDialogOpen = () =>
+  Boolean(document.querySelector('dialog[open]')) || !$('#print-view').hidden || !$('#play-view').hidden;
 
 function setView(view) {
   $('.workspace').dataset.view = view;
@@ -174,7 +176,7 @@ Griffe in ${k.key}, klingt mit Capo ${capo} in ${transposeChord(k.key, capo)}` :
 function updateControls() {
   const has = Boolean(current);
   editor.disabled = !has;
-  for (const b of document.querySelectorAll('#tr-up, #tr-down, #accidentals button, #btn-delete, .snippets button')) b.disabled = !has;
+  for (const b of document.querySelectorAll('#tr-up, #tr-down, #accidentals button, #btn-delete, #btn-play, .snippets button')) b.disabled = !has;
   const t = current?.transpose || 0;
   const out = $('#tr-value');
   out.textContent = (t > 0 ? '+' : '') + t;
@@ -579,9 +581,26 @@ addEventListener('keydown', (e) => {
     return;
   }
   if (mod || e.altKey || isTyping(document.activeElement) || !current) return;
-  if (e.key === '+' || e.key === '=') $('#tr-up').click();
+  if (e.key === 'f' || e.key === 'F') $('#btn-play').click();
+  else if (e.key === '+' || e.key === '=') $('#tr-up').click();
   else if (e.key === '-') $('#tr-down').click();
 });
+
+// ---------- Spielmodus ----------
+
+const play = setupPlayMode({
+  repo,
+  // Blättern in der Reihenfolge der (ggf. gefilterten) Liste
+  getSongIds: async () => (await repo.list({ query: search.value })).map((s) => s.id),
+  onClose: (id) => {
+    if (id && id !== current?.id) openSong(id);
+  },
+});
+$('#btn-play').onclick = async () => {
+  if (!current) return;
+  await flushSave();
+  play.open(current.id);
+};
 
 // ---------- Drucken ----------
 

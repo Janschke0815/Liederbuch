@@ -48,6 +48,28 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | Strg+E | Editor ein-/ausblenden |
 | Strg+S | sofort speichern (sonst automatisch) |
 | Strg+P | Drucken |
+| F | Spielmodus |
+
+## Spielmodus
+
+Knopf **Spielen** über der Vorschau (oder Taste **F**): Vollbild nur mit dem Lied, der
+Bildschirm bleibt an. **Automatisch scrollen** läuft so, dass das Lied in seiner Dauer
+(`{duration: 3:20}`, sonst 3 Minuten) einmal durchläuft; mit − / + schneller oder langsamer,
+die Geschwindigkeit wird pro Lied gemerkt. Tippen aufs Lied blendet die Leiste ein/aus.
+
+| Taste / Pedal | Wirkung |
+|---|---|
+| Bild↓ / ↓ | eine Seite weiter, am Ende: nächstes Lied |
+| Bild↑ / ↑ | eine Seite zurück, am Anfang: voriges Lied |
+| → / ← | nächstes / voriges Lied |
+| Leertaste / Enter | automatisches Scrollen an/aus |
+| + / − | Schrift größer / kleiner |
+| > / < | schneller / langsamer scrollen |
+| N | Nachtmodus (dunkel) |
+| Esc | Spielmodus beenden |
+
+Bluetooth-Fußpedale („Page Turner“) senden meist Bild↑/↓ oder Pfeiltasten und funktionieren
+damit ohne Einrichtung. Geblättert wird in der Reihenfolge der Liederliste (ggf. gefiltert).
 
 ## Liedinfo: Capo, Takt, Tempo
 

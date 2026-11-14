@@ -35,6 +35,13 @@
       <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
       <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a5 5 0 0 1-.6-9.96A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></symbol>
       <symbol id="i-sync" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M18 2v4h-4M6 22v-4h4"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 4h3.5v16H7zM13.5 4H17v16h-3.5z" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+      <symbol id="i-stage" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M10 9v6l5-3z" fill="currentColor"/></symbol>
       <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></symbol>
       <symbol id="i-note" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
     </defs>
@@ -136,6 +143,9 @@
       <div class="pane-bar view-bar">
         <button id="btn-focus" type="button" class="icon-btn" title="Editor ein-/ausblenden (Strg+E)" aria-pressed="false">
           <svg class="icon"><use href="#i-panel"/></svg>
+        </button>
+        <button id="btn-play" type="button" class="play-btn" title="Spielmodus: Vollbild, automatisch scrollen, Pedal (F)">
+          <svg class="icon"><use href="#i-stage"/></svg><span class="label">Spielen</span>
         </button>
         <span class="spacer"></span>
         <div class="key-box" title="Tonart (wird mit dem Lied gespeichert)">
@@ -359,6 +369,34 @@
       </footer>
     </form>
   </dialog>
+
+  <section id="play-view" class="play-view" hidden aria-label="Spielmodus">
+    <div class="play-bar" id="pl-bar">
+      <button type="button" id="pl-exit" class="icon-btn" title="Spielmodus beenden (Esc)"><svg class="icon"><use href="#i-x"/></svg></button>
+      <button type="button" id="pl-prev" class="icon-btn" title="Vorheriges Lied (←)"><svg class="icon"><use href="#i-left"/></svg></button>
+      <div class="play-title"><strong id="pl-title"></strong><small id="pl-pos"></small></div>
+      <button type="button" id="pl-next" class="icon-btn" title="Nächstes Lied (→)"><svg class="icon"><use href="#i-right"/></svg></button>
+      <span class="spacer"></span>
+      <div class="play-group" title="Schriftgröße (+ / −)">
+        <button type="button" id="pl-smaller" aria-label="Schrift kleiner">A−</button>
+        <button type="button" id="pl-bigger" aria-label="Schrift größer">A+</button>
+      </div>
+      <button type="button" id="pl-night" class="icon-btn" title="Nachtmodus (N)" aria-pressed="false"><svg class="icon"><use href="#i-moon"/></svg></button>
+      <div class="play-group play-scroll-ctl" title="Automatisch scrollen (Leertaste); Geschwindigkeit wird pro Lied gemerkt">
+        <button type="button" id="pl-slower" aria-label="Langsamer">−</button>
+        <button type="button" id="pl-toggle" class="primary" aria-label="Scrollen starten"><svg class="icon"><use href="#i-play"/></svg></button>
+        <output id="pl-speed">1,0×</output>
+        <button type="button" id="pl-faster" aria-label="Schneller">+</button>
+      </div>
+    </div>
+    <div id="pl-scroll" class="play-scroll" tabindex="-1">
+      <div id="pl-sheet" class="songbook play-sheet"></div>
+      <div class="play-end">
+        <button type="button" id="pl-next-end" class="primary"></button>
+      </div>
+    </div>
+    <div id="pl-progress" class="play-progress"></div>
+  </section>
 
   <section id="print-view" class="print-view" hidden>
     <div class="print-bar">
