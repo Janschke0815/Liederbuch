@@ -286,6 +286,23 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 .print-view { background: #6f6b65 !important; }
 .print-bar { background: var(--surface) !important; border-color: var(--border) !important; padding: .5em .8em !important; }
 .print-info { color: var(--muted) !important; }
+.pv-fonts { flex-basis: 100%; display: flex; align-items: center; gap: .5em .7em; flex-wrap: wrap; padding-top: .45em; border-top: 1px solid var(--border); font-size: .9em; }
+.pv-fonts-title { font-weight: 600; color: var(--muted); }
+.pv-font { display: inline-flex; align-items: center; gap: .4em; color: var(--muted); }
+.pv-font select { max-width: 11em; }
+.pv-pair { display: inline-flex; align-items: center; gap: .4em; white-space: nowrap; }
+@media (max-width: 760px) {
+  .print-bar { gap: .4em; }
+  .pv-fonts { gap: .35em .6em; }
+  .pv-fonts-title { flex-basis: 100%; }
+  .pv-pair { flex: 1 1 100%; }
+  .pv-pair .pv-font { flex: 1; min-width: 0; }
+  .pv-pair .pv-font select { flex: 1; min-width: 0; max-width: none; }
+  .pv-fonts .stepper output { min-width: 3.6em; }
+}
+.pv-fonts .stepper button { min-width: 2rem; font-size: 1em; }
+.pv-fonts .stepper output { min-width: 4.2em; text-align: center; align-self: center; font-variant-numeric: tabular-nums; }
+.pv-fonts.custom .pv-fonts-title { color: var(--accent); }
 
 /* Einstellungen: Navigation | Karten mit Zeilen | Muster */
 .settings-dialog { width: min(1120px, 96vw); }

@@ -610,6 +610,30 @@
       <span id="pv-info" class="print-info"></span>
       <span class="spacer"></span>
       <button type="button" id="pv-print" class="primary">Drucken / als PDF speichern</button>
+      <div class="pv-fonts" role="group" aria-label="Schrift im Druck">
+        <span class="pv-fonts-title" title="Gilt nur für den Druck – die Anzeige am Bildschirm bleibt, wie sie ist">Schrift im Druck</span>
+        <span class="pv-pair">
+          <label class="pv-font">Text
+            <select id="pv-lyricFont" aria-label="Schriftart Text"></select>
+          </label>
+          <span class="stepper" role="group" aria-label="Schriftgröße Text">
+            <button type="button" data-step="lyricSize" data-dir="-1" title="Text kleiner">−</button>
+            <output id="pv-lyricSize">12 pt</output>
+            <button type="button" data-step="lyricSize" data-dir="1" title="Text größer">+</button>
+          </span>
+        </span>
+        <span class="pv-pair">
+          <label class="pv-font">Akkorde
+            <select id="pv-chordFont" aria-label="Schriftart Akkorde"></select>
+          </label>
+          <span class="stepper" role="group" aria-label="Schriftgröße Akkorde">
+            <button type="button" data-step="chordSize" data-dir="-1" title="Akkorde kleiner">−</button>
+            <output id="pv-chordSize">10,5 pt</output>
+            <button type="button" data-step="chordSize" data-dir="1" title="Akkorde größer">+</button>
+          </span>
+        </span>
+        <button type="button" id="pv-font-reset" class="link-btn" hidden title="Schrift wieder wie unter Einstellungen">Wie Einstellungen</button>
+      </div>
     </div>
     <div class="print-scroll">
       <div id="print-root" class="print-root"></div>

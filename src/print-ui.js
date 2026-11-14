@@ -2,7 +2,8 @@
 
 import { buildSongbook, DEFAULT_PRINT_OPTIONS, PAPER } from './print/songbook.js';
 import { normalize } from './storage/repository.js';
-import { loadSettings, saveSettings, applySettings } from './settings/settings.js';
+import { loadSettings, saveSettings, applySettings, FONTS } from './settings/settings.js';
+import { withPrintFonts, loadPrintFonts, savePrintFonts, stepSize } from './print/print-fonts.js';
 
 const $ = (s) => document.querySelector(s);
 const pickLayout = ({ paper, columns, margin }) => ({ paper, columns, margin });
@@ -123,10 +124,80 @@ export function setupPrint({ repo, beforeOpen }) {
     root.style.setProperty('--preview-zoom', zoom.toFixed(3));
   }
 
-  async function showPreview() {
+  // ---------- Schrift nur für den Druck ----------
+  for (const id of ['#pv-lyricFont', '#pv-chordFont']) {
+    $(id).replaceChildren(...Object.keys(FONTS).map((f) => {
+      const o = new Option(f, f);
+      o.style.fontFamily = FONTS[f];
+      return o;
+    }));
+  }
+  const fmtPt = (v) => `${String(v).replace('.', ',')} pt`;
+
+  function printSettings() {
+    return withPrintFonts(loadSettings(), loadPrintFonts());
+  }
+
+  function syncFontBar() {
+    const s = printSettings();
+    $('#pv-lyricFont').value = s.lyricFont;
+    $('#pv-chordFont').value = s.chordFont;
+    $('#pv-lyricSize').textContent = fmtPt(s.lyricSize);
+    $('#pv-chordSize').textContent = fmtPt(s.chordSize);
+    const custom = Object.keys(loadPrintFonts()).length > 0;
+    $('#pv-font-reset').hidden = !custom;
+    $('.pv-fonts').classList.toggle('custom', custom);
+  }
+
+  let relayoutTimer = 0;
+  function changeFonts(patch) {
+    savePrintFonts({ ...loadPrintFonts(), ...patch }, loadSettings());
+    syncFontBar();
+    // Schnell mehrmals tippen: erst danach neu setzen
+    clearTimeout(relayoutTimer);
+    relayoutTimer = setTimeout(() => showPreview({ keepPlace: true }), 250);
+  }
+
+  $('#pv-lyricFont').onchange = (e) => changeFonts({ lyricFont: e.target.value });
+  $('#pv-chordFont').onchange = (e) => changeFonts({ chordFont: e.target.value });
+  $('.pv-fonts').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-step]');
+    if (!b) return;
+    const key = b.dataset.step;
+    changeFonts({ [key]: stepSize(key, printSettings()[key], Number(b.dataset.dir)) });
+  });
+  $('#pv-font-reset').onclick = () => {
+    savePrintFonts({}, loadSettings());
+    syncFontBar();
+    showPreview({ keepPlace: true });
+  };
+
+  /** Seite oben im Fenster (für "an derselben Stelle weiter" nach dem Neusetzen). */
+  function currentPage() {
+    const sc = root.parentElement;
+    const top = sc.getBoundingClientRect().top;
+    const pages = [...root.querySelectorAll('.page')];
+    const i = pages.findIndex((p) => p.getBoundingClientRect().bottom > top + 40);
+    return Math.max(0, i);
+  }
+
+  let building = null;
+  async function showPreview({ keepPlace = false } = {}) {
+    if (building) await building; // nie zwei Umbrüche gleichzeitig
+    const page = keepPlace ? currentPage() : 0;
+    building = layoutPreview(page);
+    try {
+      await building;
+    } finally {
+      building = null;
+    }
+  }
+
+  async function layoutPreview(page) {
     view.hidden = false;
     root.style.setProperty('--preview-zoom', '1'); // Messen nur in Originalgröße
-    applySettings(root, loadSettings());
+    applySettings(root, printSettings());
+    syncFontBar();
     $('#pv-info').textContent = 'Seiten werden gesetzt …';
     const chosen = songs.filter((s) => selected.has(s.id)); // bereits alphabetisch
     const result = await buildSongbook(root, chosen, options);
@@ -134,6 +205,9 @@ export function setupPrint({ repo, beforeOpen }) {
     const warn = result.overflows ? ` · ${result.overflows}× zu groß für eine Seite (abgeschnitten)` : '';
     $('#pv-info').textContent = `${chosen.length} ${chosen.length === 1 ? 'Lied' : 'Lieder'}, ${result.pages} Seiten (${options.paper})${warn}`;
     setPageSize();
+    const target = root.querySelectorAll('.page')[Math.min(page, result.pages - 1)];
+    if (page && target) target.scrollIntoView({ block: 'start' });
+    else root.parentElement.scrollTop = 0;
   }
 
   function setPageSize() {

@@ -131,6 +131,14 @@ beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ er
   nicht im Druck; wird mit gesichert und synchronisiert.
 - **Papierkorb** (Menü): gelöschte Lieder wiederherstellen oder endgültig löschen.
 
+## Druckvorschau: Schrift nur für den Druck
+
+In der Druckvorschau stehen unter der Leiste **Schriftart und -größe für Text und Akkorde**.
+Sie gelten nur für den Druck – am Bildschirm bleibt alles, wie es unter Einstellungen steht.
+Die Vorschau setzt die Seiten sofort neu (Seitenzahl oben), bleibt dabei an derselben Stelle und
+merkt sich die Werte fürs nächste Mal. Praktisch, um ein Liederbuch kleiner zu setzen, bis jedes
+Lied auf eine Seite passt. **Wie Einstellungen** stellt die Druckschrift zurück.
+
 ## Zoom, Metronom, Lied teilen
 
 - **Zoom:** unten rechts in der Vorschau − / 100 % / + (nur Bildschirm, nicht der Druck).
@@ -292,4 +300,4 @@ die App „Server nicht erreichbar … (CORS)“.
 6. ✅ Cloud-Sync über Google Drive (weitere Anbieter optional)
 7. ✅ Liederbuch über WebDAV synchronisieren (Nextcloud u. a., Server muss CORS erlauben)
 8. ✅ Mundharmonika-Tabs ([-4] …) und Gitarren-Tabs getrennt ein-/ausblendbar
-9. Schriftgröße und art in Druckvorschau anpassbar machen
+9. ✅ Schriftart und -größe in der Druckvorschau einstellbar (nur für den Druck)
