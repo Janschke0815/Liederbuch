@@ -385,3 +385,41 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 
 /* Installierte App: Statusleiste/Notch berücksichtigen */
 @media (display-mode: standalone) { .toolbar { padding-top: max(.45em, env(safe-area-inset-top)); } }
+
+/* ---------- Cloud-Sync ---------- */
+
+.cloud-btn { border-color: transparent; background: transparent; color: var(--muted); position: relative; }
+.cloud-btn::after {
+  content: ''; position: absolute; left: 1.45em; top: .45em; width: .55em; height: .55em;
+  border-radius: 50%; border: 2px solid var(--surface); background: transparent;
+}
+.cloud-btn[data-state='idle'] { color: var(--text); }
+.cloud-btn[data-state='idle']::after { background: #3b8c4a; }
+.cloud-btn[data-state='syncing']::after { background: #3a7bd5; animation: pulse 1s infinite alternate; }
+.cloud-btn[data-state='offline']::after { background: #8a847c; }
+.cloud-btn[data-state='auth']::after, .cloud-btn[data-state='error']::after { background: #d18f1c; }
+.cloud-btn[data-state='auth'], .cloud-btn[data-state='error'] { color: var(--text); }
+@keyframes pulse { to { opacity: .35; } }
+
+.sync-dialog { width: min(640px, 95vw); }
+.sync-body { display: flex; flex-direction: column; gap: 1em; }
+.sync-status {
+  display: flex; gap: .9em; align-items: center; padding: .9em 1em;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2);
+}
+.sync-status > .icon { width: 2em; height: 2em; color: var(--muted); }
+.sync-status[data-state='idle'] > .icon { color: #3b8c4a; }
+.sync-status[data-state='syncing'] > .icon { color: #3a7bd5; }
+.sync-status[data-state='auth'] > .icon, .sync-status[data-state='error'] > .icon { color: #d18f1c; }
+.field { display: flex; flex-direction: column; gap: .3em; font-size: .88em; color: var(--muted); }
+.field input, .field select { color: var(--text); font-size: 1rem; }
+.sync-setup { border: 1px solid var(--border); border-radius: 10px; padding: .6em .9em; }
+.sync-setup summary { cursor: pointer; font-weight: 600; }
+.sync-setup[open] summary { margin-bottom: .7em; }
+.sync-setup ol { margin: .8em 0 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: .35em; }
+.sync-setup a { color: var(--accent); }
+.sync-setup code { background: var(--hover); padding: .05em .35em; border-radius: 4px; color: var(--text); user-select: all; }
+@media (max-width: 760px) {
+  .cloud-btn .label { display: none; }
+  .dialog-foot { flex-wrap: wrap; }
+}

@@ -9,6 +9,8 @@ import { openIdbStore } from './storage/stores.js';
 import { SAMPLE_SONG, NEW_SONG_TEMPLATE } from './sample.js';
 import { setupPrint } from './print-ui.js';
 import { setupSettings } from './settings-ui.js';
+import { setupSync } from './sync-ui.js';
+import { bumpRepeat } from './core/repeat.js';
 import { applySettings, loadSettings } from './settings/settings.js';
 
 const $ = (s) => document.querySelector(s);
@@ -259,6 +261,22 @@ function insertSnippet(kind) {
     const t = sel.trim() || 'Hinweis';
     return insertText(`{comment: ${t}}`, 10, 10 + t.length);
   }
+  if (kind === 'times') {
+    // Zeile mit dem Cursor bekommt die Wiederholung (Abschnittsanfang: in den Namen)
+    const v = editor.value;
+    const lineAt = (p) => [v.lastIndexOf('\n', p - 1) + 1, v.indexOf('\n', p) < 0 ? v.length : v.indexOf('\n', p)];
+    let [a, b] = lineAt(editor.selectionStart);
+    if (!v.slice(a, b).trim()) return toast('Cursor in eine Zeile oder einen Abschnittsanfang setzen');
+    if (/^\s*\{\s*(end_of_\w+|eo[cvbt])\s*\}\s*$/i.test(v.slice(a, b))) {
+      // auf "{end_of_…}": Wiederholung gehört zum Abschnittsanfang
+      const start = v.slice(0, a).search(/\{\s*(start_of_\w+|so[cvbt])\b[^}]*\}[^{]*$/i);
+      if (start >= 0) [a, b] = lineAt(start);
+    }
+    editor.focus();
+    editor.setSelectionRange(a, b);
+    const next = bumpRepeat(v.slice(a, b));
+    return insertText(next, next.length);
+  }
   const atLineStart = editor.selectionStart === 0 || editor.value[editor.selectionStart - 1] === '\n';
   const nl = atLineStart ? '' : '\n';
   if (kind === 'repeat') return insertText(`${nl}{chorus}\n`);
@@ -507,11 +525,48 @@ addEventListener('keydown', (e) => {
 
 setupPrint({ repo, beforeOpen: flushSave });
 
+// ---------- Cloud-Sync ----------
+
+setupSync({
+  repo,
+  toast,
+  beforeSync: flushSave,
+  // Neues Gerät: das unveränderte Beispiellied nicht in das gemeinsame Liederbuch tragen
+  beforeConnect: async () => {
+    const all = await repo.list();
+    if (all.length && all.every((s) => s.chordpro === SAMPLE_SONG && s.createdAt === s.updatedAt)) {
+      for (const s of all) await repo.remove(s.id);
+    }
+  },
+});
+
+// Änderungen von anderen Geräten
+repo.addEventListener('remote-change', async (e) => {
+  const ids = e.detail;
+  if (!current) return openSong((await repo.list())[0]?.id);
+  if (!ids.includes(current.id)) return refreshList();
+  if (saveTimer) return refreshList(); // hier wird gerade getippt – die eigene Fassung ist neuer
+  const fresh = await repo.get(current.id);
+  if (!fresh) {
+    toast(`„${current.title || 'Ohne Titel'}“ wurde auf einem anderen Gerät gelöscht`);
+    return openSong((await repo.list())[0]?.id);
+  }
+  current = fresh;
+  if (editor.value !== fresh.chordpro) {
+    const { selectionStart: a, selectionEnd: b } = editor;
+    editor.value = fresh.chordpro;
+    editor.setSelectionRange(a, b);
+  }
+  updateControls();
+  renderPreview();
+  await refreshList();
+});
+
 // ---------- Start ----------
 
 async function start() {
   let songs = await repo.list();
-  if (!songs.length) {
+  if (!songs.length && !localStorage.getItem('sync.provider')) {
     // Entwurf aus Schritt 1 (localStorage) übernehmen, sonst Beispiel anlegen
     const draft = localStorage.getItem('draft');
     await repo.create(draft?.trim() ? draft : SAMPLE_SONG);
@@ -519,7 +574,7 @@ async function start() {
     songs = await repo.list();
   }
   const last = localStorage.getItem('lastSong');
-  await openSong(songs.some((s) => s.id === last) ? last : songs[0].id);
+  await openSong(songs.some((s) => s.id === last) ? last : songs[0]?.id);
 }
 
 const started = start();

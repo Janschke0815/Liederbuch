@@ -2,13 +2,16 @@
 // Reine Funktionen, kein DOM.
 
 import { isChord } from './chords.js';
+import { splitRepeat, formatRepeat } from './repeat.js';
 
 const FILLER = /^(\|{1,2}|\/|-+|%|\.|:|\*|[x×]\d+|\d+[x×]|\([x×]?\d+[x×]?\)|N\.?C\.?|\.{2,3})$/i;
 const PURE_PUNCT = /^(\|{1,2}|\/|-+|\.|:|\*)$/;
 
 const SECTION_WORDS =
   'verse|strophe|vers|chorus|refrain|ref|bridge|intro|outro|pre-?chorus|post-?chorus|solo|interlude|instrumental|zwischenspiel|coda|hook|riff|ending|break';
-const SECTION_NAME = `(?:${SECTION_WORDS})\\.?(?:\\s*\\d+)?`;
+// optional mit Wiederholung: "Chorus x2", "Refrain (2x)"
+const REPEAT_SUFFIX = '(?:\\s*\\(?\\s*(?:[x×]\\s*\\d{1,2}|\\d{1,2}\\s*[x×])\\s*\\)?)?';
+const SECTION_NAME = `(?:${SECTION_WORDS})\\.?(?:\\s*\\d+)?${REPEAT_SUFFIX}`;
 const SEP = '[:\\-–—]';
 // "Verse 1", "Chorus:", "Verse 1 -", "chorus –" allein auf der Zeile
 const SECTION_PLAIN_RE = new RegExp(`^\\s*(${SECTION_NAME})\\s*${SEP}?\\s*$`, 'i');
@@ -118,8 +121,18 @@ export function mergeChordLine(chordLine, lyricLine) {
     out = out.slice(0, t.col) + chordMarker(t.text) + out.slice(t.col);
   }
   if (before.length) out = before.map((t) => chordMarker(t.text)).join(' ') + ' ' + out;
+  // "x2" hinter dem Textende ist eine Wiederholung, kein Akkord
+  let repeat = '';
+  const lastAfter = after.at(-1);
+  if (lastAfter && !tokenIsChord(lastAfter.text)) {
+    const r = splitRepeat(lastAfter.text);
+    if (r.times && !r.text) {
+      after.pop();
+      repeat = ` (${formatRepeat(r.times)})`;
+    }
+  }
   if (after.length) out = out + (out ? ' ' : '') + after.map((t) => chordMarker(t.text)).join(' ');
-  return out;
+  return out + repeat;
 }
 
 /** Reine Akkordzeile -> ChordPro, Füllzeichen (|, x2) bleiben als Text. */

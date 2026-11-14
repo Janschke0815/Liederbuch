@@ -40,8 +40,43 @@ function lyricsText(chordpro) {
   return chordpro.replace(/^\s*\{.*\}\s*$/gm, ' ').replace(/\[[^\]]*\]/g, '');
 }
 
-export class SongRepository {
+/** Felder, die gespeichert und synchronisiert werden (der Rest wird abgeleitet). */
+export const SYNC_FIELDS = ['id', 'chordpro', 'transpose', 'accidentals', 'createdAt', 'updatedAt', 'deletedAt'];
+
+export function slimRecord(r) {
+  const out = {};
+  for (const k of SYNC_FIELDS) out[k] = r[k] ?? (k === 'deletedAt' ? null : r[k]);
+  return out;
+}
+
+/** Vollständiger Datensatz aus einem schlanken (z. B. aus der Cloud). */
+export function fullRecord(r) {
+  return {
+    ...slimRecord(r),
+    ...deriveSummary(r.chordpro),
+    transpose: Number.isInteger(r.transpose) ? r.transpose : 0,
+    accidentals: ['auto', 'sharp', 'flat'].includes(r.accidentals) ? r.accidentals : 'auto',
+  };
+}
+
+/**
+ * Welche Fassung gewinnt? Die mit dem späteren updatedAt; bei Gleichstand entscheidet der
+ * Inhalt, damit alle Geräte zum selben Ergebnis kommen.
+ */
+export function isNewer(a, b) {
+  if (!a) return false;
+  if (!b) return true;
+  if (a.updatedAt !== b.updatedAt) return a.updatedAt > b.updatedAt;
+  return JSON.stringify(slimRecord(a)) > JSON.stringify(slimRecord(b));
+}
+
+/**
+ * Ereignisse: "change" bei eigenen Änderungen, "remote-change" (detail: ids) wenn
+ * Änderungen von anderen Geräten übernommen wurden.
+ */
+export class SongRepository extends EventTarget {
   constructor(store, { now = () => new Date().toISOString(), newId = defaultId } = {}) {
+    super();
     this.store = store;
     this.now = now;
     this.newId = newId;
@@ -94,18 +129,31 @@ export class SongRepository {
       deletedAt: null,
     };
     await this.store.put(rec);
+    this.#changed();
     return rec;
+  }
+
+  #changed() {
+    this.dispatchEvent(new Event('change'));
+  }
+
+  /** Zeitstempel, der sicher nach dem bisherigen liegt (auch bei falsch gehender Uhr). */
+  #stamp(old) {
+    const t = this.now();
+    if (!old?.updatedAt || t > old.updatedAt) return t;
+    return new Date(Date.parse(old.updatedAt) + 1).toISOString();
   }
 
   /** Ändert chordpro, transpose und/oder accidentals. */
   async update(id, changes) {
     const old = await this.get(id);
     if (!old) throw new Error(`Lied ${id} nicht gefunden`);
-    const rec = { ...old, updatedAt: this.now() };
+    const rec = { ...old, updatedAt: this.#stamp(old) };
     if ('chordpro' in changes) Object.assign(rec, { chordpro: changes.chordpro }, deriveSummary(changes.chordpro));
     if ('transpose' in changes) rec.transpose = ((Math.trunc(changes.transpose) % 12) + 12 + 6) % 12 - 6; // -6 … +5
     if ('accidentals' in changes) rec.accidentals = changes.accidentals;
     await this.store.put(rec);
+    this.#changed();
     return rec;
   }
 
@@ -113,17 +161,42 @@ export class SongRepository {
   async remove(id) {
     const old = await this.store.get(id);
     if (!old || old.deletedAt) return;
-    const t = this.now();
+    const t = this.#stamp(old);
     await this.store.put({ ...old, deletedAt: t, updatedAt: t });
+    this.#changed();
   }
 
   /** Holt ein (weich) gelöschtes Lied zurück – für "Rückgängig". */
   async restore(id) {
     const old = await this.store.get(id);
     if (!old || !old.deletedAt) return old;
-    const rec = { ...old, deletedAt: null, updatedAt: this.now() };
+    const rec = { ...old, deletedAt: null, updatedAt: this.#stamp(old) };
     await this.store.put(rec);
+    this.#changed();
     return rec;
+  }
+
+  /** Alle Datensätze einschließlich gelöschter (Grabsteine) – für den Sync. */
+  async allRecords() {
+    return this.store.getAll();
+  }
+
+  /**
+   * Übernimmt Fassungen von anderen Geräten, aber nur, wenn sie neuer sind als die lokale
+   * (falls hier inzwischen weiter bearbeitet wurde, bleibt die lokale Fassung).
+   * @returns {Promise<string[]>} geänderte IDs
+   */
+  async applyRemote(records) {
+    const toPut = [];
+    for (const r of records) {
+      const local = await this.store.get(r.id);
+      if (isNewer(r, local)) toPut.push(fullRecord(r));
+    }
+    if (toPut.length) {
+      await this.store.putMany(toPut);
+      this.dispatchEvent(new CustomEvent('remote-change', { detail: toPut.map((r) => r.id) }));
+    }
+    return toPut.map((r) => r.id);
   }
 
   async exportData() {
@@ -176,6 +249,7 @@ export class SongRepository {
       }
     }
     await this.store.putMany(toPut);
+    if (toPut.length) this.#changed();
     return result;
   }
 }

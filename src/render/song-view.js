@@ -5,6 +5,7 @@
 // Segments läuft als normaler Text weiter, damit lange Zeilen umbrechen können.
 
 import { transposeChord, transposeNote, shouldUseFlats, parseChord } from '../core/chords.js';
+import { splitRepeat, formatRepeat } from '../core/repeat.js';
 
 const DEFAULT_LABELS = { chorus: 'Refrain', bridge: 'Bridge' };
 
@@ -27,7 +28,32 @@ function splitFirstWord(text) {
   return [m[1], m[2]];
 }
 
-function renderLyricsLine(line, chordName) {
+const repeatBadge = (n) => {
+  const b = el('span', 'repeat', formatRepeat(n));
+  b.title = `${n}-mal spielen`;
+  return b;
+};
+
+/** Wiederholungsangabe am Zeilenende abtrennen. */
+function takeLineRepeat(line) {
+  const last = line.segments.at(-1);
+  if (!last) return { line, times: null };
+  const { text, times } = splitRepeat(last.text);
+  if (!times) return { line, times: null };
+  return { line: { ...line, segments: [...line.segments.slice(0, -1), { ...last, text }] }, times };
+}
+
+function renderLyricsLine(original, chordName) {
+  const { line, times } = takeLineRepeat(original);
+  const div = renderLyricsLineBody(line, chordName);
+  if (times) {
+    div.classList.add('line--repeat');
+    div.append(repeatBadge(times));
+  }
+  return div;
+}
+
+function renderLyricsLineBody(line, chordName) {
   const div = el('div', line.chordsOnly ? 'line line--chords' : 'line');
   if (line.chordsOnly) {
     for (const s of line.segments) {
@@ -60,7 +86,12 @@ function renderLine(line, chordName) {
   switch (line.type) {
     case 'lyrics': return renderLyricsLine(line, chordName);
     case 'comment': return el('p', `comment comment--${line.style}`, line.text);
-    case 'chorus-ref': return el('p', 'chorus-ref', line.label || DEFAULT_LABELS.chorus);
+    case 'chorus-ref': {
+      const { text, times } = splitRepeat(line.label || '');
+      const p = el('p', 'chorus-ref', text || DEFAULT_LABELS.chorus);
+      if (times) p.append(' ', repeatBadge(times));
+      return p;
+    }
     case 'tab': return document.createTextNode(line.text + '\n');
     case 'new-page': return el('div', 'new-page');
     case 'column-break': return el('div', 'column-break');
@@ -71,8 +102,14 @@ function renderLine(line, chordName) {
 function renderBlock(block, chordName) {
   const kind = block.kind || 'none';
   const section = el('section', `block block--${kind}`);
-  const label = block.label || DEFAULT_LABELS[block.kind];
-  if (label) section.append(el('div', 'block-label', label));
+  const { text: labelText, times } = splitRepeat(block.label || '');
+  const label = labelText || DEFAULT_LABELS[block.kind];
+  if (label || times) {
+    const head = el('div', 'block-label');
+    if (label) head.append(el('span', 'label-text', label));
+    if (times) head.append(repeatBadge(times));
+    section.append(head);
+  }
 
   if (block.kind === 'tab' || block.kind === 'grid') {
     const pre = el('pre', 'tab');

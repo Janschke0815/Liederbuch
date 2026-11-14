@@ -154,7 +154,7 @@ describe('UG-Import: ganze Lieder', () => {
     expect(lines(ugToChordPro(input))).toEqual([
       '{start_of_chorus: Chorus}',
       "[D]And it's [G]no, nay, never",
-      '[D]No nay [A]never no [D]more [*(x2)]',
+      '[D]No nay [A]never no [D]more (2×)',
       '{end_of_chorus}',
     ]);
   });

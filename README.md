@@ -49,13 +49,49 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | Strg+S | sofort speichern (sonst automatisch) |
 | Strg+P | Drucken |
 
+## Wiederholungen
+
+„2×“, „x2“, „(2x)“ oder „2 mal“ am Ende einer Zeile, eines Abschnittsnamens oder bei
+`{chorus: 2x}` werden als kleines Abzeichen dargestellt. Im Editor setzt der Knopf **2×**
+die Angabe an die Zeile mit dem Cursor (auf `{start_of_…}`/`{end_of_…}`: am Abschnitt);
+nochmal klicken zählt hoch.
+
+    {start_of_chorus: Refrain 2×}
+    [C]Oh my darling, oh my [G]darling (2×)
+    {end_of_chorus}
+    {chorus: 2×}
+
+## Cloud-Sync (Google Drive)
+
+Alle Geräte teilen sich die Datei `Liederbuch.json` in deinem Google Drive. Jedes Gerät hat
+weiterhin eine vollständige lokale Kopie (offline nutzbar). Pro Lied gewinnt die zuletzt
+geänderte Fassung, Löschungen werden mit abgeglichen. Eigene Änderungen werden nach ~1,5 s
+hochgeladen, fremde alle ~15 s und beim Zurückwechseln in die App geholt.
+
+Einmalig einrichten (kostenlos):
+
+1. <https://console.cloud.google.com/> → neues Projekt → „APIs & Dienste“ → **Google Drive API** aktivieren.
+2. „OAuth-Zustimmungsbildschirm“: Typ *Extern*, App-Name eintragen, dich selbst unter *Testnutzer* hinzufügen.
+3. „Anmeldedaten“ → *Anmeldedaten erstellen* → **OAuth-Client-ID** → Typ *Webanwendung*.
+   Unter *Autorisierte JavaScript-Quellen* eintragen:
+   `https://janschke0815.github.io` und (zum lokalen Testen) `http://localhost:5173`.
+4. Die Client-ID in `src/sync/config.js` eintragen (gilt dann für alle Geräte) oder in der App
+   unter **Cloud → Einrichtung** einfügen.
+5. In der App auf **Cloud → Verbinden** tippen und Google-Zugriff erlauben.
+
+Die App bekommt nur die Berechtigung `drive.file`: Sie sieht ausschließlich ihre eigene Datei.
+Google meldet Browser-Apps nach etwa einer Stunde ab; dann zeigt der Cloud-Knopf „Anmelden“,
+ein Tipp darauf genügt (bis dahin wird lokal weitergespeichert). Weitere Anbieter (z. B.
+Dropbox, Nextcloud) lassen sich in `src/sync/` mit `read`/`write` ergänzen.
+
 ## Aufbau
 
     src/core/      reine Logik ohne DOM (Parser, Import, Transposition) – gut testbar
     src/render/    Song-Modell -> HTML (Vorschau und später Druck), CSS mit Variablen
     src/print/     Seitenumbruch, Deckblatt, Inhaltsverzeichnis, Druck-CSS
     src/settings/  Layout-Einstellungen (Werte prüfen, speichern, als CSS-Variablen anwenden)
-    src/storage/   IndexedDB hinter einer Schnittstelle, später austauschbar gegen Cloud-Sync
+    src/storage/   IndexedDB hinter einer Schnittstelle
+    src/sync/      Abgleich (Sync-Engine) und Cloud-Anbieter (Google Drive)
     src/app.js     Oberfläche
     src/pwa.js     Service Worker anmelden, Offline-Hinweis, Installieren
     sw.js          Service Worker (Cache „Netz zuerst“)
@@ -71,4 +107,4 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
    Refrain-Stil (Balken, eingerückt, fett, Rahmen), Abschnittsnamen, Papier, Spalten, Ränder
 5. ✅ Druck: Auswahl, Deckblatt, Inhaltsverzeichnis mit Seitenzahlen, jedes Lied auf neuer Seite,
    ein-/zweispaltig, A4/A5/Letter, Ränder – eigener Seitenumbruch (src/print/paginate.js), kein Paged.js nötig
-6. Optional: Cloud-Sync
+6. ✅ Cloud-Sync über Google Drive (weitere Anbieter optional)
