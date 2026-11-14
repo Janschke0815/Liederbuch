@@ -214,7 +214,36 @@ nur von den eingetragenen Adressen an. Das *Client-Secret* wird nicht gebraucht 
 
 Google meldet Browser-Apps nach etwa einer Stunde ab; dann zeigt der Cloud-Knopf „Anmelden“,
 ein Tipp darauf genügt (bis dahin wird lokal weitergespeichert). Weitere Anbieter (z. B.
-Dropbox, Nextcloud) lassen sich in `src/sync/` mit `read`/`write` ergänzen.
+Dropbox) lassen sich in `src/sync/` mit `read`/`write` ergänzen.
+
+### WebDAV (Nextcloud, ownCloud, Synology …)
+
+Statt Google Drive kann das persönliche Liederbuch auch auf einem eigenen WebDAV-Server liegen:
+**Cloud → Speicherort „WebDAV / Nextcloud“**, dann Ordner-Adresse, Benutzername und Passwort
+eintragen und **Verbinden**. Die App legt dort `Liederbuch.json` an (fehlt der Ordner, wird er
+angelegt). Gleichzeitige Änderungen erkennt sie über das ETag der Datei.
+
+- **Adresse** bei Nextcloud: `https://<server>/remote.php/dav/files/<benutzer>/Liederbuch/`
+  (steht in Nextcloud unten links unter *Dateien-Einstellungen → WebDAV*).
+- **App-Passwort** nehmen (Nextcloud: *Persönliche Einstellungen → Sicherheit → Neues App-Passwort*),
+  nicht das Hauptpasswort – es wird auf dem Gerät gespeichert. „Trennen“ löscht es wieder.
+- **Nur https** (außer `localhost`), damit das Passwort nicht unverschlüsselt übertragen wird.
+- **Mehrere Personen:** den Ordner in der Nextcloud teilen; alle tragen dieselbe Adresse ein.
+  Gemeinsame Liederbücher mit Einladung per E-Mail gibt es nur über Google Drive.
+
+**Wichtig – CORS:** Die App läuft im Browser und spricht den Server direkt an. Das erlaubt der
+Browser nur, wenn der Server Zugriffe von der Adresse der App zulässt. Nötig sind diese Antwort-Köpfe
+(auch auf `OPTIONS`-Anfragen):
+
+    Access-Control-Allow-Origin:   https://janschke0815.github.io
+    Access-Control-Allow-Methods:  GET, PUT, MKCOL, OPTIONS
+    Access-Control-Allow-Headers:  Authorization, Content-Type, If-Match, If-None-Match
+    Access-Control-Expose-Headers: ETag
+
+Nextcloud sendet sie von sich aus nicht. Bei einem eigenen Server lassen sie sich im Webserver
+(Apache/nginx) eintragen oder über eine Nextcloud-App wie *WebAppPassword*. Bei fertigen
+Speicherangeboten, deren Server man nicht selbst verwaltet, geht das meist nicht – dort meldet
+die App „Server nicht erreichbar … (CORS)“.
 
 ## Aufbau
 
@@ -223,7 +252,7 @@ Dropbox, Nextcloud) lassen sich in `src/sync/` mit `read`/`write` ergänzen.
     src/print/     Seitenumbruch, Deckblatt, Inhaltsverzeichnis, Druck-CSS
     src/settings/  Layout-Einstellungen (Werte prüfen, speichern, als CSS-Variablen anwenden)
     src/storage/   IndexedDB hinter einer Schnittstelle
-    src/sync/      Abgleich (Sync-Engine) und Cloud-Anbieter (Google Drive)
+    src/sync/      Abgleich (Sync-Engine) und Cloud-Anbieter (Google Drive, WebDAV)
     src/app.js     Oberfläche
     src/pwa.js     Service Worker anmelden, Offline-Hinweis, Installieren
     sw.js          Service Worker (Cache „Netz zuerst“)
@@ -240,6 +269,6 @@ Dropbox, Nextcloud) lassen sich in `src/sync/` mit `read`/`write` ergänzen.
 5. ✅ Druck: Auswahl, Deckblatt, Inhaltsverzeichnis mit Seitenzahlen, jedes Lied auf neuer Seite,
    ein-/zweispaltig, A4/A5/Letter, Ränder – eigener Seitenumbruch (src/print/paginate.js), kein Paged.js nötig
 6. ✅ Cloud-Sync über Google Drive (weitere Anbieter optional)
-7. Liederbuch über Webdav syncronisieren
+7. ✅ Liederbuch über WebDAV synchronisieren (Nextcloud u. a., Server muss CORS erlauben)
 8. Harptaps zu- und abschaltbar implementieren
 9. Schriftgröße und art in Druckvorschau anpassbar machen

@@ -481,6 +481,10 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 }
 .book-select:hover { background-color: var(--hover); }
 .sync-section { display: flex; flex-direction: column; gap: .6em; }
+.sync-provider-row { display: flex; align-items: center; gap: .7em; flex-wrap: wrap; }
+.sync-provider-row .segmented button { padding-inline: .9em; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6em; }
+@media (max-width: 520px) { .field-row { grid-template-columns: 1fr; } }
 .sync-section h3 { margin: 0; font-size: .95em; }
 .sync-status-main { flex: 1; min-width: 0; }
 .book-list, .member-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }

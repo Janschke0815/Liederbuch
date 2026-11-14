@@ -427,9 +427,16 @@
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
         <h2>Cloud-Sync &amp; Liederbücher</h2>
-        <p class="hint">Alle Geräte teilen sich ein Liederbuch über Google Drive. Änderungen erscheinen nach wenigen Sekunden überall; offline wird lokal weitergearbeitet.</p>
+        <p class="hint">Alle Geräte teilen sich ein Liederbuch über Google Drive oder einen WebDAV-Server (z. B. Nextcloud). Änderungen erscheinen nach wenigen Sekunden überall; offline wird lokal weitergearbeitet.</p>
       </header>
       <div class="dialog-body sync-body">
+        <div class="sync-provider-row" id="sync-provider-row">
+          <span class="hint">Speicherort</span>
+          <div class="segmented" role="radiogroup" aria-label="Speicherort" id="sync-provider">
+            <button type="button" role="radio" data-value="gdrive">Google Drive</button>
+            <button type="button" role="radio" data-value="webdav">WebDAV / Nextcloud</button>
+          </div>
+        </div>
         <div id="sync-status" class="sync-status" data-state="off">
           <svg class="icon"><use href="#i-cloud"/></svg>
           <div class="sync-status-main">
@@ -439,7 +446,23 @@
           <button type="button" id="sync-now" class="icon-btn" title="Jetzt abgleichen"><svg class="icon"><use href="#i-sync"/></svg></button>
         </div>
 
-        <section class="sync-section">
+        <section id="webdav-setup" class="sync-section" hidden>
+          <h3>WebDAV-Server</h3>
+          <label class="field">Ordner-Adresse
+            <input id="webdav-url" type="url" placeholder="https://cloud.example.de/remote.php/dav/files/NAME/Liederbuch/" autocomplete="off" spellcheck="false">
+          </label>
+          <div class="field-row">
+            <label class="field">Benutzername
+              <input id="webdav-user" autocomplete="username" spellcheck="false">
+            </label>
+            <label class="field">App-Passwort
+              <input id="webdav-pass" type="password" autocomplete="current-password">
+            </label>
+          </div>
+          <p class="hint">Die App legt dort die Datei <code>Liederbuch.json</code> an. Nimm ein eigenes <b>App-Passwort</b> (Nextcloud: Einstellungen → Sicherheit), nicht dein Hauptpasswort – es wird auf diesem Gerät gespeichert. Mehrere Personen: den Ordner in der Nextcloud teilen und alle tragen dieselbe Adresse ein. Der Server muss Zugriffe von <code id="webdav-origin"></code> erlauben (CORS, siehe README).</p>
+        </section>
+
+        <section class="sync-section" id="books-section">
           <h3>Liederbücher</h3>
           <ul id="book-list" class="book-list"></ul>
           <div id="book-actions" class="book-actions">
@@ -452,6 +475,7 @@
             <button type="button" id="book-join"><svg class="icon"><use href="#i-open"/></svg>Einladung öffnen …</button>
           </div>
           <p id="book-offline-hint" class="hint">Zum Anlegen und Beitreten zuerst mit Google Drive verbinden.</p>
+          <p id="book-webdav-hint" class="hint" hidden>Gemeinsame Liederbücher mit Einladung gibt es über Google Drive. Mit WebDAV teilt ihr einfach den Ordner.</p>
         </section>
 
         <section id="members" class="sync-section" hidden>
@@ -477,7 +501,7 @@
           </label>
           <p class="hint">Anleitung im README („Cloud-Sync einrichten“). JavaScript-Quelle für diese Seite: <code id="sync-origin"></code></p>
         </details>
-        <p class="hint">Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.</p>
+        <p class="hint" id="sync-foot-hint">Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.</p>
       </div>
       <footer class="dialog-foot">
         <button type="button" id="sync-disconnect" class="danger">Trennen</button>
