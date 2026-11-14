@@ -108,6 +108,27 @@
           <svg class="icon"><use href="#i-trash"/></svg>
         </button>
       </div>
+      <details id="song-meta" class="song-meta" open>
+        <summary>Liedinfo <span id="meta-summary" class="meta-summary"></span></summary>
+        <div class="meta-grid">
+          <label class="meta-wide">Titel <input data-meta="title" autocomplete="off"></label>
+          <label class="meta-wide">Interpret <input data-meta="artist" autocomplete="off"></label>
+          <label>Tonart <input data-meta="key" list="dl-keys" autocomplete="off" placeholder="z. B. G"></label>
+          <label>Capo
+            <select data-meta="capo">
+              <option value="">ohne</option>
+              <option value="1">1. Bund</option><option value="2">2. Bund</option><option value="3">3. Bund</option>
+              <option value="4">4. Bund</option><option value="5">5. Bund</option><option value="6">6. Bund</option>
+              <option value="7">7. Bund</option><option value="8">8. Bund</option><option value="9">9. Bund</option>
+              <option value="10">10. Bund</option><option value="11">11. Bund</option>
+            </select>
+          </label>
+          <label>Takt <input data-meta="time" list="dl-times" autocomplete="off" placeholder="z. B. 4/4"></label>
+          <label>Tempo <input data-meta="tempo" type="number" min="20" max="320" step="1" placeholder="bpm"></label>
+        </div>
+        <datalist id="dl-times"><option>4/4</option><option>3/4</option><option>6/8</option><option>2/4</option><option>2/2</option><option>12/8</option><option>5/4</option><option>7/8</option></datalist>
+        <datalist id="dl-keys"><option>C</option><option>G</option><option>D</option><option>A</option><option>E</option><option>F</option><option>Bb</option><option>Eb</option><option>Am</option><option>Em</option><option>Dm</option><option>Bm</option></datalist>
+      </details>
       <textarea id="editor" spellcheck="false" aria-label="ChordPro-Text"></textarea>
     </section>
 
@@ -121,6 +142,8 @@
           <span class="key-label">Tonart</span>
           <strong id="key-value">–</strong>
         </div>
+        <span id="capo-chip" class="info-chip" hidden></span>
+        <span id="time-chip" class="info-chip" hidden></span>
         <div class="stepper" role="group" aria-label="Transponieren">
           <button id="tr-down" type="button" title="Halbton tiefer (−)">−</button>
           <output id="tr-value" title="Transposition in Halbtönen">0</output>

@@ -449,3 +449,26 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 .invite-row { display: flex; gap: .5em; }
 .invite-row input { flex: 1; min-width: 0; }
 .field small { font-weight: 400; }
+
+/* Liedinfo über dem Editor */
+.song-meta { border-bottom: 1px solid var(--border); background: var(--surface-2); padding: .4em .8em; }
+.song-meta summary { cursor: pointer; font-weight: 600; font-size: .88em; padding: .2em 0; display: flex; gap: .6em; align-items: baseline; }
+.song-meta summary::-webkit-details-marker { display: none; }
+.song-meta summary::before { content: '▸'; color: var(--muted); transition: transform .15s; display: inline-block; }
+.song-meta[open] summary::before { transform: rotate(90deg); }
+.meta-summary { font-weight: 400; color: var(--muted); font-size: .95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.song-meta[open] .meta-summary { display: none; }
+.meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45em .6em; padding: .4em 0 .5em; }
+.meta-grid label { display: flex; flex-direction: column; gap: .15em; font-size: .78em; color: var(--muted); min-width: 0; }
+.meta-grid .meta-wide { grid-column: span 2; }
+.meta-grid input, .meta-grid select { font-size: .95rem; min-height: 2rem; padding: .2em .5em; width: 100%; color: var(--text); }
+.info-chip {
+  font-size: .82em; padding: .2em .6em; border-radius: 999px;
+  background: var(--hover); color: var(--text); white-space: nowrap; font-weight: 600;
+}
+@media (max-width: 1200px) {
+  .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .meta-grid input, .meta-grid select { font-size: 16px; min-height: 2.4rem; }
+}

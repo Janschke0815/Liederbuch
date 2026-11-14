@@ -201,10 +201,11 @@ export function renderSong(song, opts = {}) {
 
   const info = [];
   if (key) info.push(`Tonart: ${untouched ? key : transposeKey(key, steps, useFlats)}`);
-  if (song.meta.capo && Number(song.meta.capo) > 0) info.push(`Capo: ${song.meta.capo}`);
+  if (song.meta.capo && Number(song.meta.capo) > 0) info.push(`Capo ${song.meta.capo}. Bund`);
+  else if (song.meta.capo && !/^0*$/.test(song.meta.capo)) info.push(`Capo ${song.meta.capo}`);
   if (steps) info.push(`transponiert ${steps > 0 ? '+' : ''}${steps}`);
-  if (song.meta.tempo) info.push(`${song.meta.tempo} bpm`);
-  if (song.meta.time) info.push(song.meta.time);
+  if (song.meta.time) info.push(`${song.meta.time}-Takt`);
+  if (song.meta.tempo) info.push(/^\d+$/.test(song.meta.tempo) ? `♩ = ${song.meta.tempo}` : song.meta.tempo);
   if (info.length) header.append(el('p', 'song-info', info.join(' · ')));
   article.append(header);
 

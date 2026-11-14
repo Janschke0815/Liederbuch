@@ -12,6 +12,8 @@ import { setupSettings } from './settings-ui.js';
 import { setupSync } from './sync-ui.js';
 import { bumpRepeat } from './core/repeat.js';
 import { activeBook } from './books.js';
+import { getAllMeta, setMeta } from './core/meta-edit.js';
+import { transposeChord } from './core/chords.js';
 import { applySettings, loadSettings } from './settings/settings.js';
 
 const $ = (s) => document.querySelector(s);
@@ -150,18 +152,23 @@ search.addEventListener('keydown', (e) => {
 function renderPreview() {
   if (!current) {
     preview.replaceChildren(Object.assign(document.createElement('p'), { className: 'empty', textContent: 'Kein Lied ausgewählt.' }));
+    fillMeta();
     return;
   }
   const song = parseChordPro(editor.value);
   const opts = { transpose: current.transpose, accidentals: current.accidentals };
   preview.replaceChildren(renderSong(song, opts));
   const k = songKey(song, opts);
+  fillMeta(song);
   const keyEl = $('#key-value');
   keyEl.textContent = k ? k.key : '–';
   keyEl.classList.toggle('guessed', Boolean(k?.guessed));
-  keyEl.parentElement.title = k?.guessed
-    ? 'Tonart geschätzt aus dem ersten Akkord – mit {key: …} im Text festlegen'
-    : 'Tonart (Transposition wird mit dem Lied gespeichert)';
+  const capo = Number(song.meta.capo) || 0;
+  keyEl.parentElement.title = (k?.guessed
+    ? 'Tonart geschätzt aus dem ersten Akkord – unter „Liedinfo“ festlegen'
+    : 'Tonart (Transposition wird mit dem Lied gespeichert)') +
+    (k && capo > 0 ? `
+Griffe in ${k.key}, klingt mit Capo ${capo} in ${transposeChord(k.key, capo)}` : '');
 }
 
 function updateControls() {
@@ -240,6 +247,49 @@ setFocusMode(Boolean(localStorage.getItem('focusMode')));
 
 // Layout-Einstellungen wirken live auf Vorschau und Import-Vorschau
 setupSettings({ targets: () => [preview, $('#imp-preview')] });
+
+// ---------- Liedinfo (Titel, Capo, Takt …) ----------
+
+const metaBox = $('#song-meta');
+const metaInputs = [...metaBox.querySelectorAll('[data-meta]')];
+metaBox.open = localStorage.getItem('songMetaOpen') !== '0';
+metaBox.addEventListener('toggle', () => localStorage.setItem('songMetaOpen', metaBox.open ? '1' : '0'));
+
+function fillMeta(song) {
+  const m = getAllMeta(editor.value);
+  for (const el of metaInputs) {
+    el.disabled = !current;
+    if (el === document.activeElement) continue;
+    const v = m[el.dataset.meta];
+    if (el.tagName === 'SELECT' && v && ![...el.options].some((o) => o.value === v)) el.add(new Option(v, v));
+    el.value = v;
+  }
+  const capo = Number(m.capo) || 0;
+  $('#meta-summary').textContent = [
+    m.key && `Tonart ${m.key}`, capo > 0 && `Capo ${capo}`, m.time && `${m.time}-Takt`, m.tempo && `${m.tempo} bpm`,
+  ].filter(Boolean).join(' · ');
+  const capoChip = $('#capo-chip');
+  capoChip.hidden = !(capo > 0);
+  capoChip.textContent = `Capo ${m.capo}`;
+  capoChip.title = `Kapodaster im ${m.capo}. Bund`;
+  const timeChip = $('#time-chip');
+  const timeText = [m.time, m.tempo && `♩ ${m.tempo}`].filter(Boolean).join(' · ');
+  timeChip.hidden = !timeText;
+  timeChip.textContent = timeText;
+  timeChip.title = [m.time && `${m.time}-Takt`, m.tempo && `Tempo ${m.tempo} Schläge/Minute`].filter(Boolean).join(', ');
+}
+
+for (const el of metaInputs) {
+  el.addEventListener('input', () => {
+    if (!current) return;
+    const { selectionStart: a, selectionEnd: b, value: before } = editor;
+    editor.value = setMeta(editor.value, el.dataset.meta, el.value);
+    // Cursor im Editor ungefähr halten
+    const shift = editor.value.length - before.length;
+    editor.setSelectionRange(Math.max(0, a + shift), Math.max(0, b + shift));
+    editor.dispatchEvent(new Event('input'));
+  });
+}
 
 // ---------- Editor: Bausteine einfügen ----------
 

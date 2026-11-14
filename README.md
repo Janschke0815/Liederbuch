@@ -49,6 +49,14 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | Strg+S | sofort speichern (sonst automatisch) |
 | Strg+P | Drucken |
 
+## Liedinfo: Capo, Takt, Tempo
+
+Über dem Editor gibt es das Feld **Liedinfo** (einklappbar) mit Titel, Interpret, Tonart,
+Capo, Takt und Tempo. Es schreibt die üblichen ChordPro-Angaben in den Kopf des Liedes
+(`{capo: 2}`, `{time: 3/4}`, `{tempo: 96}`) und zeigt umgekehrt an, was im Text steht.
+Capo und Takt erscheinen im Liedkopf (auch im Druck) und als Kennzeichen über der Vorschau;
+beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ erkannt.
+
 ## Wiederholungen
 
 Eine Klammer rechts zeigt, **worauf** sich die Anzahl bezieht – sie umfasst genau den

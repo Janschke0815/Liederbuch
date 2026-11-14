@@ -85,6 +85,10 @@ function metaLine(line) {
   if (capo) return `{capo: ${capo[1]}}`;
   const key = /^\s*(?:key|tonart)\s*:\s*(\S+)\s*$/i.exec(line);
   if (key) return `{key: ${key[1]}}`;
+  const time = /^\s*(?:time(?:\s*signature)?|takt(?:art)?)\s*:\s*(\d{1,2}\/\d{1,2})\s*$/i.exec(line);
+  if (time) return `{time: ${time[1]}}`;
+  const tempo = /^\s*(?:tempo|bpm)\s*:?\s*(\d{2,3})\s*(?:bpm)?\s*$/i.exec(line);
+  if (tempo) return `{tempo: ${tempo[1]}}`;
   if (/^\s*(tuning|stimmung)\s*:/i.test(line)) return `{comment: ${line.trim()}}`;
   return null;
 }
