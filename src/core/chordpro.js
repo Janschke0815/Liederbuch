@@ -10,6 +10,7 @@
 //   { type: 'comment', text, style: 'normal'|'italic'|'box' }
 //   { type: 'tab', text }            – Zeile in Tab/Grid-Block, unverändert
 //   { type: 'chorus-ref', label }    – {chorus} = Refrain wiederholen
+//   { type: 'repeat-start', label } | { type: 'repeat-end' }  – {start_of_repeat: 2×} … {end_of_repeat}
 //   { type: 'empty' } | { type: 'new-page' } | { type: 'column-break' }
 
 const ALIASES = {
@@ -111,6 +112,11 @@ export function parseChordPro(src) {
     } else if (name === 'meta') {
       const [k, ...rest] = value.split(/\s+/);
       if (k) song.meta[k.toLowerCase()] = rest.join(' ');
+    } else if (name === 'start_of_repeat') {
+      // Wiederholung mehrerer Zeilen innerhalb eines Abschnitts
+      pushLine({ type: 'repeat-start', label: value || null });
+    } else if (name === 'end_of_repeat') {
+      pushLine({ type: 'repeat-end' });
     } else if (name.startsWith('start_of_')) {
       current = { kind: envKind(name), label: value || null, lines: [] };
       loose = null;

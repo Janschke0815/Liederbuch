@@ -69,8 +69,7 @@
 .songbook[data-chorus-style='box'] .block--chorus.cont { border-top-style: dashed; }
 .songbook[data-chorus-style='bar'] .chorus-ref,
 .songbook[data-chorus-style='box'] .chorus-ref { color: var(--chord-color); }
-.songbook[data-labels='hide'] .block-label .label-text { display: none; }
-.songbook[data-labels='hide'] .block-label:not(:has(.repeat)) { display: none; }
+.songbook[data-labels='hide'] .block-label { display: none; }
 .songbook[data-chorus-style='bold'] .block--chorus .lyric { font-weight: bold; }
 
 .comment { margin: 0.2em 0; font-family: var(--chord-font); font-size: 0.85em; color: var(--label-color); }
@@ -90,15 +89,44 @@
 .new-page { break-after: page; }
 .column-break { break-after: column; }
 
-/* Wiederholungen: "2×" an Abschnitt, Zeile oder Refrain-Verweis */
+/* Wiederholungen: Klammer rechts um genau den wiederholten Teil, Anzahl daneben */
+.repeat-scope {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-right: 3em;
+}
+.repeat-scope::after {
+  content: '';
+  position: absolute;
+  top: 0.15em;
+  bottom: 0.15em;
+  right: 2.1em;
+  width: 0.38em;
+  border: 2px solid var(--chord-color);
+  border-left: 0;
+  border-radius: 0 3px 3px 0;
+  opacity: 0.75;
+}
+.repeat-scope--block { padding-right: 3.2em; }
+.repeat-scope--block::after { right: 2.3em; border-width: 2.5px; }
+.repeat-scope--line::after { top: 0.3em; bottom: 0.1em; }
+.repeat-scope--line:has(> .line--chords)::after { top: 0; bottom: 0; }
+.repeat-scope > .repeat {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.repeat-scope--group { margin-bottom: 0.6em; }
+.repeat-scope--group:last-child { margin-bottom: 0; }
 .repeat {
   display: inline-block;
   font-family: var(--chord-font);
   font-size: 0.72em;
   font-weight: 700;
   font-style: normal;
-  letter-spacing: 0;
-  text-transform: none;
   line-height: 1.3;
   color: var(--chord-color);
   border: 1.5px solid currentColor;
@@ -107,5 +135,6 @@
   vertical-align: 0.1em;
   white-space: nowrap;
 }
-.block-label .label-text + .repeat { margin-left: 0.5em; }
-.line--repeat > .repeat { margin-left: 0.6em; }
+/* Abschnitt: Klammer beginnt unter dem Abschnittsnamen */
+.repeat-scope--block:has(> .block-label)::after,
+.repeat-scope--block:has(> .para:first-of-type > .block-label:first-child)::after { top: 1.35em; }

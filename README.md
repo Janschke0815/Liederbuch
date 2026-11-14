@@ -51,15 +51,19 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 
 ## Wiederholungen
 
-„2×“, „x2“, „(2x)“ oder „2 mal“ am Ende einer Zeile, eines Abschnittsnamens oder bei
-`{chorus: 2x}` werden als kleines Abzeichen dargestellt. Im Editor setzt der Knopf **2×**
-die Angabe an die Zeile mit dem Cursor (auf `{start_of_…}`/`{end_of_…}`: am Abschnitt);
-nochmal klicken zählt hoch.
+Eine Klammer rechts zeigt, **worauf** sich die Anzahl bezieht – sie umfasst genau den
+wiederholten Teil:
 
-    {start_of_chorus: Refrain 2×}
-    [C]Oh my darling, oh my [G]darling (2×)
-    {end_of_chorus}
-    {chorus: 2×}
+| Schreibweise | Klammer um |
+|---|---|
+| `[C]Oh my darling (2×)` – „2×“, „x2“, „(2x)“, „2 mal“ am Zeilenende | diese eine Zeile |
+| `{start_of_repeat: 2×}` … `{end_of_repeat}` | die Zeilen dazwischen |
+| `{start_of_chorus: Refrain 2×}` (bei jedem Abschnitt) | den ganzen Abschnitt |
+| `{chorus: 3×}` | – („→ Refrain 3×“) |
+
+Im Editor setzt der Knopf **2×** die Angabe passend: an die Zeile mit dem Cursor, um mehrere
+markierte Zeilen, oder – auf der Abschnittszeile – an den ganzen Abschnitt. Nochmal klicken
+zählt hoch. Beim Import aus Ultimate Guitar werden „[Chorus x2]“ und „x2“ am Zeilenende erkannt.
 
 ## Cloud-Sync (Google Drive)
 

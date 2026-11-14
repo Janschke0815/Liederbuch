@@ -33,39 +33,52 @@ describe('Wiederholungen: Editor-Knopf', () => {
     expect(bumpRepeat('{start_of_chorus: Refrain 2×}')).toBe('{start_of_chorus: Refrain 3×}');
     expect(bumpRepeat('{soc}')).toBe('{soc: 2×}');
     expect(bumpRepeat('{chorus}')).toBe('{chorus: 2×}');
+    expect(bumpRepeat('{start_of_repeat: 2×}')).toBe('{start_of_repeat: 3×}');
   });
 });
 
-describe('Wiederholungen: Darstellung', () => {
-  it('am Abschnitt als Abzeichen neben dem Namen', () => {
-    const h = render('{start_of_chorus: Refrain x2}\n[C]la\n{end_of_chorus}');
-    expect(h.querySelector('.block-label .label-text').textContent).toBe('Refrain');
-    expect(h.querySelector('.block-label .repeat').textContent).toBe('2×');
+describe('Wiederholungen: Darstellung (Klammer zeigt den Umfang)', () => {
+  const scopes = (h) => [...h.querySelectorAll('.repeat-scope')].map((s) => [
+    [...s.classList].find((c) => c.startsWith('repeat-scope--')).slice(14),
+    s.querySelector(':scope > .repeat').textContent,
+    s.querySelectorAll('.line').length,
+  ]);
+
+  it('Abschnitt: Klammer um den ganzen Abschnitt, Name ohne Angabe', () => {
+    const h = render('{start_of_chorus: Refrain x2}\n[C]la\nli\n{end_of_chorus}');
+    expect(scopes(h)).toEqual([['block', '2×', 2]]);
+    expect(h.querySelector('.block').classList.contains('repeat-scope')).toBe(true);
+    expect(h.querySelector('.block-label').textContent).toBe('Refrain');
   });
-  it('ohne Namen: Standardname plus Abzeichen', () => {
+  it('ohne Namen: Standardname, Klammer am Abschnitt', () => {
     const h = render('{soc: 3x}\n[C]la\n{eoc}');
-    expect(h.querySelector('.label-text').textContent).toBe('Refrain');
-    expect(h.querySelector('.repeat').textContent).toBe('3×');
+    expect(h.querySelector('.block-label').textContent).toBe('Refrain');
+    expect(scopes(h)).toEqual([['block', '3×', 1]]);
   });
-  it('am Zeilenende, auch bei reinen Akkordzeilen', () => {
-    const h = render('[Am]Oh oh oh x2\n| [C] | [G] | x4');
-    const [l1, l2] = h.querySelectorAll('.line');
-    expect(l1.querySelector('.repeat').textContent).toBe('2×');
-    expect(l1.textContent.includes('x2')).toBe(false);
-    expect(l2.querySelector('.repeat').textContent).toBe('4×');
+  it('Zeile: Klammer nur um diese Zeile, auch bei reinen Akkordzeilen', () => {
+    const h = render('erste Zeile\n[Am]Oh oh oh x2\n| [C] | [G] | x4');
+    expect(scopes(h)).toEqual([['line', '2×', 1], ['line', '4×', 1]]);
+    expect(h.textContent.includes('x2')).toBe(false);
+  });
+  it('mehrere Zeilen: Klammer um genau die Gruppe', () => {
+    const h = render('{sov: Strophe}\nvorher\n{start_of_repeat: 2×}\n[C]eins\n[G]zwei\n{end_of_repeat}\nnachher\n{eov}');
+    expect(scopes(h)).toEqual([['group', '2×', 2]]);
+    const lines = [...h.querySelectorAll('.line')].map((l) => l.textContent.replace('​', ''));
+    expect(lines).toEqual(['vorher', 'Ceins', 'Gzwei', 'nachher']);
+  });
+  it('Gruppe ohne Anzahl bedeutet 2×', () => {
+    expect(scopes(render('{start_of_repeat}\nla\n{end_of_repeat}'))).toEqual([['group', '2×', 1]]);
   });
   it('beim Refrain-Verweis', () => {
     const h = render('{chorus: 2x}');
     expect(h.querySelector('.chorus-ref').textContent).toBe('Refrain 2×');
   });
-  it('bleibt sichtbar, wenn Abschnittsnamen ausgeblendet sind', () => {
-    const h = render('{soc: Refrain x2}\n[C]la\n{eoc}\n{sov: Strophe}\nla\n{eov}');
-    h.dataset.labels = 'hide';
+  it('die Klammer liegt rechts neben dem Text, nicht am Seitenrand', () => {
+    const h = render('{soc: Refrain 2x}\n[C]kurz\n{eoc}');
+    h.style.width = '600px';
     document.getElementById('sandbox').append(h);
-    const labels = h.querySelectorAll('.block-label');
-    expect(getComputedStyle(labels[0]).display === 'none').toBe(false);
-    expect(getComputedStyle(labels[0].querySelector('.label-text')).display).toBe('none');
-    expect(getComputedStyle(labels[1]).display).toBe('none');
+    const block = h.querySelector('.block').getBoundingClientRect();
+    expect(block.width < 300).toBe(true);
     h.remove();
   });
 });

@@ -43,14 +43,23 @@ function takeLineRepeat(line) {
   return { line: { ...line, segments: [...line.segments.slice(0, -1), { ...last, text }] }, times };
 }
 
+/**
+ * Wiederholungsklammer: umschließt genau das, was wiederholt wird (Zeile, Zeilengruppe
+ * oder Abschnitt); die Anzahl steht rechts an der Klammer.
+ */
+function makeRepeatScope(node, kind, times) {
+  node.classList.add('repeat-scope', `repeat-scope--${kind}`);
+  node.prepend(repeatBadge(times));
+  return node;
+}
+
 function renderLyricsLine(original, chordName) {
   const { line, times } = takeLineRepeat(original);
   const div = renderLyricsLineBody(line, chordName);
-  if (times) {
-    div.classList.add('line--repeat');
-    div.append(repeatBadge(times));
-  }
-  return div;
+  if (!times) return div;
+  const scope = el('div');
+  scope.append(div);
+  return makeRepeatScope(scope, 'line', times);
 }
 
 function renderLyricsLineBody(line, chordName) {
@@ -104,12 +113,8 @@ function renderBlock(block, chordName) {
   const section = el('section', `block block--${kind}`);
   const { text: labelText, times } = splitRepeat(block.label || '');
   const label = labelText || DEFAULT_LABELS[block.kind];
-  if (label || times) {
-    const head = el('div', 'block-label');
-    if (label) head.append(el('span', 'label-text', label));
-    if (times) head.append(repeatBadge(times));
-    section.append(head);
-  }
+  if (label) section.append(el('div', 'block-label', label));
+  if (times) makeRepeatScope(section, 'block', times);
 
   if (block.kind === 'tab' || block.kind === 'grid') {
     const pre = el('pre', 'tab');
@@ -120,14 +125,28 @@ function renderBlock(block, chordName) {
 
   // Absätze (durch Leerzeilen getrennt) – im Druck nie mittendrin umbrechen
   let para = null;
+  let target = section; // Abschnitt oder offene Wiederholungsgruppe
   for (const line of block.lines) {
     if (line.type === 'empty') {
       para = null;
       continue;
     }
+    if (line.type === 'repeat-start') {
+      const group = el('div');
+      makeRepeatScope(group, 'group', splitRepeat(line.label || '').times || 2);
+      section.append(group);
+      target = group;
+      para = null;
+      continue;
+    }
+    if (line.type === 'repeat-end') {
+      target = section;
+      para = null;
+      continue;
+    }
     if (!para) {
       para = el('div', 'para');
-      section.append(para);
+      target.append(para);
     }
     const node = renderLine(line, chordName);
     if (node) para.append(node);

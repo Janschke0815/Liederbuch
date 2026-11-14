@@ -262,10 +262,19 @@ function insertSnippet(kind) {
     return insertText(`{comment: ${t}}`, 10, 10 + t.length);
   }
   if (kind === 'times') {
-    // Zeile mit dem Cursor bekommt die Wiederholung (Abschnittsanfang: in den Namen)
+    // Zeile mit dem Cursor bekommt die Wiederholung (Abschnittsanfang: in den Namen,
+    // mehrere markierte Zeilen: Gruppe mit Klammer)
     const v = editor.value;
     const lineAt = (p) => [v.lastIndexOf('\n', p - 1) + 1, v.indexOf('\n', p) < 0 ? v.length : v.indexOf('\n', p)];
     let [a, b] = lineAt(editor.selectionStart);
+    // Mehrere Zeilen markiert: als Gruppe einklammern
+    const [, selEnd] = lineAt(Math.max(editor.selectionStart, editor.selectionEnd - 1));
+    if (selEnd > b) {
+      editor.focus();
+      editor.setSelectionRange(a, selEnd);
+      const head = '{start_of_repeat: 2×}\n';
+      return insertText(`${head}${v.slice(a, selEnd)}\n{end_of_repeat}`, head.length - 1);
+    }
     if (!v.slice(a, b).trim()) return toast('Cursor in eine Zeile oder einen Abschnittsanfang setzen');
     if (/^\s*\{\s*(end_of_\w+|eo[cvbt])\s*\}\s*$/i.test(v.slice(a, b))) {
       // auf "{end_of_…}": Wiederholung gehört zum Abschnittsanfang
