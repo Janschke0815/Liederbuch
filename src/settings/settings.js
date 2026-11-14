@@ -39,6 +39,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
   chorusStyle: 'bar',
   showLabels: true,
   showDiagrams: true, // Griffbilder im Liedkopf
+  showHarp: true, // Mundharmonika-Tabs wie [-4]
+  showTabs: true, // Gitarren-Tabs ({start_of_tab})
   lineSpacing: 'normal',
   columns: 1, // Druck
   margin: 15, // mm, Druck
@@ -65,6 +67,8 @@ export function sanitize(input = {}) {
     chorusStyle: oneOf(s.chorusStyle, Object.keys(CHORUS_STYLES), d.chorusStyle),
     showLabels: typeof s.showLabels === 'boolean' ? s.showLabels : d.showLabels,
     showDiagrams: typeof s.showDiagrams === 'boolean' ? s.showDiagrams : d.showDiagrams,
+    showHarp: typeof s.showHarp === 'boolean' ? s.showHarp : d.showHarp,
+    showTabs: typeof s.showTabs === 'boolean' ? s.showTabs : d.showTabs,
     lineSpacing: oneOf(s.lineSpacing, Object.keys(LINE_SPACING), d.lineSpacing),
     columns: Number(s.columns) === 2 ? 2 : 1,
     margin: Math.round(clamp(s.margin, 5, 40, d.margin)),
@@ -87,6 +91,8 @@ export function applySettings(el, settings) {
   el.dataset.chorusStyle = s.chorusStyle;
   el.dataset.labels = s.showLabels ? 'show' : 'hide';
   el.dataset.diagrams = s.showDiagrams ? 'show' : 'hide';
+  el.dataset.harp = s.showHarp ? 'show' : 'hide';
+  el.dataset.tabs = s.showTabs ? 'show' : 'hide';
 }
 
 // ---------- Speicher ----------

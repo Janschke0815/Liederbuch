@@ -174,6 +174,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     applySettings(sheet, loadSettings());
     const transpose = entry.transpose ?? song.transpose;
     sheet.replaceChildren(renderSong(parsed, { transpose, accidentals: song.accidentals }));
+    syncDiagramButton();
     if (song.note) {
       const n = document.createElement('div');
       n.className = 'song-note';
@@ -393,19 +394,28 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   }
   $('#pl-metro').onclick = toggleMetro;
 
-  // Griffbilder ein/aus – dieselbe Einstellung wie unter Einstellungen → Akkorde
+  // Griffbilder, Mundharmonika- und Gitarren-Tabs ein/aus – dieselben Einstellungen wie im
+  // Einstellungsdialog. Die Tab-Knöpfe erscheinen nur, wenn das Lied solche Tabs enthält.
+  const TOGGLES = { showDiagrams: '#pl-diagrams', showHarp: '#pl-harp', showTabs: '#pl-tabs' };
   function syncDiagramButton() {
-    $('#pl-diagrams').setAttribute('aria-pressed', String(loadSettings().showDiagrams));
+    const s = loadSettings();
+    for (const [key, sel] of Object.entries(TOGGLES)) $(sel).setAttribute('aria-pressed', String(s[key]));
+    $('#pl-harp').hidden = !sheet.querySelector('.chord.harp');
+    $('#pl-tabs').hidden = !sheet.querySelector('.block--tab');
   }
-  function toggleDiagrams() {
+  function toggleSetting(key) {
     const rel = pos() / Math.max(1, maxPos());
-    const s = saveSettings({ ...loadSettings(), showDiagrams: !loadSettings().showDiagrams });
+    const now = loadSettings();
+    const s = saveSettings({ ...now, [key]: !now[key] });
     applySettings(sheet, s);
     syncDiagramButton();
     layout();
     setPos(cols ? snap(rel * maxPos()) : rel * maxPos());
   }
+  const toggleDiagrams = () => toggleSetting('showDiagrams');
   $('#pl-diagrams').onclick = toggleDiagrams;
+  $('#pl-harp').onclick = () => toggleSetting('showHarp');
+  $('#pl-tabs').onclick = () => toggleSetting('showTabs');
   addEventListener('resize', () => {
     if (view.hidden) return;
     const rel = pos() / Math.max(1, maxPos());
@@ -472,6 +482,14 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
       case 'g':
       case 'G':
         toggleDiagrams();
+        break;
+      case 'h':
+      case 'H':
+        if (!$('#pl-harp').hidden) toggleSetting('showHarp');
+        break;
+      case 't':
+      case 'T':
+        if (!$('#pl-tabs').hidden) toggleSetting('showTabs');
         break;
       case 's':
       case 'S':

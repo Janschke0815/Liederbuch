@@ -650,7 +650,7 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 .capo-options .easy-all .capo-score { color: #3b8c4a; font-weight: 600; }
 
 /* Spielmodus zweispaltig: Spalten in Bildschirmhöhe, waagerecht blättern */
-#pl-diagrams[aria-pressed='true'],
+#pl-diagrams[aria-pressed='true'], #pl-harp[aria-pressed='true'], #pl-tabs[aria-pressed='true'],
 #pl-cols[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 .play-view.cols2 .play-scroll { overflow: hidden; padding-bottom: 1.2em; }
 .play-view.cols2 .play-sheet {

@@ -1050,7 +1050,14 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
     '-',
     { label: 'Spielen', icon: 'stage', hint: 'F', action: () => $('#btn-play').click() },
     { label: 'Bearbeiten', icon: 'edit', action: editSong },
-    { label: 'Griffbilder anzeigen', checked: s.showDiagrams, action: () => saveSettings({ ...s, showDiagrams: !s.showDiagrams }) },
+    {
+      label: 'Anzeigen',
+      items: [
+        { label: 'Griffbilder', checked: s.showDiagrams, action: () => saveSettings({ ...s, showDiagrams: !s.showDiagrams }) },
+        { label: 'Mundharmonika-Tabs', checked: s.showHarp, action: () => saveSettings({ ...s, showHarp: !s.showHarp }) },
+        { label: 'Gitarren-Tabs', checked: s.showTabs, action: () => saveSettings({ ...s, showTabs: !s.showTabs }) },
+      ],
+    },
     {
       label: 'Größe',
       items: [

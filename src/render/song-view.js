@@ -63,32 +63,54 @@ function renderLyricsLine(original, chordName) {
   return makeRepeatScope(scope, 'line', times);
 }
 
+/** Akkord, Anmerkung oder Mundharmonika-Tab über dem Text. */
+function chordSpan(s, chordName) {
+  if (s.annotation) return el('span', 'chord annotation', s.chord);
+  if (s.harp) return el('span', 'chord harp', s.chord); // wird nie transponiert
+  return el('span', 'chord', chordName(s.chord));
+}
+
 function renderLyricsLineBody(line, chordName) {
   const div = el('div', line.chordsOnly ? 'line line--chords' : 'line');
+  if (line.segments.some((s) => s.harp)) div.classList.add('line--harp');
+  if (line.harpOnly) div.classList.add('line--harp-only');
   if (line.chordsOnly) {
     for (const s of line.segments) {
-      if (s.chord) div.append(el('span', s.annotation ? 'chord annotation' : 'chord', s.annotation ? s.chord : chordName(s.chord)));
+      if (s.chord) div.append(chordSpan(s, chordName));
       if (s.text) div.append(el('span', 'chord-filler', s.text));
     }
     return div;
   }
   const hasChords = line.segments.some((s) => s.chord);
   if (hasChords) div.classList.add('line--with-chords');
-  for (const s of line.segments) {
+  let stacked = []; // Akkord und Mundharmonika-Ton an derselben Stelle: [C][4]Text
+  line.segments.forEach((s, i) => {
     if (!s.chord) {
       div.append(el('span', 'lyric', s.text));
-      continue;
+      return;
+    }
+    const next = line.segments[i + 1];
+    if (!s.text && next?.chord && (s.harp || next.harp)) {
+      stacked.push(chordSpan(s, chordName));
+      return;
     }
     const [head, tail] = splitFirstWord(s.text);
     const seg = el('span', 'seg');
+    if (s.harp) seg.classList.add('seg--harp');
+    let top = chordSpan(s, chordName);
+    if (stacked.length) {
+      top = el('span', 'chord-stack');
+      top.append(...stacked, chordSpan(s, chordName));
+      stacked = [];
+    }
     seg.append(
-      el('span', s.annotation ? 'chord annotation' : 'chord', s.annotation ? s.chord : chordName(s.chord)),
+      top,
       // Zero-width space hält die Textzeile auch bei leerem Text auf Grundlinienhöhe
       el('span', 'lyric', head || '​'),
     );
     div.append(seg);
     if (tail) div.append(el('span', 'lyric', tail));
-  }
+  });
   return div;
 }
 
@@ -112,6 +134,9 @@ function renderLine(line, chordName) {
 function renderBlock(block, chordName) {
   const kind = block.kind || 'none';
   const section = el('section', `block block--${kind}`);
+  // Abschnitt nur aus Mundharmonika-Zeilen (z. B. Solo): verschwindet ganz, wenn Tabs aus sind
+  const content = block.lines.filter((l) => !['empty', 'repeat-start', 'repeat-end'].includes(l.type));
+  if (content.length && content.every((l) => l.harpOnly)) section.classList.add('block--harp-only');
   const { text: labelText, times } = splitRepeat(block.label || '');
   const label = labelText || DEFAULT_LABELS[block.kind];
   if (label) section.append(el('div', 'block-label', label));

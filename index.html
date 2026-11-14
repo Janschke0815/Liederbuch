@@ -371,6 +371,10 @@
                 <div class="st-text"><span class="st-title">Griffbilder</span><span class="st-hint">Diagramme aller Akkorde im Liedkopf – auch im Druck</span></div>
                 <div class="st-control"><label class="switch"><input id="st-showDiagrams" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
               </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Mundharmonika-Tabs</span><span class="st-hint">Kanäle wie [4] [-4] [-3'] über dem Text – in Grün</span></div>
+                <div class="st-control"><label class="switch"><input id="st-showHarp" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
           </section>
 
           <section class="st-card" id="st-sec-parts">
@@ -382,6 +386,10 @@
               <div class="st-row">
                 <div class="st-text"><span class="st-title">Abschnittsnamen</span><span class="st-hint">„Strophe 1“, „Refrain“ … über den Abschnitten</span></div>
                 <div class="st-control"><label class="switch"><input id="st-showLabels" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Gitarren-Tabs</span><span class="st-hint">Tab-Abschnitte ({start_of_tab}) anzeigen</span></div>
+                <div class="st-control"><label class="switch"><input id="st-showTabs" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
               </div>
           </section>
 
@@ -575,6 +583,8 @@
       </div>
       <button type="button" id="pl-metro" class="icon-btn" title="Metronom im Liedtempo (M)" aria-pressed="false"><svg class="icon"><use href="#i-metro"/></svg></button>
       <button type="button" id="pl-diagrams" class="icon-btn" title="Griffbilder ein/aus (G)" aria-pressed="true"><svg class="icon"><use href="#i-grid"/></svg></button>
+      <button type="button" id="pl-harp" class="text-btn" title="Mundharmonika-Tabs ein/aus (H)" aria-pressed="true" hidden>Harp</button>
+      <button type="button" id="pl-tabs" class="text-btn" title="Gitarren-Tabs ein/aus (T)" aria-pressed="true" hidden>Tab</button>
       <button type="button" id="pl-cols" class="icon-btn" title="Zwei Spalten nebeneinander, seitenweise blättern (S)" aria-pressed="false"><svg class="icon"><use href="#i-columns"/></svg></button>
       <button type="button" id="pl-night" class="icon-btn" title="Nachtmodus (N)" aria-pressed="false"><svg class="icon"><use href="#i-moon"/></svg></button>
       <div class="play-group play-scroll-ctl" title="Automatisch scrollen (Leertaste); Geschwindigkeit wird pro Lied gemerkt">

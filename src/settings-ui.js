@@ -29,13 +29,19 @@ Dreadful [G]sorry, Clemen[C]tine
 
 {start_of_part: Zwischenspiel}
 | [C] | [G] | [C] |
+[4] [4] [4] [3] [-4] [5] [5] [5] [4]
 {end_of_part}
+
+{start_of_tab: Riff}
+e|-----0---3---0-----|
+B|---1-------------1-|
+{end_of_tab}
 
 {chorus}
 `;
 
 const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing', 'chordFont', 'chordSize', 'chordColor',
-  'chordBold', 'showDiagrams', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin'];
+  'chordBold', 'showDiagrams', 'showHarp', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin'];
 
 function fillSelect(sel, entries) {
   sel.replaceChildren(...entries.map(([value, label]) => new Option(label, value)));

@@ -6,12 +6,15 @@
 //   blocks: [ { kind: null|'verse'|'chorus'|'bridge'|'tab'|'grid'|'part'|<eigener>, label, lines: [Line] } ]
 // }
 // Line:
-//   { type: 'lyrics', segments: [{ chord, annotation, text }], chordsOnly }
+//   { type: 'lyrics', segments: [{ chord, annotation, harp?, text }], chordsOnly, harpOnly? }
+//     harp: Mundharmonika-Tab wie [-4] statt Akkord (siehe harp.js)
 //   { type: 'comment', text, style: 'normal'|'italic'|'box' }
 //   { type: 'tab', text }            – Zeile in Tab/Grid-Block, unverändert
 //   { type: 'chorus-ref', label }    – {chorus} = Refrain wiederholen
 //   { type: 'repeat-start', label } | { type: 'repeat-end' }  – {start_of_repeat: 2×} … {end_of_repeat}
 //   { type: 'empty' } | { type: 'new-page' } | { type: 'column-break' }
+
+import { isHarpTab } from './harp.js';
 
 const ALIASES = {
   t: 'title', st: 'subtitle', c: 'comment', ci: 'comment_italic', cb: 'comment_box',
@@ -44,13 +47,16 @@ export function parseLyricsLine(line) {
     const raw = m[1].trim();
     pending = raw.startsWith('*')
       ? { chord: raw.slice(1), annotation: true }
-      : { chord: raw, annotation: false };
+      : isHarpTab(raw)
+        ? { chord: raw, annotation: false, harp: true } // Mundharmonika-Tab, kein Akkord
+        : { chord: raw, annotation: false };
     last = re.lastIndex;
   }
   flush(line.slice(last));
   const hasChord = segments.some((s) => s.chord);
   const chordsOnly = hasChord && segments.every((s) => FILLER_TEXT.test(s.text));
-  return { type: 'lyrics', segments, chordsOnly };
+  const harpOnly = chordsOnly && segments.every((s) => !s.chord || s.harp);
+  return { type: 'lyrics', segments, chordsOnly, ...(harpOnly ? { harpOnly } : {}) };
 }
 
 function parseDirective(line) {

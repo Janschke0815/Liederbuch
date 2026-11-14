@@ -91,6 +91,8 @@ die Geschwindigkeit wird pro Lied gemerkt. Tippen aufs Lied blendet die Leiste e
 | > / < | schneller / langsamer scrollen |
 | S | zwei Spalten nebeneinander (seitenweise) |
 | G | Griffbilder ein/aus |
+| H | Mundharmonika-Tabs ein/aus (nur bei Liedern mit solchen Tabs) |
+| T | Gitarren-Tabs ein/aus (nur bei Liedern mit Tab-Abschnitt) |
 | M | Metronom |
 | N | Nachtmodus (dunkel) |
 | Esc | Spielmodus beenden |
@@ -157,6 +159,25 @@ Slash-Akkorde (G/B) zeigen den Grundgriff.
 **Capo-Hilfe** (unter „Liedinfo“): schlägt Capo-Lagen vor, in denen möglichst viele Akkorde
 ohne Barré greifbar sind – z. B. ein Lied in B-Dur mit Capo 3 und G-Griffen. Ein Klick setzt
 Capo und Transposition so, dass der Klang gleich bleibt.
+
+## Mundharmonika- und Gitarren-Tabs
+
+Mundharmonika-Töne stehen wie Akkorde in eckigen Klammern über der Silbe und erscheinen in Grün:
+
+    I [C][4]come from [5]Ala[6]bama with my [G][-5]banjo
+    [4] [-4] [5] [6] [6] [-6] [6] [5]
+
+`4` blasen, `-4` ziehen (`+4` geht auch), `-3'` `-3''` oder `-3b` Bending, `6o` Overblow,
+`[4 -4 5]` mehrere Töne an einer Stelle; Kanäle 1–16. Sie werden nie transponiert und zählen
+nicht als Akkorde (keine Griffbilder). Beim **Einfügen** wird eine Zeile wie `4  -4  5` über dem
+Text automatisch erkannt.
+
+Gitarren-Tabs stehen wie bisher in `{start_of_tab}` … `{end_of_tab}`.
+
+Beide lassen sich getrennt ausblenden – unter **Einstellungen** (Akkorde bzw. Abschnitte), per
+Rechtsklick auf die Vorschau → *Anzeigen* oder im Spielmodus mit **Harp** / **Tab** (H / T).
+Das gilt auch für den Druck. Ein Abschnitt, der nur aus Mundharmonika-Tönen besteht (z. B. ein
+Solo), verschwindet dann ganz.
 
 ## Wiederholungen
 
@@ -270,5 +291,5 @@ die App „Server nicht erreichbar … (CORS)“.
    ein-/zweispaltig, A4/A5/Letter, Ränder – eigener Seitenumbruch (src/print/paginate.js), kein Paged.js nötig
 6. ✅ Cloud-Sync über Google Drive (weitere Anbieter optional)
 7. ✅ Liederbuch über WebDAV synchronisieren (Nextcloud u. a., Server muss CORS erlauben)
-8. Harptaps zu- und abschaltbar implementieren
+8. ✅ Mundharmonika-Tabs ([-4] …) und Gitarren-Tabs getrennt ein-/ausblendbar
 9. Schriftgröße und art in Druckvorschau anpassbar machen

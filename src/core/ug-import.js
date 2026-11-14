@@ -2,6 +2,7 @@
 // Reine Funktionen, kein DOM.
 
 import { isChord } from './chords.js';
+import { isHarpNote, isHarpLine } from './harp.js';
 import { splitRepeat, formatRepeat } from './repeat.js';
 
 const FILLER = /^(\|{1,2}|\/|-+|%|\.|:|\*|[x×]\d+|\d+[x×]|\([x×]?\d+[x×]?\)|N\.?C\.?|\.{2,3})$/i;
@@ -45,7 +46,9 @@ function tokenIsChord(t) {
   return isChord(stripParens(t));
 }
 
+/** Akkordzeile – oder eine Zeile Mundharmonika-Töne ("4 -4 5 -5"), die genauso über dem Text steht. */
 export function isChordLine(line) {
+  if (isHarpLine(line)) return true;
   const tokens = tokenize(line);
   if (!tokens.length) return false;
   let chords = 0;
@@ -57,6 +60,7 @@ export function isChordLine(line) {
 }
 
 export function isTabLine(line) {
+  if (isHarpLine(line)) return false; // "-4 -5 -6 -4 -5 -6" ist Mundharmonika, kein Gitarren-Tab
   const t = line.trim();
   const dashes = (t.match(/-/g) || []).length;
   if (/^[A-Ga-g][#b]?\s*[|:]/.test(t) && dashes >= 3) return true;
@@ -100,7 +104,7 @@ function escapeLyrics(text) {
 
 function chordMarker(text) {
   const inner = stripParens(text);
-  return isChord(inner) ? `[${inner}]` : `[*${text}]`;
+  return isChord(inner) || isHarpNote(inner) ? `[${inner}]` : `[*${text}]`;
 }
 
 /** Akkordzeile + Textzeile -> eine ChordPro-Zeile. */
@@ -142,7 +146,7 @@ export function mergeChordLine(chordLine, lyricLine) {
 /** Reine Akkordzeile -> ChordPro, Füllzeichen (|, x2) bleiben als Text. */
 export function chordOnlyLine(chordLine) {
   return tokenize(chordLine)
-    .map((t) => (tokenIsChord(t.text) ? `[${stripParens(t.text)}]` : t.text))
+    .map((t) => (tokenIsChord(t.text) || isHarpNote(t.text) ? `[${stripParens(t.text)}]` : t.text))
     .join(' ');
 }
 

@@ -47,7 +47,8 @@
 .line { white-space: pre-wrap; break-inside: avoid; }
 .line--with-chords { margin-top: 0.15em; }
 .seg { display: inline-block; vertical-align: baseline; }
-.seg > .chord { display: block; }
+.seg > .chord, .seg > .chord-stack { display: block; }
+.chord-stack { white-space: pre; }
 .seg > .lyric { display: block; white-space: pre; }
 .chord {
   font-family: var(--chord-font);
@@ -59,6 +60,13 @@
   white-space: pre;
 }
 .chord.annotation { color: var(--label-color); font-weight: normal; font-style: italic; }
+/* Mundharmonika-Tabs: eigene Farbe, damit sie nicht mit Akkorden verwechselt werden */
+.chord.harp { color: var(--harp-color, #00796b); font-weight: 600; font-variant-numeric: tabular-nums; }
+.songbook[data-harp='hide'] .chord.harp,
+.songbook[data-harp='hide'] .line--harp-only,
+.songbook[data-harp='hide'] .block--harp-only { display: none; }
+/* Gitarren-Tabs ({start_of_tab}) ein-/ausblendbar */
+.songbook[data-tabs='hide'] .block--tab { display: none; }
 .line--chords { font-family: var(--chord-font); }
 .line--chords .chord-filler { font-size: var(--chord-size); color: var(--label-color); white-space: pre; }
 
