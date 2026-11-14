@@ -6,6 +6,8 @@ import { parseImportFile } from './core/file-import.js';
 import { renderSong, songKey, usedChords } from './render/song-view.js';
 import { capoOptions } from './core/capo.js';
 import { parseKnown, playableCapo } from './core/playable.js';
+import { metronome, beatsPerBar } from './metronome.js';
+import { transposeChordPro, chordproToText } from './core/export-text.js';
 import { SongRepository } from './storage/repository.js';
 import { openIdbStore } from './storage/stores.js';
 import { SAMPLE_SONG, NEW_SONG_TEMPLATE } from './sample.js';
@@ -373,6 +375,8 @@ function fillMeta(song) {
   capoChip.textContent = `Capo ${m.capo}`;
   capoChip.title = `Kapodaster im ${m.capo}. Bund`;
   const timeChip = $('#time-chip');
+  timeChip.dataset.tempo = m.tempo || '';
+  timeChip.dataset.time = m.time || '';
   const timeText = [m.time, m.tempo && `♩ ${m.tempo}`].filter(Boolean).join(' · ');
   timeChip.hidden = !timeText;
   timeChip.textContent = timeText;
@@ -459,6 +463,91 @@ $('#trash-empty').onclick = async () => {
   toast('Papierkorb geleert');
 };
 trashDlg.addEventListener('click', (e) => e.target === trashDlg && trashDlg.close());
+
+// ---------- Zoom der Vorschau ----------
+
+let viewZoom = Number(localStorage.getItem('viewZoom')) || 1;
+function setViewZoom(z) {
+  viewZoom = Math.min(2.5, Math.max(0.6, Math.round(z * 10) / 10));
+  localStorage.setItem('viewZoom', String(viewZoom));
+  preview.style.setProperty('--view-zoom', String(viewZoom));
+  $('#zoom-reset').textContent = `${Math.round(viewZoom * 100)} %`;
+}
+$('#zoom-in').onclick = () => setViewZoom(viewZoom + 0.1);
+$('#zoom-out').onclick = () => setViewZoom(viewZoom - 0.1);
+$('#zoom-reset').onclick = () => setViewZoom(1);
+setViewZoom(viewZoom);
+
+// ---------- Metronom (Klick auf Takt/Tempo über der Vorschau) ----------
+
+function toggleMetronome() {
+  const chip = $('#time-chip');
+  const on = metronome.toggle(Number(chip.dataset.tempo) || 100, beatsPerBar(chip.dataset.time));
+  chip.setAttribute('aria-pressed', String(on));
+  if (on && !chip.dataset.tempo) toast('Kein Tempo angegeben – Metronom läuft mit 100 bpm (unter „Liedinfo“ einstellbar)');
+}
+$('#time-chip').onclick = toggleMetronome;
+addEventListener('metronome-beat', (e) => {
+  for (const el of document.querySelectorAll('#time-chip[aria-pressed="true"], #pl-metro[aria-pressed="true"]')) {
+    el.classList.remove('beat', 'beat-1');
+    void el.offsetWidth; // Animation neu starten
+    el.classList.add(e.detail === 0 ? 'beat-1' : 'beat');
+  }
+});
+metronome.onBeat = (b) => dispatchEvent(new CustomEvent('metronome-beat', { detail: b }));
+
+// ---------- Lied teilen ----------
+
+const shareDlg = $('#share-dialog');
+function currentExport() {
+  const t = current.transpose || 0;
+  const acc = current.accidentals || 'auto';
+  const name = (current.title || 'Lied').replace(/[\/:*?"<>|]+/g, '').trim() || 'Lied';
+  return { name, chordpro: transposeChordPro(editor.value, t, acc), text: chordproToText(editor.value, t, acc) };
+}
+$('#btn-share').onclick = async () => {
+  if (!current) return toast('Kein Lied geöffnet');
+  await flushSave();
+  $('#share-title').textContent = current.title || 'Ohne Titel';
+  const { name, chordpro } = currentExport();
+  const file = new File([chordpro], `${name}.cho`, { type: 'text/plain' });
+  $('#share-native').hidden = !navigator.canShare?.({ files: [file] }) && !navigator.share;
+  shareDlg.showModal();
+};
+$('#share-native').onclick = async () => {
+  const { name, chordpro, text } = currentExport();
+  const file = new File([chordpro], `${name}.cho`, { type: 'text/plain' });
+  try {
+    if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: name, text: name });
+    else await navigator.share({ title: name, text });
+    shareDlg.close();
+  } catch (err) {
+    if (err.name !== 'AbortError') toast(`Teilen nicht möglich: ${err.message}`);
+  }
+};
+$('#share-file').onclick = () => {
+  const { name, chordpro } = currentExport();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([chordpro], { type: 'text/plain' }));
+  a.download = `${name}.cho`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  shareDlg.close();
+};
+$('#share-text').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(currentExport().text);
+    toast('Text kopiert – zum Einfügen eine Schrift mit fester Breite verwenden, damit die Akkorde passen');
+  } catch {
+    toast('Kopieren nicht erlaubt – bitte die ChordPro-Datei nehmen');
+  }
+  shareDlg.close();
+};
+$('#share-pdf').onclick = async () => {
+  shareDlg.close();
+  await printer.printSongs([{ ...current, chordpro: editor.value }], { cover: false, toc: false, useSavedTranspose: true });
+};
+shareDlg.addEventListener('click', (e) => e.target === shareDlg && shareDlg.close());
 
 // ---------- Capo-Hilfe ----------
 
@@ -791,6 +880,7 @@ addEventListener('keydown', (e) => {
   }
   if (mod || e.altKey || isTyping(document.activeElement) || !current) return;
   if (e.key === 'f' || e.key === 'F') $('#btn-play').click();
+  else if (e.key === 'm' || e.key === 'M') toggleMetronome();
   else if (e.key === '+' || e.key === '=') $('#tr-up').click();
   else if (e.key === '-') $('#tr-down').click();
 });

@@ -7,6 +7,7 @@
 import { parseChordPro } from './core/chordpro.js';
 import { renderSong } from './render/song-view.js';
 import { applySettings, loadSettings, saveSettings } from './settings/settings.js';
+import { metronome, beatsPerBar } from './metronome.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -194,6 +195,9 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     endBtn.hidden = !next;
     endBtn.textContent = next ? `Nächstes Lied: ${next.title || 'Ohne Titel'} →` : '';
     setSpeed(loadMap('playSpeed')[song.id] || 1, false);
+    // Metronom läuft weiter, aber im Tempo des neuen Liedes
+    if (metronome.running) metronome.start(Number(meta.tempo) || 100, beatsPerBar(meta.time));
+    syncMetro();
     layout();
     scroller.scrollTop = 0;
     scroller.scrollLeft = 0;
@@ -353,6 +357,8 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
 
   function close() {
     setPlaying(false);
+    metronome.stop();
+    syncMetro();
     clearTimeout(hideTimer);
     view.hidden = true;
     wakeLock?.release().catch(() => {});
@@ -373,6 +379,19 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   $('#pl-faster').onclick = () => setSpeed(speed + 0.1);
   toggleBtn.onclick = () => setPlaying(!playing);
   $('#pl-cols').onclick = () => setCols(!cols);
+
+  function syncMetro() {
+    const b = $('#pl-metro');
+    b.setAttribute('aria-pressed', String(metronome.running));
+    b.title = `Metronom${meta.tempo ? ` ${meta.tempo} bpm` : ' (kein Tempo angegeben: 100 bpm)'}${meta.time ? `, ${meta.time}` : ''} (M)`;
+    const chip = $('#time-chip');
+    if (chip) chip.setAttribute('aria-pressed', String(metronome.running));
+  }
+  function toggleMetro() {
+    metronome.toggle(Number(meta.tempo) || 100, beatsPerBar(meta.time));
+    syncMetro();
+  }
+  $('#pl-metro').onclick = toggleMetro;
 
   // Griffbilder ein/aus – dieselbe Einstellung wie unter Einstellungen → Akkorde
   function syncDiagramButton() {
@@ -445,6 +464,10 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
       case '<':
       case ',':
         setSpeed(speed - 0.1);
+        break;
+      case 'm':
+      case 'M':
+        toggleMetro();
         break;
       case 'g':
       case 'G':

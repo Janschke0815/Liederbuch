@@ -49,6 +49,7 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | Strg+S | sofort speichern (sonst automatisch) |
 | Strg+P | Drucken |
 | F | Spielmodus |
+| M | Metronom an/aus |
 
 ## Spielmodus
 
@@ -67,6 +68,7 @@ die Geschwindigkeit wird pro Lied gemerkt. Tippen aufs Lied blendet die Leiste e
 | > / < | schneller / langsamer scrollen |
 | S | zwei Spalten nebeneinander (seitenweise) |
 | G | Griffbilder ein/aus |
+| M | Metronom |
 | N | Nachtmodus (dunkel) |
 | Esc | Spielmodus beenden |
 
@@ -103,6 +105,15 @@ beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ er
 - **Notiz** (Liedinfo → Notiz): privater Hinweis zum Lied, sichtbar in Vorschau und Spielmodus,
   nicht im Druck; wird mit gesichert und synchronisiert.
 - **Papierkorb** (Menü): gelöschte Lieder wiederherstellen oder endgültig löschen.
+
+## Zoom, Metronom, Lied teilen
+
+- **Zoom:** unten rechts in der Vorschau − / 100 % / + (nur Bildschirm, nicht der Druck).
+- **Metronom:** Klick auf Takt/Tempo über der Vorschau, im Spielmodus das Metronom-Symbol oder
+  Taste **M** – im Tempo des Liedes (`{tempo:}`, sonst 100 bpm), Betonung auf der Eins nach
+  Taktart (6/8 und 12/8 in Gruppen zu drei Achteln).
+- **Lied teilen** (Menü): in der aktuellen Transposition als ChordPro-Datei, über das
+  Teilen-Menü des Handys (WhatsApp, Mail …), als Text „Akkorde über dem Text“ oder als PDF.
 
 ## Was kann ich spielen?
 
