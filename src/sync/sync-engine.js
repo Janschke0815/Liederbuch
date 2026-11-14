@@ -14,7 +14,8 @@
 import { isNewer, slimRecord } from '../storage/repository.js';
 
 export const SYNC_FORMAT = 'liederbuch-sync';
-export const SYNC_VERSION = 1;
+// 2: zusätzlich Setlisten ("setlists"); Version-1-Dateien werden weiter gelesen
+export const SYNC_VERSION = 2;
 
 export class ConflictError extends Error {
   constructor() {
@@ -30,13 +31,14 @@ export class AuthError extends Error {
   }
 }
 
-const same = (a, b) => JSON.stringify(slimRecord(a)) === JSON.stringify(slimRecord(b));
+
 
 /**
  * Führt lokale und entfernte Datensätze zusammen.
  * @returns {{merged: object[], toLocal: object[], remoteChanged: boolean}}
  */
-export function mergeRecords(local, remote) {
+export function mergeRecords(local, remote, slim = slimRecord) {
+  const same = (a, b) => JSON.stringify(slim(a)) === JSON.stringify(slim(b));
   const L = new Map(local.map((r) => [r.id, r]));
   const R = new Map(remote.filter((r) => r && typeof r.id === 'string').map((r) => [r.id, r]));
   const merged = [];
@@ -45,8 +47,8 @@ export function mergeRecords(local, remote) {
   for (const id of new Set([...L.keys(), ...R.keys()])) {
     const l = L.get(id);
     const r = R.get(id);
-    const win = isNewer(r, l) ? r : l;
-    merged.push(slimRecord(win));
+    const win = isNewer(r, l, slim) ? r : l;
+    merged.push(slim(win));
     if (win === r && !(l && same(l, r))) toLocal.push(r);
     if (!r || !same(win, r)) remoteChanged = true;
   }
@@ -58,9 +60,15 @@ export function mergeRecords(local, remote) {
  * Ereignisse: "status" (bei jeder Änderung von state/lastSync/error)
  */
 export class SyncEngine extends EventTarget {
-  constructor(repo, provider, { pollMs = 15000, debounceMs = 1500, beforeSync } = {}) {
+  /**
+   * @param repo      Lieder (SongRepository)
+   * @param provider  Cloud-Anbieter
+   * @param opts.extra weitere Sammlungen, z. B. [{ key: 'setlists', repo, slim }]
+   */
+  constructor(repo, provider, { pollMs = 15000, debounceMs = 1500, beforeSync, extra = [] } = {}) {
     super();
     this.repo = repo;
+    this.collections = [{ key: 'songs', repo, slim: slimRecord }, ...extra];
     this.provider = provider;
     this.pollMs = pollMs;
     this.debounceMs = debounceMs;
@@ -76,10 +84,12 @@ export class SyncEngine extends EventTarget {
     this.poller = null;
     this.cleanup = [];
     // Eigene Änderungen immer vormerken, auch solange der Abgleich ruht
-    repo.addEventListener('change', () => {
-      this.dirty = true;
-      this.schedule();
-    });
+    for (const c of this.collections) {
+      c.repo.addEventListener('change', () => {
+        this.dirty = true;
+        this.schedule();
+      });
+    }
   }
 
   #set(state, error = null) {
@@ -174,18 +184,23 @@ export class SyncEngine extends EventTarget {
     this.dirty = false;
     const remote = await this.provider.read(hadLocalChanges ? null : this.knownVersion);
     if (remote?.unchanged) return; // nichts Neues, nichts Eigenes
-    const remoteSongs = remote?.data?.format === SYNC_FORMAT ? remote.data.songs || [] : [];
     if (remote?.data && remote.data.format !== SYNC_FORMAT) {
       throw new Error('Die Cloud-Datei hat ein unbekanntes Format');
     }
     if (remote?.data?.version > SYNC_VERSION) {
       throw new Error('Die Cloud-Datei stammt aus einer neueren Version der App – bitte App neu laden');
     }
-    const local = await this.repo.allRecords();
-    const { merged, toLocal, remoteChanged } = mergeRecords(local, remoteSongs);
-    if (toLocal.length) await this.repo.applyRemote(toLocal);
-    if (remoteChanged || !remote) {
-      const data = { format: SYNC_FORMAT, version: SYNC_VERSION, updatedAt: new Date().toISOString(), songs: merged };
+    const data = { format: SYNC_FORMAT, version: SYNC_VERSION, updatedAt: new Date().toISOString() };
+    let remoteChanged = false;
+    for (const c of this.collections) {
+      const theirs = Array.isArray(remote?.data?.[c.key]) ? remote.data[c.key] : [];
+      const mine = await c.repo.allRecords();
+      const r = mergeRecords(mine, theirs, c.slim);
+      if (r.toLocal.length) await c.repo.applyRemote(r.toLocal);
+      data[c.key] = r.merged;
+      if (r.remoteChanged) remoteChanged = true;
+    }
+    if (remoteChanged || !remote || remote.data?.version !== SYNC_VERSION) {
       try {
         this.knownVersion = await this.provider.write(data, remote?.version ?? null);
       } catch (err) {

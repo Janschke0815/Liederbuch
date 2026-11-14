@@ -90,12 +90,44 @@
 
   <main class="workspace" data-view="preview">
     <aside class="pane pane-list" aria-label="Lieder">
-      <div class="search-box">
-        <svg class="icon"><use href="#i-search"/></svg>
-        <input id="search" type="search" placeholder="Suchen …" autocomplete="off" title="Titel, Interpret oder Text (Strg+K)">
+      <div class="list-tabs" role="tablist">
+        <button type="button" role="tab" data-tab="songs" aria-selected="true">Lieder</button>
+        <button type="button" role="tab" data-tab="sets" aria-selected="false">Setlisten</button>
       </div>
-      <ul id="song-list" class="song-list"></ul>
-      <p id="song-count" class="song-count"></p>
+      <div id="tab-songs" class="list-tab">
+        <div class="search-box">
+          <svg class="icon"><use href="#i-search"/></svg>
+          <input id="search" type="search" placeholder="Suchen …" autocomplete="off" title="Titel, Interpret oder Text (Strg+K)">
+        </div>
+        <ul id="song-list" class="song-list"></ul>
+        <p id="song-count" class="song-count"></p>
+      </div>
+      <div id="tab-sets" class="list-tab" hidden>
+        <div id="sets-overview" class="list-tab">
+          <ul id="set-list" class="song-list"></ul>
+          <div class="list-foot"><button type="button" id="set-new"><svg class="icon"><use href="#i-plus"/></svg>Neue Setliste</button></div>
+        </div>
+        <div id="set-detail" class="list-tab" hidden>
+          <div class="set-head">
+            <button type="button" id="set-back" class="icon-btn" title="Alle Setlisten"><svg class="icon"><use href="#i-left"/></svg></button>
+            <input id="set-name" class="set-name" aria-label="Name der Setliste" autocomplete="off">
+            <button type="button" id="set-delete" class="icon-btn danger" title="Setliste löschen"><svg class="icon"><use href="#i-trash"/></svg></button>
+          </div>
+          <div class="set-actions">
+            <button type="button" id="set-play" class="primary" title="Setliste im Spielmodus der Reihe nach spielen"><svg class="icon"><use href="#i-stage"/></svg>Spielen</button>
+            <button type="button" id="set-print" title="Setliste in dieser Reihenfolge drucken"><svg class="icon"><use href="#i-print"/></svg>Drucken</button>
+          </div>
+          <ol id="set-items" class="set-items"></ol>
+          <div class="set-add">
+            <div class="search-box">
+              <svg class="icon"><use href="#i-plus"/></svg>
+              <input id="set-add-search" type="search" placeholder="Lied hinzufügen …" autocomplete="off">
+            </div>
+            <ul id="set-add-results" class="set-add-results"></ul>
+          </div>
+          <p id="set-count" class="song-count"></p>
+        </div>
+      </div>
     </aside>
 
     <section class="pane pane-editor" aria-label="Editor">

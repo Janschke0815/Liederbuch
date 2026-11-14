@@ -4,12 +4,17 @@
 //   put(record) / putMany(records) / delete(id) / clear()
 // Ein späterer Cloud-Sync setzt auf dieser Schnittstelle bzw. dem Repository auf.
 
+const STORES = ['songs', 'setlists'];
+
 /** Dauerhafter Speicher im Browser (IndexedDB), ohne Fremdbibliothek. */
 export function openIdbStore(dbName = 'liederbuch', storeName = 'songs') {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(dbName, 1);
+    // Version 2: zusätzlich "setlists"
+    const req = indexedDB.open(dbName, 2);
     req.onupgradeneeded = () => {
-      req.result.createObjectStore(storeName, { keyPath: 'id' });
+      for (const name of new Set([...STORES, storeName])) {
+        if (!req.result.objectStoreNames.contains(name)) req.result.createObjectStore(name, { keyPath: 'id' });
+      }
     };
     req.onsuccess = () => resolve(wrapIdb(req.result, storeName));
     req.onerror = () => reject(req.error);
@@ -17,6 +22,8 @@ export function openIdbStore(dbName = 'liederbuch', storeName = 'songs') {
 }
 
 function wrapIdb(db, name) {
+  // Andere Tabs mit neuerer Version nicht blockieren
+  db.onversionchange = () => db.close();
   const tx = (mode, fn) =>
     new Promise((resolve, reject) => {
       const t = db.transaction(name, mode);

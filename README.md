@@ -71,6 +71,16 @@ die Geschwindigkeit wird pro Lied gemerkt. Tippen aufs Lied blendet die Leiste e
 Bluetooth-Fußpedale („Page Turner“) senden meist Bild↑/↓ oder Pfeiltasten und funktionieren
 damit ohne Einrichtung. Geblättert wird in der Reihenfolge der Liederliste (ggf. gefiltert).
 
+## Setlisten
+
+Reiter **Setlisten** in der linken Spalte: Lieder in fester Reihenfolge, z. B. für einen
+Auftritt. Lieder über „Lied hinzufügen …“ suchen und anklicken; Reihenfolge per Ziehen oder
+über **⋯** (nach oben/unten). Unter **⋯** gibt es pro Eintrag eine **Notiz** (z. B. „Capo 2“,
+erscheint im Spielmodus) und eine **eigene Transposition** nur für diese Setliste.
+**Spielen** startet den Spielmodus in Setlisten-Reihenfolge, **Drucken** druckt genau diese
+Lieder in dieser Reihenfolge. Setlisten werden mit synchronisiert – in gemeinsamen
+Liederbüchern sieht die ganze Band dieselben Setlisten.
+
 ## Liedinfo: Capo, Takt, Tempo
 
 Über dem Editor gibt es das Feld **Liedinfo** (einklappbar) mit Titel, Interpret, Tonart,

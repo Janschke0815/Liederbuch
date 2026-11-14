@@ -63,11 +63,11 @@ export function fullRecord(r) {
  * Welche Fassung gewinnt? Die mit dem späteren updatedAt; bei Gleichstand entscheidet der
  * Inhalt, damit alle Geräte zum selben Ergebnis kommen.
  */
-export function isNewer(a, b) {
+export function isNewer(a, b, slim = slimRecord) {
   if (!a) return false;
   if (!b) return true;
   if (a.updatedAt !== b.updatedAt) return a.updatedAt > b.updatedAt;
-  return JSON.stringify(slimRecord(a)) > JSON.stringify(slimRecord(b));
+  return JSON.stringify(slim(a)) > JSON.stringify(slim(b));
 }
 
 /**

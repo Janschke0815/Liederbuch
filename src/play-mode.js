@@ -47,7 +47,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   const sheet = $('#pl-sheet');
   const toggleBtn = $('#pl-toggle');
 
-  let ids = [];
+  let entries = []; // [{ id, transpose?, note? }]
   let index = 0;
   let song = null; // Datensatz
   let meta = {};
@@ -118,19 +118,27 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   }
 
   async function show(i) {
-    if (!ids.length) return;
-    index = clamp(i, 0, ids.length - 1);
-    song = await repo.get(ids[index]);
+    if (!entries.length) return;
+    index = clamp(i, 0, entries.length - 1);
+    const entry = entries[index];
+    song = await repo.get(entry.id);
     if (!song) return;
     const parsed = parseChordPro(song.chordpro);
     meta = parsed.meta;
     applySettings(sheet, loadSettings());
-    sheet.replaceChildren(renderSong(parsed, { transpose: song.transpose, accidentals: song.accidentals }));
+    const transpose = entry.transpose ?? song.transpose;
+    sheet.replaceChildren(renderSong(parsed, { transpose, accidentals: song.accidentals }));
+    if (entry.note) {
+      const note = document.createElement('p');
+      note.className = 'play-note';
+      note.textContent = entry.note;
+      sheet.querySelector('.song-header')?.append(note);
+    }
     $('#pl-title').textContent = song.title || 'Ohne Titel';
-    $('#pl-pos').textContent = ids.length > 1 ? `${index + 1} von ${ids.length}` : song.artist || '';
+    $('#pl-pos').textContent = entries.length > 1 ? `${index + 1} von ${entries.length}` : song.artist || '';
     $('#pl-prev').disabled = index === 0;
-    $('#pl-next').disabled = index >= ids.length - 1;
-    const next = index < ids.length - 1 ? await repo.get(ids[index + 1]) : null;
+    $('#pl-next').disabled = index >= entries.length - 1;
+    const next = index < entries.length - 1 ? await repo.get(entries[index + 1].id) : null;
     const endBtn = $('#pl-next-end');
     endBtn.hidden = !next;
     endBtn.textContent = next ? `Nächstes Lied: ${next.title || 'Ohne Titel'} →` : '';
@@ -208,7 +216,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
 
   async function go(delta, { toEnd = false } = {}) {
     const target = index + delta;
-    if (target < 0 || target >= ids.length) return;
+    if (target < 0 || target >= entries.length) return;
     const wasPlaying = playing;
     setPlaying(false);
     await show(target);
@@ -218,14 +226,15 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
 
   // ---------- Öffnen / Schließen ----------
 
-  async function open(currentId) {
-    ids = await getSongIds();
-    if (!ids.length) return;
+  /** list: optional feste Reihenfolge (Setliste) mit eigener Transposition/Notiz */
+  async function open(currentId, list = null) {
+    entries = list || (await getSongIds()).map((id) => ({ id }));
+    if (!entries.length) return;
     view.hidden = false;
     view.classList.toggle('night', localStorage.getItem('playNight') === '1');
     $('#pl-night').setAttribute('aria-pressed', String(view.classList.contains('night')));
     applyZoom();
-    await show(Math.max(0, ids.indexOf(currentId)));
+    await show(Math.max(0, entries.findIndex((e) => e.id === currentId)));
     showBar(false);
     scroller.focus({ preventScroll: true });
     keepAwake();

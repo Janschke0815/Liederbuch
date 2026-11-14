@@ -160,4 +160,14 @@ export function setupPrint({ repo, beforeOpen }) {
   addEventListener('afterprint', () => document.body.classList.remove('printing'));
 
   $('#btn-print').onclick = () => openDialog();
+
+  /** Feste Auswahl in fester Reihenfolge drucken (z. B. Setliste) – direkt zur Vorschau. */
+  async function printSongs(list, overrides = {}) {
+    await beforeOpen?.();
+    options = { ...loadOptions(), ...overrides };
+    songs = list;
+    selected = new Set(list.map((s) => s.id));
+    await showPreview();
+  }
+  return { printSongs };
 }

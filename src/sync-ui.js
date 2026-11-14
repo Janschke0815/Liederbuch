@@ -39,7 +39,7 @@ const button = (text, onclick, className = '') =>
  * @param {{repo, book, beforeSync: () => Promise<void>, beforeConnect?: () => Promise<void>,
  *          beforeSwitch: () => Promise<void>, toast: Function}} opts
  */
-export function setupSync({ repo, book, beforeSync, beforeConnect, beforeSwitch, toast }) {
+export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, beforeSwitch, toast }) {
   const dlg = $('#sync-dialog');
   const btn = $('#btn-cloud');
   $('#sync-origin').textContent = location.origin;
@@ -57,7 +57,7 @@ export function setupSync({ repo, book, beforeSync, beforeConnect, beforeSwitch,
   function build() {
     engine?.stop();
     provider = new GoogleDriveProvider({ clientId: clientId(), apiKey: apiKey(), appId: appId(), book });
-    engine = new SyncEngine(repo, provider, { beforeSync });
+    engine = new SyncEngine(repo, provider, { beforeSync, extra });
     engine.addEventListener('status', render);
   }
 

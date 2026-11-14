@@ -13,6 +13,8 @@ import { setupSync } from './sync-ui.js';
 import { bumpRepeat } from './core/repeat.js';
 import { activeBook } from './books.js';
 import { setupPlayMode } from './play-mode.js';
+import { SetlistRepository, slimSetlist } from './storage/setlists.js';
+import { setupSetlists } from './setlist-ui.js';
 import { getAllMeta, setMeta } from './core/meta-edit.js';
 import { transposeChord } from './core/chords.js';
 import { applySettings, loadSettings } from './settings/settings.js';
@@ -26,6 +28,7 @@ const isMobile = () => matchMedia('(max-width: 760px)').matches;
 
 const book = activeBook(); // persönliches oder gemeinsames Liederbuch
 const repo = new SongRepository(await openIdbStore(book.dbName));
+const sets = new SetlistRepository(await openIdbStore(book.dbName, 'setlists'));
 if (book.shared) document.title = `${book.name} – Liederbuch`;
 navigator.storage?.persist?.(); // Browser bitten, die Daten nicht automatisch zu löschen
 
@@ -191,6 +194,7 @@ async function openSong(id) {
   current = id ? await repo.get(id) : null;
   editor.value = current?.chordpro ?? '';
   if (current) localStorage.setItem('lastSong', current.id);
+  dispatchEvent(new CustomEvent('songopened', { detail: current?.id || null }));
   setStatus('');
   updateControls();
   renderPreview();
@@ -604,12 +608,26 @@ $('#btn-play').onclick = async () => {
 
 // ---------- Drucken ----------
 
-setupPrint({ repo, beforeOpen: flushSave });
+const printer = setupPrint({ repo, beforeOpen: flushSave });
+
+const setlists = setupSetlists({
+  repo,
+  sets,
+  toast,
+  play,
+  getCurrentId: () => current?.id || null,
+  openSong: async (id) => {
+    await openSong(id);
+    if (isMobile()) setView('preview');
+  },
+  printSongs: (list, opts) => printer.printSongs(list, opts),
+});
 
 // ---------- Cloud-Sync ----------
 
 setupSync({
   repo,
+  extra: [{ key: 'setlists', repo: sets, slim: slimSetlist }],
   book,
   toast,
   beforeSync: flushSave,
