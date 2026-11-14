@@ -65,25 +65,44 @@ Im Editor setzt der Knopf **2×** die Angabe passend: an die Zeile mit dem Curso
 markierte Zeilen, oder – auf der Abschnittszeile – an den ganzen Abschnitt. Nochmal klicken
 zählt hoch. Beim Import aus Ultimate Guitar werden „[Chorus x2]“ und „x2“ am Zeilenende erkannt.
 
-## Cloud-Sync (Google Drive)
+## Cloud-Sync und gemeinsame Liederbücher (Google Drive)
 
-Alle Geräte teilen sich die Datei `Liederbuch.json` in deinem Google Drive. Jedes Gerät hat
-weiterhin eine vollständige lokale Kopie (offline nutzbar). Pro Lied gewinnt die zuletzt
-geänderte Fassung, Löschungen werden mit abgeglichen. Eigene Änderungen werden nach ~1,5 s
-hochgeladen, fremde alle ~15 s und beim Zurückwechseln in die App geholt.
+Jedes Liederbuch ist eine Datei in Google Drive; jedes Gerät hat zusätzlich eine vollständige
+lokale Kopie (offline nutzbar). Pro Lied gewinnt die zuletzt geänderte Fassung, Löschungen
+werden mit abgeglichen. Eigene Änderungen werden nach ~1,5 s hochgeladen, fremde alle ~15 s
+und beim Zurückwechseln in die App geholt.
 
-Einmalig einrichten (kostenlos):
+- **Mein Liederbuch** – `Liederbuch.json` im eigenen Drive, für alle eigenen Geräte.
+- **Gemeinsame Liederbücher** (z. B. „Band“) – `Liederbuch – Band.json`, per Drive geteilt.
+  Unter **Cloud** anlegen (optional mit den eigenen Liedern), dann Mitglieder per E-Mail
+  einladen. Eingeladene öffnen die App, verbinden sich und tippen auf **„Einladung öffnen …“**.
+  Alle Mitglieder können bearbeiten; der Besitzer kann Mitglieder entfernen. Gewechselt wird
+  oben links in der Kopfleiste.
 
-1. <https://console.cloud.google.com/> → neues Projekt → „APIs & Dienste“ → **Google Drive API** aktivieren.
-2. „OAuth-Zustimmungsbildschirm“: Typ *Extern*, App-Name eintragen, dich selbst unter *Testnutzer* hinzufügen.
-3. „Anmeldedaten“ → *Anmeldedaten erstellen* → **OAuth-Client-ID** → Typ *Webanwendung*.
-   Unter *Autorisierte JavaScript-Quellen* eintragen:
-   `https://janschke0815.github.io` und (zum lokalen Testen) `http://localhost:5173`.
-4. Die Client-ID in `src/sync/config.js` eintragen (gilt dann für alle Geräte) oder in der App
-   unter **Cloud → Einrichtung** einfügen.
-5. In der App auf **Cloud → Verbinden** tippen und Google-Zugriff erlauben.
+Sicherheit: Die App ist öffentlich, die Lieder nicht. Zugriff auf ein Drive gibt es nur über
+die Google-Anmeldung des jeweiligen Kontos, und die App bekommt nur die Berechtigung
+`drive.file` (ausschließlich ihre eigenen bzw. ausdrücklich ausgewählten Dateien).
 
-Die App bekommt nur die Berechtigung `drive.file`: Sie sieht ausschließlich ihre eigene Datei.
+### Einmalig einrichten (kostenlos)
+
+1. <https://console.cloud.google.com/> → neues Projekt → **Google Drive API** und
+   **Google Picker API** aktivieren.
+2. „Google Auth Platform“ (früher „OAuth-Zustimmungsbildschirm“): Typ *Extern*, App-Name eintragen.
+   Unter *Zielgruppe* entweder alle Nutzer (dich und alle Mitglieder) als **Testnutzer** eintragen
+   (max. 100), oder die App **veröffentlichen** – mit der Berechtigung `drive.file` ist dafür
+   keine Google-Prüfung nötig, und jeder erreicht trotzdem nur sein eigenes Drive bzw. die mit
+   ihm geteilten Liederbücher.
+3. *Clients* → **Client erstellen** → Typ *Webanwendung*, *Autorisierte JavaScript-Quellen*:
+   `https://janschke0815.github.io` und `http://localhost:5173`.
+4. *APIs & Dienste → Anmeldedaten* → **API-Schlüssel erstellen**; einschränken auf
+   *Websites* (`https://janschke0815.github.io/*`, `http://localhost:5173/*`) und die *Google Picker API*.
+5. **Projektnummer** steht im Dashboard des Projekts (nur Ziffern).
+6. Client-ID, API-Schlüssel und Projektnummer in `src/sync/config.js` eintragen (gilt dann für
+   alle Geräte und Mitglieder) oder in der App unter **Cloud → Einrichtung**.
+
+Keiner dieser Werte ist geheim (sie stehen bei jeder Web-App sichtbar im Code); Google nimmt sie
+nur von den eingetragenen Adressen an. Das *Client-Secret* wird nicht gebraucht – nicht weitergeben.
+
 Google meldet Browser-Apps nach etwa einer Stunde ab; dann zeigt der Cloud-Knopf „Anmelden“,
 ein Tipp darauf genügt (bis dahin wird lokal weitergespeichert). Weitere Anbieter (z. B.
 Dropbox, Nextcloud) lassen sich in `src/sync/` mit `read`/`write` ergänzen.

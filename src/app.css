@@ -423,3 +423,29 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
   .cloud-btn .label { display: none; }
   .dialog-foot { flex-wrap: wrap; }
 }
+
+/* Liederbücher */
+.book-select {
+  font-weight: 700; font-size: 1.05em; max-width: 14em;
+  border-color: transparent; background-color: transparent; padding-inline: .4em;
+}
+.book-select:hover { background-color: var(--hover); }
+.sync-section { display: flex; flex-direction: column; gap: .6em; }
+.sync-section h3 { margin: 0; font-size: .95em; }
+.sync-status-main { flex: 1; min-width: 0; }
+.book-list, .member-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.book-list li, .member-list li { display: flex; align-items: center; gap: .6em; padding: .5em .8em; border-bottom: 1px solid var(--border); }
+.book-list li:last-child, .member-list li:last-child { border-bottom: 0; }
+.book-list li.active { background: var(--accent-soft); }
+.book-name { flex: 1; min-width: 0; font-weight: 600; }
+.book-name small, .member-name small { display: block; font-weight: 400; color: var(--muted); font-size: .8em; }
+.member-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.book-list button, .member-list button { min-height: 1.9rem; padding: .15em .6em; font-size: .85em; }
+.book-actions { display: flex; flex-direction: column; gap: .5em; align-items: flex-start; }
+.book-actions details { align-self: stretch; }
+.book-actions .field { margin-bottom: .5em; }
+.sync-setup label.check { display: flex; gap: .5em; align-items: center; font-size: .9em; }
+.row-end { display: flex; justify-content: flex-end; margin-top: .6em; }
+.invite-row { display: flex; gap: .5em; }
+.invite-row input { flex: 1; min-width: 0; }
+.field small { font-weight: 400; }

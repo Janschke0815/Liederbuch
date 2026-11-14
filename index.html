@@ -43,7 +43,8 @@
   <header class="toolbar">
     <div class="brand">
       <img src="icons/icon.svg" alt="" width="28" height="28">
-      <strong class="app-name">Liederbuch</strong>
+      <strong class="app-name" id="app-name">Liederbuch</strong>
+      <select id="book-select" class="book-select" title="Liederbuch wechseln" hidden></select>
       <span id="offline-badge" class="offline-badge" hidden title="Keine Verbindung – alles funktioniert weiter, Lieder werden lokal gespeichert">offline</span>
     </div>
     <button id="btn-new" type="button" class="primary" title="Neues Lied anlegen">
@@ -274,40 +275,62 @@
   <dialog id="sync-dialog" class="sync-dialog">
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
-        <h2>Cloud-Sync</h2>
-        <p class="hint">Alle Geräte (App und Browser) teilen sich ein Liederbuch. Änderungen erscheinen nach wenigen Sekunden überall; offline wird lokal weitergearbeitet und später abgeglichen.</p>
+        <h2>Cloud-Sync &amp; Liederbücher</h2>
+        <p class="hint">Alle Geräte teilen sich ein Liederbuch über Google Drive. Änderungen erscheinen nach wenigen Sekunden überall; offline wird lokal weitergearbeitet.</p>
       </header>
       <div class="dialog-body sync-body">
         <div id="sync-status" class="sync-status" data-state="off">
           <svg class="icon"><use href="#i-cloud"/></svg>
-          <div>
+          <div class="sync-status-main">
             <strong id="sync-status-title">Nicht verbunden</strong>
             <div id="sync-status-text" class="hint"></div>
           </div>
+          <button type="button" id="sync-now" class="icon-btn" title="Jetzt abgleichen"><svg class="icon"><use href="#i-sync"/></svg></button>
         </div>
-        <label class="field">Speicherort
-          <select id="sync-provider">
-            <option value="gdrive">Google Drive</option>
-          </select>
-        </label>
+
+        <section class="sync-section">
+          <h3>Liederbücher</h3>
+          <ul id="book-list" class="book-list"></ul>
+          <div id="book-actions" class="book-actions">
+            <details id="book-new" class="sync-setup">
+              <summary>+ Neues gemeinsames Liederbuch</summary>
+              <label class="field">Name <input id="book-new-name" placeholder="z. B. Band, Lagerfeuer" autocomplete="off"></label>
+              <label class="check"><input type="checkbox" id="book-new-copy"> Lieder aus „<span id="book-new-from"></span>“ übernehmen</label>
+              <div class="row-end"><button type="button" id="book-new-ok" class="primary">Anlegen</button></div>
+            </details>
+            <button type="button" id="book-join"><svg class="icon"><use href="#i-open"/></svg>Einladung öffnen …</button>
+          </div>
+          <p id="book-offline-hint" class="hint">Zum Anlegen und Beitreten zuerst mit Google Drive verbinden.</p>
+        </section>
+
+        <section id="members" class="sync-section" hidden>
+          <h3>Mitglieder von „<span id="members-book"></span>“</h3>
+          <ul id="member-list" class="member-list"></ul>
+          <div class="invite-row">
+            <input id="invite-email" type="email" placeholder="E-Mail-Adresse (Google-Konto)" autocomplete="off">
+            <button type="button" id="invite-ok" class="primary">Einladen</button>
+          </div>
+          <p class="hint">Google schickt eine Einladung. Die Person öffnet dann die App, verbindet sich und tippt auf „Einladung öffnen …“. Alle Mitglieder können Lieder bearbeiten.</p>
+        </section>
+
         <details id="sync-setup" class="sync-setup">
           <summary>Einrichtung (einmalig)</summary>
           <label class="field">Google-Client-ID
             <input id="sync-client-id" placeholder="….apps.googleusercontent.com" autocomplete="off" spellcheck="false">
           </label>
-          <ol class="hint">
-            <li>In der <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a> ein Projekt anlegen und die <b>Google Drive API</b> aktivieren.</li>
-            <li>„OAuth-Zustimmungsbildschirm“ einrichten (Typ „Extern“) und dich selbst als Testnutzer eintragen.</li>
-            <li>Unter „Anmeldedaten“ eine <b>OAuth-Client-ID</b> vom Typ „Webanwendung“ anlegen, als JavaScript-Quelle <code id="sync-origin"></code> eintragen.</li>
-            <li>Die Client-ID hier einfügen (auf jedem Gerät dieselbe).</li>
-          </ol>
+          <label class="field">API-Schlüssel <small>(nur für „Einladung öffnen“)</small>
+            <input id="sync-api-key" placeholder="AIza…" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="field">Projektnummer <small>(nur für „Einladung öffnen“)</small>
+            <input id="sync-app-id" placeholder="z. B. 123456789012" autocomplete="off" spellcheck="false" inputmode="numeric">
+          </label>
+          <p class="hint">Anleitung im README („Cloud-Sync einrichten“). JavaScript-Quelle für diese Seite: <code id="sync-origin"></code></p>
         </details>
-        <p class="hint">Die App sieht in deinem Drive nur ihre eigene Datei <b>Liederbuch.json</b>. Schrift- und Druckeinstellungen bleiben pro Gerät.</p>
+        <p class="hint">Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.</p>
       </div>
       <footer class="dialog-foot">
         <button type="button" id="sync-disconnect" class="danger">Trennen</button>
         <span class="spacer"></span>
-        <button type="button" id="sync-now"><svg class="icon"><use href="#i-sync"/></svg>Jetzt abgleichen</button>
         <button type="button" id="sync-connect" class="primary">Verbinden</button>
         <button value="close" formnovalidate>Schließen</button>
       </footer>

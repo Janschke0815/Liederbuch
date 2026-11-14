@@ -11,6 +11,7 @@ import { setupPrint } from './print-ui.js';
 import { setupSettings } from './settings-ui.js';
 import { setupSync } from './sync-ui.js';
 import { bumpRepeat } from './core/repeat.js';
+import { activeBook } from './books.js';
 import { applySettings, loadSettings } from './settings/settings.js';
 
 const $ = (s) => document.querySelector(s);
@@ -20,7 +21,9 @@ const listEl = $('#song-list');
 const search = $('#search');
 const isMobile = () => matchMedia('(max-width: 760px)').matches;
 
-const repo = new SongRepository(await openIdbStore());
+const book = activeBook(); // persönliches oder gemeinsames Liederbuch
+const repo = new SongRepository(await openIdbStore(book.dbName));
+if (book.shared) document.title = `${book.name} – Liederbuch`;
 navigator.storage?.persist?.(); // Browser bitten, die Daten nicht automatisch zu löschen
 
 let current = null; // aktuell geöffnetes Lied (Datensatz)
@@ -99,7 +102,7 @@ async function refreshList() {
   if (!songs.length) {
     listEl.append(Object.assign(document.createElement('li'), {
       className: 'list-empty',
-      textContent: search.value ? 'Nichts gefunden.' : 'Noch keine Lieder.',
+      textContent: search.value ? 'Nichts gefunden.' : book.shared ? 'Noch keine Lieder – sie erscheinen nach dem Abgleich oder mit „Neues Lied“.' : 'Noch keine Lieder.',
     }));
   }
   const total = search.value ? `${songs.length} Treffer` : `${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'}`;
@@ -538,8 +541,10 @@ setupPrint({ repo, beforeOpen: flushSave });
 
 setupSync({
   repo,
+  book,
   toast,
   beforeSync: flushSave,
+  beforeSwitch: flushSave,
   // Neues Gerät: das unveränderte Beispiellied nicht in das gemeinsame Liederbuch tragen
   beforeConnect: async () => {
     const all = await repo.list();
@@ -575,7 +580,7 @@ repo.addEventListener('remote-change', async (e) => {
 
 async function start() {
   let songs = await repo.list();
-  if (!songs.length && !localStorage.getItem('sync.provider')) {
+  if (!songs.length && !book.shared && !localStorage.getItem('sync.provider')) {
     // Entwurf aus Schritt 1 (localStorage) übernehmen, sonst Beispiel anlegen
     const draft = localStorage.getItem('draft');
     await repo.create(draft?.trim() ? draft : SAMPLE_SONG);
