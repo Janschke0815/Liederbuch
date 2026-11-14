@@ -89,6 +89,18 @@ Capo, Takt und Tempo. Es schreibt die üblichen ChordPro-Angaben in den Kopf des
 Capo und Takt erscheinen im Liedkopf (auch im Druck) und als Kennzeichen über der Vorschau;
 beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ erkannt.
 
+## Griffbilder und Capo-Hilfe
+
+Im Liedkopf erscheinen **Griffbilder** aller vorkommenden Akkorde – in der gespielten, also
+transponierten Form (abschaltbar unter Einstellungen → Akkorde). Bekannte offene Griffe kommen
+aus einer Tabelle, alle anderen werden aus den verschiebbaren E- und A-Barré-Formen berechnet;
+ein Test prüft jeden Griff (12 Grundtöne × 17 Akkordtypen) gegen die Akkordtöne.
+Slash-Akkorde (G/B) zeigen den Grundgriff.
+
+**Capo-Hilfe** (unter „Liedinfo“): schlägt Capo-Lagen vor, in denen möglichst viele Akkorde
+ohne Barré greifbar sind – z. B. ein Lied in B-Dur mit Capo 3 und G-Griffen. Ein Klick setzt
+Capo und Transposition so, dass der Klang gleich bleibt.
+
 ## Wiederholungen
 
 Eine Klammer rechts zeigt, **worauf** sich die Anzahl bezieht – sie umfasst genau den

@@ -162,6 +162,7 @@
               <option value="10">10. Bund</option><option value="11">11. Bund</option>
             </select>
           </label>
+          <button type="button" id="btn-capo-help" class="link-btn capo-help" title="Capo-Lage mit möglichst einfachen Griffen vorschlagen">Capo-Hilfe …</button>
           <label>Takt <input data-meta="time" list="dl-times" autocomplete="off" placeholder="z. B. 4/4"></label>
           <label>Tempo <input data-meta="tempo" type="number" min="20" max="320" step="1" placeholder="bpm"></label>
         </div>
@@ -316,6 +317,7 @@
               </span>
             </label>
             <label class="check"><input id="st-chordBold" type="checkbox"> fett</label>
+            <label class="check"><input id="st-showDiagrams" type="checkbox"> Griffbilder im Liedkopf (auch im Druck)</label>
           </fieldset>
           <fieldset>
             <legend>Abschnitte</legend>
@@ -398,6 +400,21 @@
         <span class="spacer"></span>
         <button type="button" id="sync-connect" class="primary">Verbinden</button>
         <button value="close" formnovalidate>Schließen</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="capo-dialog" class="capo-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Capo-Hilfe</h2>
+        <p class="hint" id="capo-intro">Gleicher Klang, andere Griffe: Mit Kapodaster im passenden Bund lassen sich viele Lieder mit offenen Griffen ohne Barré spielen.</p>
+      </header>
+      <div class="dialog-body">
+        <ul id="capo-options" class="capo-options"></ul>
+      </div>
+      <footer class="dialog-foot">
+        <button value="cancel" formnovalidate>Schließen</button>
       </footer>
     </form>
   </dialog>

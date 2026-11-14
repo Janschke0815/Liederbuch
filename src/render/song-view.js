@@ -6,6 +6,7 @@
 
 import { transposeChord, transposeNote, shouldUseFlats, parseChord } from '../core/chords.js';
 import { splitRepeat, formatRepeat } from '../core/repeat.js';
+import { chordDiagram } from './chord-diagram.js';
 
 const DEFAULT_LABELS = { chorus: 'Refrain', bridge: 'Bridge' };
 
@@ -154,6 +155,16 @@ function renderBlock(block, chordName) {
   return section;
 }
 
+/** Alle Akkordnamen des Liedes in Reihenfolge des ersten Auftretens (ohne Anmerkungen). */
+export function usedChords(song) {
+  const seen = new Set();
+  for (const b of song.blocks)
+    for (const l of b.lines)
+      if (l.type === 'lyrics')
+        for (const s of l.segments) if (s.chord && !s.annotation && parseChord(s.chord)) seen.add(s.chord);
+  return [...seen];
+}
+
 function firstChord(song) {
   for (const b of song.blocks)
     for (const l of b.lines)
@@ -207,6 +218,15 @@ export function renderSong(song, opts = {}) {
   if (song.meta.time) info.push(`${song.meta.time}-Takt`);
   if (song.meta.tempo) info.push(/^\d+$/.test(song.meta.tempo) ? `♩ = ${song.meta.tempo}` : song.meta.tempo);
   if (info.length) header.append(el('p', 'song-info', info.join(' · ')));
+
+  // Griffbilder aller Akkorde (in der gespielten, also transponierten Form)
+  const names = usedChords(song).map(chordName);
+  const diagrams = [...new Set(names)].map(chordDiagram).filter(Boolean);
+  if (diagrams.length) {
+    const box = el('div', 'chord-diagrams');
+    box.append(...diagrams);
+    header.append(box);
+  }
   article.append(header);
 
   const body = el('div', 'song-body');

@@ -35,7 +35,7 @@ Dreadful [G]sorry, Clemen[C]tine
 `;
 
 const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing', 'chordFont', 'chordSize', 'chordColor',
-  'chordBold', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin'];
+  'chordBold', 'showDiagrams', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin'];
 
 function fillSelect(sel, entries) {
   sel.replaceChildren(...entries.map(([value, label]) => new Option(label, value)));

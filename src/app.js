@@ -3,7 +3,8 @@
 import { parseChordPro } from './core/chordpro.js';
 import { ugToChordPro } from './core/ug-import.js';
 import { parseImportFile } from './core/file-import.js';
-import { renderSong, songKey } from './render/song-view.js';
+import { renderSong, songKey, usedChords } from './render/song-view.js';
+import { capoOptions } from './core/capo.js';
 import { SongRepository } from './storage/repository.js';
 import { openIdbStore } from './storage/stores.js';
 import { SAMPLE_SONG, NEW_SONG_TEMPLATE } from './sample.js';
@@ -296,6 +297,48 @@ for (const el of metaInputs) {
     editor.dispatchEvent(new Event('input'));
   });
 }
+
+// ---------- Capo-Hilfe ----------
+
+const capoDlg = $('#capo-dialog');
+$('#btn-capo-help').onclick = () => {
+  if (!current) return;
+  const song = parseChordPro(editor.value);
+  const capoOld = Number(song.meta.capo) || 0;
+  // klingende Akkorde = angezeigte (transponierte) Griffe + bisheriger Capo
+  const sounding = usedChords(song).map((c) => transposeChord(c, current.transpose + capoOld, false));
+  if (!sounding.length) return toast('Im Lied stehen noch keine Akkorde');
+  const all = capoOptions(sounding);
+  const shown = all.slice(0, 4);
+  const now = all.find((o) => o.capo === capoOld);
+  if (now && !shown.includes(now)) shown.push(now);
+  $('#capo-options').replaceChildren(...shown.map((o) => {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.type = 'button';
+    if (o.capo === capoOld) b.classList.add('current');
+    if (o.easy === o.total) b.classList.add('easy-all');
+    const pos = Object.assign(document.createElement('span'), { className: 'capo-pos', textContent: o.capo ? `Capo ${o.capo}` : 'ohne Capo' });
+    const chords = Object.assign(document.createElement('span'), { className: 'capo-chords', textContent: o.chords.join('  ') });
+    const score = Object.assign(document.createElement('span'), {
+      className: 'capo-score',
+      textContent: (o.easy === o.total ? 'alle einfach' : `${o.easy} von ${o.total} einfach`) + (o.capo === capoOld ? ' · jetzt' : ''),
+    });
+    b.append(pos, chords, score);
+    b.onclick = async () => {
+      capoDlg.close();
+      if (o.capo === capoOld) return;
+      editor.value = setMeta(editor.value, 'capo', o.capo ? String(o.capo) : '');
+      editor.dispatchEvent(new Event('input'));
+      await setViewOption({ transpose: current.transpose + capoOld - o.capo });
+      toast(o.capo ? `Capo in den ${o.capo}. Bund – Griffe angepasst, Klang bleibt gleich` : 'Ohne Capo – Griffe angepasst');
+    };
+    li.append(b);
+    return li;
+  }));
+  capoDlg.showModal();
+};
+capoDlg.addEventListener('click', (e) => e.target === capoDlg && capoDlg.close());
 
 // ---------- Editor: Bausteine einfügen ----------
 

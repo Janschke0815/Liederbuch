@@ -38,6 +38,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   chordBold: true,
   chorusStyle: 'bar',
   showLabels: true,
+  showDiagrams: true, // Griffbilder im Liedkopf
   lineSpacing: 'normal',
   columns: 1, // Druck
   margin: 15, // mm, Druck
@@ -63,6 +64,7 @@ export function sanitize(input = {}) {
     chordBold: typeof s.chordBold === 'boolean' ? s.chordBold : d.chordBold,
     chorusStyle: oneOf(s.chorusStyle, Object.keys(CHORUS_STYLES), d.chorusStyle),
     showLabels: typeof s.showLabels === 'boolean' ? s.showLabels : d.showLabels,
+    showDiagrams: typeof s.showDiagrams === 'boolean' ? s.showDiagrams : d.showDiagrams,
     lineSpacing: oneOf(s.lineSpacing, Object.keys(LINE_SPACING), d.lineSpacing),
     columns: Number(s.columns) === 2 ? 2 : 1,
     margin: Math.round(clamp(s.margin, 5, 40, d.margin)),
@@ -84,6 +86,7 @@ export function applySettings(el, settings) {
   st.setProperty('--line-height', String(LINE_SPACING[s.lineSpacing]));
   el.dataset.chorusStyle = s.chorusStyle;
   el.dataset.labels = s.showLabels ? 'show' : 'hide';
+  el.dataset.diagrams = s.showDiagrams ? 'show' : 'hide';
 }
 
 // ---------- Speicher ----------

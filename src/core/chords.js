@@ -60,3 +60,8 @@ export function transposeChord(name, steps, useFlats) {
   const bass = c.bass ? '/' + transposeNote(c.bass, steps, useFlats) : '';
   return root + c.quality + bass;
 }
+
+/** Halbton-Index 0–11 (C = 0) oder undefined. */
+export function noteIndex(note) {
+  return NOTE_INDEX[note];
+}
