@@ -35,6 +35,15 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 
 ## Bedienung
 
+- **Rechtsklick** (Handy/Tablet: **lange drücken**) öffnet überall passende Optionen:
+  - Lied in der Liste: Öffnen, Bearbeiten, Spielen, zur Setliste hinzufügen (auch neue),
+    Duplizieren, Teilen, Drucken/PDF, Löschen
+  - Vorschau: Transponieren, Originaltonart, Schreibweise, Capo-Hilfe, Spielen, Griffbilder,
+    Größe, zur Setliste, Teilen, Drucken
+  - Setliste: Öffnen, Spielen, Duplizieren, Löschen; Eintrag: Ab hier spielen, Verschieben,
+    Notiz & Transposition, Entfernen
+  - Menüs lassen sich auch mit der Tastatur bedienen (Menütaste / Umschalt+F10, Pfeile, Enter, Esc).
+- **Doppelklick** auf ein Lied startet den Spielmodus, **Entf** löscht das markierte Lied (mit Rückgängig).
 - **Editor ein-/ausblenden** (Symbol links über der Vorschau): nur Liste und Lied, z. B. zum Spielen.
 - **Bausteine** über dem Editor: Akkord, Strophe, Refrain, Bridge, Refrain wiederholen, Hinweis. Markierter Text wird eingeschlossen.
 - **Dateien** einfach ins Fenster ziehen, um sie zu importieren.

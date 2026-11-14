@@ -6,6 +6,8 @@ import { renderSong, songKey, usedChords } from './render/song-view.js';
 import { capoOptions } from './core/capo.js';
 import { parseKnown, playableCapo } from './core/playable.js';
 import { pastedToSongs } from './core/paste-import.js';
+import { attachContextMenu } from './context-menu.js';
+import { saveSettings } from './settings/settings.js';
 import { metronome, beatsPerBar } from './metronome.js';
 import { transposeChordPro, chordproToText } from './core/export-text.js';
 import { SongRepository } from './storage/repository.js';
@@ -675,13 +677,15 @@ $('#btn-new').onclick = async () => {
   editor.setSelectionRange(8, 18); // "Neues Lied" markieren
 };
 
-$('#btn-delete').onclick = async () => {
-  if (!current) return;
+/** Lied löschen (in den Papierkorb), mit "Rückgängig". */
+async function deleteSong(id) {
   await flushSave();
-  const { id, title } = current;
+  const song = await repo.get(id);
+  if (!song) return;
+  const title = song.title;
   await repo.remove(id);
-  const next = (await repo.list())[0];
-  await openSong(next?.id);
+  if (current?.id === id) await openSong((await repo.list())[0]?.id);
+  else await refreshList();
   toast(`„${title || 'Ohne Titel'}“ gelöscht`, {
     action: 'Rückgängig',
     onAction: async () => {
@@ -689,7 +693,8 @@ $('#btn-delete').onclick = async () => {
       await openSong(id);
     },
   });
-};
+}
+$('#btn-delete').onclick = () => current && deleteSong(current.id);
 
 // ---------- Text einfügen (Akkorde über Text) ----------
 
@@ -942,6 +947,124 @@ $('#btn-play').onclick = async () => {
   await flushSave();
   play.open(current.id);
 };
+
+// ---------- Kontextmenüs (Rechtsklick / langes Drücken) ----------
+
+/** Lied als Kopie anlegen und öffnen. */
+async function duplicateSong(id) {
+  await flushSave();
+  const s = await repo.get(id);
+  if (!s) return;
+  const text = setMeta(s.chordpro, 'title', `${s.title || 'Ohne Titel'} (Kopie)`);
+  const rec = await repo.create(text, { transpose: s.transpose, accidentals: s.accidentals, note: s.note || '' });
+  await openSong(rec.id);
+  toast('Kopie angelegt');
+}
+
+async function addToSetlist(setId, songId) {
+  const set = await sets.get(setId);
+  const song = await repo.get(songId);
+  if (!set || !song) return;
+  await sets.update(setId, { items: [...set.items, { songId, transpose: null, note: '' }] });
+  toast(`„${song.title || 'Ohne Titel'}“ zu „${set.name}“ hinzugefügt`, {
+    action: 'Anzeigen',
+    onAction: () => setlists.open(setId),
+  });
+}
+
+async function newSetlistWith(songId) {
+  const set = await sets.create(`Setliste ${new Date().toLocaleDateString('de')}`, [{ songId }]);
+  await setlists.open(set.id);
+  if (isMobile()) setView('list');
+  toast('Neue Setliste angelegt – Namen oben eintragen');
+}
+
+function editSong() {
+  if ($('.workspace').classList.contains('focus')) setFocusMode(false);
+  setView('editor');
+  editor.focus();
+}
+
+/** Untermenü "Zur Setliste hinzufügen" für ein Lied. */
+async function setlistMenu(songId) {
+  const allSets = await sets.list();
+  return {
+    label: 'Zur Setliste hinzufügen', icon: 'list',
+    items: [
+      ...allSets.map((s) => ({ label: s.name || 'Ohne Namen', hint: String(s.items.length), action: () => addToSetlist(s.id, songId) })),
+      allSets.length ? '-' : null,
+      { label: 'Neue Setliste …', icon: 'plus', action: () => newSetlistWith(songId) },
+    ],
+  };
+}
+
+attachContextMenu(listEl, '.song-item', async (btn) => {
+  const id = btn.dataset.id;
+  const song = await repo.get(id);
+  if (!song) return null;
+  return [
+    { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
+    { label: 'Bearbeiten', icon: 'edit', action: async () => { await openSong(id); editSong(); } },
+    { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: async () => { await openSong(id); play.open(id); } },
+    '-',
+    await setlistMenu(id),
+    { label: 'Duplizieren', icon: 'paste', action: () => duplicateSong(id) },
+    { label: 'Teilen …', icon: 'share', action: async () => { await openSong(id); $('#btn-share').click(); } },
+    { label: 'Drucken / PDF', icon: 'print', action: () => printer.printSongs([song], { cover: false, toc: false, useSavedTranspose: true }) },
+    '-',
+    { label: 'Löschen', icon: 'trash', danger: true, hint: 'Entf', action: () => deleteSong(id) },
+  ];
+}, { title: (btn) => btn.querySelector('.song-item-title').textContent });
+
+// Doppelklick spielt, Entf löscht (mit Rückgängig)
+listEl.addEventListener('dblclick', async (e) => {
+  const btn = e.target.closest('.song-item');
+  if (!btn) return;
+  await openSong(btn.dataset.id);
+  play.open(btn.dataset.id);
+});
+listEl.addEventListener('keydown', (e) => {
+  const btn = e.target.closest('.song-item');
+  if (btn && (e.key === 'Delete' || e.key === 'Backspace')) {
+    e.preventDefault();
+    deleteSong(btn.dataset.id);
+  }
+});
+
+attachContextMenu($('.preview-scroll'), '#preview', async () => {
+  if (!current) return null;
+  const t = current.transpose || 0;
+  const acc = current.accidentals || 'auto';
+  const s = loadSettings();
+  return [
+    { label: 'Halbton höher', icon: 'plus', hint: '+', action: () => setViewOption({ transpose: t + 1 }) },
+    { label: 'Halbton tiefer', hint: '−', action: () => setViewOption({ transpose: t - 1 }) },
+    { label: 'Originaltonart', disabled: t === 0, action: () => setViewOption({ transpose: 0 }) },
+    {
+      label: 'Schreibweise',
+      items: [['auto', 'automatisch'], ['sharp', 'mit ♯'], ['flat', 'mit ♭']].map(([v, l]) => ({
+        label: l, checked: acc === v, action: () => setViewOption({ accidentals: v }),
+      })),
+    },
+    { label: 'Capo-Hilfe …', action: () => $('#btn-capo-help').click() },
+    '-',
+    { label: 'Spielen', icon: 'stage', hint: 'F', action: () => $('#btn-play').click() },
+    { label: 'Bearbeiten', icon: 'edit', action: editSong },
+    { label: 'Griffbilder anzeigen', checked: s.showDiagrams, action: () => saveSettings({ ...s, showDiagrams: !s.showDiagrams }) },
+    {
+      label: 'Größe',
+      items: [
+        { label: 'Größer', icon: 'plus', action: () => setViewZoom(viewZoom + 0.1) },
+        { label: 'Kleiner', action: () => setViewZoom(viewZoom - 0.1) },
+        { label: 'Originalgröße', disabled: viewZoom === 1, action: () => setViewZoom(1) },
+      ],
+    },
+    '-',
+    await setlistMenu(current.id),
+    { label: 'Teilen …', icon: 'share', action: () => $('#btn-share').click() },
+    { label: 'Drucken / PDF', icon: 'print', action: () => printer.printSongs([{ ...current, chordpro: editor.value }], { cover: false, toc: false, useSavedTranspose: true }) },
+  ];
+}, { title: () => current?.title || '' });
 
 // ---------- Drucken ----------
 

@@ -1,6 +1,8 @@
 // Setlisten in der linken Spalte: Übersicht, Bearbeiten (Reihenfolge, Notiz, eigene
 // Transposition), Spielen und Drucken in Setlisten-Reihenfolge.
 
+import { attachContextMenu } from './context-menu.js';
+
 const $ = (s) => document.querySelector(s);
 const h = (tag, className, text) => {
   const el = document.createElement(tag);
@@ -50,6 +52,7 @@ export function setupSetlists({ repo, sets, getCurrentId, openSong, play, printS
       const btn = h('button', 'song-item');
       btn.type = 'button';
       btn.append(h('span', 'song-item-title', s.name || 'Ohne Namen'), h('span', 'set-row-count', count(s.items.length)));
+      btn.dataset.set = s.id;
       btn.onclick = () => openSet(s.id);
       li.append(btn);
       return li;
@@ -324,6 +327,79 @@ export function setupSetlists({ repo, sets, getCurrentId, openSong, play, printS
     else await renderOverview();
   }
 
+  // ---------- Kontextmenüs ----------
+
+  async function playFrom(songId) {
+    const list = await entries();
+    if (list.length) play.open(songId, list);
+  }
+
+  attachContextMenu($('#set-items'), '.set-item', async (li) => {
+    const s = await current();
+    if (!s) return null;
+    const index = Number(li.dataset.index);
+    const item = s.items[index];
+    const song = songMap.get(item?.songId);
+    const move = async (to) => {
+      const items = [...s.items];
+      const [m] = items.splice(index, 1);
+      items.splice(to, 0, m);
+      expanded = null;
+      await saveItems(items);
+    };
+    return [
+      { label: 'Öffnen', icon: 'eye', disabled: !song, action: () => openSong(song.id) },
+      { label: 'Ab hier spielen', icon: 'stage', disabled: !song, action: () => playFrom(song.id) },
+      '-',
+      { label: 'Nach oben', disabled: index === 0, action: () => move(index - 1) },
+      { label: 'Nach unten', disabled: index === s.items.length - 1, action: () => move(index + 1) },
+      { label: 'An den Anfang', disabled: index === 0, action: () => move(0) },
+      { label: 'Ans Ende', disabled: index === s.items.length - 1, action: () => move(s.items.length - 1) },
+      '-',
+      { label: 'Notiz & Transposition …', icon: 'edit', action: () => { expanded = index; render(); } },
+      { label: 'Aus Setliste entfernen', icon: 'x', danger: true, action: () => { expanded = null; saveItems(s.items.filter((_, i) => i !== index)); } },
+    ];
+  }, { title: (li) => li.querySelector('.set-item-title')?.textContent || '' });
+
+  attachContextMenu($('#set-list'), '.song-item[data-set]', async (btn) => {
+    const s = await sets.get(btn.dataset.set);
+    if (!s) return null;
+    return [
+      { label: 'Öffnen', icon: 'eye', action: () => openSet(s.id) },
+      {
+        label: 'Spielen', icon: 'stage', disabled: !s.items.length,
+        action: async () => {
+          songMap = new Map((await repo.list()).map((x) => [x.id, x]));
+          const list = s.items.filter((i) => songMap.has(i.songId)).map((i) => ({ id: i.songId, transpose: i.transpose, note: i.note }));
+          if (list.length) play.open(list[0].id, list);
+        },
+      },
+      {
+        label: 'Duplizieren', icon: 'paste',
+        action: async () => {
+          const copy = await sets.create(`${s.name} (Kopie)`, s.items);
+          await openSet(copy.id);
+          toast('Kopie der Setliste angelegt');
+        },
+      },
+      '-',
+      {
+        label: 'Löschen', icon: 'trash', danger: true,
+        action: async () => {
+          await sets.remove(s.id);
+          await render();
+          toast(`Setliste „${s.name}“ gelöscht`, {
+            action: 'Rückgängig',
+            onAction: async () => {
+              await sets.restore(s.id);
+              await render();
+            },
+          });
+        },
+      },
+    ];
+  }, { title: (btn) => btn.querySelector('.song-item-title')?.textContent || '' });
+
   sets.addEventListener('remote-change', render);
   addEventListener('songopened', () => render());
   repo.addEventListener('remote-change', render);
@@ -336,5 +412,12 @@ export function setupSetlists({ repo, sets, getCurrentId, openSong, play, printS
   setTab(localStorage.getItem('listTab') === 'sets' ? 'sets' : 'songs');
 
   /** Liste neu zeichnen, z. B. wenn ein anderes Lied geöffnet wurde (Markierung). */
-  return { refresh: render };
+  return {
+    refresh: render,
+    /** Reiter "Setlisten" zeigen und eine Setliste öffnen */
+    open: async (id) => {
+      setTab('sets');
+      await openSet(id);
+    },
+  };
 }
