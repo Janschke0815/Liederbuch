@@ -247,7 +247,7 @@
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
         <h2>Text einfügen</h2>
-        <p class="hint">Akkorde über dem Text, z. B. aus Ultimate Guitar. Abschnitte, Tabs und reine Akkordzeilen werden erkannt.</p>
+        <p class="hint">Akkorde über dem Text, z. B. aus Ultimate Guitar, oder ChordPro. Titel und Interpret werden aus der Kopfzeile erkannt („… Chords by …“, „Interpret – Titel“). Mehrere Lieder auf einmal: mit einer Linie <code>---</code> trennen. Tipp: Text einfach mit Strg+V irgendwo in die App einfügen.</p>
       </header>
       <div class="dialog-body import-body">
         <div class="import-input">
@@ -255,7 +255,8 @@
             <label>Titel <input id="imp-title"></label>
             <label>Interpret <input id="imp-artist"></label>
           </div>
-          <textarea id="imp-text" spellcheck="false" placeholder="[Verse 1]&#10;     Am       C&#10;There is a house …"></textarea>
+          <textarea id="imp-text" spellcheck="false" placeholder="Clementine Chords by Traditional&#10;&#10;[Verse 1]&#10;      C              G&#10;Oh my darling, oh my darling …"></textarea>
+          <p id="imp-info" class="hint imp-info"></p>
         </div>
         <div class="import-preview">
           <div class="mini-label">So wird es aussehen</div>

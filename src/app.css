@@ -660,3 +660,6 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 .share-body { display: flex; flex-direction: column; gap: .5em; }
 .share-body button { justify-content: flex-start; min-height: 2.8rem; padding-inline: 1em; }
 @media (max-width: 760px) { .zoom-ctl { display: none; } }
+.imp-info { min-height: 1.2em; font-weight: 600; color: var(--text); }
+#imp-preview hr { border: 0; border-top: 2px dashed var(--border-strong); margin: 1.5em 0; }
+.dialog-head code { background: var(--hover); padding: 0 .3em; border-radius: 4px; }

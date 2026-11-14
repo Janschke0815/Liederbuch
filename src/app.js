@@ -1,11 +1,11 @@
 // Oberfläche: Liederliste, Editor, Vorschau. Speichert automatisch in IndexedDB.
 
 import { parseChordPro } from './core/chordpro.js';
-import { ugToChordPro } from './core/ug-import.js';
 import { parseImportFile } from './core/file-import.js';
 import { renderSong, songKey, usedChords } from './render/song-view.js';
 import { capoOptions } from './core/capo.js';
 import { parseKnown, playableCapo } from './core/playable.js';
+import { pastedToSongs } from './core/paste-import.js';
 import { metronome, beatsPerBar } from './metronome.js';
 import { transposeChordPro, chordproToText } from './core/export-text.js';
 import { SongRepository } from './storage/repository.js';
@@ -695,41 +695,83 @@ $('#btn-delete').onclick = async () => {
 
 const dlg = $('#import-dialog');
 const impPreview = $('#imp-preview');
-function importChordPro() {
-  return ugToChordPro($('#imp-text').value, { title: $('#imp-title').value.trim(), artist: $('#imp-artist').value.trim() });
+/** Eingefügter Text -> Lieder (Titel/Interpret aus den Feldern gelten nur bei einem Lied). */
+function importSongs() {
+  return pastedToSongs($('#imp-text').value, { title: $('#imp-title').value.trim(), artist: $('#imp-artist').value.trim() });
 }
 function renderImportPreview() {
-  const has = Boolean($('#imp-text').value.trim());
-  $('#imp-ok').disabled = !has;
-  if (!has) {
+  const songs = importSongs();
+  const n = songs.length;
+  $('#imp-ok').disabled = !n;
+  $('#imp-ok').textContent = n > 1 ? `${n} Lieder anlegen` : 'Als neues Lied anlegen';
+  // Erkanntes als Platzhalter zeigen; bei mehreren Liedern gelten die Felder nicht
+  const auto = n === 1 ? pastedToSongs($('#imp-text').value)[0] : null;
+  for (const [id, key] of [['#imp-title', 'title'], ['#imp-artist', 'artist']]) {
+    $(id).disabled = n > 1;
+    $(id).placeholder = n > 1 ? 'aus dem Text' : auto?.[key] ? `erkannt: ${auto[key]}` : '';
+  }
+  $('#imp-info').textContent = !n
+    ? ''
+    : n === 1
+      ? `1 Lied${songs[0].title ? `: ${songs[0].title}${songs[0].artist ? ' – ' + songs[0].artist : ''}` : ' (Titel unten eintragen oder im Editor ergänzen)'}`
+      : `${n} Lieder erkannt: ${songs.map((s) => s.title || 'Ohne Titel').join(', ')}`;
+  if (!n) {
     impPreview.replaceChildren(Object.assign(document.createElement('p'), {
       className: 'empty', textContent: 'Links Text einfügen – hier erscheint das Ergebnis.',
     }));
     return;
   }
-  impPreview.replaceChildren(renderSong(parseChordPro(importChordPro())));
+  const nodes = [];
+  songs.forEach((s, i) => {
+    if (i) nodes.push(document.createElement('hr'));
+    nodes.push(renderSong(parseChordPro(s.chordpro)));
+  });
+  impPreview.replaceChildren(...nodes);
 }
 let impTimer;
 dlg.addEventListener('input', () => {
   clearTimeout(impTimer);
   impTimer = setTimeout(renderImportPreview, 120);
 });
-$('#btn-import').onclick = () => {
+function openImport(text = '') {
   $('#imp-title').value = '';
   $('#imp-artist').value = '';
-  $('#imp-text').value = '';
+  $('#imp-text').value = text;
   applySettings(impPreview, loadSettings());
   renderImportPreview();
   dlg.showModal();
   $('#imp-text').focus();
-};
+  if (text) $('#imp-ok').focus();
+}
+$('#btn-import').onclick = () => openImport();
+
+// Strg+V irgendwo in der App (außerhalb von Eingabefeldern): Einfügen-Dialog mit dem Text
+document.addEventListener('paste', (e) => {
+  if (isTyping(document.activeElement) || anyDialogOpen()) return;
+  const text = e.clipboardData?.getData('text/plain') || '';
+  if (!text.trim()) return;
+  e.preventDefault();
+  openImport(text);
+});
 dlg.addEventListener('close', async () => {
   if (dlg.returnValue !== 'ok') return;
-  const text = $('#imp-text').value;
-  if (!text.trim()) return;
-  await createAndOpen(importChordPro());
-  setView('editor');
-  toast('Umgewandelt – bitte im Editor prüfen');
+  const songs = importSongs();
+  if (!songs.length) return;
+  if (songs.length === 1) {
+    await createAndOpen(songs[0].chordpro);
+    setView('editor');
+    toast('Umgewandelt – bitte im Editor prüfen');
+    return;
+  }
+  await flushSave();
+  let first = null;
+  for (const s of songs) {
+    const rec = await repo.create(s.chordpro);
+    first ||= rec;
+  }
+  search.value = '';
+  await openSong(first.id);
+  toast(`${songs.length} Lieder angelegt`);
 });
 
 // ---------- Datei öffnen / Sichern ----------

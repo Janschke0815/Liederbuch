@@ -51,6 +51,20 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | F | Spielmodus |
 | M | Metronom an/aus |
 
+## Einfügen aus Ultimate Guitar & Co.
+
+Text einfach mit **Strg+V** irgendwo in die App einfügen (oder Menü → Text einfügen). Erkannt
+werden:
+
+- **Titel und Interpret** aus der Kopfzeile: „Wonderwall Chords by Oasis“, „Oasis – Wonderwall“,
+  „Title: … / Artist: …“ oder zwei kurze Zeilen über dem Lied. Die Felder im Dialog
+  überschreiben die Erkennung.
+- **Füllwerk** der Webseite („Difficulty: …“, „Author …“) fällt weg; Capo, Tonart, Takt, Tempo
+  werden übernommen.
+- **Mehrere Lieder auf einmal**: getrennt durch eine Linie `---` oder eine neue
+  „… Chords by …“-Zeile – der Dialog zeigt alle und legt sie zusammen an.
+- **ChordPro** wird erkannt und unverändert übernommen (mehrere Lieder mit `{new_song}`).
+
 ## Spielmodus
 
 Knopf **Spielen** über der Vorschau (oder Taste **F**): Vollbild nur mit dem Lied, der

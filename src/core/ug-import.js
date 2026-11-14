@@ -63,7 +63,7 @@ export function isTabLine(line) {
   return /^[|:]?[-0-9|hpbrsx/\\~^().*\s]+[|:]?$/.test(t) && dashes >= 6;
 }
 
-function sectionLabel(line) {
+export function sectionLabel(line) {
   const br = /^\s*\[([^\]]+)\]\s*$/.exec(line);
   if (br && !isChord(br[1].trim())) return br[1].trim();
   const plain = SECTION_PLAIN_RE.exec(line);
