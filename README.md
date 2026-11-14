@@ -240,3 +240,6 @@ Dropbox, Nextcloud) lassen sich in `src/sync/` mit `read`/`write` ergänzen.
 5. ✅ Druck: Auswahl, Deckblatt, Inhaltsverzeichnis mit Seitenzahlen, jedes Lied auf neuer Seite,
    ein-/zweispaltig, A4/A5/Letter, Ränder – eigener Seitenumbruch (src/print/paginate.js), kein Paged.js nötig
 6. ✅ Cloud-Sync über Google Drive (weitere Anbieter optional)
+7. Liederbuch über Webdav syncronisieren
+8. Harptaps zu- und abschaltbar implementieren
+9. Schriftgröße und art in Druckvorschau anpassbar machen
