@@ -65,8 +65,15 @@ die Geschwindigkeit wird pro Lied gemerkt. Tippen aufs Lied blendet die Leiste e
 | Leertaste / Enter | automatisches Scrollen an/aus |
 | + / − | Schrift größer / kleiner |
 | > / < | schneller / langsamer scrollen |
+| S | zwei Spalten nebeneinander (seitenweise) |
+| G | Griffbilder ein/aus |
 | N | Nachtmodus (dunkel) |
 | Esc | Spielmodus beenden |
+
+**Zwei Spalten** (Symbol in der Leiste oder Taste S), ideal für Tablets im Querformat: Das Lied
+fließt in Spalten von Bildschirmhöhe, je zwei nebeneinander; Blättern schiebt um eine
+Doppelseite weiter, automatisch im Liedtempo. **Griffbilder** lassen sich hier direkt ein- und
+ausschalten (gleiche Einstellung wie unter Einstellungen → Akkorde).
 
 Bluetooth-Fußpedale („Page Turner“) senden meist Bild↑/↓ oder Pfeiltasten und funktionieren
 damit ohne Einrichtung. Geblättert wird in der Reihenfolge der Liederliste (ggf. gefiltert).

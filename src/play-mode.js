@@ -6,7 +6,7 @@
 
 import { parseChordPro } from './core/chordpro.js';
 import { renderSong } from './render/song-view.js';
-import { applySettings, loadSettings } from './settings/settings.js';
+import { applySettings, loadSettings, saveSettings } from './settings/settings.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -59,6 +59,8 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   let hideTimer = 0;
   let wakeLock = null;
   let zoom = Number(localStorage.getItem('playZoom')) || 0;
+  let cols = localStorage.getItem('playColumns') === '2'; // zwei Spalten, seitenweise
+  let pageClock = 0; // Sekunden seit dem letzten automatischen Umblättern
 
   // ---------- Bildschirm wach halten ----------
 
@@ -96,11 +98,54 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   }
 
   function setZoom(z) {
-    const top = scroller.scrollTop / Math.max(1, scroller.scrollHeight);
+    const rel = pos() / Math.max(1, maxPos());
     zoom = clamp(Math.round(z * 20) / 20, ZOOM_MIN, ZOOM_MAX);
     localStorage.setItem('playZoom', String(zoom));
     applyZoom();
-    scroller.scrollTop = top * scroller.scrollHeight;
+    layout();
+    setPos(cols ? snap(rel * maxPos()) : rel * maxPos());
+  }
+
+  // ---------- Ein- oder zweispaltig ----------
+  // Zweispaltig: das Lied fließt in Spalten von Bildschirmhöhe (CSS-Mehrspaltensatz),
+  // je zwei sind sichtbar; geblättert wird waagerecht um zwei Spalten.
+
+  function layout() {
+    view.classList.toggle('cols2', cols);
+    $('#pl-cols').setAttribute('aria-pressed', String(cols));
+    if (!cols) {
+      sheet.style.height = '';
+      return;
+    }
+    const cs = getComputedStyle(scroller);
+    const avail = scroller.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    sheet.style.height = `${Math.max(100, avail / currentZoom())}px`;
+  }
+
+  /** Breite einer Doppelseite (zwei Spalten + Abstand) in Bildschirmpixeln. */
+  function pageWidth() {
+    const gap = parseFloat(getComputedStyle(sheet).columnGap) || 0;
+    return sheet.getBoundingClientRect().width + gap * currentZoom();
+  }
+  const pos = () => (cols ? scroller.scrollLeft : scroller.scrollTop);
+  const maxPos = () => (cols ? scroller.scrollWidth - scroller.clientWidth : scroller.scrollHeight - scroller.clientHeight);
+  const setPos = (v) => {
+    if (cols) scroller.scrollLeft = v;
+    else scroller.scrollTop = v;
+  };
+  // Doppelseiten: 0, pw, 2·pw … – die letzte kann nur halb gefüllt sein (dann bis maxPos)
+  const pageCount = () => (cols ? Math.max(1, Math.ceil(maxPos() / pageWidth() - 0.02) + 1) : 1);
+  const pageIndex = () => (pos() >= maxPos() - 2 ? pageCount() - 1 : Math.round(pos() / pageWidth()));
+  const pagePos = (i) => Math.min(clamp(i, 0, pageCount() - 1) * pageWidth(), maxPos());
+  const snap = (v) => pagePos(Math.round(v / pageWidth()));
+
+  function setCols(on) {
+    cols = on;
+    localStorage.setItem('playColumns', on ? '2' : '1');
+    setPlaying(false);
+    layout();
+    setPos(0);
+    updateProgress();
   }
 
   function speedKey() {
@@ -143,8 +188,11 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     endBtn.hidden = !next;
     endBtn.textContent = next ? `Nächstes Lied: ${next.title || 'Ohne Titel'} →` : '';
     setSpeed(loadMap('playSpeed')[song.id] || 1, false);
+    layout();
     scroller.scrollTop = 0;
+    scroller.scrollLeft = 0;
     carry = 0;
+    pageClock = 0;
     updateProgress();
   }
 
@@ -160,13 +208,29 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   }
 
   function maxScroll() {
-    return scroller.scrollHeight - scroller.clientHeight;
+    return maxPos();
   }
 
   function step(t) {
     if (!playing) return;
     const dt = lastT ? Math.min(0.1, (t - lastT) / 1000) : 0;
     lastT = t;
+    if (cols) {
+      // zweispaltig: im Liedtempo umblättern, auf der letzten Doppelseite anhalten
+      const secs = (durationSeconds(meta.duration) || DEFAULT_SECONDS) / pageCount() / speed;
+      pageClock += dt;
+      updateProgress(pageClock / secs);
+      if (pageClock >= secs) {
+        pageClock = 0;
+        if (pos() >= maxPos() - 2) {
+          setPlaying(false);
+          return;
+        }
+        page(1);
+      }
+      raf = requestAnimationFrame(step);
+      return;
+    }
     carry += basePxPerSecond() * speed * dt;
     const whole = Math.floor(carry);
     if (whole >= 1) {
@@ -196,22 +260,57 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     }
   }
 
-  function updateProgress() {
-    const max = maxScroll();
-    $('#pl-progress').style.width = `${max > 0 ? (scroller.scrollTop / max) * 100 : 0}%`;
+  /** Fortschrittsbalken unten; zweispaltig: Seite + Anteil bis zum nächsten Umblättern */
+  function updateProgress(within = 0) {
+    let f;
+    if (cols) {
+      const pages = pageCount();
+      const current = pageIndex();
+      f = pages > 1 ? Math.min(1, (current + (playing ? within : 0)) / (pages - 1)) : 1;
+    } else {
+      const max = maxPos();
+      f = max > 0 ? scroller.scrollTop / max : 0;
+    }
+    $('#pl-progress').style.width = `${f * 100}%`;
   }
-  scroller.addEventListener('scroll', updateProgress, { passive: true });
+  scroller.addEventListener('scroll', () => updateProgress(), { passive: true });
 
   // ---------- Blättern ----------
 
+  // Eigene kurze Animation statt behavior:'smooth' – landet garantiert am Ziel
+  let anim = 0;
+  function glideTo(target, ms = 260) {
+    cancelAnimationFrame(anim);
+    const max = maxPos();
+    const to = clamp(target, 0, max);
+    const from = pos();
+    const t0 = performance.now();
+    const tick = (t) => {
+      const k = Math.min(1, (t - t0) / ms);
+      setPos(from + (to - from) * (1 - (1 - k) ** 3));
+      if (k < 1) anim = requestAnimationFrame(tick);
+      else updateProgress();
+    };
+    anim = requestAnimationFrame(tick);
+    setTimeout(() => {
+      if (Math.abs(pos() - to) > 1) setPos(to);
+      updateProgress();
+    }, ms + 80);
+  }
+
   function page(dir) {
-    const max = maxScroll();
-    const atEnd = scroller.scrollTop >= max - 2;
-    const atStart = scroller.scrollTop <= 2;
+    const max = maxPos();
+    const atEnd = pos() >= max - 2;
+    const atStart = pos() <= 2;
     if (dir > 0 && atEnd) return go(1);
     if (dir < 0 && atStart) return go(-1, { toEnd: true });
+    pageClock = 0;
+    if (cols) {
+      glideTo(pagePos(pageIndex() + dir));
+      return;
+    }
     // ein Bildschirm minus etwas Überlappung, damit keine Zeile verloren geht
-    scroller.scrollBy({ top: dir * scroller.clientHeight * 0.82, behavior: 'smooth' });
+    glideTo(pos() + dir * scroller.clientHeight * 0.82);
   }
 
   async function go(delta, { toEnd = false } = {}) {
@@ -220,7 +319,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     const wasPlaying = playing;
     setPlaying(false);
     await show(target);
-    if (toEnd) scroller.scrollTop = maxScroll();
+    if (toEnd) setPos(cols ? pagePos(pageCount() - 1) : maxPos());
     if (wasPlaying && delta > 0) showBar(false);
   }
 
@@ -234,6 +333,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     view.classList.toggle('night', localStorage.getItem('playNight') === '1');
     $('#pl-night').setAttribute('aria-pressed', String(view.classList.contains('night')));
     applyZoom();
+    syncDiagramButton();
     await show(Math.max(0, entries.findIndex((e) => e.id === currentId)));
     showBar(false);
     scroller.focus({ preventScroll: true });
@@ -266,6 +366,27 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   $('#pl-slower').onclick = () => setSpeed(speed - 0.1);
   $('#pl-faster').onclick = () => setSpeed(speed + 0.1);
   toggleBtn.onclick = () => setPlaying(!playing);
+  $('#pl-cols').onclick = () => setCols(!cols);
+
+  // Griffbilder ein/aus – dieselbe Einstellung wie unter Einstellungen → Akkorde
+  function syncDiagramButton() {
+    $('#pl-diagrams').setAttribute('aria-pressed', String(loadSettings().showDiagrams));
+  }
+  function toggleDiagrams() {
+    const rel = pos() / Math.max(1, maxPos());
+    const s = saveSettings({ ...loadSettings(), showDiagrams: !loadSettings().showDiagrams });
+    applySettings(sheet, s);
+    syncDiagramButton();
+    layout();
+    setPos(cols ? snap(rel * maxPos()) : rel * maxPos());
+  }
+  $('#pl-diagrams').onclick = toggleDiagrams;
+  addEventListener('resize', () => {
+    if (view.hidden) return;
+    const rel = pos() / Math.max(1, maxPos());
+    layout();
+    setPos(cols ? snap(rel * maxPos()) : rel * maxPos());
+  });
   $('#pl-night').onclick = () => {
     const on = view.classList.toggle('night');
     localStorage.setItem('playNight', on ? '1' : '');
@@ -318,6 +439,14 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
       case '<':
       case ',':
         setSpeed(speed - 0.1);
+        break;
+      case 'g':
+      case 'G':
+        toggleDiagrams();
+        break;
+      case 's':
+      case 'S':
+        setCols(!cols);
         break;
       case 'n':
       case 'N':

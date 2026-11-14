@@ -592,3 +592,18 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 .capo-options .capo-chords { font-family: var(--chord-font, system-ui); color: var(--accent); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .capo-options .capo-score { font-size: .82em; color: var(--muted); white-space: nowrap; }
 .capo-options .easy-all .capo-score { color: #3b8c4a; font-weight: 600; }
+
+/* Spielmodus zweispaltig: Spalten in Bildschirmhöhe, waagerecht blättern */
+#pl-diagrams[aria-pressed='true'],
+#pl-cols[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.play-view.cols2 .play-scroll { overflow: hidden; padding-bottom: 1.2em; }
+.play-view.cols2 .play-sheet {
+  max-width: none; margin: 0;
+  column-count: 2; column-gap: 3em; column-fill: auto;
+  column-rule: 1px solid #0000001a;
+}
+.play-view.cols2 .play-sheet .song-body { column-count: 1; }
+.play-view.cols2 .play-end { display: none; }
+.play-sheet .song-header, .play-sheet .para, .play-sheet .line { break-inside: avoid; }
+.play-view.cols2 .play-sheet .block { break-inside: auto; }
+.play-view.cols2 .play-sheet .block-label { break-after: avoid; }

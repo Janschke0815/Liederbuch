@@ -118,5 +118,11 @@ export function setupSettings({ targets }) {
   };
 
   applyAll(saved);
+  // Änderungen von anderer Stelle (z. B. Schalter im Spielmodus) übernehmen
+  addEventListener('settingschange', (e) => {
+    if (dlg.open) return;
+    saved = e.detail;
+    applyAll(saved);
+  });
   return { get: () => loadSettings() };
 }
