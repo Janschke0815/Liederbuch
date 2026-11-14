@@ -107,6 +107,23 @@ function firstChord(song) {
 }
 
 /**
+ * Klingende Tonart nach Transposition: {key:} oder ersatzweise der erste Akkord.
+ * @returns {{key: string, guessed: boolean} | null}
+ */
+export function songKey(song, opts = {}) {
+  const steps = opts.transpose || 0;
+  let base = song.meta.key;
+  if (!base) {
+    const c = parseChord(firstChord(song) || '');
+    if (!c) return null;
+    base = c.root + (/^m(?!aj)/.test(c.quality) ? 'm' : '');
+  }
+  const useFlats = shouldUseFlats(opts.accidentals || 'auto', base, steps);
+  const key = steps === 0 && (opts.accidentals || 'auto') === 'auto' ? base : transposeKey(base, steps, useFlats);
+  return { key, guessed: !song.meta.key };
+}
+
+/**
  * @param {object} song  Ergebnis von parseChordPro
  * @param {{transpose?: number, accidentals?: 'auto'|'sharp'|'flat'}} [opts]
  * @returns {HTMLElement}

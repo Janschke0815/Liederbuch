@@ -168,3 +168,16 @@ describe('Datei-Import', () => {
     expect(looksLikeChordPro('{soc}\nla\n{eoc}')).toBe(true);
   });
 });
+
+describe('Rückgängig nach Löschen', () => {
+  it('stellt ein gelöschtes Lied wieder her', async () => {
+    const repo = makeRepo();
+    const a = await repo.create('{title: Weg}\n[C]la');
+    await repo.remove(a.id);
+    expect(await repo.get(a.id)).toBe(undefined);
+    const back = await repo.restore(a.id);
+    expect(back.deletedAt).toBe(null);
+    expect((await repo.get(a.id)).title).toBe('Weg');
+    expect((await repo.list()).length).toBe(1);
+  });
+});

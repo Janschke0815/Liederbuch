@@ -3,12 +3,13 @@
 import { parseChordPro } from './core/chordpro.js';
 import { ugToChordPro } from './core/ug-import.js';
 import { parseImportFile } from './core/file-import.js';
-import { renderSong } from './render/song-view.js';
+import { renderSong, songKey } from './render/song-view.js';
 import { SongRepository } from './storage/repository.js';
 import { openIdbStore } from './storage/stores.js';
 import { SAMPLE_SONG, NEW_SONG_TEMPLATE } from './sample.js';
 import { setupPrint } from './print-ui.js';
 import { setupSettings } from './settings-ui.js';
+import { applySettings, loadSettings } from './settings/settings.js';
 
 const $ = (s) => document.querySelector(s);
 const editor = $('#editor');
@@ -26,17 +27,31 @@ let saveTimer = null;
 // ---------- Hilfen ----------
 
 let toastTimer;
-function toast(msg) {
+/** Kurze Meldung unten; optional mit Knopf (z. B. "Rückgängig"). */
+function toast(msg, { action, onAction, ms = 3500 } = {}) {
   const t = $('#toast');
-  t.textContent = msg;
+  const btn = $('#toast-action');
+  $('#toast-text').textContent = msg;
+  btn.hidden = !action;
+  btn.textContent = action || '';
+  btn.onclick = async () => {
+    t.hidden = true;
+    await onAction?.();
+  };
   t.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (t.hidden = true), 3500);
+  toastTimer = setTimeout(() => (t.hidden = true), action ? Math.max(ms, 6000) : ms);
 }
 
-function setStatus(text) {
-  $('#save-status').textContent = text;
+function setStatus(text, state = '') {
+  const el = $('#save-status');
+  el.textContent = text;
+  el.title = text;
+  el.dataset.state = state;
 }
+
+const isTyping = (el) => el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+const anyDialogOpen = () => Boolean(document.querySelector('dialog[open]')) || !$('#print-view').hidden;
 
 function setView(view) {
   $('.workspace').dataset.view = view;
@@ -47,8 +62,22 @@ function setView(view) {
 
 async function refreshList() {
   const songs = await repo.list({ query: search.value });
+  const items = [];
+  let letter = null;
+  for (const s of songs) {
+    if (!search.value) {
+      const first = (s.sortTitle || s.title || '#').trim().charAt(0).toLocaleUpperCase('de');
+      const l = /[A-ZÄÖÜ]/.test(first) ? first.normalize('NFD').charAt(0) : '#';
+      if (l !== letter) {
+        letter = l;
+        items.push(Object.assign(document.createElement('li'), { className: 'song-letter', textContent: l }));
+      }
+    }
+    items.push(s);
+  }
   listEl.replaceChildren(
-    ...songs.map((s) => {
+    ...items.map((s) => {
+      if (s instanceof HTMLElement) return s;
       const li = document.createElement('li');
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -65,6 +94,12 @@ async function refreshList() {
       return li;
     }),
   );
+  if (!songs.length) {
+    listEl.append(Object.assign(document.createElement('li'), {
+      className: 'list-empty',
+      textContent: search.value ? 'Nichts gefunden.' : 'Noch keine Lieder.',
+    }));
+  }
   const total = search.value ? `${songs.length} Treffer` : `${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'}`;
   $('#song-count').textContent = total;
 }
@@ -76,10 +111,33 @@ listEl.addEventListener('click', async (e) => {
   if (isMobile()) setView('preview');
 });
 
+// Pfeiltasten in der Liste
+listEl.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  const btns = [...listEl.querySelectorAll('.song-item')];
+  const i = btns.indexOf(document.activeElement);
+  const next = btns[i + (e.key === 'ArrowDown' ? 1 : -1)];
+  if (!next) return;
+  e.preventDefault();
+  next.focus();
+  next.click();
+});
+
 let searchTimer;
 search.addEventListener('input', () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(refreshList, 150);
+});
+search.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    listEl.querySelector('.song-item')?.focus();
+  } else if (e.key === 'Enter') {
+    listEl.querySelector('.song-item')?.click();
+  } else if (e.key === 'Escape' && search.value) {
+    search.value = '';
+    refreshList();
+  }
 });
 
 // ---------- Lied öffnen / speichern ----------
@@ -90,16 +148,28 @@ function renderPreview() {
     return;
   }
   const song = parseChordPro(editor.value);
-  preview.replaceChildren(renderSong(song, { transpose: current.transpose, accidentals: current.accidentals }));
+  const opts = { transpose: current.transpose, accidentals: current.accidentals };
+  preview.replaceChildren(renderSong(song, opts));
+  const k = songKey(song, opts);
+  const keyEl = $('#key-value');
+  keyEl.textContent = k ? k.key : '–';
+  keyEl.classList.toggle('guessed', Boolean(k?.guessed));
+  keyEl.parentElement.title = k?.guessed
+    ? 'Tonart geschätzt aus dem ersten Akkord – mit {key: …} im Text festlegen'
+    : 'Tonart (Transposition wird mit dem Lied gespeichert)';
 }
 
 function updateControls() {
   const has = Boolean(current);
   editor.disabled = !has;
-  for (const id of ['#tr-up', '#tr-down', '#accidentals', '#btn-delete']) $(id).disabled = !has;
+  for (const b of document.querySelectorAll('#tr-up, #tr-down, #accidentals button, #btn-delete, .snippets button')) b.disabled = !has;
   const t = current?.transpose || 0;
-  $('#tr-value').textContent = (t > 0 ? '+' : '') + t;
-  $('#accidentals').value = current?.accidentals || 'auto';
+  const out = $('#tr-value');
+  out.textContent = (t > 0 ? '+' : '') + t;
+  out.classList.toggle('changed', t !== 0);
+  $('#tr-reset').hidden = t === 0;
+  const acc = current?.accidentals || 'auto';
+  for (const b of document.querySelectorAll('#accidentals button')) b.setAttribute('aria-checked', String(b.dataset.value === acc));
 }
 
 async function openSong(id) {
@@ -120,17 +190,17 @@ async function flushSave() {
   if (!current) return;
   try {
     current = await repo.update(current.id, { chordpro: editor.value });
-    setStatus('Gespeichert');
+    setStatus('Gespeichert', 'saved');
     await refreshList();
   } catch (err) {
-    setStatus('Fehler beim Speichern!');
+    setStatus('Fehler beim Speichern!', 'error');
     console.error(err);
   }
 }
 
 editor.addEventListener('input', () => {
   renderPreview();
-  setStatus('Ungespeichert …');
+  setStatus('Ungespeichert …', 'dirty');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flushSave, 500);
 });
@@ -148,10 +218,65 @@ async function setViewOption(changes) {
 
 $('#tr-up').onclick = () => setViewOption({ transpose: current.transpose + 1 });
 $('#tr-down').onclick = () => setViewOption({ transpose: current.transpose - 1 });
-$('#accidentals').onchange = (e) => setViewOption({ accidentals: e.target.value });
+$('#tr-reset').onclick = () => setViewOption({ transpose: 0 });
+$('#accidentals').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-value]');
+  if (b) setViewOption({ accidentals: b.dataset.value });
+});
 
-// Layout-Einstellungen wirken live auf die Vorschau
-setupSettings({ targets: () => [preview] });
+// Editor ausblenden (nur Liste + Vorschau), z. B. zum Spielen
+function setFocusMode(on) {
+  $('.workspace').classList.toggle('focus', on);
+  $('#btn-focus').setAttribute('aria-pressed', String(on));
+  localStorage.setItem('focusMode', on ? '1' : '');
+}
+$('#btn-focus').onclick = () => setFocusMode(!$('.workspace').classList.contains('focus'));
+setFocusMode(Boolean(localStorage.getItem('focusMode')));
+
+// Layout-Einstellungen wirken live auf Vorschau und Import-Vorschau
+setupSettings({ targets: () => [preview, $('#imp-preview')] });
+
+// ---------- Editor: Bausteine einfügen ----------
+
+function insertText(text, selectFrom, selectTo) {
+  editor.focus();
+  const start = editor.selectionStart;
+  // execCommand erhält den Rückgängig-Verlauf des Browsers
+  if (!document.execCommand?.('insertText', false, text)) {
+    editor.setRangeText(text, editor.selectionStart, editor.selectionEnd, 'end');
+    editor.dispatchEvent(new Event('input'));
+  }
+  if (selectFrom !== undefined) editor.setSelectionRange(start + selectFrom, start + (selectTo ?? selectFrom));
+}
+
+function insertSnippet(kind) {
+  const sel = editor.value.slice(editor.selectionStart, editor.selectionEnd);
+  if (kind === 'chord') {
+    const name = sel.trim() || '';
+    return insertText(`[${name}]`, 1, 1 + name.length);
+  }
+  if (kind === 'comment') {
+    const t = sel.trim() || 'Hinweis';
+    return insertText(`{comment: ${t}}`, 10, 10 + t.length);
+  }
+  const atLineStart = editor.selectionStart === 0 || editor.value[editor.selectionStart - 1] === '\n';
+  const nl = atLineStart ? '' : '\n';
+  if (kind === 'repeat') return insertText(`${nl}{chorus}\n`);
+  const verses = (editor.value.match(/\{(start_of_verse|sov)\b/g) || []).length;
+  const [env, label] = {
+    verse: ['verse', `Strophe ${verses + 1}`],
+    chorus: ['chorus', 'Refrain'],
+    bridge: ['bridge', 'Bridge'],
+  }[kind];
+  const body = sel.replace(/\n$/, '');
+  const head = `${nl}{start_of_${env}: ${label}}\n`;
+  insertText(`${head}${body}\n{end_of_${env}}\n`, head.length, head.length + body.length);
+}
+
+document.querySelector('.snippets').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-snippet]');
+  if (b && current) insertSnippet(b.dataset.snippet);
+});
 
 // ---------- Anlegen / Löschen ----------
 
@@ -172,29 +297,57 @@ $('#btn-new').onclick = async () => {
 
 $('#btn-delete').onclick = async () => {
   if (!current) return;
-  if (!confirm(`„${current.title || 'Ohne Titel'}“ wirklich löschen?`)) return;
-  clearTimeout(saveTimer);
-  saveTimer = null;
-  await repo.remove(current.id);
+  await flushSave();
+  const { id, title } = current;
+  await repo.remove(id);
   const next = (await repo.list())[0];
   await openSong(next?.id);
-  toast('Lied gelöscht');
+  toast(`„${title || 'Ohne Titel'}“ gelöscht`, {
+    action: 'Rückgängig',
+    onAction: async () => {
+      await repo.restore(id);
+      await openSong(id);
+    },
+  });
 };
 
 // ---------- Text einfügen (Akkorde über Text) ----------
 
 const dlg = $('#import-dialog');
+const impPreview = $('#imp-preview');
+function importChordPro() {
+  return ugToChordPro($('#imp-text').value, { title: $('#imp-title').value.trim(), artist: $('#imp-artist').value.trim() });
+}
+function renderImportPreview() {
+  const has = Boolean($('#imp-text').value.trim());
+  $('#imp-ok').disabled = !has;
+  if (!has) {
+    impPreview.replaceChildren(Object.assign(document.createElement('p'), {
+      className: 'empty', textContent: 'Links Text einfügen – hier erscheint das Ergebnis.',
+    }));
+    return;
+  }
+  impPreview.replaceChildren(renderSong(parseChordPro(importChordPro())));
+}
+let impTimer;
+dlg.addEventListener('input', () => {
+  clearTimeout(impTimer);
+  impTimer = setTimeout(renderImportPreview, 120);
+});
 $('#btn-import').onclick = () => {
   $('#imp-title').value = '';
   $('#imp-artist').value = '';
   $('#imp-text').value = '';
+  applySettings(impPreview, loadSettings());
+  renderImportPreview();
   dlg.showModal();
+  $('#imp-text').focus();
 };
 dlg.addEventListener('close', async () => {
   if (dlg.returnValue !== 'ok') return;
   const text = $('#imp-text').value;
   if (!text.trim()) return;
-  await createAndOpen(ugToChordPro(text, { title: $('#imp-title').value.trim(), artist: $('#imp-artist').value.trim() }));
+  await createAndOpen(importChordPro());
   setView('editor');
   toast('Umgewandelt – bitte im Editor prüfen');
 });
@@ -266,6 +419,88 @@ document.querySelectorAll('.mobile-tabs button').forEach((b) => {
     if (b.dataset.view !== 'editor') await flushSave();
     setView(b.dataset.view);
   };
+});
+
+// ---------- Menü (Handy) ----------
+
+const menu = $('#actions');
+const menuBtn = $('#btn-menu');
+function setMenu(open) {
+  menu.classList.toggle('open', open);
+  menuBtn.setAttribute('aria-expanded', String(open));
+}
+menuBtn.onclick = (e) => {
+  e.stopPropagation();
+  setMenu(!menu.classList.contains('open'));
+};
+menu.addEventListener('click', () => setMenu(false));
+document.addEventListener('click', (e) => !menu.contains(e.target) && setMenu(false));
+
+// ---------- Dateien per Ziehen & Ablegen ----------
+
+const drop = $('#drop-zone');
+let dragDepth = 0;
+const hasFiles = (e) => [...(e.dataTransfer?.types || [])].includes('Files');
+addEventListener('dragenter', (e) => {
+  if (!hasFiles(e)) return;
+  dragDepth++;
+  drop.hidden = false;
+});
+addEventListener('dragleave', (e) => {
+  if (!hasFiles(e)) return;
+  if (--dragDepth <= 0) {
+    dragDepth = 0;
+    drop.hidden = true;
+  }
+});
+addEventListener('dragover', (e) => hasFiles(e) && e.preventDefault());
+addEventListener('drop', async (e) => {
+  if (!hasFiles(e)) return;
+  e.preventDefault();
+  dragDepth = 0;
+  drop.hidden = true;
+  await importFiles([...e.dataTransfer.files]);
+});
+
+// Klick neben Druck- und Einstellungsdialog schließt ihn
+for (const d of document.querySelectorAll('#print-dialog, #settings-dialog')) {
+  d.addEventListener('click', (e) => e.target === d && d.close('cancel'));
+}
+
+// ---------- Tastenkürzel ----------
+
+addEventListener('keydown', (e) => {
+  const mod = e.ctrlKey || e.metaKey;
+  const key = e.key.toLowerCase();
+  if (e.key === 'Escape') setMenu(false);
+  if (mod && key === 's') {
+    e.preventDefault();
+    if (!saveTimer && current) setStatus('Gespeichert', 'saved');
+    flushSave();
+    return;
+  }
+  if (mod && key === 'p') {
+    e.preventDefault();
+    if (!$('#print-view').hidden) $('#pv-print').click();
+    else if (!document.querySelector('dialog[open]')) $('#btn-print').click();
+    return;
+  }
+  if (anyDialogOpen()) return;
+  if (mod && key === 'k') {
+    e.preventDefault();
+    if (isMobile()) setView('list');
+    search.focus();
+    search.select();
+    return;
+  }
+  if (mod && key === 'e') {
+    e.preventDefault();
+    $('#btn-focus').click();
+    return;
+  }
+  if (mod || e.altKey || isTyping(document.activeElement) || !current) return;
+  if (e.key === '+' || e.key === '=') $('#tr-up').click();
+  else if (e.key === '-') $('#tr-down').click();
 });
 
 // ---------- Drucken ----------

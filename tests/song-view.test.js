@@ -1,6 +1,6 @@
 import { describe, it, expect } from './runner.js';
 import { parseChordPro } from '../src/core/chordpro.js';
-import { renderSong } from '../src/render/song-view.js';
+import { renderSong, songKey } from '../src/render/song-view.js';
 
 const render = (src, opts) => {
   const host = document.createElement('div');
@@ -69,5 +69,18 @@ describe('Vorschau', () => {
   it('Tabs werden als vorformatierter Text gezeigt', () => {
     const host = render('{sot}\ne|--0--|\nB|--1--|\n{eot}');
     expect(host.querySelector('pre.tab').textContent).toBe('e|--0--|\nB|--1--|\n');
+  });
+});
+
+describe('Tonart-Anzeige', () => {
+  it('nimmt {key:} und transponiert mit passender Schreibweise', () => {
+    const s = parseChordPro('{key: F}\n[F]la [C]li');
+    expect(songKey(s)).toEqual({ key: 'F', guessed: false });
+    expect(songKey(s, { transpose: 2 })).toEqual({ key: 'G', guessed: false });
+    expect(songKey(s, { transpose: -2 }).key).toBe('Eb');
+  });
+  it('schätzt die Tonart aus dem ersten Akkord', () => {
+    expect(songKey(parseChordPro('[Am7]la [G]li'), { transpose: 2 })).toEqual({ key: 'Bm', guessed: true });
+    expect(songKey(parseChordPro('nur Text'))).toBe(null);
   });
 });

@@ -117,6 +117,15 @@ export class SongRepository {
     await this.store.put({ ...old, deletedAt: t, updatedAt: t });
   }
 
+  /** Holt ein (weich) gelöschtes Lied zurück – für "Rückgängig". */
+  async restore(id) {
+    const old = await this.store.get(id);
+    if (!old || !old.deletedAt) return old;
+    const rec = { ...old, deletedAt: null, updatedAt: this.now() };
+    await this.store.put(rec);
+    return rec;
+  }
+
   async exportData() {
     const songs = SongRepository.sort(await this.#live()).map(
       ({ id, chordpro, transpose, accidentals, createdAt, updatedAt }) =>

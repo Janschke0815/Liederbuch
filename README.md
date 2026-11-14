@@ -33,6 +33,22 @@ Jedes Gerät hat sein eigenes Liederbuch. Übertragen: auf Gerät A „Sichern�
 Updates: Der Service Worker lädt bei Verbindung immer die aktuelle Version („Netz zuerst“)
 und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zurück.
 
+## Bedienung
+
+- **Editor ein-/ausblenden** (Symbol links über der Vorschau): nur Liste und Lied, z. B. zum Spielen.
+- **Bausteine** über dem Editor: Akkord, Strophe, Refrain, Bridge, Refrain wiederholen, Hinweis. Markierter Text wird eingeschlossen.
+- **Dateien** einfach ins Fenster ziehen, um sie zu importieren.
+- **Löschen** lässt sich in der Meldung unten rückgängig machen.
+
+| Taste | Wirkung |
+|---|---|
+| Strg+K | Suchen |
+| ↑ / ↓ in der Liste | vorheriges / nächstes Lied |
+| + / − | Halbton höher / tiefer (außerhalb des Editors) |
+| Strg+E | Editor ein-/ausblenden |
+| Strg+S | sofort speichern (sonst automatisch) |
+| Strg+P | Drucken |
+
 ## Aufbau
 
     src/core/      reine Logik ohne DOM (Parser, Import, Transposition) – gut testbar
