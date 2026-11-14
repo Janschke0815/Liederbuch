@@ -1,0 +1,90 @@
+/* Darstellung eines Liedes. Alle Stellschrauben als CSS-Variablen –
+   die Einstellungsseite setzt später genau diese Variablen. */
+.songbook {
+  --lyric-font: Georgia, 'Times New Roman', serif;
+  --lyric-size: 12pt;
+  --chord-font: 'Segoe UI', Arial, sans-serif;
+  --chord-size: 10.5pt;
+  --chord-color: #b3261e;
+  --chord-weight: 700;
+  --chord-gap: 0.35em;
+  --label-color: #666;
+  --chorus-indent: 1.5em;
+  --chord-bar-color: #b3261e40;
+  --line-height: 1.25;
+  --columns: 1;
+  --block-gap: 0.9em;
+}
+
+.song {
+  font-family: var(--lyric-font);
+  font-size: var(--lyric-size);
+  line-height: var(--line-height);
+  color: #111;
+}
+
+.song-header { margin-bottom: 1em; }
+.song-title { font-size: 1.6em; margin: 0; }
+.song-subtitle, .song-artist { margin: 0.1em 0 0; font-style: italic; }
+.song-info { margin: 0.3em 0 0; font-size: 0.8em; color: var(--label-color); }
+
+.song-body { column-count: var(--columns); column-gap: 2em; }
+
+.block { margin: 0 0 var(--block-gap); break-inside: avoid-column; }
+.block-label {
+  font-family: var(--chord-font);
+  font-size: 0.75em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--label-color);
+  margin-bottom: 0.15em;
+}
+.para { break-inside: avoid; margin-bottom: 0.6em; }
+.para:last-child { margin-bottom: 0; }
+
+/* Zeile: Akkord über Silbe */
+.line { white-space: pre-wrap; break-inside: avoid; }
+.line--with-chords { margin-top: 0.15em; }
+.seg { display: inline-block; vertical-align: baseline; }
+.seg > .chord { display: block; }
+.seg > .lyric { display: block; white-space: pre; }
+.chord {
+  font-family: var(--chord-font);
+  font-size: var(--chord-size);
+  font-weight: var(--chord-weight);
+  color: var(--chord-color);
+  line-height: 1.1;
+  padding-right: var(--chord-gap);
+  white-space: pre;
+}
+.chord.annotation { color: var(--label-color); font-weight: normal; font-style: italic; }
+.line--chords { font-family: var(--chord-font); }
+.line--chords .chord-filler { font-size: var(--chord-size); color: var(--label-color); white-space: pre; }
+
+/* Abschnittsdarstellung: data-chorus-style="indent" | "bar" | "plain" */
+.songbook[data-chorus-style='indent'] .block--chorus { margin-left: var(--chorus-indent); }
+.songbook[data-chorus-style='bar'] .block--chorus { border-left: 3px solid var(--chord-bar-color); padding-left: 0.8em; }
+.songbook[data-chorus-style='box'] .block--chorus { border: 1px solid var(--chord-bar-color); border-radius: 4px; padding: 0.4em 0.7em; }
+.songbook[data-chorus-style='box'] .block--chorus.cont { border-top-style: dashed; }
+.songbook[data-chorus-style='bar'] .chorus-ref,
+.songbook[data-chorus-style='box'] .chorus-ref { color: var(--chord-color); }
+.songbook[data-labels='hide'] .block-label { display: none; }
+.songbook[data-chorus-style='bold'] .block--chorus .lyric { font-weight: bold; }
+
+.comment { margin: 0.2em 0; font-family: var(--chord-font); font-size: 0.85em; color: var(--label-color); }
+.comment--italic { font-style: italic; }
+.comment--box { display: inline-block; border: 1px solid currentColor; padding: 0 0.4em; }
+.chorus-ref { font-style: italic; color: var(--label-color); margin: 0.2em 0; }
+.chorus-ref::before { content: '→ '; }
+
+.tab {
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.8em;
+  line-height: 1.2;
+  margin: 0;
+  overflow-x: auto;
+  break-inside: avoid;
+}
+.new-page { break-after: page; }
+.column-break { break-after: column; }

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Liederbuch</title>
+  <meta name="theme-color" content="#b3261e">
+  <meta name="description" content="Persönliches Gitarren-Liederbuch">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Liederbuch">
+  <link rel="stylesheet" href="src/render/song-view.css">
+  <link rel="stylesheet" href="src/app.css">
+  <link rel="stylesheet" href="src/print/print.css">
+</head>
+<body>
+  <header class="toolbar">
+    <strong class="app-name">Liederbuch</strong>
+    <span id="offline-badge" class="offline-badge" hidden title="Keine Verbindung – alles funktioniert weiter, Lieder werden lokal gespeichert">offline</span>
+    <button id="btn-new" type="button">+ Neues Lied</button>
+    <button id="btn-import" type="button">Text einfügen …</button>
+    <button id="btn-open" type="button">Datei öffnen …</button>
+    <button id="btn-export" type="button">Sichern</button>
+    <button id="btn-print" type="button">Drucken …</button>
+    <input id="file-input" type="file" multiple hidden
+           accept=".json,.cho,.chordpro,.chopro,.crd,.pro,.txt,application/json,text/plain">
+    <button id="btn-install" type="button" hidden>App installieren</button>
+    <span class="spacer"></span>
+    <div class="group" aria-label="Transponieren">
+      <button id="tr-down" type="button" title="Halbton tiefer">−</button>
+      <output id="tr-value" title="Transposition (wird mit dem Lied gespeichert)">0</output>
+      <button id="tr-up" type="button" title="Halbton höher">+</button>
+    </div>
+    <select id="accidentals" title="Schreibweise (wird mit dem Lied gespeichert)">
+      <option value="auto">♯/♭ auto</option>
+      <option value="sharp">♯</option>
+      <option value="flat">♭</option>
+    </select>
+    <button id="btn-settings" type="button" title="Einstellungen">⚙ Einstellungen</button>
+  </header>
+
+  <nav class="mobile-tabs">
+    <button type="button" data-view="list">Lieder</button>
+    <button type="button" data-view="editor">Editor</button>
+    <button type="button" data-view="preview" class="active">Vorschau</button>
+  </nav>
+
+  <main class="workspace" data-view="preview">
+    <aside class="pane pane-list">
+      <input id="search" type="search" placeholder="Suchen (Titel, Interpret, Text) …" autocomplete="off">
+      <ul id="song-list" class="song-list"></ul>
+      <p id="song-count" class="song-count"></p>
+    </aside>
+    <section class="pane pane-editor">
+      <div class="editor-bar">
+        <span id="save-status" class="save-status"></span>
+        <button id="btn-delete" type="button" class="danger">Löschen</button>
+      </div>
+      <textarea id="editor" spellcheck="false" aria-label="ChordPro-Text"></textarea>
+    </section>
+    <section class="pane pane-preview">
+      <div id="preview" class="songbook"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <dialog id="import-dialog">
+    <form method="dialog" class="import-form">
+      <h2>Text einfügen: Akkorde über dem Text</h2>
+      <p class="hint">Text z. B. aus Ultimate Guitar hier einfügen. Abschnitte wie [Verse] oder [Chorus], Tabs und reine Akkordzeilen werden erkannt. Das Ergebnis wird als neues Lied angelegt.</p>
+      <div class="row">
+        <label>Titel <input id="imp-title"></label>
+        <label>Interpret <input id="imp-artist"></label>
+      </div>
+      <textarea id="imp-text" spellcheck="false" placeholder="[Verse 1]&#10;     Am       C&#10;There is a house …"></textarea>
+      <div class="row end">
+        <button value="cancel" formnovalidate>Abbrechen</button>
+        <button id="imp-ok" value="ok" class="primary">Als neues Lied anlegen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="print-dialog">
+    <form method="dialog" class="print-form">
+      <h2>Liederbuch drucken</h2>
+      <div class="print-columns">
+        <fieldset>
+          <legend>Lieder</legend>
+          <div class="row">
+            <input id="pr-search" type="search" placeholder="Filtern …" autocomplete="off">
+            <button type="button" id="pr-all">Alle</button>
+            <button type="button" id="pr-none">Keine</button>
+          </div>
+          <ul id="pr-list" class="pr-list"></ul>
+          <p id="pr-count" class="hint"></p>
+        </fieldset>
+        <fieldset>
+          <legend>Aufbau</legend>
+          <label>Titel <input id="pr-title"></label>
+          <label>Untertitel <input id="pr-subtitle" placeholder="z. B. Name, Jahr"></label>
+          <label class="check"><input type="checkbox" id="pr-cover"> Deckblatt</label>
+          <label class="check"><input type="checkbox" id="pr-toc"> Inhaltsverzeichnis</label>
+          <label class="check"><input type="checkbox" id="pr-transpose"> gespeicherte Transposition verwenden</label>
+          <legend class="sub">Seite</legend>
+          <div class="row">
+            <label>Papier
+              <select id="pr-paper"><option>A4</option><option>A5</option><option>Letter</option></select>
+            </label>
+            <label>Spalten
+              <select id="pr-columns"><option value="1">1</option><option value="2">2</option></select>
+            </label>
+            <label>Rand (mm) <input id="pr-margin" type="number" min="5" max="40" step="1"></label>
+          </div>
+          <p class="hint">Papier, Spalten und Rand gelten auch für spätere Ausdrucke (siehe Einstellungen).</p>
+        </fieldset>
+      </div>
+      <div class="row end">
+        <button value="cancel" formnovalidate>Abbrechen</button>
+        <button id="pr-ok" value="ok" class="primary">Vorschau</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settings-dialog" class="settings-dialog">
+    <form method="dialog" class="settings-form">
+      <div class="settings-head">
+        <h2>Einstellungen</h2>
+        <span class="spacer"></span>
+        <button type="button" id="st-reset">Standard</button>
+        <button value="cancel" formnovalidate>Abbrechen</button>
+        <button value="ok" class="primary">Speichern</button>
+      </div>
+      <div class="settings-body">
+        <div class="settings-fields">
+          <fieldset>
+            <legend>Liedtext</legend>
+            <label>Schrift <select id="st-lyricFont"></select></label>
+            <label>Größe (pt) <input id="st-lyricSize" type="number" min="7" max="28" step="0.5"></label>
+            <label>Zeilenabstand
+              <select id="st-lineSpacing">
+                <option value="compact">eng</option><option value="normal">normal</option><option value="wide">weit</option>
+              </select>
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>Akkorde</legend>
+            <label>Schrift <select id="st-chordFont"></select></label>
+            <label>Größe (pt) <input id="st-chordSize" type="number" min="6" max="28" step="0.5"></label>
+            <label>Farbe
+              <span class="color-row">
+                <input id="st-chordColor" type="color">
+                <button type="button" class="swatch" data-color="#b3261e" style="--c:#b3261e" title="Rot"></button>
+                <button type="button" class="swatch" data-color="#1f4e9c" style="--c:#1f4e9c" title="Blau"></button>
+                <button type="button" class="swatch" data-color="#2e7d32" style="--c:#2e7d32" title="Grün"></button>
+                <button type="button" class="swatch" data-color="#000000" style="--c:#000000" title="Schwarz"></button>
+              </span>
+            </label>
+            <label class="check"><input id="st-chordBold" type="checkbox"> fett</label>
+          </fieldset>
+          <fieldset>
+            <legend>Abschnitte</legend>
+            <label>Refrain <select id="st-chorusStyle"></select></label>
+            <label class="check"><input id="st-showLabels" type="checkbox"> Abschnittsnamen anzeigen (Strophe 1, Refrain …)</label>
+          </fieldset>
+          <fieldset>
+            <legend>Druck</legend>
+            <label>Papier <select id="st-paper"><option>A4</option><option>A5</option><option>Letter</option></select></label>
+            <label>Spalten <select id="st-columns"><option value="1">einspaltig</option><option value="2">zweispaltig</option></select></label>
+            <label>Seitenrand (mm) <input id="st-margin" type="number" min="5" max="40" step="1"></label>
+          </fieldset>
+        </div>
+        <div class="settings-sample">
+          <div class="settings-sample-label">Muster</div>
+          <div id="st-sample" class="songbook"></div>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <section id="print-view" class="print-view" hidden>
+    <div class="print-bar">
+      <button type="button" id="pv-back">← Zurück</button>
+      <button type="button" id="pv-settings">Optionen …</button>
+      <span id="pv-info" class="print-info"></span>
+      <span class="spacer"></span>
+      <button type="button" id="pv-print" class="primary">Drucken / als PDF speichern</button>
+    </div>
+    <div class="print-scroll">
+      <div id="print-root" class="print-root"></div>
+    </div>
+  </section>
+
+  <script type="module" src="src/pwa.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

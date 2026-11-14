@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Tests – Liederbuch</title>
+  <link rel="stylesheet" href="../src/render/song-view.css">
+  <link rel="stylesheet" href="../src/print/print.css">
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2em; }
+    .ok { color: #1b7a1b; } .fail { color: #b3261e; }
+    .summary { font-size: 1.3em; font-weight: bold; }
+    pre { background: #f6f6f6; padding: .5em; white-space: pre-wrap; color: #333; }
+    #sandbox { position: absolute; left: -10000px; top: 0; width: 600px; }
+  </style>
+</head>
+<body>
+  <h1>Tests</h1>
+  <div id="results">läuft …</div>
+  <div id="sandbox"></div>
+  <script type="module">
+    import { run } from './runner.js';
+    import './chordpro.test.js';
+    import './ug-import.test.js';
+    import './song-view.test.js';
+    import './storage.test.js';
+    import './print.test.js';
+    import './settings.test.js';
+    run(document.getElementById('results'));
+  </script>
+</body>
+</html>

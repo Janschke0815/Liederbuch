@@ -1,0 +1,172 @@
+// Lieder verwalten: anlegen, ändern, löschen, suchen, Export/Import.
+// Kennt nur die Store-Schnittstelle (siehe stores.js), nicht IndexedDB selbst.
+//
+// Datensatz:
+// {
+//   id, chordpro,
+//   title, artist, sortTitle,          – aus dem ChordPro-Text abgeleitet (für Liste/Suche)
+//   transpose, accidentals,            – gespeicherte Ansicht pro Lied
+//   createdAt, updatedAt, deletedAt    – ISO-Zeitstempel; deletedAt = gelöscht (für späteren Sync)
+// }
+
+import { parseChordPro } from '../core/chordpro.js';
+
+export const EXPORT_FORMAT = 'liederbuch';
+export const EXPORT_VERSION = 1;
+
+const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
+
+export function normalize(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss');
+}
+
+export function deriveSummary(chordpro) {
+  const { meta } = parseChordPro(chordpro || '');
+  const title = (meta.title || '').trim();
+  return {
+    title,
+    artist: (meta.artist || []).join(', '),
+    sortTitle: (meta.sorttitle || title).trim(),
+  };
+}
+
+function defaultId() {
+  if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
+  return 'id-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+}
+
+/** Nur Zeichen aus dem Liedtext, ohne Akkorde und Direktiven – für die Volltextsuche. */
+function lyricsText(chordpro) {
+  return chordpro.replace(/^\s*\{.*\}\s*$/gm, ' ').replace(/\[[^\]]*\]/g, '');
+}
+
+export class SongRepository {
+  constructor(store, { now = () => new Date().toISOString(), newId = defaultId } = {}) {
+    this.store = store;
+    this.now = now;
+    this.newId = newId;
+  }
+
+  async #live() {
+    return (await this.store.getAll()).filter((s) => !s.deletedAt);
+  }
+
+  static sort(songs) {
+    return songs.sort(
+      (a, b) =>
+        collator.compare(a.sortTitle || a.title || '￿', b.sortTitle || b.title || '￿') ||
+        collator.compare(a.artist || '', b.artist || ''),
+    );
+  }
+
+  /** Alle Lieder alphabetisch; optional gefiltert (Titel/Interpret, sonst Liedtext). */
+  async list({ query = '' } = {}) {
+    const songs = await this.#live();
+    const q = normalize(query.trim());
+    if (!q) return SongRepository.sort(songs);
+    const words = q.split(/\s+/);
+    const matches = (text) => words.every((w) => text.includes(w));
+    const head = [];
+    const body = [];
+    for (const s of songs) {
+      if (matches(normalize(`${s.title} ${s.artist}`))) head.push(s);
+      else if (matches(normalize(lyricsText(s.chordpro)))) body.push(s);
+    }
+    return [...SongRepository.sort(head), ...SongRepository.sort(body)];
+  }
+
+  async get(id) {
+    const s = await this.store.get(id);
+    return s && !s.deletedAt ? s : undefined;
+  }
+
+  async create(chordpro = '', extra = {}) {
+    const t = this.now();
+    const rec = {
+      id: this.newId(),
+      chordpro,
+      ...deriveSummary(chordpro),
+      transpose: 0,
+      accidentals: 'auto',
+      ...extra,
+      createdAt: t,
+      updatedAt: t,
+      deletedAt: null,
+    };
+    await this.store.put(rec);
+    return rec;
+  }
+
+  /** Ändert chordpro, transpose und/oder accidentals. */
+  async update(id, changes) {
+    const old = await this.get(id);
+    if (!old) throw new Error(`Lied ${id} nicht gefunden`);
+    const rec = { ...old, updatedAt: this.now() };
+    if ('chordpro' in changes) Object.assign(rec, { chordpro: changes.chordpro }, deriveSummary(changes.chordpro));
+    if ('transpose' in changes) rec.transpose = ((Math.trunc(changes.transpose) % 12) + 12 + 6) % 12 - 6; // -6 … +5
+    if ('accidentals' in changes) rec.accidentals = changes.accidentals;
+    await this.store.put(rec);
+    return rec;
+  }
+
+  /** Löscht weich: Datensatz bleibt als Grabstein für einen späteren Sync erhalten. */
+  async remove(id) {
+    const old = await this.store.get(id);
+    if (!old || old.deletedAt) return;
+    const t = this.now();
+    await this.store.put({ ...old, deletedAt: t, updatedAt: t });
+  }
+
+  async exportData() {
+    const songs = SongRepository.sort(await this.#live()).map(
+      ({ id, chordpro, transpose, accidentals, createdAt, updatedAt }) =>
+        ({ id, chordpro, transpose, accidentals, createdAt, updatedAt }),
+    );
+    return { format: EXPORT_FORMAT, version: EXPORT_VERSION, exportedAt: this.now(), songs };
+  }
+
+  /**
+   * Führt eine Sicherung zusammen: neue Lieder kommen dazu, vorhandene werden nur
+   * überschrieben, wenn die Sicherung neuer ist.
+   */
+  async importData(data) {
+    if (!data || data.format !== EXPORT_FORMAT || !Array.isArray(data.songs)) {
+      throw new Error('Keine gültige Liederbuch-Sicherung');
+    }
+    if (data.version > EXPORT_VERSION) {
+      throw new Error('Die Sicherung stammt aus einer neueren Version der App');
+    }
+    const result = { added: 0, updated: 0, skipped: 0 };
+    const toPut = [];
+    const t = this.now();
+    for (const s of data.songs) {
+      if (typeof s?.chordpro !== 'string') {
+        result.skipped++;
+        continue;
+      }
+      const incoming = {
+        id: typeof s.id === 'string' && s.id ? s.id : this.newId(),
+        chordpro: s.chordpro,
+        ...deriveSummary(s.chordpro),
+        transpose: Number.isInteger(s.transpose) ? s.transpose : 0,
+        accidentals: ['auto', 'sharp', 'flat'].includes(s.accidentals) ? s.accidentals : 'auto',
+        createdAt: s.createdAt || t,
+        updatedAt: s.updatedAt || t,
+        deletedAt: null,
+      };
+      const existing = await this.store.get(incoming.id);
+      if (!existing) {
+        result.added++;
+        toPut.push(incoming);
+      } else if (existing.deletedAt || incoming.updatedAt > existing.updatedAt) {
+        if (existing.deletedAt) result.added++;
+        else result.updated++;
+        toPut.push(incoming);
+      } else {
+        result.skipped++;
+      }
+    }
+    await this.store.putMany(toPut);
+    return result;
+  }
+}

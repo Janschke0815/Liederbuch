@@ -1,0 +1,27 @@
+{
+  "name": "Liederbuch",
+  "short_name": "Liederbuch",
+  "description": "Persönliches Gitarren-Liederbuch mit Akkorden, Transponieren und Druck",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "background_color": "#f4f2ee",
+  "theme_color": "#b3261e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "application/json": [".json"],
+        "text/plain": [".cho", ".chordpro", ".chopro", ".crd", ".pro"]
+      }
+    }
+  ]
+}

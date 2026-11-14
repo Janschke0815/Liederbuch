@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Druck-Demo – Liederbuch</title>
+  <link rel="stylesheet" href="../src/render/song-view.css">
+  <link rel="stylesheet" href="../src/app.css">
+  <link rel="stylesheet" href="../src/print/print.css">
+  <style>@page { size: 210mm 297mm; margin: 0; }</style>
+</head>
+<!-- Druck-Demo mit Beispiel-Liedern (unabhängig von den gespeicherten Liedern).
+     ?columns=2  ?paper=A5  ?chorus=indent|bar|bold|plain -->
+<body class="printing">
+  <section class="print-view">
+    <div class="print-scroll"><div id="print-root" class="print-root"></div></div>
+  </section>
+  <script type="module">
+    import { buildSongbook, PAPER } from '../src/print/songbook.js';
+    import { SAMPLE_SONG } from '../src/sample.js';
+
+    const q = new URLSearchParams(location.search);
+    const verse = (n) => Array.from({ length: 8 }, (_, i) =>
+      `Zeile ${i + 1} der [G]Strophe ${n}, ein [C]wenig län[D]ger, damit sie [G]umbricht`).join('\n');
+    const songs = [
+      { id: 'a', title: 'Amazing Grace', artist: 'John Newton', chordpro: SAMPLE_SONG, transpose: 0 },
+      { id: 'c', title: 'Clementine', artist: 'Traditional', transpose: 2, chordpro:
+        '{title: Clementine}\n{artist: Traditional}\n{key: C}\n{capo: 1}\n\n{sov}\nIn a [C]cavern, in a canyon,\nExca[G]vating for a [C]mine,\nDwelt a [C]miner, forty-[G]niner,\nAnd his [G]daughter, Clemen[C]tine\n{eov}\n\n{soc: Refrain}\nOh my [C]darling, oh my darling,\nOh my [C]darling, Clemen[G]tine,\nYou are [G]lost and gone for[C]ever,\nDreadful [G]sorry, Clemen[C]tine\n{eoc}\n\n{chorus}' },
+      { id: 'z', title: 'Zum Testen: langes Lied', artist: '', chordpro:
+        `{title: Zum Testen: langes Lied}\n{c: Mehrseitiges Lied für den Umbruch}\n` +
+        [1, 2, 3, 4, 5, 6].map((n) => `{sov: Strophe ${n}}\n${verse(n)}\n{eov}\n\n{soc}\n[C]Refrain, [G]Refrain\n[F]noch eine [G]Zeile\n{eoc}`).join('\n\n') },
+    ];
+    const root = document.getElementById('print-root');
+    root.dataset.chorusStyle = q.get('chorus') || 'bar';
+    const paper = q.get('paper') || 'A4';
+    const p = PAPER[paper];
+    document.querySelector('style').textContent = `@page { size: ${p.width}mm ${p.height}mm; margin: 0; }`;
+    const r = await buildSongbook(root, songs, {
+      title: 'Mein Liederbuch', subtitle: 'Druck-Demo', paper, columns: Number(q.get('columns') || 1),
+    });
+    document.title = `fertig: ${r.pages} Seiten`;
+    window.__done = r;
+  </script>
+</body>
+</html>
