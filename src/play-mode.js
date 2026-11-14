@@ -173,6 +173,12 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     applySettings(sheet, loadSettings());
     const transpose = entry.transpose ?? song.transpose;
     sheet.replaceChildren(renderSong(parsed, { transpose, accidentals: song.accidentals }));
+    if (song.note) {
+      const n = document.createElement('div');
+      n.className = 'song-note';
+      n.textContent = song.note;
+      sheet.prepend(n);
+    }
     if (entry.note) {
       const note = document.createElement('p');
       note.className = 'play-note';

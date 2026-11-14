@@ -82,6 +82,9 @@
       <button id="btn-install" type="button" hidden title="Als App auf diesem Gerät installieren">
         <svg class="icon"><use href="#i-install"/></svg><span class="label">Installieren</span>
       </button>
+      <button id="btn-trash" type="button" title="Gelöschte Lieder wiederherstellen">
+        <svg class="icon"><use href="#i-trash"/></svg><span class="label">Papierkorb</span>
+      </button>
       <button id="btn-settings" type="button" title="Schrift, Farben, Druck">
         <svg class="icon"><use href="#i-gear"/></svg><span class="label">Einstellungen</span>
       </button>
@@ -101,6 +104,7 @@
           <svg class="icon"><use href="#i-search"/></svg>
           <input id="search" type="search" placeholder="Suchen …" autocomplete="off" title="Titel, Interpret oder Text (Strg+K)">
         </div>
+        <div id="tag-filter" class="tag-filter" hidden></div>
         <ul id="song-list" class="song-list"></ul>
         <p id="song-count" class="song-count"></p>
       </div>
@@ -167,7 +171,12 @@
           <button type="button" id="btn-capo-help" class="link-btn capo-help" title="Capo-Lage mit möglichst einfachen Griffen vorschlagen">Capo-Hilfe …</button>
           <label>Takt <input data-meta="time" list="dl-times" autocomplete="off" placeholder="z. B. 4/4"></label>
           <label>Tempo <input data-meta="tempo" type="number" min="20" max="320" step="1" placeholder="bpm"></label>
+          <label class="meta-full">Tags <input id="meta-tags" list="dl-tags" placeholder="z. B. Lagerfeuer, Weihnachten (mit Komma trennen)" autocomplete="off"></label>
+          <label class="meta-full">Notiz <small>– privat, erscheint in Vorschau und Spielmodus, nicht im Druck</small>
+            <textarea id="meta-note" rows="2" placeholder="z. B. Anschlag, Einsatz, wer singt …"></textarea>
+          </label>
         </div>
+        <datalist id="dl-tags"></datalist>
         <datalist id="dl-times"><option>4/4</option><option>3/4</option><option>6/8</option><option>2/4</option><option>2/2</option><option>12/8</option><option>5/4</option><option>7/8</option></datalist>
         <datalist id="dl-keys"><option>C</option><option>G</option><option>D</option><option>A</option><option>E</option><option>F</option><option>Bb</option><option>Eb</option><option>Am</option><option>Em</option><option>Dm</option><option>Bm</option></datalist>
       </details>
@@ -402,6 +411,23 @@
         <span class="spacer"></span>
         <button type="button" id="sync-connect" class="primary">Verbinden</button>
         <button value="close" formnovalidate>Schließen</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="trash-dialog" class="capo-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Papierkorb</h2>
+        <p class="hint">Gelöschte Lieder bleiben hier, bis du sie endgültig löschst – auch nach Wochen noch wiederherstellbar.</p>
+      </header>
+      <div class="dialog-body">
+        <ul id="trash-list" class="book-list"></ul>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" id="trash-empty" class="danger">Papierkorb leeren</button>
+        <span class="spacer"></span>
+        <button value="cancel" formnovalidate>Schließen</button>
       </footer>
     </form>
   </dialog>

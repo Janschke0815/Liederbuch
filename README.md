@@ -96,6 +96,14 @@ Capo, Takt und Tempo. Es schreibt die üblichen ChordPro-Angaben in den Kopf des
 Capo und Takt erscheinen im Liedkopf (auch im Druck) und als Kennzeichen über der Vorschau;
 beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ erkannt.
 
+## Tags, Notizen, Papierkorb
+
+- **Tags** (Liedinfo → Tags, mit Komma trennen) werden als ChordPro-Standard `{tag: Advent}`
+  gespeichert. Über der Liederliste erscheinen sie als Filter; die Suche findet sie auch.
+- **Notiz** (Liedinfo → Notiz): privater Hinweis zum Lied, sichtbar in Vorschau und Spielmodus,
+  nicht im Druck; wird mit gesichert und synchronisiert.
+- **Papierkorb** (Menü): gelöschte Lieder wiederherstellen oder endgültig löschen.
+
 ## Griffbilder und Capo-Hilfe
 
 Im Liedkopf erscheinen **Griffbilder** aller vorkommenden Akkorde – in der gespielten, also

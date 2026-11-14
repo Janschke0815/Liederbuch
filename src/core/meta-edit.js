@@ -11,7 +11,7 @@ const NAMES = {
 };
 
 // Reihenfolge, in der neue Angaben im Kopf einsortiert werden
-const ORDER = ['title', 'subtitle', 'st', 't', 'artist', 'key', 'capo', 'time', 'tempo'];
+const ORDER = ['title', 'subtitle', 'st', 't', 'artist', 'key', 'capo', 'time', 'tempo', 'tag'];
 
 const directiveRe = (names) => new RegExp(String.raw`^\s*\{\s*(?:${names.join('|')})\s*(?::\s*([^}]*?))?\s*\}\s*$`, 'i');
 const ANY_DIRECTIVE = /^\s*\{\s*([a-z_]+)\s*(?::[^}]*)?\}\s*$/i;
@@ -66,4 +66,33 @@ export function setMeta(text, field, value) {
   // Leerzeile zwischen Kopf und Lied, wenn der Kopf neu entsteht
   if (headEnd === 0 && lines[1] !== undefined && lines[1].trim() !== '') lines.splice(1, 0, '');
   return lines.join('\n');
+}
+
+const TAG_RE = /^\s*\{\s*tag\s*:\s*([^}]*?)\s*\}\s*$/i;
+
+/** Alle {tag: …}-Angaben. */
+export function getTags(text) {
+  return String(text).split('\n').map((l) => TAG_RE.exec(l)?.[1]).filter(Boolean);
+}
+
+/** Ersetzt alle Tags; neue stehen im Kopf nach den übrigen Angaben. */
+export function setTags(text, tags) {
+  const clean = [...new Set(tags.map((t) => String(t).replace(/[{}\n]/g, '').trim()).filter(Boolean))];
+  const lines = String(text).split('\n');
+  const first = lines.findIndex((l) => TAG_RE.test(l));
+  const rest = lines.filter((l) => !TAG_RE.test(l));
+  if (first >= 0) {
+    // an der Stelle der bisherigen Tags einsetzen
+    const at = lines.slice(0, first).filter((l) => !TAG_RE.test(l)).length;
+    rest.splice(at, 0, ...clean.map((t) => `{tag: ${t}}`));
+    return rest.join('\n');
+  }
+  if (!clean.length) return text;
+  let out = rest.join('\n');
+  // erst einen Tag regulär einsortieren, die übrigen direkt dahinter
+  out = setMeta(out, 'tag', clean[0]);
+  const ls = out.split('\n');
+  const i = ls.findIndex((l) => TAG_RE.test(l));
+  ls.splice(i + 1, 0, ...clean.slice(1).map((t) => `{tag: ${t}}`));
+  return ls.join('\n');
 }

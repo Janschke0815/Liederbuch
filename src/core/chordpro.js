@@ -21,7 +21,7 @@ const ALIASES = {
   colb: 'column_break', highlight: 'comment',
 };
 
-const MULTI_META = new Set(['subtitle', 'artist', 'composer', 'lyricist', 'arranger']);
+const MULTI_META = new Set(['subtitle', 'artist', 'composer', 'lyricist', 'arranger', 'tag']);
 const SINGLE_META = new Set([
   'title', 'sorttitle', 'album', 'year', 'key', 'capo', 'tempo', 'time', 'duration', 'copyright',
 ]);

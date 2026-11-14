@@ -16,7 +16,7 @@ import { activeBook } from './books.js';
 import { setupPlayMode } from './play-mode.js';
 import { SetlistRepository, slimSetlist } from './storage/setlists.js';
 import { setupSetlists } from './setlist-ui.js';
-import { getAllMeta, setMeta } from './core/meta-edit.js';
+import { getAllMeta, setMeta, getTags, setTags } from './core/meta-edit.js';
 import { transposeChord } from './core/chords.js';
 import { applySettings, loadSettings } from './settings/settings.js';
 
@@ -73,8 +73,33 @@ function setView(view) {
 
 // ---------- Liste ----------
 
+let activeTag = localStorage.getItem('activeTag') || '';
+
+/** Tag-Filter über der Liste (nur sichtbar, wenn es Tags gibt). */
+async function renderTagFilter() {
+  const tags = await repo.tags();
+  if (activeTag && !tags.some((t) => t.tag === activeTag)) activeTag = '';
+  const box = $('#tag-filter');
+  box.hidden = !tags.length;
+  box.replaceChildren(...tags.map(({ tag, count }) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tag-chip';
+    b.setAttribute('aria-pressed', String(tag === activeTag));
+    b.append(tag, Object.assign(document.createElement('small'), { textContent: count }));
+    b.onclick = () => {
+      activeTag = activeTag === tag ? '' : tag;
+      localStorage.setItem('activeTag', activeTag);
+      refreshList();
+    };
+    return b;
+  }));
+  $('#dl-tags').replaceChildren(...tags.map((t) => new Option(t.tag)));
+}
+
 async function refreshList() {
-  const songs = await repo.list({ query: search.value });
+  await renderTagFilter();
+  const songs = await repo.list({ query: search.value, tag: activeTag });
   const items = [];
   let letter = null;
   for (const s of songs) {
@@ -113,7 +138,7 @@ async function refreshList() {
       textContent: search.value ? 'Nichts gefunden.' : book.shared ? 'Noch keine Lieder – sie erscheinen nach dem Abgleich oder mit „Neues Lied“.' : 'Noch keine Lieder.',
     }));
   }
-  const total = search.value ? `${songs.length} Treffer` : `${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'}`;
+  const total = search.value || activeTag ? `${songs.length} Treffer` : `${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'}`;
   $('#song-count').textContent = total;
 }
 
@@ -164,6 +189,7 @@ function renderPreview() {
   const song = parseChordPro(editor.value);
   const opts = { transpose: current.transpose, accidentals: current.accidentals };
   preview.replaceChildren(renderSong(song, opts));
+  if (current.note) preview.prepend(Object.assign(document.createElement('div'), { className: 'song-note', textContent: current.note }));
   const k = songKey(song, opts);
   fillMeta(song);
   const keyEl = $('#key-value');
@@ -271,6 +297,11 @@ function fillMeta(song) {
     if (el.tagName === 'SELECT' && v && ![...el.options].some((o) => o.value === v)) el.add(new Option(v, v));
     el.value = v;
   }
+  const tagsInput = $('#meta-tags');
+  const noteInput = $('#meta-note');
+  tagsInput.disabled = noteInput.disabled = !current;
+  if (tagsInput !== document.activeElement) tagsInput.value = getTags(editor.value).join(', ');
+  if (noteInput !== document.activeElement) noteInput.value = current?.note || '';
   const capo = Number(m.capo) || 0;
   $('#meta-summary').textContent = [
     m.key && `Tonart ${m.key}`, capo > 0 && `Capo ${capo}`, m.time && `${m.time}-Takt`, m.tempo && `${m.tempo} bpm`,
@@ -297,6 +328,75 @@ for (const el of metaInputs) {
     editor.dispatchEvent(new Event('input'));
   });
 }
+
+// Tags: beim Verlassen des Feldes bzw. Enter übernehmen (Komma ist Trennzeichen)
+$('#meta-tags').addEventListener('change', (e) => {
+  if (!current) return;
+  editor.value = setTags(editor.value, e.target.value.split(','));
+  editor.dispatchEvent(new Event('input'));
+});
+$('#meta-tags').addEventListener('keydown', (e) => e.key === 'Enter' && e.target.blur());
+
+// Notiz: eigenes Feld am Lied (wird mit synchronisiert, aber nicht gedruckt)
+let noteTimer;
+$('#meta-note').addEventListener('input', (e) => {
+  if (!current) return;
+  const id = current.id;
+  const note = e.target.value;
+  setStatus('Ungespeichert …', 'dirty');
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(async () => {
+    const rec = await repo.update(id, { note });
+    if (current?.id === id) {
+      current = { ...current, note: rec.note, updatedAt: rec.updatedAt };
+      renderPreview();
+    }
+    setStatus('Gespeichert', 'saved');
+  }, 500);
+});
+
+// ---------- Papierkorb ----------
+
+const trashDlg = $('#trash-dialog');
+async function renderTrash() {
+  const items = await repo.trash();
+  const fmt = (iso) => new Date(iso).toLocaleDateString('de', { day: 'numeric', month: 'short', year: 'numeric' });
+  $('#trash-list').replaceChildren(...items.map((s) => {
+    const li = document.createElement('li');
+    const name = Object.assign(document.createElement('span'), { className: 'book-name', textContent: s.title || 'Ohne Titel' });
+    name.append(Object.assign(document.createElement('small'), { textContent: `gelöscht am ${fmt(s.deletedAt)}${s.artist ? ' · ' + s.artist : ''}` }));
+    const restore = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Wiederherstellen' });
+    restore.onclick = async () => {
+      await repo.restore(s.id);
+      await openSong(s.id);
+      toast(`„${s.title || 'Ohne Titel'}“ wiederhergestellt`);
+      renderTrash();
+    };
+    const del = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Endgültig', className: 'danger' });
+    del.onclick = async () => {
+      if (!confirm(`„${s.title || 'Ohne Titel'}“ endgültig löschen? Das lässt sich nicht rückgängig machen.`)) return;
+      await repo.purge(s.id);
+      renderTrash();
+    };
+    li.append(name, restore, del);
+    return li;
+  }));
+  if (!items.length) $('#trash-list').append(Object.assign(document.createElement('li'), { className: 'list-empty', textContent: 'Der Papierkorb ist leer.' }));
+  $('#trash-empty').hidden = !items.length;
+}
+$('#btn-trash').onclick = async () => {
+  await flushSave();
+  await renderTrash();
+  trashDlg.showModal();
+};
+$('#trash-empty').onclick = async () => {
+  const items = await repo.trash();
+  if (!confirm(`${items.length} ${items.length === 1 ? 'Lied' : 'Lieder'} endgültig löschen? Das lässt sich nicht rückgängig machen.`)) return;
+  for (const s of items) await repo.purge(s.id);
+  renderTrash();
+  toast('Papierkorb geleert');
+};
+trashDlg.addEventListener('click', (e) => e.target === trashDlg && trashDlg.close());
 
 // ---------- Capo-Hilfe ----------
 
@@ -638,7 +738,7 @@ addEventListener('keydown', (e) => {
 const play = setupPlayMode({
   repo,
   // Blättern in der Reihenfolge der (ggf. gefilterten) Liste
-  getSongIds: async () => (await repo.list({ query: search.value })).map((s) => s.id),
+  getSongIds: async () => (await repo.list({ query: search.value, tag: activeTag })).map((s) => s.id),
   onClose: (id) => {
     if (id && id !== current?.id) openSong(id);
   },

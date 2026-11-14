@@ -461,6 +461,8 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 .meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45em .6em; padding: .4em 0 .5em; }
 .meta-grid label { display: flex; flex-direction: column; gap: .15em; font-size: .78em; color: var(--muted); min-width: 0; }
 .meta-grid .meta-wide { grid-column: span 2; }
+.meta-grid .meta-full { grid-column: 1 / -1; }
+.meta-grid textarea { font: inherit; font-size: .95rem; padding: .35em .5em; border: 1px solid var(--border-strong); border-radius: var(--radius); resize: vertical; color: var(--text); background: var(--surface); }
 .meta-grid input, .meta-grid select { font-size: .95rem; min-height: 2rem; padding: .2em .5em; width: 100%; color: var(--text); }
 .info-chip {
   font-size: .82em; padding: .2em .6em; border-radius: 999px;
@@ -607,3 +609,21 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 .play-sheet .song-header, .play-sheet .para, .play-sheet .line { break-inside: avoid; }
 .play-view.cols2 .play-sheet .block { break-inside: auto; }
 .play-view.cols2 .play-sheet .block-label { break-after: avoid; }
+
+/* Tags und Notizen */
+.tag-filter { display: flex; gap: .3em; flex-wrap: wrap; padding: .5em .6em; border-bottom: 1px solid var(--border); max-height: 6.5em; overflow: auto; }
+.tag-chip {
+  min-height: 1.7rem; padding: .05em .65em; border-radius: 999px; font-size: .8em;
+  border: 1px solid var(--border-strong); background: var(--surface); color: var(--text);
+}
+.tag-chip small { color: var(--muted); margin-left: .25em; }
+.tag-chip[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.tag-chip[aria-pressed='true'] small { color: inherit; opacity: .8; }
+.song-item-tags { font-size: .72em; color: var(--muted); }
+.song-note {
+  margin: 0 0 1.2em; padding: .6em .9em; border-radius: 6px;
+  background: #fff6d6; border: 1px solid #f0dc94; color: #5b4a12;
+  font: .9rem/1.4 system-ui, 'Segoe UI', sans-serif; white-space: pre-wrap;
+}
+.song-note::before { content: '📝 '; }
+.play-sheet .song-note { font-size: .85em; }

@@ -20,7 +20,7 @@ const song = (title, artist = '', body = '[G]la') =>
 describe('Speicher: Repository', () => {
   it('leitet Titel, Interpret und Sortiertitel aus dem ChordPro-Text ab', () => {
     expect(deriveSummary('{t: Der Mond ist aufgegangen}\n{sorttitle: Mond ist aufgegangen}\n{artist: A}\n{artist: B}')).toEqual({
-      title: 'Der Mond ist aufgegangen', artist: 'A, B', sortTitle: 'Mond ist aufgegangen',
+      title: 'Der Mond ist aufgegangen', artist: 'A, B', sortTitle: 'Mond ist aufgegangen', tags: [],
     });
   });
 
