@@ -5,6 +5,7 @@ import { ugToChordPro } from './core/ug-import.js';
 import { parseImportFile } from './core/file-import.js';
 import { renderSong, songKey, usedChords } from './render/song-view.js';
 import { capoOptions } from './core/capo.js';
+import { parseKnown, playableCapo } from './core/playable.js';
 import { SongRepository } from './storage/repository.js';
 import { openIdbStore } from './storage/stores.js';
 import { SAMPLE_SONG, NEW_SONG_TEMPLATE } from './sample.js';
@@ -97,9 +98,69 @@ async function renderTagFilter() {
   $('#dl-tags').replaceChildren(...tags.map((t) => new Option(t.tag)));
 }
 
+// "Was kann ich spielen?" – Filter nach bekannten Griffen
+const cf = {
+  open: localStorage.getItem('cfOpen') === '1',
+  chords: localStorage.getItem('cfChords') || '',
+  capo: localStorage.getItem('cfCapo') === '1',
+};
+const capoHint = new Map(); // songId -> Capo-Bund für die Anzeige in der Liste
+
+function chordFilterActive() {
+  return cf.open && parseKnown(cf.chords).size > 0;
+}
+
+/** Lieder filtern, die nur aus bekannten Griffen bestehen (mit gespeicherter Transposition). */
+function applyChordFilter(songs) {
+  capoHint.clear();
+  if (!chordFilterActive()) return songs;
+  const known = parseKnown(cf.chords);
+  return songs.filter((s) => {
+    const chords = usedChords(parseChordPro(s.chordpro)).map((c) => transposeChord(c, s.transpose || 0, false));
+    const capo = playableCapo(chords, known, { withCapo: cf.capo });
+    if (capo === null) return false;
+    if (capo > 0) capoHint.set(s.id, capo);
+    return true;
+  });
+}
+
+function setupChordFilter() {
+  const panel = $('#cf-panel');
+  const toggle = $('#cf-toggle');
+  const sync = () => {
+    panel.hidden = !cf.open;
+    toggle.setAttribute('aria-expanded', String(cf.open));
+    toggle.classList.toggle('active', chordFilterActive());
+  };
+  $('#cf-chords').value = cf.chords;
+  $('#cf-capo').checked = cf.capo;
+  toggle.onclick = () => {
+    cf.open = !cf.open;
+    localStorage.setItem('cfOpen', cf.open ? '1' : '');
+    sync();
+    refreshList();
+    if (cf.open) $('#cf-chords').focus();
+  };
+  let t;
+  $('#cf-chords').addEventListener('input', (e) => {
+    cf.chords = e.target.value;
+    localStorage.setItem('cfChords', cf.chords);
+    sync();
+    clearTimeout(t);
+    t = setTimeout(refreshList, 200);
+  });
+  $('#cf-capo').addEventListener('change', (e) => {
+    cf.capo = e.target.checked;
+    localStorage.setItem('cfCapo', cf.capo ? '1' : '');
+    refreshList();
+  });
+  sync();
+}
+setupChordFilter();
+
 async function refreshList() {
   await renderTagFilter();
-  const songs = await repo.list({ query: search.value, tag: activeTag });
+  const songs = applyChordFilter(await repo.list({ query: search.value, tag: activeTag }));
   const items = [];
   let letter = null;
   for (const s of songs) {
@@ -127,6 +188,7 @@ async function refreshList() {
       const artist = document.createElement('span');
       artist.className = 'song-item-artist';
       artist.textContent = s.artist;
+      if (capoHint.has(s.id)) artist.textContent += `${s.artist ? ' · ' : ''}mit Capo ${capoHint.get(s.id)}`;
       btn.append(title, artist);
       li.append(btn);
       return li;
@@ -135,10 +197,10 @@ async function refreshList() {
   if (!songs.length) {
     listEl.append(Object.assign(document.createElement('li'), {
       className: 'list-empty',
-      textContent: search.value ? 'Nichts gefunden.' : book.shared ? 'Noch keine Lieder – sie erscheinen nach dem Abgleich oder mit „Neues Lied“.' : 'Noch keine Lieder.',
+      textContent: chordFilterActive() ? 'Kein Lied nur mit diesen Griffen – „auch mit Capo“ probieren oder Griffe ergänzen.' : search.value ? 'Nichts gefunden.' : book.shared ? 'Noch keine Lieder – sie erscheinen nach dem Abgleich oder mit „Neues Lied“.' : 'Noch keine Lieder.',
     }));
   }
-  const total = search.value || activeTag ? `${songs.length} Treffer` : `${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'}`;
+  const total = search.value || activeTag || chordFilterActive() ? `${songs.length} Treffer` : `${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'}`;
   $('#song-count').textContent = total;
 }
 
@@ -738,7 +800,7 @@ addEventListener('keydown', (e) => {
 const play = setupPlayMode({
   repo,
   // Blättern in der Reihenfolge der (ggf. gefilterten) Liste
-  getSongIds: async () => (await repo.list({ query: search.value, tag: activeTag })).map((s) => s.id),
+  getSongIds: async () => applyChordFilter(await repo.list({ query: search.value, tag: activeTag })).map((s) => s.id),
   onClose: (id) => {
     if (id && id !== current?.id) openSong(id);
   },

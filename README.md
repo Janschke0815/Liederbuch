@@ -104,6 +104,14 @@ beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ er
   nicht im Druck; wird mit gesichert und synchronisiert.
 - **Papierkorb** (Menü): gelöschte Lieder wiederherstellen oder endgültig löschen.
 
+## Was kann ich spielen?
+
+Über der Liederliste: **🎸 Was kann ich spielen?** – Griffe eingeben, die du kannst
+(z. B. `G C D Em Am`). Die Liste zeigt nur noch Lieder, die ausschließlich aus diesen Griffen
+bestehen (mit der gespeicherten Transposition; Slash-Bass zählt nicht). Mit **„auch mit Capo“**
+kommen Lieder dazu, die mit Kapodaster passen – der Bund steht dann in der Liste.
+Der Spielmodus blättert in dieser gefilterten Liste.
+
 ## Griffbilder und Capo-Hilfe
 
 Im Liedkopf erscheinen **Griffbilder** aller vorkommenden Akkorde – in der gespielten, also

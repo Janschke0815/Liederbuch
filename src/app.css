@@ -627,3 +627,11 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 }
 .song-note::before { content: '📝 '; }
 .play-sheet .song-note { font-size: .85em; }
+
+/* Akkord-Filter */
+.chord-filter { padding: .1em .6em .4em; border-bottom: 1px solid var(--border); }
+.chord-filter .link-btn { font-size: .85em; min-height: 1.8rem; padding: 0 .2em; }
+.chord-filter .link-btn.active { font-weight: 700; }
+.cf-panel { display: flex; flex-direction: column; gap: .35em; padding-bottom: .2em; }
+.cf-panel input:not([type=checkbox]) { width: 100%; font-size: .92em; }
+.cf-panel .check { display: flex; gap: .45em; align-items: center; font-size: .85em; color: var(--muted); }
