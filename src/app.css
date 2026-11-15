@@ -498,6 +498,18 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 }
 .book-select:hover { background-color: var(--hover); }
 .sync-section { display: flex; flex-direction: column; gap: .6em; }
+.syntax-btn { font-weight: 700; min-width: 2rem; border-radius: 999px !important; }
+.syntax-dialog { width: min(48rem, calc(100vw - 2rem)); }
+.syntax-body { display: flex; flex-direction: column; gap: 1em; }
+.syntax-body h3 { margin: 0 0 .35em; font-size: .95em; }
+.syntax-table { width: 100%; border-collapse: collapse; font-size: .9em; }
+.syntax-table td { padding: .35em .5em; border-top: 1px solid var(--border); vertical-align: top; }
+.syntax-table td:first-child { width: 52%; }
+.syntax-table code { font-size: .92em; background: var(--hover); padding: .05em .3em; border-radius: 4px; white-space: pre-wrap; user-select: all; }
+@media (max-width: 600px) {
+  .syntax-table tr { display: flex; flex-direction: column; border-top: 1px solid var(--border); padding: .3em 0; }
+  .syntax-table td { border: 0; padding: .1em .3em; width: auto !important; }
+}
 .ugm-dialog { width: min(40rem, calc(100vw - 2rem)); }
 .ugm-body { display: flex; flex-direction: column; gap: .9em; }
 .ugm-step h3 { margin: 0 0 .3em; font-size: .95em; }

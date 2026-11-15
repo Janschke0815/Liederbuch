@@ -155,9 +155,11 @@
           <button type="button" data-snippet="verse" title="Strophe einfügen">Strophe</button>
           <button type="button" data-snippet="chorus" title="Refrain einfügen">Refrain</button>
           <button type="button" data-snippet="bridge" title="Bridge einfügen">Bridge</button>
+          <button type="button" data-snippet="tab" title="Gitarren-Tab einfügen (markierter Text wird zum Tab; sonst leeres Griffbrett zum Überschreiben)">Tab</button>
           <button type="button" data-snippet="repeat" title="Refrain wiederholen ({chorus})">↻ Refrain</button>
           <button type="button" data-snippet="times" title="Wiederholen: Zeile mit dem Cursor, markierte Zeilen oder – auf der Abschnittszeile – den ganzen Abschnitt. Nochmal klicken = öfter.">2×</button>
           <button type="button" data-snippet="comment" title="Kommentar / Hinweis">Hinweis</button>
+          <button type="button" id="btn-syntax" class="syntax-btn" title="ChordPro-Syntax: Übersicht aller Angaben">?</button>
         </div>
         <span class="spacer"></span>
         <span id="save-status" class="save-status" aria-live="polite"></span>
@@ -432,6 +434,79 @@
         <span class="spacer"></span>
         <button value="cancel" formnovalidate>Abbrechen</button>
         <button value="ok" class="primary">Speichern</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="syntax-dialog" class="syntax-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>ChordPro – so schreibst du Lieder</h2>
+        <p class="hint">Jedes Lied ist reiner Text. Akkorde stehen in eckigen Klammern direkt vor der Silbe, alles andere in geschweiften Klammern auf einer eigenen Zeile. Groß-/Kleinschreibung ist egal, Unbekanntes wird ignoriert. Die Knöpfe über dem Editor fügen das Meiste für dich ein.</p>
+      </header>
+      <div class="dialog-body syntax-body">
+        <section>
+          <h3>Liedkopf</h3>
+          <table class="syntax-table">
+            <tr><td><code>{title: Clementine}</code> <small><code>{t: …}</code></small></td><td>Titel</td></tr>
+            <tr><td><code>{subtitle: …}</code> <small><code>{st: …}</code></small></td><td>Untertitel</td></tr>
+            <tr><td><code>{artist: Percy Montrose}</code></td><td>Interpret (mehrfach möglich); ebenso <code>composer</code>, <code>lyricist</code>, <code>arranger</code></td></tr>
+            <tr><td><code>{key: C}</code></td><td>Tonart – wird beim Transponieren mitgeändert</td></tr>
+            <tr><td><code>{capo: 2}</code></td><td>Capo-Bund</td></tr>
+            <tr><td><code>{time: 3/4}</code></td><td>Takt (für das Metronom)</td></tr>
+            <tr><td><code>{tempo: 96}</code></td><td>Tempo in Schlägen pro Minute</td></tr>
+            <tr><td><code>{duration: 3:20}</code></td><td>Dauer – danach richtet sich das automatische Scrollen im Spielmodus</td></tr>
+            <tr><td><code>{tag: Lagerfeuer}</code></td><td>Tag zum Filtern (mehrfach möglich)</td></tr>
+            <tr><td><code>{album: …}</code> <code>{year: …}</code> <code>{copyright: …}</code> <code>{sorttitle: …}</code></td><td>weitere Angaben</td></tr>
+          </table>
+        </section>
+        <section>
+          <h3>Akkorde und Text</h3>
+          <table class="syntax-table">
+            <tr><td><code>In a [C]cavern, [G]canyon</code></td><td>Akkord über der folgenden Silbe</td></tr>
+            <tr><td><code>[Am7] [D/F#] [Csus4] [Bb]</code></td><td>jeder Akkord, auch mit Bassnote; wird transponiert</td></tr>
+            <tr><td><code>| [C] [G] | [Am] |</code></td><td>Zeile nur mit Akkorden (z. B. Intro), Taktstriche bleiben</td></tr>
+            <tr><td><code>[*Riff]</code></td><td>Anmerkung über dem Text, kursiv, wird nicht transponiert</td></tr>
+            <tr><td><code>[4] [-4] [-3'] [6o] [4 -4 5]</code></td><td>Mundharmonika-Tabs: blasen, ziehen, Bending, Overblow, mehrere</td></tr>
+            <tr><td><code># Notiz</code></td><td>Zeile mit <code>#</code> am Anfang: nur im Editor sichtbar</td></tr>
+          </table>
+        </section>
+        <section>
+          <h3>Abschnitte</h3>
+          <table class="syntax-table">
+            <tr><td><code>{start_of_verse: Strophe 1}</code><br><code>{end_of_verse}</code></td><td>Strophe – kurz <code>{sov}</code> / <code>{eov}</code></td></tr>
+            <tr><td><code>{start_of_chorus: Refrain}</code><br><code>{end_of_chorus}</code></td><td>Refrain (hervorgehoben) – <code>{soc}</code> / <code>{eoc}</code></td></tr>
+            <tr><td><code>{start_of_bridge}</code> … <code>{end_of_bridge}</code></td><td>Bridge – <code>{sob}</code> / <code>{eob}</code></td></tr>
+            <tr><td><code>{start_of_part: Intro}</code> … <code>{end_of_part}</code></td><td>eigener Abschnitt; jeder Name nach <code>start_of_</code> geht</td></tr>
+            <tr><td><code>{start_of_tab: Riff}</code><br><code>e|---0---3---|</code><br><code>{end_of_tab}</code></td><td>Gitarren-Tab in fester Schrift, unverändert – <code>{sot}</code> / <code>{eot}</code>; ausblendbar</td></tr>
+            <tr><td><code>{start_of_grid}</code> … <code>{end_of_grid}</code></td><td>Akkordraster in fester Schrift</td></tr>
+            <tr><td><code>{chorus}</code> <small><code>{chorus: Refrain}</code></small></td><td>Refrain hier noch einmal (als Verweis)</td></tr>
+          </table>
+        </section>
+        <section>
+          <h3>Wiederholungen</h3>
+          <table class="syntax-table">
+            <tr><td><code>Oh my darling (2×)</code></td><td>diese Zeile wiederholen – auch <code>x2</code>, <code>2x</code>, <code>2 mal</code></td></tr>
+            <tr><td><code>{start_of_chorus: Refrain 2×}</code></td><td>ganzen Abschnitt wiederholen</td></tr>
+            <tr><td><code>{start_of_repeat: 3×}</code><br>… Zeilen …<br><code>{end_of_repeat}</code></td><td>mehrere Zeilen wiederholen (Klammer am Rand)</td></tr>
+            <tr><td><code>{chorus: 2×}</code></td><td>Refrain-Verweis mit Anzahl</td></tr>
+          </table>
+        </section>
+        <section>
+          <h3>Hinweise und Druck</h3>
+          <table class="syntax-table">
+            <tr><td><code>{comment: leise}</code> <small><code>{c: …}</code></small></td><td>Hinweis im Lied</td></tr>
+            <tr><td><code>{comment_italic: …}</code> <small><code>{ci: …}</code></small></td><td>Hinweis kursiv</td></tr>
+            <tr><td><code>{comment_box: …}</code> <small><code>{cb: …}</code></small></td><td>Hinweis im Rahmen</td></tr>
+            <tr><td><code>{new_page}</code> <small><code>{np}</code></small></td><td>neue Seite im Druck</td></tr>
+            <tr><td><code>{column_break}</code> <small><code>{colb}</code></small></td><td>neue Spalte (zweispaltiger Druck)</td></tr>
+          </table>
+        </section>
+        <p class="hint">Persönliche Notizen zum Lied gehören in die <b>Liedinfo</b> – die erscheinen nicht im Druck.</p>
+      </div>
+      <footer class="dialog-foot">
+        <span class="spacer"></span>
+        <button value="close" class="primary">Schließen</button>
       </footer>
     </form>
   </dialog>

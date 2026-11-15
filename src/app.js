@@ -273,7 +273,7 @@ Griffe in ${k.key}, klingt mit Capo ${capo} in ${transposeChord(k.key, capo)}` :
 function updateControls() {
   const has = Boolean(current);
   editor.disabled = !has;
-  for (const b of document.querySelectorAll('#tr-up, #tr-down, #accidentals button, #btn-delete, #btn-play, .snippets button')) b.disabled = !has;
+  for (const b of document.querySelectorAll('#tr-up, #tr-down, #accidentals button, #btn-delete, #btn-play, .snippets button[data-snippet]')) b.disabled = !has;
   const t = current?.transpose || 0;
   const out = $('#tr-value');
   out.textContent = (t > 0 ? '+' : '') + t;
@@ -645,6 +645,14 @@ function insertSnippet(kind) {
   const atLineStart = editor.selectionStart === 0 || editor.value[editor.selectionStart - 1] === '\n';
   const nl = atLineStart ? '' : '\n';
   if (kind === 'repeat') return insertText(`${nl}{chorus}\n`);
+  if (kind === 'tab') {
+    // Gitarren-Tab: markierter Text wird eingerahmt, sonst ein leeres Griffbrett (markiert,
+    // damit ein kopierter Tab es mit Strg+V direkt ersetzt)
+    const empty = ['e', 'B', 'G', 'D', 'A', 'E'].map((s) => `${s}|${'-'.repeat(16)}|`).join('\n');
+    const body = sel.replace(/\n$/, '') || empty;
+    const head = `${nl}{start_of_tab: Tab}\n`;
+    return insertText(`${head}${body}\n{end_of_tab}\n`, head.length, head.length + body.length);
+  }
   const verses = (editor.value.match(/\{(start_of_verse|sov)\b/g) || []).length;
   const [env, label] = {
     verse: ['verse', `Strophe ${verses + 1}`],
@@ -660,6 +668,10 @@ document.querySelector('.snippets').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-snippet]');
   if (b && current) insertSnippet(b.dataset.snippet);
 });
+
+// Übersicht der ChordPro-Syntax
+$('#btn-syntax').onclick = () => $('#syntax-dialog').showModal();
+$('#syntax-dialog').addEventListener('click', (e) => e.target === e.currentTarget && e.currentTarget.close());
 
 // ---------- Anlegen / Löschen ----------
 

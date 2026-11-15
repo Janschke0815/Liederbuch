@@ -60,6 +60,21 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | F | Spielmodus |
 | M | Metronom an/aus |
 
+## ChordPro-Syntax (Kurzüberblick)
+
+Die vollständige Übersicht öffnet der Knopf **?** über dem Editor. Die Knöpfe daneben
+(Akkord, Strophe, Refrain, Bridge, **Tab**, Refrain-Verweis, 2×, Hinweis) fügen das Meiste ein.
+
+    {title: Clementine}          {artist: …}   {key: C}   {capo: 2}   {time: 3/4}   {tempo: 96}
+    In a [C]cavern, [G]canyon    Akkord vor der Silbe; [*Riff] = Anmerkung; [-4] = Mundharmonika
+    {start_of_verse: Strophe 1} … {end_of_verse}     ebenso chorus, bridge, part, tab, grid
+    {chorus}                     Refrain hier wiederholen
+    Zeile (2×)   {start_of_chorus: Refrain 2×}   {start_of_repeat: 3×} … {end_of_repeat}
+    {comment: leise}   {new_page}   {column_break}   # Notiz (nur im Editor)
+
+Der Knopf **Tab** rahmt markierten Text als Gitarren-Tab ein; ohne Markierung fügt er ein leeres
+Griffbrett ein, das schon markiert ist – ein kopierter Tab ersetzt es direkt mit Strg+V.
+
 ## Einfügen aus Ultimate Guitar & Co.
 
 Text einfach mit **Strg+V** irgendwo in die App einfügen (oder Menü → Text einfügen). Erkannt
