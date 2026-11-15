@@ -178,7 +178,17 @@ Mundharmonika-Töne stehen wie Akkorde in eckigen Klammern über der Silbe und e
 `4` blasen, `-4` ziehen (`+4` geht auch), `-3'` `-3''` oder `-3b` Bending, `6o` Overblow,
 `[4 -4 5]` mehrere Töne an einer Stelle; Kanäle 1–16. Sie werden nie transponiert und zählen
 nicht als Akkorde (keine Griffbilder). Beim **Einfügen** wird eine Zeile wie `4  -4  5` über dem
-Text automatisch erkannt.
+Text automatisch erkannt – auch zusammen mit einer Akkordzeile darüber oder darunter:
+
+          C                         G
+          6        6      6     5   -4
+    Oh my darling, oh my darling, oh my darling Clementine
+
+**Eine oder zwei Zeilen:** Unter *Einstellungen → Akkorde → Akkorde und Harp-Tabs* (oder per
+Rechtsklick auf die Vorschau → *Anzeigen → Harp-Tabs in eigener Zeile*) wählst du, ob Akkord und
+Ton nebeneinander stehen oder untereinander – Akkorde oben, Tabs direkt über dem Text. Das gilt
+für Vorschau, Spielmodus und Druck, und **Lied teilen → als Text** schreibt die Tabs dann ebenfalls
+in eine eigene Zeile (die sich wieder einfügen lässt).
 
 Gitarren-Tabs stehen wie bisher in `{start_of_tab}` … `{end_of_tab}`.
 
@@ -301,3 +311,4 @@ die App „Server nicht erreichbar … (CORS)“.
 7. ✅ Liederbuch über WebDAV synchronisieren (Nextcloud u. a., Server muss CORS erlauben)
 8. ✅ Mundharmonika-Tabs ([-4] …) und Gitarren-Tabs getrennt ein-/ausblendbar
 9. ✅ Schriftart und -größe in der Druckvorschau einstellbar (nur für den Druck)
+10. ✅ Harp-Tabs importieren (auch Akkord- und Harp-Zeile übereinander); Akkorde und Harp-Tabs wahlweise in einer oder zwei Zeilen

@@ -3,7 +3,7 @@ import { isHarpNote, isHarpTab, isHarpLine } from '../src/core/harp.js';
 import { parseChordPro, parseLyricsLine } from '../src/core/chordpro.js';
 import { renderSong, usedChords } from '../src/render/song-view.js';
 import { ugToChordPro } from '../src/core/ug-import.js';
-import { transposeChordPro } from '../src/core/export-text.js';
+import { transposeChordPro, chordproToText } from '../src/core/export-text.js';
 import { applySettings, sanitize } from '../src/settings/settings.js';
 
 describe('Mundharmonika: Schreibweise', () => {
@@ -80,5 +80,62 @@ describe('Mundharmonika/Gitarren-Tabs: Schalter', () => {
     } finally {
       root.remove();
     }
+  });
+});
+
+describe('Mundharmonika: eine oder zwei Zeilen', () => {
+  const SONG = '{title: T}\n[C][4]Oh my [-4]dar[G]ling';
+
+  it('Einstellung wird geprüft und als data-Attribut gesetzt', () => {
+    expect(sanitize({}).harpLayout).toBe('inline');
+    expect(sanitize({ harpLayout: 'quer' }).harpLayout).toBe('inline');
+    const el = document.createElement('div');
+    applySettings(el, { harpLayout: 'split' });
+    expect(el.dataset.harpLayout).toBe('split');
+  });
+
+  it('zwei Zeilen: Tabs stehen unter den Akkorden über derselben Silbe, eine Zeile: daneben', () => {
+    const root = document.createElement('div');
+    root.className = 'songbook';
+    root.style.width = '40em'; // breit genug, damit die Zeile nicht umbricht
+    root.append(renderSong(parseChordPro(SONG)));
+    document.body.append(root);
+    const box = (sel, text) => [...root.querySelectorAll(sel)].find((e) => e.textContent === text).getBoundingClientRect();
+    try {
+      applySettings(root, { harpLayout: 'split' });
+      let c = box('.chord:not(.harp)', 'C');
+      let h = box('.chord.harp', '4');
+      expect(h.top >= c.bottom - 1).toBe(true); // darunter
+      expect(Math.abs(h.left - c.left) < 2).toBe(true); // gleiche Spalte
+      // alle Tabs der Zeile auf einer Höhe, alle Akkorde auf einer Höhe
+      expect(Math.abs(box('.chord.harp', '-4').top - h.top) < 1).toBe(true);
+      expect(Math.abs(box('.chord:not(.harp)', 'G').top - c.top) < 1).toBe(true);
+
+      applySettings(root, { harpLayout: 'inline' });
+      c = box('.chord:not(.harp)', 'C');
+      h = box('.chord.harp', '4');
+      expect(Math.abs(h.top - c.top) < 1).toBe(true); // nebeneinander
+      expect(h.left > c.left).toBe(true);
+
+      applySettings(root, { harpLayout: 'split', showHarp: false });
+      expect([...root.querySelectorAll('.chord.harp')].some((e) => e.offsetParent)).toBe(false);
+    } finally {
+      root.remove();
+    }
+  });
+
+  it('Einfügen: Akkord-, Harp- und Textzeile werden eine Zeile (auch Harp oben)', () => {
+    const a = ugToChordPro('C        G\n4  -4    5\nOh my darling');
+    expect(a).toContain('[C][4]Oh [-4]my dar[G][5]ling');
+    const b = ugToChordPro('4  -4    5\nC        G\nOh my darling');
+    expect(b).toContain('[C][4]Oh [-4]my dar[G][5]ling');
+  });
+
+  it('Teilen als Text: eigene Harp-Zeile bei "zwei Zeilen", und das lässt sich wieder einfügen', () => {
+    const split = chordproToText(SONG, 0, 'auto', { harpLayout: 'split' });
+    expect(split).toContain('C        G\n4     -4\nOh my darling'); // G über "ling" (Spalte 9)
+    expect(ugToChordPro(split)).toContain('[C][4]Oh my [-4]dar[G]ling');
+    const inline = chordproToText(SONG, 0, 'auto');
+    expect(inline).notToContain('\n4     -4\n');
   });
 });

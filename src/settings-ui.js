@@ -21,7 +21,7 @@ And his [G]daughter, Clemen[C]tine
 {end_of_verse}
 
 {start_of_chorus: Refrain}
-Oh my [C]darling, oh my darling,
+Oh my [C][6]darling, [6]oh my [-6]darling,
 Oh my [C]darling, Clemen[G]tine,
 You are [G]lost and gone for[C]ever,
 Dreadful [G]sorry, Clemen[C]tine
@@ -41,7 +41,7 @@ B|---1-------------1-|
 `;
 
 const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing', 'chordFont', 'chordSize', 'chordColor',
-  'chordBold', 'showDiagrams', 'showHarp', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin'];
+  'chordBold', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin'];
 
 function fillSelect(sel, entries) {
   sel.replaceChildren(...entries.map(([value, label]) => new Option(label, value)));

@@ -35,8 +35,30 @@ export function transposeChordPro(text, steps = 0, accidentals = 'auto') {
     .join('\n');
 }
 
+/**
+ * Liedzeile mit Akkorden und Mundharmonika-Tabs in getrennten Reihen über dem Text
+ * (Akkorde oben, Tabs direkt über dem Text) – so, wie es der Import wieder einliest.
+ */
+function lyricsToSplitText(line, map) {
+  let text = '';
+  const rows = { chords: '', harp: '' };
+  for (const s of line.segments) {
+    if (s.chord) {
+      const key = s.harp ? 'harp' : 'chords';
+      const name = s.annotation || s.harp ? s.chord : map(s.chord);
+      if (rows[key].length > text.length) text = text.padEnd(rows[key].length);
+      rows[key] = rows[key].padEnd(text.length) + name + ' ';
+    }
+    text += s.text;
+  }
+  return [rows.chords, rows.harp, text].filter((r) => r.trim()).map((r) => r.replace(/\s+$/, ''));
+}
+
 /** Eine Liedzeile als zwei Zeilen: Akkorde (an der richtigen Spalte) über dem Text. */
-function lyricsToText(line, map) {
+function lyricsToText(line, map, harpLayout = 'inline') {
+  const hasHarp = line.segments.some((s) => s.harp);
+  const hasChord = line.segments.some((s) => s.chord && !s.harp);
+  if (harpLayout === 'split' && hasHarp && hasChord && !line.chordsOnly) return lyricsToSplitText(line, map);
   let text = '';
   let chords = '';
   for (const s of line.segments) {
@@ -59,8 +81,11 @@ function lyricsToText(line, map) {
   return out;
 }
 
-/** Ganzes Lied als "Akkorde über dem Text" (für Monospace-Schrift gedacht). */
-export function chordproToText(text, steps = 0, accidentals = 'auto') {
+/**
+ * Ganzes Lied als "Akkorde über dem Text" (für Monospace-Schrift gedacht).
+ * opts.harpLayout: 'split' = Mundharmonika-Tabs in eigener Zeile unter den Akkorden.
+ */
+export function chordproToText(text, steps = 0, accidentals = 'auto', { harpLayout = 'inline' } = {}) {
   const song = parseChordPro(text);
   const map = chordMapper(song, steps, accidentals);
   const out = [];
@@ -78,7 +103,7 @@ export function chordproToText(text, steps = 0, accidentals = 'auto') {
     const label = block.label || DEFAULT_LABELS[block.kind];
     if (label) out.push(`[${label}]`);
     for (const l of block.lines) {
-      if (l.type === 'lyrics') out.push(...lyricsToText(l, map));
+      if (l.type === 'lyrics') out.push(...lyricsToText(l, map, harpLayout));
       else if (l.type === 'comment') out.push(`(${l.text})`);
       else if (l.type === 'chorus-ref') out.push(`→ ${l.label || 'Refrain'}`);
       else if (l.type === 'tab') out.push(l.text);

@@ -107,13 +107,22 @@ function chordMarker(text) {
   return isChord(inner) || isHarpNote(inner) ? `[${inner}]` : `[*${text}]`;
 }
 
-/** Akkordzeile + Textzeile -> eine ChordPro-Zeile. */
-export function mergeChordLine(chordLine, lyricLine) {
+/**
+ * Akkordzeile + Textzeile -> eine ChordPro-Zeile. Optional zusätzlich eine Zeile
+ * Mundharmonika-Töne (Akkorde und Tabs untereinander über dem Text); an derselben Stelle
+ * steht der Akkord vor dem Ton: [C][4]Text.
+ */
+export function mergeChordLine(chordLine, lyricLine, harpLine = null) {
   let lyrics = escapeLyrics(lyricLine.replace(/\s+$/, ''));
   const indent = lyrics.length - lyrics.trimStart().length;
   lyrics = lyrics.slice(indent);
 
-  const tokens = tokenize(chordLine).filter((t) => !PURE_PUNCT.test(t.text));
+  const tokens = [
+    ...tokenize(chordLine).map((t) => ({ ...t, ord: 0 })),
+    ...(harpLine ? tokenize(harpLine).map((t) => ({ ...t, ord: 1 })) : []),
+  ]
+    .filter((t) => !PURE_PUNCT.test(t.text))
+    .sort((a, b) => a.col - b.col || a.ord - b.ord);
   const before = [];
   const inline = [];
   const after = [];
@@ -125,7 +134,8 @@ export function mergeChordLine(chordLine, lyricLine) {
   }
 
   let out = lyrics;
-  for (const t of inline.sort((a, b) => b.col - a.col)) {
+  // von hinten einfügen; bei gleicher Spalte zuerst den Ton, damit der Akkord davor landet
+  for (const t of inline.sort((a, b) => b.col - a.col || b.ord - a.ord)) {
     out = out.slice(0, t.col) + chordMarker(t.text) + out.slice(t.col);
   }
   if (before.length) out = before.map((t) => chordMarker(t.text)).join(' ') + ' ' + out;
@@ -266,9 +276,17 @@ export function ugToChordPro(input, meta = {}) {
 
     if (isChordLine(line)) {
       const next = lines[i + 1];
-      const nextIsLyrics =
-        next !== undefined && next.trim() !== '' && !isChordLine(next) && !isTabLine(next) &&
-        !sectionLabel(next) && !metaLine(next);
+      const isLyrics = (l) =>
+        l !== undefined && l.trim() !== '' && !isChordLine(l) && !isTabLine(l) && !sectionLabel(l) && !metaLine(l);
+      const nextIsLyrics = isLyrics(next);
+      // Akkordzeile und Mundharmonika-Zeile (in beliebiger Reihenfolge) über dem Text
+      if (!nextIsLyrics && next !== undefined && isChordLine(next) &&
+          isHarpLine(line) !== isHarpLine(next) && isLyrics(lines[i + 2])) {
+        const [chords, harp] = isHarpLine(line) ? [next, line] : [line, next];
+        emitContent(mergeChordLine(chords, lines[i + 2], harp));
+        i += 2;
+        continue;
+      }
       if (nextIsLyrics) {
         emitContent(mergeChordLine(line, next));
         i++;

@@ -505,7 +505,7 @@ function currentExport() {
   const t = current.transpose || 0;
   const acc = current.accidentals || 'auto';
   const name = (current.title || 'Lied').replace(/[\/:*?"<>|]+/g, '').trim() || 'Lied';
-  return { name, chordpro: transposeChordPro(editor.value, t, acc), text: chordproToText(editor.value, t, acc) };
+  return { name, chordpro: transposeChordPro(editor.value, t, acc), text: chordproToText(editor.value, t, acc, { harpLayout: loadSettings().harpLayout }) };
 }
 $('#btn-share').onclick = async () => {
   if (!current) return toast('Kein Lied geöffnet');
@@ -1055,6 +1055,12 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
       items: [
         { label: 'Griffbilder', checked: s.showDiagrams, action: () => saveSettings({ ...s, showDiagrams: !s.showDiagrams }) },
         { label: 'Mundharmonika-Tabs', checked: s.showHarp, action: () => saveSettings({ ...s, showHarp: !s.showHarp }) },
+        {
+          label: 'Harp-Tabs in eigener Zeile',
+          checked: s.harpLayout === 'split',
+          disabled: !s.showHarp,
+          action: () => saveSettings({ ...s, harpLayout: s.harpLayout === 'split' ? 'inline' : 'split' }),
+        },
         { label: 'Gitarren-Tabs', checked: s.showTabs, action: () => saveSettings({ ...s, showTabs: !s.showTabs }) },
       ],
     },

@@ -47,8 +47,15 @@
 .line { white-space: pre-wrap; break-inside: avoid; }
 .line--with-chords { margin-top: 0.15em; }
 .seg { display: inline-block; vertical-align: baseline; }
-.seg > .chord, .seg > .chord-stack { display: block; }
-.chord-stack { white-space: pre; }
+.seg > .chord, .seg > .chord-top { display: block; }
+/* Zeilen mit Mundharmonika-Tabs: Akkord- und Harp-Reihe nebeneinander (Standard) oder
+   untereinander – Akkorde oben, Tabs direkt über dem Text (data-harp-layout="split") */
+.chord-top { white-space: pre; }
+.chord-row, .harp-row { display: inline; }
+.chord-pad { font-family: var(--chord-font); font-size: var(--chord-size); line-height: 1.1; }
+.songbook[data-harp-layout='split'] .chord-row,
+.songbook[data-harp-layout='split'] .harp-row { display: block; }
+.songbook[data-harp='hide'] .harp-row { display: none; }
 .seg > .lyric { display: block; white-space: pre; }
 .chord {
   font-family: var(--chord-font);

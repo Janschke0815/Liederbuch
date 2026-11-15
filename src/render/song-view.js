@@ -83,6 +83,11 @@ function renderLyricsLineBody(line, chordName) {
   }
   const hasChords = line.segments.some((s) => s.chord);
   if (hasChords) div.classList.add('line--with-chords');
+  // Zeilen mit Mundharmonika-Tabs: über jeder Silbe eine Akkord- und eine Harp-Reihe.
+  // Ob die beiden nebeneinander oder untereinander stehen, entscheidet allein das CSS
+  // (data-harp-layout), damit die Einstellung ohne neues Zeichnen wirkt.
+  const harpLine = line.segments.some((s) => s.harp);
+  const withChordRow = harpLine && line.segments.some((s) => s.chord && !s.harp);
   let stacked = []; // Akkord und Mundharmonika-Ton an derselben Stelle: [C][4]Text
   line.segments.forEach((s, i) => {
     if (!s.chord) {
@@ -90,18 +95,29 @@ function renderLyricsLineBody(line, chordName) {
       return;
     }
     const next = line.segments[i + 1];
-    if (!s.text && next?.chord && (s.harp || next.harp)) {
-      stacked.push(chordSpan(s, chordName));
+    if (harpLine && !s.text && next?.chord) {
+      stacked.push(s);
       return;
     }
     const [head, tail] = splitFirstWord(s.text);
     const seg = el('span', 'seg');
     if (s.harp) seg.classList.add('seg--harp');
-    let top = chordSpan(s, chordName);
-    if (stacked.length) {
-      top = el('span', 'chord-stack');
-      top.append(...stacked, chordSpan(s, chordName));
+    let top;
+    if (harpLine) {
+      const here = [...stacked, s];
       stacked = [];
+      top = el('span', 'chord-top');
+      const row = (cls, items) => {
+        const r = el('span', cls);
+        // leere Reihe behält ihre Höhe, damit alle Reihen einer Zeile auf einer Linie liegen
+        if (items.length) r.append(...items.map((x) => chordSpan(x, chordName)));
+        else r.append(el('span', 'chord-pad', '​'));
+        return r;
+      };
+      if (withChordRow) top.append(row('chord-row', here.filter((x) => !x.harp)));
+      top.append(row('harp-row', here.filter((x) => x.harp)));
+    } else {
+      top = chordSpan(s, chordName);
     }
     seg.append(
       top,

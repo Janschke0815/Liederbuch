@@ -40,6 +40,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   showLabels: true,
   showDiagrams: true, // Griffbilder im Liedkopf
   showHarp: true, // Mundharmonika-Tabs wie [-4]
+  harpLayout: 'inline', // Akkorde und Harp-Tabs: 'inline' = eine Zeile, 'split' = zwei Zeilen
   showTabs: true, // Gitarren-Tabs ({start_of_tab})
   lineSpacing: 'normal',
   columns: 1, // Druck
@@ -68,6 +69,7 @@ export function sanitize(input = {}) {
     showLabels: typeof s.showLabels === 'boolean' ? s.showLabels : d.showLabels,
     showDiagrams: typeof s.showDiagrams === 'boolean' ? s.showDiagrams : d.showDiagrams,
     showHarp: typeof s.showHarp === 'boolean' ? s.showHarp : d.showHarp,
+    harpLayout: oneOf(s.harpLayout, ['inline', 'split'], d.harpLayout),
     showTabs: typeof s.showTabs === 'boolean' ? s.showTabs : d.showTabs,
     lineSpacing: oneOf(s.lineSpacing, Object.keys(LINE_SPACING), d.lineSpacing),
     columns: Number(s.columns) === 2 ? 2 : 1,
@@ -92,6 +94,7 @@ export function applySettings(el, settings) {
   el.dataset.labels = s.showLabels ? 'show' : 'hide';
   el.dataset.diagrams = s.showDiagrams ? 'show' : 'hide';
   el.dataset.harp = s.showHarp ? 'show' : 'hide';
+  el.dataset.harpLayout = s.harpLayout;
   el.dataset.tabs = s.showTabs ? 'show' : 'hide';
 }
 
