@@ -74,6 +74,25 @@ werden:
   „… Chords by …“-Zeile – der Dialog zeigt alle und legt sie zusammen an.
 - **ChordPro** wird erkannt und unverändert übernommen (mehrere Lieder mit `{new_song}`).
 
+### Lesezeichen „Ins Liederbuch“
+
+Noch schneller: Im Einfügen-Dialog **„Direkt von Ultimate Guitar übernehmen …“** zeigt einen
+Knopf, den man in die Lesezeichenleiste zieht (am Handy: „Code kopieren“ und als Adresse eines
+Lesezeichens einfügen). Auf einer Liedseite von Ultimate Guitar angeklickt, öffnet es das
+Liederbuch mit dem fertig ausgefüllten Einfügen-Dialog – **Titel, Interpret, Capo, Tonart, Tempo**
+und Stimmung (wenn nicht Standard) inklusive. Angelegt wird erst nach dem Bestätigen.
+
+- Es liest nur die Seite, die man gerade selbst ansieht – kein automatischer Abruf, kein Server.
+  Die Daten stehen kurz hinter `#ug=` in der Adresse und gehen nicht ins Netz.
+- Ein **Takt** kommt nur mit, wenn er im Liedtext steht; Ultimate Guitar speichert ihn nicht.
+- Auf anderen Seiten: Liedtext markieren, dann das Lesezeichen anklicken.
+- In der Ultimate-Guitar-App geht es nicht – das Lied im Browser öffnen.
+- Das Lesezeichen öffnet die Adresse, von der aus es eingerichtet wurde – also am besten in der
+  Online-Version (GitHub Pages) einrichten, nicht unter `localhost`.
+- Ändert Ultimate Guitar den Aufbau seiner Seiten, nimmt das Lesezeichen den markierten bzw.
+  sichtbaren Liedtext; die Umwandlung steckt in der App (`src/core/ug-bookmarklet.js`), das
+  Lesezeichen muss für Verbesserungen nicht neu angelegt werden.
+
 ## Spielmodus
 
 Knopf **Spielen** über der Vorschau (oder Taste **F**): Vollbild nur mit dem Lied, der

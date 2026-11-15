@@ -247,7 +247,8 @@
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
         <h2>Text einfügen</h2>
-        <p class="hint">Akkorde über dem Text, z. B. aus Ultimate Guitar, oder ChordPro. Titel und Interpret werden aus der Kopfzeile erkannt („… Chords by …“, „Interpret – Titel“). Mehrere Lieder auf einmal: mit einer Linie <code>---</code> trennen. Tipp: Text einfach mit Strg+V irgendwo in die App einfügen.</p>
+        <p class="hint">Akkorde über dem Text, z. B. aus Ultimate Guitar, oder ChordPro. Titel und Interpret werden aus der Kopfzeile erkannt („… Chords by …“, „Interpret – Titel“). Mehrere Lieder auf einmal: mit einer Linie <code>---</code> trennen. Tipp: Text einfach mit Strg+V irgendwo in die App einfügen.
+          <button type="button" id="imp-bookmark" class="link-btn">Direkt von Ultimate Guitar übernehmen …</button></p>
       </header>
       <div class="dialog-body import-body">
         <div class="import-input">
@@ -431,6 +432,41 @@
         <span class="spacer"></span>
         <button value="cancel" formnovalidate>Abbrechen</button>
         <button value="ok" class="primary">Speichern</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="ug-bookmark-dialog" class="ugm-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Lieder direkt von Ultimate Guitar übernehmen</h2>
+        <p class="hint">Mit dem Lesezeichen „Ins Liederbuch“ übernimmst du das Lied, das du gerade auf Ultimate Guitar ansiehst – mit Titel, Interpret, Capo, Tonart, Tempo und Stimmung. Das Liederbuch öffnet sich mit dem Einfügen-Dialog; angelegt wird erst, wenn du bestätigst.</p>
+      </header>
+      <div class="dialog-body ugm-body">
+        <section class="ugm-step">
+          <h3>Am PC (Chrome, Edge, Firefox)</h3>
+          <ol>
+            <li>Lesezeichenleiste einblenden: <kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>B</kbd> (Mac: <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>B</kbd>).</li>
+            <li>Diesen Knopf mit der Maus in die Lesezeichenleiste ziehen:
+              <a id="ugm-link" class="ugm-link" href="#" draggable="true" title="In die Lesezeichenleiste ziehen">🎸 Ins Liederbuch</a></li>
+            <li>Auf Ultimate Guitar ein Lied öffnen und auf das Lesezeichen klicken.</li>
+          </ol>
+        </section>
+        <section class="ugm-step">
+          <h3>Am Handy (Chrome, Safari)</h3>
+          <ol>
+            <li><button type="button" id="ugm-copy">Code kopieren</button></li>
+            <li>Eine beliebige Seite als Lesezeichen speichern, dann das Lesezeichen <b>bearbeiten</b>: Name „Ins Liederbuch“, als Adresse den kopierten Code einfügen.</li>
+            <li>Lied auf Ultimate Guitar <b>im Browser</b> öffnen (nicht in der UG-App). Chrome: in die Adresszeile „Ins Liederbuch“ tippen und das Lesezeichen aus den Vorschlägen wählen. Safari: über das Lesezeichen-Menü.</li>
+          </ol>
+        </section>
+        <p class="hint">Klappt auch auf anderen Seiten: Liedtext markieren, dann das Lesezeichen anklicken. Ein Takt wird nur übernommen, wenn er im Liedtext steht – Ultimate Guitar speichert ihn nicht gesondert. Nur für einzelne Lieder zum eigenen Gebrauch.</p>
+        <p class="hint">Das Lesezeichen öffnet: <code id="ugm-target"></code></p>
+        <p id="ugm-local" class="hint ugm-warn" hidden>Du nutzt gerade die Version auf diesem PC (localhost) – das Lesezeichen funktioniert dann nur, solange der Server läuft. Richte es besser in der Online-Version (GitHub Pages) ein.</p>
+      </div>
+      <footer class="dialog-foot">
+        <span class="spacer"></span>
+        <button value="close" class="primary">Fertig</button>
       </footer>
     </form>
   </dialog>

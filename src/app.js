@@ -24,6 +24,7 @@ import { setupSetlists } from './setlist-ui.js';
 import { getAllMeta, setMeta, getTags, setTags } from './core/meta-edit.js';
 import { transposeChord } from './core/chords.js';
 import { applySettings, loadSettings } from './settings/settings.js';
+import { bookmarkletHref, readUgHash, ugDataToText } from './core/ug-bookmarklet.js';
 
 const $ = (s) => document.querySelector(s);
 const editor = $('#editor');
@@ -1152,3 +1153,54 @@ async function start() {
 }
 
 const started = start();
+
+// ---------- Lesezeichen „Ins Liederbuch“ (Ultimate Guitar) ----------
+
+// Das Lesezeichen öffnet die App mit #ug=… in der Adresse: Einfügen-Dialog vorausfüllen.
+// Angelegt wird erst, wenn man im Dialog bestätigt.
+async function takeUgFromHash() {
+  const data = readUgHash(location.hash);
+  if (!location.hash.startsWith('#ug=')) return;
+  history.replaceState(null, '', location.pathname + location.search); // Daten nicht in der Adresse lassen
+  if (!data) {
+    toast('Die Daten vom Lesezeichen waren unvollständig – bitte noch einmal versuchen');
+    return;
+  }
+  await started;
+  const text = ugDataToText(data);
+  for (const d of document.querySelectorAll('dialog[open]')) if (d !== dlg) d.close('cancel');
+  if (dlg.open) {
+    $('#imp-text').value = text;
+    renderImportPreview();
+  } else openImport(text);
+  window.focus();
+}
+takeUgFromHash();
+addEventListener('hashchange', takeUgFromHash);
+
+const appUrl = () => location.origin + location.pathname.replace(/index\.html$/, '');
+function openBookmarkDialog() {
+  const href = bookmarkletHref(appUrl());
+  $('#ugm-link').href = href;
+  $('#ugm-target').textContent = appUrl();
+  $('#ugm-local').hidden = !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  $('#ug-bookmark-dialog').showModal();
+}
+$('#imp-bookmark').onclick = () => {
+  dlg.close('cancel');
+  openBookmarkDialog();
+};
+// Ein Klick hier in der App würde nichts finden: Hinweis statt Ausführen
+$('#ugm-link').addEventListener('click', (e) => {
+  e.preventDefault();
+  toast('In die Lesezeichenleiste ziehen – dann auf einer Ultimate-Guitar-Seite anklicken');
+});
+$('#ugm-copy').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(bookmarkletHref(appUrl()));
+    toast('Code kopiert – jetzt als Adresse eines Lesezeichens einfügen');
+  } catch {
+    toast('Kopieren nicht möglich – bitte am PC einrichten');
+  }
+};
+$('#ug-bookmark-dialog').addEventListener('click', (e) => e.target === e.currentTarget && e.currentTarget.close());
