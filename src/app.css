@@ -498,7 +498,7 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 }
 .book-select:hover { background-color: var(--hover); }
 .sync-section { display: flex; flex-direction: column; gap: .6em; }
-.app-version { margin: .3em 0 0; font-size: .8em; color: var(--muted); font-variant-numeric: tabular-nums; }
+.app-version { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .syntax-btn { font-weight: 700; min-width: 2rem; border-radius: 999px !important; }
 .syntax-dialog { width: min(48rem, calc(100vw - 2rem)); }
 .syntax-body { display: flex; flex-direction: column; gap: 1em; }

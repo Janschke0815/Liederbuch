@@ -319,7 +319,6 @@
       <header class="settings-head">
         <h2>Einstellungen</h2>
         <p class="hint">Änderungen siehst du sofort im Muster und in der Vorschau. Sie gelten für Vorschau, Spielmodus und Druck.</p>
-        <p class="app-version">Liederbuch <span id="app-version"></span></p>
       </header>
       <div class="settings-body">
         <nav class="st-nav" aria-label="Bereiche">
@@ -328,6 +327,7 @@
           <a href="#st-sec-parts"><span>¶</span>Abschnitte</a>
           <a href="#st-sec-print"><span>⎙</span>Druck</a>
           <a href="#st-sec-storage"><span>⛁</span>Speicher</a>
+          <a href="#st-sec-about"><span>ⓘ</span>Version</a>
         </nav>
         <div class="settings-fields" id="st-fields">
           <section class="st-card" id="st-sec-text">
@@ -422,6 +422,14 @@
               <div class="st-row">
                 <div class="st-text"><span class="st-title">Dauerhaft speichern</span><span class="st-hint" id="st-storage-status">Wird geprüft …</span></div>
                 <div class="st-control"><button type="button" id="st-storage-btn" hidden>Anfragen</button></div>
+              </div>
+          </section>
+
+          <section class="st-card" id="st-sec-about">
+            <h3>Version</h3>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Liederbuch</span><span class="st-hint">Welche Fassung der App gerade läuft – z. B. um zu prüfen, ob die NAS oder das Handy schon die neueste hat</span></div>
+                <div class="st-control"><span class="app-version" id="app-version"></span></div>
               </div>
           </section>
         </div>
