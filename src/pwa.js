@@ -1,7 +1,7 @@
 // PWA: Service Worker anmelden, Offline-Hinweis, "App installieren".
 // Eigenständig, damit ein Fehler hier die eigentliche App nicht blockiert.
 
-const $ = (s) => document.querySelector(s);
+import { $ } from './ui/dom.js';
 
 async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;

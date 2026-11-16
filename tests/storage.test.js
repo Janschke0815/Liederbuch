@@ -1,7 +1,7 @@
 import { describe, it, expect } from './runner.js';
 import { SongRepository, deriveSummary } from '../src/storage/repository.js';
 import { createMemoryStore, openIdbStore } from '../src/storage/stores.js';
-import { parseImportFile, looksLikeChordPro } from '../src/core/file-import.js';
+import { parseImportFile, looksLikeChordPro } from '../src/formats/file-import.js';
 
 // Repository mit steuerbarer Uhr und fortlaufenden IDs
 function makeRepo(store = createMemoryStore()) {

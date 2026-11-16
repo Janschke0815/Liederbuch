@@ -14,7 +14,19 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Liederbuch">
   <link rel="stylesheet" href="src/render/song-view.css">
-  <link rel="stylesheet" href="src/app.css">
+  <!-- Oberfläche: eine Datei pro Bereich, Reihenfolge zählt (Grundlagen zuerst) -->
+  <link rel="stylesheet" href="src/styles/base.css">
+  <link rel="stylesheet" href="src/styles/layout.css">
+  <link rel="stylesheet" href="src/styles/list.css">
+  <link rel="stylesheet" href="src/styles/editor.css">
+  <link rel="stylesheet" href="src/styles/preview.css">
+  <link rel="stylesheet" href="src/styles/dialogs.css">
+  <link rel="stylesheet" href="src/styles/print-dialog.css">
+  <link rel="stylesheet" href="src/styles/settings.css">
+  <link rel="stylesheet" href="src/styles/sync.css">
+  <link rel="stylesheet" href="src/styles/setlists.css">
+  <link rel="stylesheet" href="src/styles/play.css">
+  <link rel="stylesheet" href="src/styles/context-menu.css">
   <link rel="stylesheet" href="src/print/print.css">
 </head>
 <body>
@@ -823,38 +835,9 @@
         <p class="hint">Mit <kbd>?</kbd> jederzeit wieder aufrufen. Ein Bluetooth-Fußpedal sendet meist Bild↑/Bild↓ oder Pfeiltasten.</p>
       </header>
       <div class="dialog-body keys-body">
-        <section>
-          <h3>Überall</h3>
-          <table class="keys-table">
-            <tr><td><kbd>Strg</kbd>+<kbd>K</kbd></td><td>Suchen</td></tr>
-            <tr><td><kbd>Strg</kbd>+<kbd>S</kbd></td><td>Speichern (passiert auch automatisch)</td></tr>
-            <tr><td><kbd>Strg</kbd>+<kbd>P</kbd></td><td>Drucken / PDF</td></tr>
-            <tr><td><kbd>Strg</kbd>+<kbd>E</kbd></td><td>Editor ein-/ausblenden</td></tr>
-            <tr><td><kbd>Strg</kbd>+<kbd>V</kbd></td><td>Text einfügen (außerhalb des Editors)</td></tr>
-            <tr><td><kbd>F</kbd></td><td>Spielmodus</td></tr>
-            <tr><td><kbd>M</kbd></td><td>Metronom an/aus</td></tr>
-            <tr><td><kbd>+</kbd> / <kbd>−</kbd></td><td>Transponieren</td></tr>
-            <tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>in der Liste: vorheriges/nächstes Lied</td></tr>
-            <tr><td><kbd>Entf</kbd></td><td>in der Liste: Lied löschen</td></tr>
-            <tr><td><kbd>?</kbd></td><td>diese Übersicht</td></tr>
-          </table>
-        </section>
-        <section>
-          <h3>Spielmodus</h3>
-          <table class="keys-table">
-            <tr><td><kbd>Bild↓</kbd> / <kbd>↓</kbd></td><td>weiterblättern, am Ende nächstes Lied</td></tr>
-            <tr><td><kbd>Bild↑</kbd> / <kbd>↑</kbd></td><td>zurückblättern</td></tr>
-            <tr><td><kbd>→</kbd> / <kbd>←</kbd></td><td>nächstes / vorheriges Lied</td></tr>
-            <tr><td><kbd>Leertaste</kbd></td><td>automatisch scrollen an/aus</td></tr>
-            <tr><td><kbd>&lt;</kbd> / <kbd>&gt;</kbd></td><td>langsamer / schneller</td></tr>
-            <tr><td><kbd>+</kbd> / <kbd>−</kbd></td><td>Schrift größer / kleiner</td></tr>
-            <tr><td><kbd>G</kbd> <kbd>H</kbd> <kbd>T</kbd></td><td>Griffbilder, Harp-Tabs, Gitarren-Tabs</td></tr>
-            <tr><td><kbd>S</kbd></td><td>zweispaltig</td></tr>
-            <tr><td><kbd>N</kbd></td><td>Nachtmodus</td></tr>
-            <tr><td><kbd>M</kbd></td><td>Metronom</td></tr>
-            <tr><td><kbd>Esc</kbd></td><td>beenden</td></tr>
-          </table>
-        </section>
+        <!-- Tabellen entstehen aus src/ui/shortcuts.js -->
+        <section><h3>Überall</h3><div id="keys-app"></div></section>
+        <section><h3>Spielmodus</h3><div id="keys-play"></div></section>
       </div>
       <footer class="dialog-foot">
         <span class="spacer"></span>

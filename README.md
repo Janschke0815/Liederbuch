@@ -425,17 +425,43 @@ Caddyfile dort passt mit anderen Adressen auch für andere NAS oder Server.
 
 ## Aufbau
 
-    src/core/      reine Logik ohne DOM (Parser, Import, Transposition) – gut testbar
-    src/render/    Song-Modell -> HTML (Vorschau und später Druck), CSS mit Variablen
-    src/print/     Seitenumbruch, Deckblatt, Inhaltsverzeichnis, Druck-CSS
-    src/settings/  Layout-Einstellungen (Werte prüfen, speichern, als CSS-Variablen anwenden)
-    src/storage/   IndexedDB hinter einer Schnittstelle
-    src/sync/      Abgleich (Sync-Engine) und Cloud-Anbieter (Google Drive, WebDAV)
-    src/app.js     Oberfläche
-    src/pwa.js     Service Worker anmelden, Offline-Hinweis, Installieren
-    sw.js          Service Worker (Cache „Netz zuerst“)
-    icons/         App-Icons (icon.svg ist die Vorlage)
-    tests/         Browser-Tests (index.html öffnen)
+Kein Build-Schritt: Der Browser lädt die ES-Module direkt. Abhängigkeiten zeigen nur nach unten –
+`core` kennt nichts, `formats` kennt `core`, `storage`/`sync` kennen beide, die Oberfläche kennt alles.
+
+    src/core/       reine Musik- und Textlogik ohne Bildschirm: ChordPro-Parser, Akkorde, Capo,
+                    Harp-Tabs, Wiederholungen, Liedinfo bearbeiten, Sortierung, Spielmodus-Rechnungen,
+                    Textfunktionen (text.js)
+    src/formats/    Dateiformate: .cho-Dateien und Dateinamen, ZIP, Sicherung, Text-/UG-Import,
+                    Lesezeichen „Ins Liederbuch“, Export als Text
+    src/render/     Lied -> HTML (Vorschau, Spielmodus, Druck), Griffbilder
+    src/print/      Seitenumbruch, Deckblatt, Inhaltsverzeichnis, Druck-CSS, Druckschriften
+    src/settings/   Darstellungs-Einstellungen (prüfen, speichern, als CSS-Variablen anwenden)
+    src/storage/    IndexedDB hinter einer Schnittstelle: Lieder, Setlisten
+    src/sync/       Abgleich (sync-engine.js), Google Drive, WebDAV (webdav.js: Lieder <-> Dateien,
+                    webdav-client.js: HTTP)
+    src/ui/         Hauptansicht, ein Modul pro Aufgabe:
+                      app-state.js   Liederbuch, Datenbanken, geöffnetes Lied
+                      dom.js         kleine Hilfen: $, toast, ask(dialog) …
+                      song.js        Lied öffnen/speichern, Vorschau, Transponieren, Liedinfo
+                      list.js        Liederliste (Suche, Filter, Sortierung)
+                      view.js        Handy-Reiter, Editor ausblenden, Menü
+                      song-actions.js, snippets.js, preview-tools.js, paste.js, add-songs.js,
+                      files.js, trash.js, share.js, capo-help.js, context-menus.js
+                      shortcuts.js   alle Tastenkürzel (daraus auch die Übersicht „?“)
+                      app-keys.js    was die Kürzel der Hauptansicht tun
+    src/styles/     CSS, eine Datei pro Bereich; Reihenfolge der <link> in index.html zählt
+    src/app.js      Einstieg: steckt alles zusammen, öffnet das erste Lied
+    src/prefs.js    alles, was pro Gerät gemerkt wird (localStorage), mit Standardwerten
+    src/types.js    Beschreibung der Datensätze (nur für den Editor)
+    src/play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js, sync-ui.js   größere Bereiche
+    src/pwa.js      Service Worker anmelden, Offline-Hinweis, Installieren
+    sw.js           Service Worker (Cache „Netz zuerst“)
+    icons/          App-Icons (icon.svg ist die Vorlage)
+    tests/          Browser-Tests (tests/index.html öffnen)
+    tools/          serve.py (lokaler Server), css-snapshot.js (CSS-Umbauten vorher/nachher vergleichen)
+
+Neue gespeicherte Werte gehören in `src/prefs.js`, neue Tastenkürzel in `src/ui/shortcuts.js`.
+Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx prettier --write src`).
 
 ## Fahrplan
 
@@ -457,3 +483,6 @@ Caddyfile dort passt mit anderen Adressen auch für andere NAS oder Server.
 14. ✅ Bedienbarkeit (1.22): Handy-Ansicht (Liedinfo, Bausteine, Spielmodus-Leiste, größere Knöpfe),
     Sortierung, Warnung bei doppelten Liedern, Tastenkürzel-Übersicht, nächstes Lied im Spielmodus,
     Schriftgröße pro Lied, klarere Cloud-Fehler, „Drucken / PDF“ direkt aus dem Druckdialog, Import-Bericht
+15. ✅ Wartbarkeit (1.23): `app.js` in Module unter `src/ui/` aufgeteilt, Dateiformate in `src/formats/`,
+    gemeinsame Hilfen (`ui/dom.js`, `core/text.js`), gespeicherte Werte zentral (`prefs.js`), Tastenkürzel
+    aus einer Tabelle, CSS nach Bereichen (`src/styles/`), Spielmodus-Rechnungen und WebDAV-HTTP getrennt

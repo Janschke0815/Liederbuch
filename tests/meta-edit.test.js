@@ -41,7 +41,7 @@ describe('Liedinfo: setzen', () => {
   });
 });
 
-import { ugToChordPro } from '../src/core/ug-import.js';
+import { ugToChordPro } from '../src/formats/ug-import.js';
 import { renderSong } from '../src/render/song-view.js';
 
 describe('Capo und Takt: Anzeige und Import', () => {

@@ -14,8 +14,8 @@
 //      Setlisten. Fehlende Dateien löschen nichts.
 
 import { toFileJson, toWindowsText } from './file-format.js';
-import { songBaseName, uniqueName, cleanFileName, SONG_FILE, withTitle, normalizeText, idForFile } from '../sync/song-files.js';
-import { songToFile, fileToSong, setlistToFile, fileToSetlist, SETLIST_EXT } from '../sync/chordpro-files.js';
+import { songBaseName, uniqueName, cleanFileName, SONG_FILE, withTitle, normalizeText, idForFile } from './song-files.js';
+import { songToFile, fileToSong, setlistToFile, fileToSetlist, SETLIST_EXT } from './chordpro-files.js';
 
 export const BACKUP_JSON = 'liederbuch-sicherung.json';
 

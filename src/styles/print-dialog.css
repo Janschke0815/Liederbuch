@@ -1,0 +1,45 @@
+/* Druckdialog, Druckvorschau-Leiste und Schnellwahl. */
+
+/* Drucken */
+.print-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.print-form fieldset { border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; gap: .6em; min-width: 0; margin: 0; padding: .8em 1em 1em; }
+.print-form legend { font-weight: 600; padding: 0 .3em; }
+.print-form fieldset > label { display: flex; flex-direction: column; font-size: .85em; color: var(--muted); gap: .25em; }
+.print-form label.check { flex-direction: row; align-items: center; gap: .55em; font-size: .95em; color: var(--text); }
+.print-form legend.sub { padding: .6em 0 0; font-size: .9em; }
+.print-form .row label { min-width: 6em; }
+#pr-search { flex: 1; min-width: 8em; }
+.pr-list { list-style: none; margin: 0; padding: 0; max-height: 40vh; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.pr-list li label { display: flex; gap: .6em; align-items: center; padding: .4em .6em; border-bottom: 1px solid var(--border); cursor: pointer; }
+.pr-list li label:hover { background: var(--hover); }
+.pr-list li label small { color: var(--muted); margin-left: auto; }
+.print-view { background: #6f6b65 !important; }
+.print-bar { background: var(--surface) !important; border-color: var(--border) !important; padding: .5em .8em !important; }
+.print-info { color: var(--muted) !important; }
+/* Druck-Optionen: jede Option mit 📌 als Schnellwahl in die Leiste über der Vorschau */
+.pr-right { display: flex; flex-direction: column; gap: 1em; min-width: 0; }
+.opt-row { display: flex; align-items: flex-end; gap: .5em; }
+.opt-row > label { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: .85em; color: var(--muted); gap: .25em; }
+.opt-row > label.check { flex-direction: row; align-items: center; gap: .55em; font-size: .95em; color: var(--text); align-self: center; }
+.pin { border: 1px solid transparent; background: none; padding: .2em .35em; border-radius: var(--radius); font-size: .95em; line-height: 1; opacity: .3; filter: grayscale(1); cursor: pointer; }
+.pin:hover { opacity: .7; }
+.pin[aria-pressed='true'] { opacity: 1; filter: none; border-color: var(--accent); background: var(--accent-soft); }
+.pin-hint { margin: 0; }
+.print-form legend small { font-weight: 400; color: var(--muted); }
+/* Schnellwahl in der Druckleiste */
+.pv-quick { display: flex; align-items: center; gap: .4em .6em; flex-wrap: wrap; font-size: .9em; }
+.pv-quick:empty { display: none; }
+.pv-quick .q { display: inline-flex; align-items: center; gap: .35em; white-space: nowrap; color: var(--muted); }
+.pv-quick .q select { max-width: 10em; }
+.pv-quick .stepper button { min-width: 2rem; font-size: 1em; }
+.pv-quick .stepper output { min-width: 3.8em; text-align: center; align-self: center; font-variant-numeric: tabular-nums; color: var(--text); }
+.pv-quick .q-toggle[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.pv-quick .q-toggle[aria-pressed='false'] { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
+@media (max-width: 760px) {
+  .print-bar { gap: .4em; }
+  .pv-quick { flex-basis: 100%; order: 5; }
+}
+@media (max-width: 760px) {
+  .print-columns { grid-template-columns: 1fr; }
+}
+.row-end { display: flex; justify-content: flex-end; margin-top: .6em; }

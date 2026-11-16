@@ -8,7 +8,7 @@
 // Andere Programme ignorieren x_-Direktiven (so sieht es der ChordPro-Standard vor).
 // Reine Funktionen, kein DOM, keine Netzwerkzugriffe.
 
-import { toWindowsText } from '../core/file-format.js';
+import { toWindowsText } from './file-format.js';
 import { cleanFileName, normalizeText } from './song-files.js';
 
 export const SETLIST_DIR = 'Setlisten/';

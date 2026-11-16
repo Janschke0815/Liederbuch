@@ -3,7 +3,7 @@
 
 import { ugToChordPro, isChordLine, isTabLine, sectionLabel } from './ug-import.js';
 import { looksLikeChordPro, splitChordProSongs } from './file-import.js';
-import { parseChordPro } from './chordpro.js';
+import { parseChordPro } from '../core/chordpro.js';
 
 // "Wonderwall Chords by Oasis", "Hallelujah Ukulele Chords by Leonard Cohen @ Ultimate-Guitar.Com"
 const CHORDS_BY = /^\s*(.+?)\s+(?:(?:ukulele\s+|guitar\s+|bass\s+)?(?:chords?|tabs?|akkorde)|guitar\s+pro|official)\s+(?:by|von)\s+(.+?)\s*(?:@.*)?$/i;

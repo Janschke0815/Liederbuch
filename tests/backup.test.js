@@ -1,6 +1,6 @@
 import { describe, it, expect } from './runner.js';
-import { createZip, readZip, isZip, crc32 } from '../src/core/zip.js';
-import { backupFiles, backupJson, applyZipEdits, BACKUP_JSON } from '../src/core/backup.js';
+import { createZip, readZip, isZip, crc32 } from '../src/formats/zip.js';
+import { backupFiles, backupJson, applyZipEdits, BACKUP_JSON } from '../src/formats/backup.js';
 import { SongRepository } from '../src/storage/repository.js';
 import { SetlistRepository, slimSetlist } from '../src/storage/setlists.js';
 import { createMemoryStore } from '../src/storage/stores.js';

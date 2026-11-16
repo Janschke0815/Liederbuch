@@ -1,8 +1,8 @@
 // Lied exportieren: transponierter ChordPro-Text und "Akkorde über dem Text" (z. B. für
 // Nachrichten oder Foren). Reine Funktionen, kein DOM.
 
-import { parseChordPro } from './chordpro.js';
-import { transposeChord, shouldUseFlats, parseChord } from './chords.js';
+import { parseChordPro } from '../core/chordpro.js';
+import { transposeChord, shouldUseFlats, parseChord } from '../core/chords.js';
 
 const DEFAULT_LABELS = { verse: 'Strophe', chorus: 'Refrain', bridge: 'Bridge', tab: 'Tab', grid: 'Grid' };
 

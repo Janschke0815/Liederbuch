@@ -1,6 +1,6 @@
 // Liederliste: Sortierung und Erkennen doppelter Lieder.
 
-const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
+import { collator, foldText } from './text.js';
 
 export const SORT_MODES = {
   title: 'Titel',
@@ -42,10 +42,7 @@ export function letterOf(text) {
 
 /** Titel/Interpret vergleichbar machen: klein, ohne Akzente, Satzzeichen und Klammerzusätze. */
 export function songKey(text) {
-  return String(text || '')
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/ß/g, 'ss')
+  return foldText(text)
     .replace(/\s*[([].*?[)\]]\s*/g, ' ') // „(Live)“, „[Acoustic]“
     .replace(/^(the|der|die|das)\s+/, '')
     .replace(/[^a-z0-9]+/g, ' ')

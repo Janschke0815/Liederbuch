@@ -1,42 +1,31 @@
 // Spielmodus: Vollbild nur mit dem Lied, automatisches Scrollen, Bildschirm bleibt an,
 // Blättern per Tastatur oder Bluetooth-Fußpedal (die senden Bild-/Pfeiltasten).
 //
-// Tasten: Bild↓/↓ weiterblättern (am Ende: nächstes Lied), Bild↑/↑ zurück, →/← Lied wechseln,
-//         Leertaste/Enter Scrollen an/aus, +/− Schrift, </> Tempo, N Nachtmodus, Esc beenden
+// Tasten: siehe SHORTCUTS.play in ui/shortcuts.js. Rechnungen (Tempo, Doppelseiten) in
+// core/play-scroll.js, gemerkte Werte (Schrift, Tempo pro Lied …) über prefs.js.
 
 import { parseChordPro } from './core/chordpro.js';
 import { renderSong } from './render/song-view.js';
 import { applySettings, loadSettings, saveSettings } from './settings/settings.js';
 import { metronome, beatsPerBar } from './metronome.js';
+import { prefs } from './prefs.js';
+import { SHORTCUTS, findShortcut } from './ui/shortcuts.js';
+import {
+  durationSeconds, pixelsPerSecond, secondsPerPage,
+  pageCount as countPages, pageIndex as indexOfPage, pagePos as posOfPage, snapPos,
+} from './core/play-scroll.js';
+import { $ } from './ui/dom.js';
 
-const $ = (s) => document.querySelector(s);
+export { durationSeconds }; // alter Fundort, für bestehende Aufrufer
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 3;
 const SPEED_MIN = 0.2;
 const SPEED_MAX = 5;
-const DEFAULT_SECONDS = 180; // angenommene Liedlänge ohne {duration}
 const BAR_HIDE_MS = 2500;
-
-/** "3:20" oder "200" -> Sekunden */
-export function durationSeconds(value) {
-  const s = String(value || '').trim();
-  const m = /^(\d+):(\d{1,2})$/.exec(s);
-  if (m) return Number(m[1]) * 60 + Number(m[2]);
-  if (/^\d+$/.test(s)) return Number(s);
-  return null;
-}
 
 const fmtSpeed = (f) => `${f.toFixed(1).replace('.', ',')}×`;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-
-function loadMap(key) {
-  try {
-    return JSON.parse(localStorage.getItem(key) || '{}') || {};
-  } catch {
-    return {};
-  }
-}
 
 /**
  * @param {{repo, getSongIds: () => Promise<string[]>, onClose: (id: string) => void}} opts
@@ -59,9 +48,9 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   let raf = 0;
   let hideTimer = 0;
   let wakeLock = null;
-  let zoom = Number(localStorage.getItem('playZoom')) || 0; // allgemeine Schriftgröße
+  let zoom = prefs.get('playZoom'); // allgemeine Schriftgröße
   let songZoom = 0; // Schriftgröße dieses Liedes (gemerkt), sonst 0
-  let cols = localStorage.getItem('playColumns') === '2'; // zwei Spalten, seitenweise
+  let cols = prefs.get('playColumns') === '2'; // zwei Spalten, seitenweise
   let pageClock = 0; // Sekunden seit dem letzten automatischen Umblättern
 
   // ---------- Bildschirm wach halten ----------
@@ -104,12 +93,8 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     const rel = pos() / Math.max(1, maxPos());
     // pro Lied merken; die letzte Wahl gilt außerdem für Lieder ohne eigene Größe
     zoom = songZoom = clamp(Math.round(z * 20) / 20, ZOOM_MIN, ZOOM_MAX);
-    localStorage.setItem('playZoom', String(zoom));
-    if (song?.id) {
-      const map = loadMap('playZoomSong');
-      map[song.id] = songZoom;
-      localStorage.setItem('playZoomSong', JSON.stringify(map));
-    }
+    prefs.set('playZoom', zoom);
+    if (song?.id) prefs.setIn('playZoomSong', song.id, songZoom);
     applyZoom();
     layout();
     setPos(cols ? snap(rel * maxPos()) : rel * maxPos());
@@ -143,32 +128,24 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     else scroller.scrollTop = v;
   };
   // Doppelseiten: 0, pw, 2·pw … – die letzte kann nur halb gefüllt sein (dann bis maxPos)
-  const pageCount = () => (cols ? Math.max(1, Math.ceil(maxPos() / pageWidth() - 0.02) + 1) : 1);
-  const pageIndex = () => (pos() >= maxPos() - 2 ? pageCount() - 1 : Math.round(pos() / pageWidth()));
-  const pagePos = (i) => Math.min(clamp(i, 0, pageCount() - 1) * pageWidth(), maxPos());
-  const snap = (v) => pagePos(Math.round(v / pageWidth()));
+  const pageCount = () => (cols ? countPages(maxPos(), pageWidth()) : 1);
+  const pageIndex = () => indexOfPage(pos(), maxPos(), pageWidth());
+  const pagePos = (i) => posOfPage(i, maxPos(), pageWidth());
+  const snap = (v) => snapPos(v, maxPos(), pageWidth());
 
   function setCols(on) {
     cols = on;
-    localStorage.setItem('playColumns', on ? '2' : '1');
+    prefs.set('playColumns', on ? '2' : '1');
     setPlaying(false);
     layout();
     setPos(0);
     updateProgress();
   }
 
-  function speedKey() {
-    return song?.id;
-  }
-
   function setSpeed(f, persist = true) {
     speed = clamp(Math.round(f * 10) / 10, SPEED_MIN, SPEED_MAX);
     $('#pl-speed').textContent = fmtSpeed(speed);
-    if (persist && speedKey()) {
-      const map = loadMap('playSpeed');
-      map[speedKey()] = speed;
-      localStorage.setItem('playSpeed', JSON.stringify(map));
-    }
+    if (persist && song?.id) prefs.setIn('playSpeed', song.id, speed);
   }
 
   async function show(i) {
@@ -196,10 +173,8 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
       sheet.querySelector('.song-header')?.append(note);
     }
     // zuletzt gespielt (für die Sortierung der Liste)
-    const played = loadMap('playedAt');
-    played[song.id] = new Date().toISOString();
-    localStorage.setItem('playedAt', JSON.stringify(played));
-    songZoom = Number(loadMap('playZoomSong')[song.id]) || 0;
+    prefs.setIn('playedAt', song.id, new Date().toISOString());
+    songZoom = Number(prefs.get('playZoomSong')[song.id]) || 0;
     applyZoom();
     const next = index < entries.length - 1 ? await repo.get(entries[index + 1].id) : null;
     $('#pl-title').textContent = song.title || 'Ohne Titel';
@@ -211,7 +186,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     const endBtn = $('#pl-next-end');
     endBtn.hidden = !next;
     endBtn.textContent = next ? `Nächstes Lied: ${next.title || 'Ohne Titel'} →` : '';
-    setSpeed(loadMap('playSpeed')[song.id] || 1, false);
+    setSpeed(prefs.get('playSpeed')[song.id] || 1, false);
     // Metronom läuft weiter, aber im Tempo des neuen Liedes
     if (metronome.running) metronome.start(Number(meta.tempo) || 100, beatsPerBar(meta.time));
     syncMetro();
@@ -229,9 +204,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   function basePxPerSecond() {
     const end = $('.play-end');
     const content = scroller.scrollHeight - end.offsetHeight + scroller.clientHeight * 0.5;
-    const travel = Math.max(200, content - scroller.clientHeight);
-    const secs = durationSeconds(meta.duration) || DEFAULT_SECONDS;
-    return travel / secs;
+    return pixelsPerSecond(content - scroller.clientHeight, meta.duration);
   }
 
   function maxScroll() {
@@ -244,7 +217,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     lastT = t;
     if (cols) {
       // zweispaltig: im Liedtempo umblättern, auf der letzten Doppelseite anhalten
-      const secs = (durationSeconds(meta.duration) || DEFAULT_SECONDS) / pageCount() / speed;
+      const secs = secondsPerPage(meta.duration, pageCount(), speed);
       pageClock += dt;
       updateProgress(pageClock / secs);
       if (pageClock >= secs) {
@@ -358,7 +331,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     entries = list || (await getSongIds()).map((id) => ({ id }));
     if (!entries.length) return;
     view.hidden = false;
-    view.classList.toggle('night', localStorage.getItem('playNight') === '1');
+    view.classList.toggle('night', prefs.get('playNight'));
     $('#pl-night').setAttribute('aria-pressed', String(view.classList.contains('night')));
     applyZoom();
     syncDiagramButton();
@@ -448,7 +421,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   });
   $('#pl-night').onclick = () => {
     const on = view.classList.toggle('night');
-    localStorage.setItem('playNight', on ? '1' : '');
+    prefs.set('playNight', on);
     $('#pl-night').setAttribute('aria-pressed', String(on));
   };
 
@@ -462,77 +435,33 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   // Von Hand scrollen hält das automatische Scrollen nicht an, verschiebt nur die Stelle
   scroller.addEventListener('wheel', () => (carry = 0), { passive: true });
 
+  // Was die Tasten aus SHORTCUTS.play bewirken
+  const KEY_ACTIONS = {
+    pageDown: () => page(1),
+    pageUp: () => page(-1),
+    next: () => go(1),
+    prev: () => go(-1),
+    toggle: () => setPlaying(!playing),
+    bigger: () => setZoom(currentZoom() + 0.1),
+    smaller: () => setZoom(currentZoom() - 0.1),
+    faster: () => setSpeed(speed + 0.1),
+    slower: () => setSpeed(speed - 0.1),
+    metronome: toggleMetro,
+    diagrams: toggleDiagrams,
+    harp: () => !$('#pl-harp').hidden && toggleSetting('showHarp'),
+    tabs: () => !$('#pl-tabs').hidden && toggleSetting('showTabs'),
+    columns: () => setCols(!cols),
+    night: () => $('#pl-night').click(),
+    exit: close,
+  };
+  // Erfassen vor allen anderen (capture), damit die Tasten der Hauptansicht nicht mitreagieren
   addEventListener('keydown', (e) => {
-    if (view.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
-    let handled = true;
-    switch (e.key) {
-      case 'PageDown':
-      case 'ArrowDown':
-        page(1);
-        break;
-      case 'PageUp':
-      case 'ArrowUp':
-        page(-1);
-        break;
-      case 'ArrowRight':
-        go(1);
-        break;
-      case 'ArrowLeft':
-        go(-1);
-        break;
-      case ' ':
-      case 'Enter':
-        setPlaying(!playing);
-        break;
-      case '+':
-      case '=':
-        setZoom(currentZoom() + 0.1);
-        break;
-      case '-':
-        setZoom(currentZoom() - 0.1);
-        break;
-      case '>':
-      case '.':
-        setSpeed(speed + 0.1);
-        break;
-      case '<':
-      case ',':
-        setSpeed(speed - 0.1);
-        break;
-      case 'm':
-      case 'M':
-        toggleMetro();
-        break;
-      case 'g':
-      case 'G':
-        toggleDiagrams();
-        break;
-      case 'h':
-      case 'H':
-        if (!$('#pl-harp').hidden) toggleSetting('showHarp');
-        break;
-      case 't':
-      case 'T':
-        if (!$('#pl-tabs').hidden) toggleSetting('showTabs');
-        break;
-      case 's':
-      case 'S':
-        setCols(!cols);
-        break;
-      case 'n':
-      case 'N':
-        $('#pl-night').click();
-        break;
-      case 'Escape':
-        close();
-        break;
-      default:
-        handled = false;
-    }
-    if (handled) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-    }
+    if (view.hidden) return;
+    const s = findShortcut(e, SHORTCUTS.play);
+    if (!s) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    KEY_ACTIONS[s.id]();
   }, true);
 
   return { open, close, get isOpen() { return !view.hidden; } };

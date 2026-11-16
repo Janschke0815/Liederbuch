@@ -8,9 +8,9 @@
 //   createdAt, updatedAt, deletedAt          – wie bei Liedern (weiches Löschen für den Sync)
 // }
 
+import { collator } from '../core/text.js';
 import { isNewer } from './repository.js';
 
-const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
 
 function defaultId() {
   if (globalThis.crypto?.randomUUID) return crypto.randomUUID();

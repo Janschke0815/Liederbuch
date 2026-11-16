@@ -2,8 +2,9 @@
 // Transposition), Spielen und Drucken in Setlisten-Reihenfolge.
 
 import { attachContextMenu } from './context-menu.js';
+import { $ } from './ui/dom.js';
+import { prefs } from './prefs.js';
 
-const $ = (s) => document.querySelector(s);
 const h = (tag, className, text) => {
   const el = document.createElement(tag);
   if (className) el.className = className;
@@ -28,7 +29,7 @@ const count = (n) => `${n} ${n === 1 ? 'Lied' : 'Lieder'}`;
 export function setupSetlists({ repo, sets, getCurrentId, openSong, play, printSongs, toast }) {
   const tabSongs = $('#tab-songs');
   const tabSets = $('#tab-sets');
-  let openId = localStorage.getItem('openSetlist') || null;
+  let openId = prefs.get('openSetlist') || null;
   let expanded = null; // songId-Index mit offenem Bearbeiten-Feld
   let songMap = new Map();
 
@@ -38,7 +39,7 @@ export function setupSetlists({ repo, sets, getCurrentId, openSong, play, printS
     for (const b of document.querySelectorAll('.list-tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === tab));
     tabSongs.hidden = tab !== 'songs';
     tabSets.hidden = tab !== 'sets';
-    localStorage.setItem('listTab', tab);
+    prefs.set('listTab', tab);
     if (tab === 'sets') render();
   }
   for (const b of document.querySelectorAll('.list-tabs button')) b.onclick = () => setTab(b.dataset.tab);
@@ -75,8 +76,8 @@ export function setupSetlists({ repo, sets, getCurrentId, openSong, play, printS
   async function openSet(id) {
     openId = id;
     expanded = null;
-    if (id) localStorage.setItem('openSetlist', id);
-    else localStorage.removeItem('openSetlist');
+    if (id) prefs.set('openSetlist', id);
+    else prefs.remove('openSetlist');
     await render();
   }
 
@@ -409,7 +410,7 @@ export function setupSetlists({ repo, sets, getCurrentId, openSong, play, printS
     render.t = setTimeout(render, 300);
   });
 
-  setTab(localStorage.getItem('listTab') === 'sets' ? 'sets' : 'songs');
+  setTab(prefs.get('listTab') === 'sets' ? 'sets' : 'songs');
 
   /** Liste neu zeichnen, z. B. wenn ein anderes Lied geöffnet wurde (Markierung). */
   return {

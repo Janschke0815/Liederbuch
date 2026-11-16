@@ -1,6 +1,6 @@
 import { describe, it, expect } from './runner.js';
-import { transposeChordPro, chordproToText } from '../src/core/export-text.js';
-import { ugToChordPro } from '../src/core/ug-import.js';
+import { transposeChordPro, chordproToText } from '../src/formats/export-text.js';
+import { ugToChordPro } from '../src/formats/ug-import.js';
 
 describe('Lied teilen: Text', () => {
   it('transponiert Akkorde und Tonart im ChordPro-Text, Anmerkungen bleiben', () => {

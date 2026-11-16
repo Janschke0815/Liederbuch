@@ -1,0 +1,81 @@
+/* Vorschau: Leiste mit Tonart, Transponieren, Schreibweise; Zoom; Metronom. */
+
+/* Vorschau */
+.pane-preview { background: var(--bg); }
+.key-box { display: inline-flex; align-items: baseline; gap: .4em; padding-inline: .3em; }
+.key-label { font-size: .78em; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.stepper { display: inline-flex; border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.stepper button { border: 0; border-radius: 0; min-width: 2.4rem; font-size: 1.15em; font-weight: 600; }
+#tr-value {
+  min-width: 2.6em; display: grid; place-items: center; font-variant-numeric: tabular-nums;
+  border-inline: 1px solid var(--border); font-weight: 600;
+}
+#tr-value.changed { color: var(--accent); }
+#btn-focus[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.preview-scroll { flex: 1; overflow: auto; padding: 1.5em; }
+.sheet {
+  background: var(--sheet);
+  color: #111;
+  max-width: 52em;
+  margin: 0 auto;
+  padding: 2.2em 2.6em;
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  min-height: 8em;
+}
+.import-preview .sheet { flex: 1; max-height: 62vh; overflow: auto; width: 100%; padding: 1.4em 1.6em; font-size: .85em; border: 1px solid var(--border); }
+@media (max-width: 1200px) {
+  .key-label { display: none; }
+  .view-bar { gap: .35em; }
+}
+@media (max-width: 760px) {
+  .workspace[data-view='list'] .pane-list,
+  .workspace[data-view='editor'] .pane-editor,
+  .workspace[data-view='preview'] .pane-preview { display: flex; }
+  #btn-focus { display: none; }
+  .view-bar { justify-content: center; gap: .4em; }
+  .view-bar .spacer { display: none; }
+  .preview-scroll { padding: 0; }
+  .sheet { border-radius: 0; box-shadow: none; padding: 1.2em 1em 2em; max-width: none; min-height: 100%; }
+  .import-preview .sheet { max-height: none; }
+}
+.info-chip {
+  font-size: .82em; padding: .2em .6em; border-radius: 999px;
+  background: var(--hover); color: var(--text); white-space: nowrap; font-weight: 600;
+}
+.song-note {
+  margin: 0 0 1.2em; padding: .6em .9em; border-radius: 6px;
+  background: #fff6d6; border: 1px solid #f0dc94; color: #5b4a12;
+  font: .9rem/1.4 system-ui, 'Segoe UI', sans-serif; white-space: pre-wrap;
+}
+.song-note::before { content: '📝 '; }
+/* Zoom der Vorschau */
+.preview-scroll { position: relative; }
+.zoom-ctl {
+  position: sticky; bottom: .8em; float: right; margin-top: -2.6em; z-index: 1;
+  display: inline-flex; border: 1px solid var(--border-strong); border-radius: 999px; overflow: hidden;
+  background: var(--surface); box-shadow: var(--shadow); opacity: .55; transition: opacity .15s;
+}
+.zoom-ctl:hover, .zoom-ctl:focus-within { opacity: 1; }
+.zoom-ctl button { border: 0; border-radius: 0; min-height: 2rem; min-width: 2.2rem; padding: 0 .5em; background: transparent; font-weight: 600; }
+@media (max-width: 760px) {
+  .zoom-ctl { display: none; }
+}
+/* Handy: Leiste über dem Lied darf nicht überlaufen */
+@media (max-width: 760px) {
+  #time-chip { display: none !important; }
+  .view-bar { gap: .3em; padding-inline: .4em; }
+  .view-bar .stepper button { min-width: 2rem; }
+  .view-bar .segmented button { min-width: 1.9rem; padding-inline: .45em; }
+  #tr-value { min-width: 2.1em; }
+  .info-chip { padding: .2em .5em; }
+}
+/* Fingertaugliche Knöpfe (mind. 44 px) auf Touch-Geräten */
+@media (pointer: coarse) {
+  .view-bar .segmented button, .view-bar .stepper button { min-width: 2.75rem; min-height: 2.75rem; }
+}
+@media (max-width: 760px) {
+  .view-bar { flex-wrap: wrap; row-gap: .3em; }
+  .view-bar .segmented button { min-width: 2.75rem; min-height: 2.6rem; }
+  .view-bar .stepper button { min-width: 2.6rem; min-height: 2.6rem; }
+}

@@ -1,0 +1,34 @@
+/* Kontextmenü (Rechtsklick / langes Drücken). */
+
+
+/* ---------- Kontextmenü ---------- */
+.ctx-menu {
+  position: fixed; z-index: 60; min-width: 13.5em; max-width: 20em; padding: .3em;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-lg);
+  font-size: .92rem; outline: none;
+  animation: ctx-in .1s ease-out;
+}
+.ctx-title {
+  padding: .35em .7em .3em; font-size: .78em; font-weight: 700; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 18em;
+}
+.ctx-item {
+  display: flex; align-items: center; gap: .55em; width: 100%;
+  min-height: 2.1rem; padding: .3em .7em; border: 0; border-radius: 6px;
+  background: transparent; text-align: left; justify-content: flex-start; font-size: inherit;
+}
+.ctx-item:hover:not(:disabled), .ctx-item:focus-visible { background: var(--hover); outline: none; }
+.ctx-item:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.ctx-item.danger { color: var(--accent); }
+.ctx-item.danger:hover:not(:disabled) { background: var(--accent-soft); }
+.ctx-icon { width: 1.2em; display: inline-grid; place-items: center; color: var(--muted); font-weight: 700; }
+.ctx-item.danger .ctx-icon { color: var(--accent); }
+.ctx-icon .icon { width: 1.05em; height: 1.05em; }
+.ctx-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ctx-hint { color: var(--muted); font-size: .82em; margin-left: 1em; }
+.ctx-sep { height: 1px; background: var(--border); margin: .3em .4em; }
+@media (pointer: coarse) {
+  .ctx-item { min-height: 2.7rem; }
+  .ctx-menu { font-size: 1rem; }
+}

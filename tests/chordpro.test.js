@@ -1,6 +1,6 @@
 import { describe, it, expect } from './runner.js';
 import { parseChordPro, parseLyricsLine } from '../src/core/chordpro.js';
-import { ugToChordPro } from '../src/core/ug-import.js';
+import { ugToChordPro } from '../src/formats/ug-import.js';
 import { isChord, transposeChord, shouldUseFlats } from '../src/core/chords.js';
 
 describe('ChordPro-Parser', () => {

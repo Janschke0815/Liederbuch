@@ -9,8 +9,8 @@ import { normalize } from './storage/repository.js';
 import { loadSettings, saveSettings, applySettings, FONTS } from './settings/settings.js';
 import { withPrintFonts, loadPrintFonts, savePrintFonts } from './print/print-fonts.js';
 import { QUICK_OPTIONS, loadPins, togglePin, formatValue } from './print/print-quick.js';
+import { $ } from './ui/dom.js';
 
-const $ = (s) => document.querySelector(s);
 const OWN_KEY = 'printOptions';
 
 function loadOwn() {

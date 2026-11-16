@@ -5,8 +5,8 @@ import { SetlistRepository, slimSetlist } from '../src/storage/setlists.js';
 import { createMemoryStore } from '../src/storage/stores.js';
 import { SyncEngine } from '../src/sync/sync-engine.js';
 import { WebDavProvider } from '../src/sync/webdav.js';
-import { songBaseName, cleanFileName, nameFits, parsePropfind } from '../src/sync/song-files.js';
-import { songToFile, fileToSong, setlistToFile, fileToSetlist } from '../src/sync/chordpro-files.js';
+import { songBaseName, cleanFileName, nameFits, parsePropfind } from '../src/formats/song-files.js';
+import { songToFile, fileToSong, setlistToFile, fileToSetlist } from '../src/formats/chordpro-files.js';
 
 let tick = 0;
 const now = () => new Date(Date.UTC(2026, 2, 1, 0, 0, tick++)).toISOString();

@@ -6,8 +6,8 @@ import {
 } from './settings/settings.js';
 import { parseChordPro } from './core/chordpro.js';
 import { renderSong } from './render/song-view.js';
-
-const $ = (s) => document.querySelector(s);
+import { $ } from './ui/dom.js';
+import { prefs } from './prefs.js';
 
 const SAMPLE = `{title: Clementine}
 {artist: Traditional}
@@ -107,20 +107,13 @@ export function setupSettings({ targets }) {
   }
 
   // Bereiche einklappbar: Klick auf die Überschrift; der Zustand bleibt gespeichert
-  const COLLAPSED_KEY = 'settingsCollapsed';
-  const collapsed = new Set((() => {
-    try {
-      return JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '[]');
-    } catch {
-      return [];
-    }
-  })());
+  const collapsed = new Set(prefs.get('settingsCollapsed'));
   function setCollapsed(card, value) {
     card.classList.toggle('collapsed', value);
     card.querySelector('.st-card-toggle').setAttribute('aria-expanded', String(!value));
     if (value) collapsed.add(card.id);
     else collapsed.delete(card.id);
-    localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed]));
+    prefs.set('settingsCollapsed', [...collapsed]);
   }
   for (const card of dlg.querySelectorAll('.st-card')) {
     const h3 = card.querySelector(':scope > h3');
@@ -143,10 +136,10 @@ export function setupSettings({ targets }) {
   function setSampleHidden(hidden) {
     sampleBox.classList.toggle('collapsed', hidden);
     sampleToggle.setAttribute('aria-expanded', String(!hidden));
-    localStorage.setItem('settingsSampleHidden', hidden ? '1' : '');
+    prefs.set('settingsSampleHidden', hidden);
   }
   sampleToggle.onclick = () => setSampleHidden(!sampleBox.classList.contains('collapsed'));
-  setSampleHidden(localStorage.getItem('settingsSampleHidden') === '1');
+  setSampleHidden(prefs.get('settingsSampleHidden'));
 
   // Bereichs-Navigation: springen und beim Scrollen mitführen
   const fields = $('#st-fields');

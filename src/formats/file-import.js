@@ -3,7 +3,7 @@
 //   - ChordPro (.cho, .chordpro, .pro, .crd …), auch mehrere Lieder mit {new_song}
 //   - Akkorde-über-Text (.txt aus Ultimate Guitar o. ä.) -> wird umgewandelt
 
-import { isChord } from './chords.js';
+import { isChord } from '../core/chords.js';
 import { ugToChordPro } from './ug-import.js';
 
 export function looksLikeChordPro(text) {

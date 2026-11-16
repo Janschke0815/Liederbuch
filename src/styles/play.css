@@ -1,0 +1,93 @@
+/* Spielmodus (Vollbild, Leiste, Nachtmodus, zweispaltig). */
+
+
+/* ---------- Spielmodus ---------- */
+.play-btn { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.play-btn:hover:not(:disabled) { background: var(--accent-soft); }
+.play-view {
+  position: fixed; inset: 0; z-index: 25;
+  display: flex; flex-direction: column;
+  background: #fffefb; color: #111;
+  --play-zoom: 1.3;
+}
+.play-bar {
+  display: flex; align-items: center; gap: .5em;
+  padding: .45em .7em; padding-top: max(.45em, env(safe-area-inset-top));
+  background: #f6f3ee; border-bottom: 1px solid #e2ddd4; color: #22201c;
+  transition: transform .25s, opacity .25s;
+  position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+}
+.play-view.bar-hidden .play-bar { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+.play-bar button { background: #fff; border-color: #cdc6ba; color: #22201c; }
+.play-bar button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.play-title { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; max-width: 40vw; }
+.play-title strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.play-title small { color: #77716a; font-size: .78em; }
+.play-group { display: inline-flex; border: 1px solid #cdc6ba; border-radius: 8px; overflow: hidden; }
+.play-group button { border: 0; border-radius: 0; min-width: 2.5rem; font-weight: 600; }
+.play-group button + button, .play-group output + button, .play-group button + output { border-left: 1px solid #e2ddd4; }
+#pl-speed { display: grid; place-items: center; min-width: 3.4em; font-variant-numeric: tabular-nums; font-weight: 600; background: #fff; font-size: .9em; }
+#pl-toggle .icon { width: 1.1em; height: 1.1em; }
+#pl-night[aria-pressed='true'] { background: #22201c; color: #fff; border-color: #22201c; }
+.play-scroll { flex: 1; overflow-y: auto; outline: none; padding: 4.2em 1.5em 0; scroll-behavior: auto; }
+.play-sheet { zoom: var(--play-zoom); max-width: 46em; margin: 0 auto; }
+.play-end { display: flex; justify-content: center; padding: 2.5em 1em 45vh; }
+.play-end button { font-size: 1.05em; padding: .6em 1.2em; }
+.play-progress {
+  position: absolute; left: 0; bottom: 0; height: 3px; width: 0;
+  background: var(--accent); opacity: .6; pointer-events: none; z-index: 2;
+}
+/* Nachtmodus: Blatt invertieren, Akkordfarben bleiben erkennbar */
+.play-view.night { background: #0e0e0e; }
+.play-view.night .play-scroll { filter: invert(1) hue-rotate(180deg); background: #f1f1f1; }
+.play-view.night .play-bar { background: #1b1a19; border-color: #333; color: #eee; }
+.play-view.night .play-bar button:not(.primary) { background: #2a2826; border-color: #444; color: #eee; }
+.play-view.night #pl-speed { background: #2a2826; color: #eee; }
+.play-view.night .play-group { border-color: #444; }
+@media (max-width: 760px) {
+  .play-btn .label { display: none; }
+  .play-view { --play-zoom: 1.05; }
+  .play-bar { flex-wrap: wrap; gap: .35em; }
+  .play-bar .spacer { display: none; }
+  .play-title { flex: 1; max-width: none; }
+  .play-scroll { padding: 6.6em .9em 0; }
+}
+.play-note { font-family: var(--chord-font, system-ui); font-size: .9em; color: #b3261e; margin: 0 0 .8em; font-style: italic; }
+/* Spielmodus zweispaltig: Spalten in Bildschirmhöhe, waagerecht blättern */
+#pl-diagrams[aria-pressed='true'], #pl-harp[aria-pressed='true'], #pl-tabs[aria-pressed='true'],
+#pl-cols[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.play-view.cols2 .play-scroll { overflow: hidden; padding-bottom: 1.2em; }
+.play-view.cols2 .play-sheet {
+  max-width: none; margin: 0;
+  column-count: 2; column-gap: 3em; column-fill: auto;
+  column-rule: 1px solid #0000001a;
+}
+.play-view.cols2 .play-sheet .song-body { column-count: 1; }
+.play-view.cols2 .play-end { display: none; }
+.play-sheet .song-header, .play-sheet .para, .play-sheet .line { break-inside: avoid; }
+.play-view.cols2 .play-sheet .block { break-inside: auto; }
+.play-view.cols2 .play-sheet .block-label { break-after: avoid; }
+.play-sheet .song-note { font-size: .85em; }
+.time-chip[aria-pressed='true'], #pl-metro[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+@media (pointer: coarse) {
+  .play-bar button, .play-bar .icon-btn { min-width: 2.75rem; min-height: 2.75rem; }
+}
+/* Spielmodus: Zusatzknöpfe; am Handy hinter "⋯" */
+.play-extra { display: contents; }
+#pl-more { display: none; }
+#pl-toggle { min-width: 2.6rem; }
+@media (max-width: 760px) {
+  .play-bar { flex-wrap: nowrap; }
+  .play-title { flex: 1; min-width: 0; }
+  .play-title small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #pl-more { display: inline-flex; }
+  .play-extra { display: none; }
+  .play-view.extra-open .play-bar { flex-wrap: wrap; }
+  .play-view.extra-open .play-extra {
+    display: flex; flex-wrap: wrap; gap: .35em; order: 10; flex: 1 1 100%;
+    padding-top: .35em; border-top: 1px solid #e2ddd4;
+  }
+  .play-view.night.extra-open .play-extra { border-color: #333; }
+  .play-scroll { padding-top: 4.2em; }
+  .play-bar #pl-prev, .play-bar #pl-next { min-width: 2.4rem; }
+}

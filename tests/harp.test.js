@@ -2,8 +2,8 @@ import { describe, it, expect } from './runner.js';
 import { isHarpNote, isHarpTab, isHarpLine } from '../src/core/harp.js';
 import { parseChordPro, parseLyricsLine } from '../src/core/chordpro.js';
 import { renderSong, usedChords } from '../src/render/song-view.js';
-import { ugToChordPro } from '../src/core/ug-import.js';
-import { transposeChordPro, chordproToText } from '../src/core/export-text.js';
+import { ugToChordPro } from '../src/formats/ug-import.js';
+import { transposeChordPro, chordproToText } from '../src/formats/export-text.js';
 import { applySettings, sanitize } from '../src/settings/settings.js';
 
 describe('Mundharmonika: Schreibweise', () => {

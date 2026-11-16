@@ -10,15 +10,14 @@
 // }
 
 import { parseChordPro } from '../core/chordpro.js';
+import { collator, foldText } from '../core/text.js';
 
 export const EXPORT_FORMAT = 'liederbuch';
 export const EXPORT_VERSION = 2; // 2: zusätzlich Papierkorb (trash); Setlisten stehen in der Sicherungsdatei der App
 
-const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
 
-export function normalize(s) {
-  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss');
-}
+/** Für die Suche vereinfachen (siehe core/text.js) – alter Name, bleibt für bestehende Aufrufer. */
+export const normalize = foldText;
 
 export function deriveSummary(chordpro) {
   const { meta } = parseChordPro(chordpro || '');

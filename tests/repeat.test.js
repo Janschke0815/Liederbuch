@@ -2,7 +2,7 @@ import { describe, it, expect } from './runner.js';
 import { splitRepeat, bumpRepeat } from '../src/core/repeat.js';
 import { parseChordPro } from '../src/core/chordpro.js';
 import { renderSong } from '../src/render/song-view.js';
-import { ugToChordPro } from '../src/core/ug-import.js';
+import { ugToChordPro } from '../src/formats/ug-import.js';
 
 const render = (src) => {
   const host = document.createElement('div');

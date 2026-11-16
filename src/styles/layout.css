@@ -1,0 +1,118 @@
+/* Kopfleiste, Arbeitsbereich mit drei Spalten, Handy-Reiter unten. */
+
+html, body { height: 100%; margin: 0; }
+body {
+  display: flex;
+  flex-direction: column;
+  font: 15px/1.4 system-ui, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+.spacer { flex: 1; }
+
+/* ---------- Kopfleiste ---------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  min-height: var(--bar-h);
+  padding: .45em .8em;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 5;
+}
+.brand { display: flex; align-items: center; gap: .55em; margin-right: .6em; }
+.brand img { border-radius: 6px; }
+.app-name { font-size: 1.12em; letter-spacing: .01em; }
+.actions { display: flex; align-items: center; gap: .35em; }
+.actions button { border-color: transparent; background: transparent; }
+.actions button:hover:not(:disabled) { background: var(--hover); }
+.menu-toggle { display: none; border-color: transparent; background: transparent; }
+#btn-install { color: var(--accent); }
+.offline-badge {
+  font-size: .7em; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: #fff; background: #7a756e; border-radius: 999px; padding: .15em .6em;
+}
+
+/* ---------- Arbeitsbereich ---------- */
+.workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 0;
+}
+.workspace.focus { grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); }
+.pane { min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.pane-bar {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  min-height: 2.9rem;
+  padding: .35em .6em;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ---------- Unterseiten-Navigation (Handy) ---------- */
+.mobile-tabs { display: none; }
+/* Mittlere Breite: nur Symbole in der Kopfleiste */
+@media (max-width: 1200px) {
+  .actions .label { display: none; }
+  .actions button { padding-inline: .55em; }
+  .workspace { grid-template-columns: 210px minmax(0, 1fr) minmax(0, 1fr); }
+  .workspace.focus { grid-template-columns: 210px minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  .toolbar { padding: .4em .6em; }
+  .brand { margin-right: 0; }
+  #btn-new .label { display: none; }
+  #btn-new { padding-inline: .6em; }
+  .menu-toggle { display: inline-flex; }
+  .actions {
+    display: none;
+    position: absolute; right: .6em; top: calc(100% + .3em);
+    flex-direction: column; align-items: stretch; gap: 0;
+    min-width: 14em; padding: .35em;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-lg);
+  }
+  .actions.open { display: flex; }
+  .actions .label { display: inline; }
+  .actions button { justify-content: flex-start; padding: .65em .8em; min-height: 2.8rem; }
+  .workspace, .workspace.focus { grid-template-columns: 1fr; }
+  .workspace > .pane { display: none; }
+  .mobile-tabs {
+    display: flex;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mobile-tabs button {
+    flex: 1; flex-direction: column; gap: .15em; min-height: 3.4rem;
+    border: 0; border-radius: 0; background: transparent; font-size: .75em; color: var(--muted);
+  }
+  .mobile-tabs button .icon { width: 1.5em; height: 1.5em; }
+  .mobile-tabs button.active { color: var(--accent); font-weight: 600; }
+}
+/* Installierte App: Statusleiste/Notch berücksichtigen */
+@media (display-mode: standalone) {
+  .toolbar { padding-top: max(.45em, env(safe-area-inset-top)); }
+}
+
+/* ---------- Cloud-Sync ---------- */
+.cloud-btn { border-color: transparent; background: transparent; color: var(--muted); position: relative; }
+.cloud-btn::after {
+  content: ''; position: absolute; left: 1.45em; top: .45em; width: .55em; height: .55em;
+  border-radius: 50%; border: 2px solid var(--surface); background: transparent;
+}
+.cloud-btn[data-state='idle'] { color: var(--text); }
+.cloud-btn[data-state='idle']::after { background: #3b8c4a; }
+.cloud-btn[data-state='syncing']::after { background: #3a7bd5; animation: pulse 1s infinite alternate; }
+.cloud-btn[data-state='offline']::after { background: #8a847c; }
+.cloud-btn[data-state='auth']::after, .cloud-btn[data-state='error']::after { background: #d18f1c; }
+.cloud-btn[data-state='auth'], .cloud-btn[data-state='error'] { color: var(--text); }
+@media (max-width: 760px) {
+  .cloud-btn .label { display: none; }
+}

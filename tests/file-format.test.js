@@ -1,6 +1,6 @@
 import { describe, it, expect } from './runner.js';
-import { toFileJson, toWindowsText } from '../src/core/file-format.js';
-import { songToFile, fileToSong } from '../src/sync/chordpro-files.js';
+import { toFileJson, toWindowsText } from '../src/formats/file-format.js';
+import { songToFile, fileToSong } from '../src/formats/chordpro-files.js';
 import { parseChordPro } from '../src/core/chordpro.js';
 
 describe('Dateien für Windows (CR LF)', () => {

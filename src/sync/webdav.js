@@ -20,18 +20,21 @@
 //
 // Ältere Ablageformate (alles in Liederbuch.json bzw. Verzeichnis + Dateien) werden gelesen und
 // beim ersten Schreiben umgestellt.
+//
+// Die HTTP-Seite (Anmeldung, PROPFIND, PUT, DELETE, Fehlermeldungen) steht in webdav-client.js.
 
-import { AuthError, ConflictError, SYNC_FORMAT } from './sync-engine.js';
-import { toFileJson } from '../core/file-format.js';
+import { SYNC_FORMAT } from './sync-engine.js';
+import { WebdavClient } from './webdav-client.js';
+import { toFileJson } from '../formats/file-format.js';
 import { slimRecord } from '../storage/repository.js';
 import { slimSetlist } from '../storage/setlists.js';
 import {
-  SONG_DIR, SONG_FILE, songBaseName, nameFits, uniqueName, normalizeText, hashText, idForFile,
-  withTitle, parsePropfind, listingSignature, PROPFIND_BODY, cleanFileName,
-} from './song-files.js';
+  SONG_DIR, SONG_FILE, songBaseName, nameFits, normalizeText, hashText, idForFile,
+  withTitle, listingSignature, cleanFileName,
+} from '../formats/song-files.js';
 import {
   SETLIST_DIR, SETLIST_EXT, songToFile, fileToSong, songBody, setlistToFile, fileToSetlist, setlistFileName,
-} from './chordpro-files.js';
+} from '../formats/chordpro-files.js';
 
 export const WEBDAV_FILE = 'Liederbuch.json';
 const GUARD_VERSION = 4; // Hinweisdatei: "Ablage als ChordPro-Dateien"
@@ -85,14 +88,11 @@ export class WebDavProvider {
     this.folderUrl = this.fileUrl.replace(/[^/]*$/, '');
     this.songDirUrl = this.folderUrl + SONG_DIR;
     this.setDirUrl = this.folderUrl + SETLIST_DIR;
-    this.user = user;
-    this.password = password;
-    this.fetch = f;
     this.now = now;
     this.storage = storage;
     this.stateKey = `webdav.state:${this.folderUrl}`;
     this.signedIn = Boolean(this.fileUrl);
-    this.texts = new Map(); // Adresse -> {etag, text}
+    this.http = new WebdavClient({ user, password, fetch: f, host: this.host });
     this.local = null; // eigene Datensätze (von der Engine vor dem Lesen gereicht)
     this.lists = null; // zuletzt gelesene Ordnerlisten {songs, setlists}
     this.guard = null; // Inhalt von Liederbuch.json beim letzten Lesen (Hinweis oder altes Format)
@@ -131,56 +131,14 @@ export class WebDavProvider {
     this.local = local;
   }
 
-  // ---------- Netzwerk ----------
+  // ---------- Netzwerk (siehe webdav-client.js) ----------
 
-  #headers(extra = {}) {
-    const h = { ...extra };
-    if (this.user || this.password) {
-      const bytes = new TextEncoder().encode(`${this.user}:${this.password}`);
-      h.Authorization = 'Basic ' + btoa(String.fromCharCode(...bytes));
-    }
-    return h;
+  #list(dirUrl) {
+    return this.http.list(dirUrl);
   }
 
-  async #request(method, url, { headers = {}, body } = {}) {
-    let res;
-    try {
-      res = await this.fetch(url, { method, headers: this.#headers(headers), body, cache: 'no-store', credentials: 'omit' });
-    } catch {
-      if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('Offline');
-      throw new Error(
-        `Server ${this.host} nicht erreichbar – Adresse prüfen. Erreichbar, aber blockiert? ` +
-          'Dann erlaubt der Server keine Zugriffe von dieser Seite (CORS, siehe README).',
-      );
-    }
-    if (res.status === 401) throw new AuthError('Benutzername oder Passwort falsch');
-    if (res.status === 403) throw new AuthError('Keine Berechtigung für diesen Ordner');
-    return res;
-  }
-
-  /** Ordnerliste (PROPFIND). Fehlt der Ordner: leere Liste mit folderMissing. */
-  async #list(dirUrl) {
-    const res = await this.#request('PROPFIND', dirUrl, {
-      headers: { Depth: '1', 'Content-Type': 'application/xml; charset=utf-8' },
-      body: PROPFIND_BODY,
-    });
-    if (res.status === 404) return Object.assign(new Map(), { folderMissing: true });
-    if (res.status !== 207) {
-      throw new Error(`Der Server liefert keine Ordnerliste (PROPFIND, Antwort ${res.status}) – für den Abgleich nötig`);
-    }
-    return parsePropfind(await res.text(), dirUrl);
-  }
-
-  /** Datei lesen (zwischengespeichert, solange sich das ETag nicht ändert). null = gibt es nicht. */
-  async #text(url, etag) {
-    const cached = this.texts.get(url);
-    if (cached && etag && cached.etag === etag) return cached.text;
-    const res = await this.#request('GET', url);
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Lesen von „${decodeURIComponent(url.split('/').pop())}“`);
-    const text = normalizeText(await res.text());
-    this.texts.set(url, { etag: etag || res.headers.get('ETag'), text });
-    return text;
+  #text(url, etag) {
+    return this.http.text(url, etag);
   }
 
   #songUrl(name) {
@@ -212,7 +170,7 @@ export class WebDavProvider {
     if (knownVersion && knownVersion === version && this.lists) return { unchanged: true };
 
     // Liederbuch.json: Hinweisdatei (neu) oder älteres Ablageformat
-    const res = await this.#request('GET', this.fileUrl);
+    const res = await this.http.request('GET', this.fileUrl);
     let guard = null;
     if (res.ok) {
       try {
@@ -362,49 +320,9 @@ export class WebDavProvider {
 
   // ---------- Schreiben ----------
 
-  async #ensureFolder(url) {
-    for (const u of [this.folderUrl, url]) {
-      const mk = await this.#request('MKCOL', u);
-      if (!mk.ok && ![405, 301].includes(mk.status)) throw new Error(`Ordner konnte nicht angelegt werden (${mk.status})`);
-    }
-  }
-
-  async #put(url, body, headers, dirUrl) {
-    let res = await this.#request('PUT', url, { headers: { 'Content-Type': 'text/plain; charset=utf-8', ...headers }, body });
-    if (res.status === 409) {
-      await this.#ensureFolder(dirUrl); // Ordner fehlt noch
-      res = await this.#request('PUT', url, { headers: { 'Content-Type': 'text/plain; charset=utf-8', ...headers }, body });
-    }
-    if (res.status === 412) throw new ConflictError();
-    if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Speichern von „${decodeURIComponent(url.split('/').pop())}“`);
-    return res.headers.get('ETag');
-  }
-
-  /** Neue Datei unter freiem Namen anlegen (gleicher Inhalt unter dem Namen = schon da). */
-  async #putNew(dirUrl, urlOf, base, ext, body, taken) {
-    for (let i = 0; i < 30; i++) {
-      const name = i === 0 ? base + ext : `${base} (${i + 1})${ext}`;
-      if (taken.has(lower(name))) continue;
-      const res = await this.#request('PUT', urlOf(name), { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'If-None-Match': '*' }, body });
-      let r = res;
-      if (r.status === 409) {
-        await this.#ensureFolder(dirUrl);
-        r = await this.#request('PUT', urlOf(name), { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'If-None-Match': '*' }, body });
-      }
-      if (r.ok) return { name, etag: r.headers.get('ETag') };
-      if (r.status !== 412) throw new Error(`WebDAV-Fehler ${r.status} beim Speichern von „${name}“`);
-      const existing = await this.#text(urlOf(name), null);
-      if (existing != null && existing === normalizeText(body)) return { name, etag: this.texts.get(urlOf(name))?.etag || null };
-      taken.add(lower(name));
-    }
-    throw new Error(`Kein freier Dateiname für „${base}“`);
-  }
-
-  async #delete(url, etag) {
-    const d = await this.#request('DELETE', url, { headers: etag ? { 'If-Match': etag } : {} });
-    if (d.status === 412) throw new ConflictError();
-    if (!d.ok && d.status !== 404) throw new Error(`WebDAV-Fehler ${d.status} beim Löschen`);
-    this.texts.delete(url);
+  /** Ordner, die vor dem Schreiben in dirUrl ggf. angelegt werden müssen. */
+  #folders(dirUrl) {
+    return [this.folderUrl, dirUrl];
   }
 
   async write(data) {
@@ -419,7 +337,7 @@ export class WebDavProvider {
       const st = current ? state.songs[current] : null;
       if (r.deletedAt) {
         if (current) {
-          await this.#delete(this.#songUrl(current), lists.songs.get(current)?.etag || st.etag);
+          await this.http.delete(this.#songUrl(current), lists.songs.get(current)?.etag || st.etag);
           delete state.songs[current];
           fileOfId.delete(r.id);
         }
@@ -434,21 +352,21 @@ export class WebDavProvider {
       if (current && nameFits(current, base)) {
         if (st.hash !== hash || !lists.songs.has(current)) {
           const onServer = lists.songs.get(current);
-          etag = await this.#put(this.#songUrl(current), body, onServer ? { 'If-Match': onServer.etag || st.etag } : { 'If-None-Match': '*' }, this.songDirUrl);
+          etag = await this.http.put(this.#songUrl(current), body, onServer ? { 'If-Match': onServer.etag || st.etag } : { 'If-None-Match': '*' }, this.#folders(this.songDirUrl));
         }
       } else {
-        const created = await this.#putNew(this.songDirUrl, (n) => this.#songUrl(n), base, '.cho', body, taken);
+        const created = await this.http.putNew((n) => this.#songUrl(n), base, '.cho', body, taken, this.#folders(this.songDirUrl));
         name = created.name;
         etag = created.etag;
         if (current) {
-          await this.#delete(this.#songUrl(current), lists.songs.get(current)?.etag || st.etag);
+          await this.http.delete(this.#songUrl(current), lists.songs.get(current)?.etag || st.etag);
           delete state.songs[current];
           taken.delete(lower(current));
         }
       }
       taken.add(lower(name));
       fileOfId.set(r.id, name);
-      this.texts.set(this.#songUrl(name), { etag, text });
+      this.http.remember(this.#songUrl(name), etag, text);
       state.songs[name] = {
         id: r.id, etag, hash, body: await hashText(songBody(r.chordpro)), updatedAt: r.updatedAt, createdAt: r.createdAt,
       };
@@ -462,7 +380,7 @@ export class WebDavProvider {
       const st = current ? state.setlists[current] : null;
       if (s.deletedAt) {
         if (current) {
-          await this.#delete(this.#setUrl(current), lists.sets.get(current)?.etag || st.etag);
+          await this.http.delete(this.#setUrl(current), lists.sets.get(current)?.etag || st.etag);
           delete state.setlists[current];
         }
         continue;
@@ -476,19 +394,19 @@ export class WebDavProvider {
       if (current && lower(current) === lower(wanted)) {
         if (st.hash !== hash || !lists.sets.has(current)) {
           const onServer = lists.sets.get(current);
-          etag = await this.#put(this.#setUrl(current), body, onServer ? { 'If-Match': onServer.etag || st.etag } : { 'If-None-Match': '*' }, this.setDirUrl);
+          etag = await this.http.put(this.#setUrl(current), body, onServer ? { 'If-Match': onServer.etag || st.etag } : { 'If-None-Match': '*' }, this.#folders(this.setDirUrl));
         }
       } else {
-        const created = await this.#putNew(this.setDirUrl, (n) => this.#setUrl(n), cleanFileName(s.name || 'Setliste'), SETLIST_EXT, body, setTaken);
+        const created = await this.http.putNew((n) => this.#setUrl(n), cleanFileName(s.name || 'Setliste'), SETLIST_EXT, body, setTaken, this.#folders(this.setDirUrl));
         name = created.name;
         etag = created.etag;
         if (current) {
-          await this.#delete(this.#setUrl(current), lists.sets.get(current)?.etag || st.etag);
+          await this.http.delete(this.#setUrl(current), lists.sets.get(current)?.etag || st.etag);
           delete state.setlists[current];
         }
       }
       setTaken.add(lower(name));
-      this.texts.set(this.#setUrl(name), { etag, text });
+      this.http.remember(this.#setUrl(name), etag, text);
       state.setlists[name] = { id: s.id, etag, hash, updatedAt: s.updatedAt, createdAt: s.createdAt };
     }
 
@@ -501,7 +419,7 @@ export class WebDavProvider {
           '„Setlisten“. Diese Datei enthält keine Daten – sie hält nur ältere Versionen der Liederbuch-App davon ab, ' +
           'etwas zu überschreiben.',
       };
-      const res = await this.#request('PUT', this.fileUrl, { headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: toFileJson(guard) });
+      const res = await this.http.request('PUT', this.fileUrl, { headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: toFileJson(guard) });
       if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Speichern von „${WEBDAV_FILE}“`);
       this.guard = guard;
     }

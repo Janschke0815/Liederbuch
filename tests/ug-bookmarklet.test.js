@@ -1,6 +1,6 @@
 import { describe, it, expect } from './runner.js';
-import { bookmarkletHref, readUgHash, stripUgMarkup, ugDataToText } from '../src/core/ug-bookmarklet.js';
-import { pastedToSongs } from '../src/core/paste-import.js';
+import { bookmarkletHref, readUgHash, stripUgMarkup, ugDataToText } from '../src/formats/ug-bookmarklet.js';
+import { pastedToSongs } from '../src/formats/paste-import.js';
 import { parseChordPro } from '../src/core/chordpro.js';
 
 // So legt Ultimate Guitar ein Lied in window.UGAPP ab (nur der Aufbau, gemeinfreies Lied)

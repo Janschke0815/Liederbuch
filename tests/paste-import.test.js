@@ -1,5 +1,5 @@
 import { describe, it, expect } from './runner.js';
-import { detectHeader, splitPastedSongs, pastedToSongs } from '../src/core/paste-import.js';
+import { detectHeader, splitPastedSongs, pastedToSongs } from '../src/formats/paste-import.js';
 
 const BODY = '[Verse 1]\nC        G\nOh my darling\n';
 

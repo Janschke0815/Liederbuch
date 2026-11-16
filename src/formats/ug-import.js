@@ -1,9 +1,9 @@
 // Import: "Akkorde über dem Text" (z. B. Ultimate Guitar) -> ChordPro-Text.
 // Reine Funktionen, kein DOM.
 
-import { isChord } from './chords.js';
-import { isHarpNote, isHarpLine } from './harp.js';
-import { splitRepeat, formatRepeat } from './repeat.js';
+import { isChord } from '../core/chords.js';
+import { isHarpNote, isHarpLine } from '../core/harp.js';
+import { splitRepeat, formatRepeat } from '../core/repeat.js';
 
 const FILLER = /^(\|{1,2}|\/|-+|%|\.|:|\*|[x×]\d+|\d+[x×]|\([x×]?\d+[x×]?\)|N\.?C\.?|\.{2,3})$/i;
 const PURE_PUNCT = /^(\|{1,2}|\/|-+|\.|:|\*)$/;

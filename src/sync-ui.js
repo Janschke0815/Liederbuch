@@ -8,8 +8,7 @@ import {
   listBooks, setActiveBook, addSharedBook, removeBook, bookNameFromFile, fileNameForBook,
 } from './books.js';
 import { slimRecord } from './storage/repository.js';
-
-const $ = (s) => document.querySelector(s);
+import { $ } from './ui/dom.js';
 
 const TITLES = {
   off: 'Nicht verbunden',

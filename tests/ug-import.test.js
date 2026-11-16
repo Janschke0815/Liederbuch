@@ -1,5 +1,5 @@
 import { describe, it, expect } from './runner.js';
-import { ugToChordPro, mergeChordLine, isChordLine, isTabLine } from '../src/core/ug-import.js';
+import { ugToChordPro, mergeChordLine, isChordLine, isTabLine } from '../src/formats/ug-import.js';
 
 // Baut eine Akkordzeile, deren Akkorde genau über dem angegebenen Wortanfang stehen.
 // place('There is a house', [['Am', 'is'], ['C', 'house']])

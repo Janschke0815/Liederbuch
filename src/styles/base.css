@@ -1,0 +1,111 @@
+/* Grundlagen: Farben (hell/dunkel), Schrift, Knöpfe und Eingabefelder, Symbole. */
+
+/* Oberfläche der App. Das Lied selbst (Blatt) bleibt immer hell wie gedruckt. */
+:root {
+  color-scheme: light dark;
+  --accent: #b3261e;
+  --accent-hover: #9a1f18;
+  --accent-soft: #fbe9e7;
+  --on-accent: #fff;
+  --bg: #f3f1ec;
+  --surface: #ffffff;
+  --surface-2: #faf8f4;
+  --hover: #efebe4;
+  --border: #e2ddd4;
+  --border-strong: #cdc6ba;
+  --text: #22201c;
+  --muted: #77716a;
+  --shadow: 0 1px 2px #0000000d, 0 4px 16px #0000000f;
+  --shadow-lg: 0 12px 48px #0000003a;
+  --radius: 8px;
+  --bar-h: 3.25rem;
+  --sheet: #fffefb;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: #e0574c;
+    --accent-hover: #ef6a5f;
+    --accent-soft: #46211e;
+    --bg: #181716;
+    --surface: #23211f;
+    --surface-2: #1e1c1b;
+    --hover: #2f2c29;
+    --border: #36332f;
+    --border-strong: #4a4641;
+    --text: #ece8e2;
+    --muted: #a19a91;
+    --shadow: 0 1px 2px #0006, 0 4px 16px #0005;
+    --shadow-lg: 0 12px 48px #000a;
+    --sheet: #fbf9f4;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+/* ---------- Bedienelemente ---------- */
+button, select, input, textarea { font: inherit; color: inherit; }
+/* :where() hält die Spezifität niedrig – Bereichsregeln wie „.search-box input“ gewinnen dann ohne Tricks */
+button, select, input:where(:not([type=checkbox]):not([type=color])) {
+  min-height: 2.25rem;
+  padding: .35em .8em;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s, border-color .12s, color .12s;
+}
+button:hover:not(:disabled) { background: var(--hover); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+button:disabled, select:disabled { opacity: .4; cursor: default; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offset: 0; }
+input[type=checkbox] { accent-color: var(--accent); width: 1.1em; height: 1.1em; }
+.icon { width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon-btn { padding: .35em .55em; }
+button.danger { color: var(--accent); }
+button.danger:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--accent); }
+.link-btn { border-color: transparent; background: transparent; color: var(--accent); padding-inline: .5em; }
+#key-value { font-size: 1.1em; min-width: 2.2em; }
+#key-value.guessed::after { content: '?'; color: var(--muted); font-weight: 400; font-size: .8em; margin-left: .1em; }
+.segmented { display: inline-flex; border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; }
+.segmented button { border: 0; border-radius: 0; min-width: 2.3rem; padding-inline: .6em; background: var(--surface); }
+.segmented button + button { border-left: 1px solid var(--border); }
+.segmented button[aria-checked='true'] { background: var(--accent); color: var(--on-accent); }
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, .6em); }
+}
+@keyframes dlg-in {
+  from { opacity: 0; transform: translateY(.8em) scale(.98); }
+}
+.hint { margin: 0; color: var(--muted); font-size: .88em; }
+.row { display: flex; gap: .8em; flex-wrap: wrap; }
+.row label { display: flex; flex-direction: column; flex: 1; font-size: .85em; color: var(--muted); gap: .25em; }
+input:where(:not([type=checkbox]):not([type=color])), textarea { background: var(--surface); }
+.range-val { min-width: 3.6em; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; font-size: .9em; }
+@keyframes pulse {
+  to { opacity: .35; }
+}
+.app-version { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#preview { zoom: var(--view-zoom, 1); }
+#zoom-reset { font-size: .78em; min-width: 3.6em; font-variant-numeric: tabular-nums; }
+/* Metronom */
+.time-chip { border: 0; min-height: 0; cursor: pointer; }
+.beat { animation: beat .12s ease-out; }
+.beat-1 { animation: beat1 .15s ease-out; }
+@keyframes beat {
+  from { transform: scale(1.12); }
+}
+@keyframes beat1 {
+  from { transform: scale(1.25); filter: brightness(1.3); }
+}
+@keyframes ctx-in {
+  from { opacity: 0; transform: scale(.97); }
+}

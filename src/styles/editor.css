@@ -1,0 +1,61 @@
+/* Editor: Bausteine, Liedinfo, Speicherstatus. */
+
+.workspace.focus .pane-editor { display: none; }
+/* Editor */
+.pane-editor { border-right: 1px solid var(--border); background: var(--surface); }
+.snippets { display: flex; gap: .25em; min-width: 0; flex: 0 1 auto; overflow-x: auto; scrollbar-width: none; }
+.snippets::-webkit-scrollbar { display: none; }
+.snippets button { flex: none; min-height: 1.9rem; padding: .15em .55em; font-size: .85em; border-color: var(--border); }
+.save-status { font-size: .8em; color: var(--muted); display: inline-flex; align-items: center; gap: .35em; }
+.save-status::before { content: ''; width: .5em; height: .5em; border-radius: 50%; background: currentColor; opacity: 0; }
+.save-status[data-state='saved']::before { background: #3b8c4a; opacity: 1; }
+.save-status[data-state='dirty']::before { background: #d18f1c; opacity: 1; }
+.save-status[data-state='error'] { color: var(--accent); }
+#editor {
+  flex: 1; border: 0; resize: none; padding: 1em 1.2em; outline: none;
+  font: 14px/1.6 ui-monospace, Consolas, 'Cascadia Mono', 'Courier New', monospace;
+  background: var(--surface); tab-size: 4;
+}
+@media (max-width: 1200px) {
+  .save-status { font-size: 0; gap: 0; }
+  .save-status::before { font-size: 1rem; }
+}
+@media (max-width: 760px) {
+  .pane-list, .pane-editor { border-right: 0; }
+  .snippets button { min-height: 2.2rem; }
+  #editor { font-size: 15px; padding: .8em; }
+}
+.syntax-btn { font-weight: 700; min-width: 2rem; border-radius: 999px !important; }
+/* Liedinfo über dem Editor */
+.song-meta { border-bottom: 1px solid var(--border); background: var(--surface-2); padding: .4em .8em; }
+.song-meta summary { cursor: pointer; font-weight: 600; font-size: .88em; padding: .2em 0; display: flex; gap: .6em; align-items: baseline; }
+.song-meta summary::-webkit-details-marker { display: none; }
+.song-meta summary::before { content: '▸'; color: var(--muted); transition: transform .15s; display: inline-block; }
+.song-meta[open] summary::before { transform: rotate(90deg); }
+.meta-summary { font-weight: 400; color: var(--muted); font-size: .95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.song-meta[open] .meta-summary { display: none; }
+.meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45em .6em; padding: .4em 0 .5em; }
+.meta-grid label { display: flex; flex-direction: column; gap: .15em; font-size: .78em; color: var(--muted); min-width: 0; }
+.meta-grid .meta-wide { grid-column: span 2; }
+.meta-grid .meta-full { grid-column: 1 / -1; }
+.meta-grid textarea { font: inherit; font-size: .95rem; padding: .35em .5em; border: 1px solid var(--border-strong); border-radius: var(--radius); resize: vertical; color: var(--text); background: var(--surface); }
+.meta-grid input, .meta-grid select { font-size: .95rem; width: 100%; color: var(--text); }
+.meta-grid select { min-height: 2rem; padding: .2em .5em; }
+@media (max-width: 1200px) {
+  .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .meta-grid input, .meta-grid select { font-size: 16px; }
+  .meta-grid select { min-height: 2.4rem; }
+}
+/* Capo-Hilfe */
+.capo-help { grid-column: span 2; justify-self: start; font-size: .85em; min-height: 1.6rem; padding: 0; }
+/* Liedinfo am Handy: höchstens die halbe Höhe, Rest scrollt – der Editor bleibt sichtbar */
+@media (max-width: 760px) {
+  .song-meta[open] .meta-grid { max-height: 42vh; overflow-y: auto; }
+  .song-meta summary { min-height: 2.4rem; align-items: center; }
+  /* Symbolleiste über dem Editor: umbrechen statt abschneiden */
+  .editor-bar { align-items: flex-start; }
+  .editor-bar .snippets { flex: 1 1 0; flex-wrap: wrap; overflow: visible; }
+  .editor-bar .snippets button { min-height: 2.5rem; min-width: 2.75rem; }
+}

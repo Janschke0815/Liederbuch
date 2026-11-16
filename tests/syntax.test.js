@@ -2,7 +2,7 @@
 import { describe, it, expect } from './runner.js';
 import { parseChordPro } from '../src/core/chordpro.js';
 import { renderSong } from '../src/render/song-view.js';
-import { transposeChordPro } from '../src/core/export-text.js';
+import { transposeChordPro } from '../src/formats/export-text.js';
 
 const SONG = `{t: Clementine}
 {st: Volkslied}

@@ -1,6 +1,8 @@
 // Hilfen für „eine Datei pro Lied“ auf einem WebDAV-Server: Dateinamen aus Titel und Interpret,
 // Prüfsummen zum Erkennen von Änderungen, Ordnerliste (PROPFIND) lesen. Reine Funktionen.
 
+import { normalizeText } from '../core/text.js';
+
 export const SONG_DIR = 'Lieder/';
 export const SONG_EXT = '.cho';
 /** Dateien, die beim Abgleich als Lied gelten (auch von Hand auf den Server gelegte). */
@@ -50,7 +52,8 @@ export function uniqueName(base, taken) {
 }
 
 /** Zeilenenden vereinheitlichen (Dateien auf dem Server haben CR LF, die App LF). */
-export const normalizeText = (t) => String(t ?? '').replace(/\r\n?/g, '\n');
+// Zeilenenden vereinheitlichen – steht in core/text.js, hier für bestehende Aufrufer weitergereicht
+export { normalizeText };
 
 /** Kurze Prüfsumme eines Liedtexts (Zeilenenden egal). */
 export async function hashText(text) {

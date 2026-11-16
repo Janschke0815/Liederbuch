@@ -7,7 +7,7 @@
 // hat oder die man ihr über die Google-Dateiauswahl (Picker) gibt – nicht den Rest des Drives.
 
 import { AuthError, ConflictError } from './sync-engine.js';
-import { toFileJson } from '../core/file-format.js';
+import { toFileJson } from '../formats/file-format.js';
 
 const GIS_URL = 'https://accounts.google.com/gsi/client';
 const GAPI_URL = 'https://apis.google.com/js/api.js';
