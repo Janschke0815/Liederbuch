@@ -179,18 +179,26 @@ beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ er
   nicht im Druck; wird mit gesichert und synchronisiert.
 - **Papierkorb** (Menü): gelöschte Lieder wiederherstellen oder endgültig löschen.
 
-## Seitenzahlen im Druck
+## Druck: Optionen und Schnellwahl
 
-Unter **Einstellungen → Druck → Seitenzahlen** lassen sich die Zahlen unten auf den Druckseiten
-abschalten. Der Seitenumbruch bleibt dabei gleich, das Inhaltsverzeichnis nennt die Seiten weiterhin.
+Im Druckdialog bzw. in der Druckvorschau unter **Optionen …** stehen alle Einstellungen für den
+Druck: Deckblatt, Inhaltsverzeichnis, gespeicherte Transposition, Papier, Spalten, Rand,
+**Seitenzahlen** sowie **Schriftart und -größe für Text und Akkorde**. Die Schrift gilt nur für
+den Druck – am Bildschirm bleibt alles, wie es unter Einstellungen steht; **Wie Einstellungen**
+stellt sie zurück. Papier, Spalten, Rand und Seitenzahlen sind dieselben wie unter
+*Einstellungen → Druck*.
 
-## Druckvorschau: Schrift nur für den Druck
+**Schnellwahl:** Jede Option hat ein 📌. Angeheftete Optionen stehen direkt in der Leiste neben
+**Optionen …** (am Handy in einer Zeile darunter) – zum Beispiel Papier, Seitenzahlen oder die
+Schriftgröße. Eine Änderung dort setzt die Seiten sofort neu (Seitenzahl oben), die Vorschau bleibt
+an derselben Stelle. Voreingestellt angeheftet: Seitenzahlen, Textgröße, Akkordgröße. Praktisch, um
+ein Liederbuch kleiner zu setzen, bis jedes Lied auf eine Seite passt.
 
-In der Druckvorschau stehen unter der Leiste **Schriftart und -größe für Text und Akkorde**.
-Sie gelten nur für den Druck – am Bildschirm bleibt alles, wie es unter Einstellungen steht.
-Die Vorschau setzt die Seiten sofort neu (Seitenzahl oben), bleibt dabei an derselben Stelle und
-merkt sich die Werte fürs nächste Mal. Praktisch, um ein Liederbuch kleiner zu setzen, bis jedes
-Lied auf eine Seite passt. **Wie Einstellungen** stellt die Druckschrift zurück.
+Beim Drucken eines einzelnen Liedes oder einer Setliste gelten eigene Vorgaben (z. B. ohne
+Deckblatt); ändert man sie per Schnellwahl, gilt das nur für diese Vorschau.
+
+Ohne **Seitenzahlen** bleibt der Seitenumbruch gleich, das Inhaltsverzeichnis nennt die Seiten
+weiterhin.
 
 ## Zoom, Metronom, Lied teilen
 

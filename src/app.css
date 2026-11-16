@@ -286,23 +286,30 @@ input:not([type=checkbox]):not([type=color]), textarea { background: var(--surfa
 .print-view { background: #6f6b65 !important; }
 .print-bar { background: var(--surface) !important; border-color: var(--border) !important; padding: .5em .8em !important; }
 .print-info { color: var(--muted) !important; }
-.pv-fonts { flex-basis: 100%; display: flex; align-items: center; gap: .5em .7em; flex-wrap: wrap; padding-top: .45em; border-top: 1px solid var(--border); font-size: .9em; }
-.pv-fonts-title { font-weight: 600; color: var(--muted); }
-.pv-font { display: inline-flex; align-items: center; gap: .4em; color: var(--muted); }
-.pv-font select { max-width: 11em; }
-.pv-pair { display: inline-flex; align-items: center; gap: .4em; white-space: nowrap; }
+/* Druck-Optionen: jede Option mit 📌 als Schnellwahl in die Leiste über der Vorschau */
+.pr-right { display: flex; flex-direction: column; gap: 1em; min-width: 0; }
+.opt-row { display: flex; align-items: flex-end; gap: .5em; }
+.opt-row > label { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: .85em; color: var(--muted); gap: .25em; }
+.opt-row > label.check { flex-direction: row; align-items: center; gap: .55em; font-size: .95em; color: var(--text); align-self: center; }
+.pin { border: 1px solid transparent; background: none; padding: .2em .35em; border-radius: var(--radius); font-size: .95em; line-height: 1; opacity: .3; filter: grayscale(1); cursor: pointer; }
+.pin:hover { opacity: .7; }
+.pin[aria-pressed='true'] { opacity: 1; filter: none; border-color: var(--accent); background: var(--accent-soft); }
+.pin-hint { margin: 0; }
+.print-form legend small { font-weight: 400; color: var(--muted); }
+
+/* Schnellwahl in der Druckleiste */
+.pv-quick { display: flex; align-items: center; gap: .4em .6em; flex-wrap: wrap; font-size: .9em; }
+.pv-quick:empty { display: none; }
+.pv-quick .q { display: inline-flex; align-items: center; gap: .35em; white-space: nowrap; color: var(--muted); }
+.pv-quick .q select { max-width: 10em; }
+.pv-quick .stepper button { min-width: 2rem; font-size: 1em; }
+.pv-quick .stepper output { min-width: 3.8em; text-align: center; align-self: center; font-variant-numeric: tabular-nums; color: var(--text); }
+.pv-quick .q-toggle[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.pv-quick .q-toggle[aria-pressed='false'] { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
 @media (max-width: 760px) {
   .print-bar { gap: .4em; }
-  .pv-fonts { gap: .35em .6em; }
-  .pv-fonts-title { flex-basis: 100%; }
-  .pv-pair { flex: 1 1 100%; }
-  .pv-pair .pv-font { flex: 1; min-width: 0; }
-  .pv-pair .pv-font select { flex: 1; min-width: 0; max-width: none; }
-  .pv-fonts .stepper output { min-width: 3.6em; }
+  .pv-quick { flex-basis: 100%; order: 5; }
 }
-.pv-fonts .stepper button { min-width: 2rem; font-size: 1em; }
-.pv-fonts .stepper output { min-width: 4.2em; text-align: center; align-self: center; font-variant-numeric: tabular-nums; }
-.pv-fonts.custom .pv-fonts-title { color: var(--accent); }
 
 /* Einstellungen: Navigation | Karten mit Zeilen | Muster */
 .settings-dialog { width: min(1120px, 96vw); }

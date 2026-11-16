@@ -1,25 +1,36 @@
 // Druckdialog (Auswahl + Optionen) und Druckvorschau.
+//
+// Alle Optionen stehen im Dialog „Optionen …“. Mit 📌 lässt sich jede davon als Schnellwahl in
+// die Leiste über der Vorschau heften (siehe print/print-quick.js); Änderungen dort setzen die
+// Vorschau sofort neu.
 
 import { buildSongbook, DEFAULT_PRINT_OPTIONS, PAPER } from './print/songbook.js';
 import { normalize } from './storage/repository.js';
 import { loadSettings, saveSettings, applySettings, FONTS } from './settings/settings.js';
-import { withPrintFonts, loadPrintFonts, savePrintFonts, stepSize } from './print/print-fonts.js';
+import { withPrintFonts, loadPrintFonts, savePrintFonts } from './print/print-fonts.js';
+import { QUICK_OPTIONS, loadPins, togglePin, formatValue } from './print/print-quick.js';
 
 const $ = (s) => document.querySelector(s);
-const pickLayout = ({ paper, columns, margin }) => ({ paper, columns, margin });
+const OWN_KEY = 'printOptions';
+
+function loadOwn() {
+  try {
+    const v = JSON.parse(localStorage.getItem(OWN_KEY) || '{}');
+    return v && typeof v === 'object' ? v : {};
+  } catch {
+    return {};
+  }
+}
 
 // Papier, Spalten und Rand kommen aus den gemeinsamen Einstellungen,
 // der Rest (Titel, Deckblatt …) ist druckspezifisch.
 function loadOptions() {
-  let own = {};
-  try {
-    own = JSON.parse(localStorage.getItem('printOptions') || '{}');
-  } catch {
-    /* Standardwerte */
-  }
   const { paper, columns, margin } = loadSettings();
-  return { ...DEFAULT_PRINT_OPTIONS, ...own, paper, columns, margin };
+  return { ...DEFAULT_PRINT_OPTIONS, ...loadOwn(), paper, columns, margin };
 }
+
+/** Einstellungen für den Druck: gemeinsame Einstellungen + eigene Druckschrift. */
+const printSettings = () => withPrintFonts(loadSettings(), loadPrintFonts());
 
 export function setupPrint({ repo, beforeOpen }) {
   const dlg = $('#print-dialog');
@@ -27,7 +38,82 @@ export function setupPrint({ repo, beforeOpen }) {
   const root = $('#print-root');
   let songs = [];
   let selected = new Set();
+  let overrides = {}; // Vorgaben eines Aufrufs (einzelnes Lied, Setliste) – gelten nur für diese Vorschau
   let options = loadOptions();
+
+  // ---------- Werte lesen und ändern (für Dialog und Schnellwahl) ----------
+
+  function valueOf(key) {
+    const opt = QUICK_OPTIONS.find((o) => o.key === key);
+    if (opt.store === 'settings') return loadSettings()[key];
+    if (opt.store === 'fonts') return printSettings()[key];
+    return { ...loadOptions(), ...overrides }[key];
+  }
+
+  function setValue(key, value) {
+    const opt = QUICK_OPTIONS.find((o) => o.key === key);
+    if (opt.store === 'settings') saveSettings({ ...loadSettings(), [key]: value });
+    else if (opt.store === 'fonts') savePrintFonts({ ...loadPrintFonts(), [key]: value }, loadSettings());
+    else if (key in overrides) overrides[key] = value; // nur für diese Vorschau
+    else localStorage.setItem(OWN_KEY, JSON.stringify({ ...loadOwn(), [key]: value }));
+    options = { ...loadOptions(), ...overrides };
+    renderQuick();
+    relayoutSoon();
+  }
+
+  // ---------- Schnellwahl in der Leiste ----------
+
+  const el = (tag, props = {}, ...children) => {
+    const e = Object.assign(document.createElement(tag), props);
+    e.append(...children);
+    return e;
+  };
+
+  function fontOptions(select) {
+    select.replaceChildren(...Object.keys(FONTS).map((f) => {
+      const o = new Option(f, f);
+      o.style.fontFamily = FONTS[f];
+      return o;
+    }));
+  }
+
+  function quickControl(opt) {
+    const value = valueOf(opt.key);
+    const title = opt.title || opt.label;
+    if (opt.kind === 'toggle') {
+      return el('button', {
+        type: 'button', className: 'q-toggle', textContent: opt.label, title: `${title}: ${value ? 'an' : 'aus'}`,
+        onclick: () => setValue(opt.key, !valueOf(opt.key)),
+      });
+    }
+    if (opt.kind === 'select' || opt.kind === 'font') {
+      const select = el('select', { title });
+      if (opt.kind === 'font') fontOptions(select);
+      else select.replaceChildren(...opt.choices.map(([v, l]) => new Option(l, v)));
+      select.value = String(value);
+      select.onchange = () => setValue(opt.key, opt.number ? Number(select.value) : select.value);
+      return el('label', { className: 'q' }, opt.kind === 'font' ? `${opt.label} ` : '', select);
+    }
+    // Stepper: − Wert +
+    const step = (dir) => () => setValue(opt.key, opt.step(Number(valueOf(opt.key)), dir));
+    return el('span', { className: 'q', title },
+      el('span', { textContent: opt.label }),
+      el('span', { className: 'stepper' },
+        el('button', { type: 'button', textContent: '−', title: `${title} kleiner`, onclick: step(-1) }),
+        el('output', { textContent: formatValue(opt, value) }),
+        el('button', { type: 'button', textContent: '+', title: `${title} größer`, onclick: step(1) })));
+  }
+
+  function renderQuick() {
+    const pins = loadPins();
+    $('#pv-quick').replaceChildren(...QUICK_OPTIONS.filter((o) => pins.includes(o.key)).map((o) => {
+      const c = quickControl(o);
+      if (o.kind === 'toggle') c.setAttribute('aria-pressed', String(Boolean(valueOf(o.key))));
+      return c;
+    }));
+  }
+
+  // ---------- Dialog ----------
 
   function renderList() {
     const q = normalize($('#pr-search').value.trim());
@@ -58,6 +144,21 @@ export function setupPrint({ repo, beforeOpen }) {
     $('#pr-ok').disabled = selected.size === 0;
   }
 
+  fontOptions($('#pr-lyricFont'));
+  fontOptions($('#pr-chordFont'));
+
+  function fillFonts(s) {
+    $('#pr-lyricFont').value = s.lyricFont;
+    $('#pr-lyricSize').value = s.lyricSize;
+    $('#pr-chordFont').value = s.chordFont;
+    $('#pr-chordSize').value = s.chordSize;
+  }
+
+  function syncPins() {
+    const pins = loadPins();
+    for (const b of dlg.querySelectorAll('.pin')) b.setAttribute('aria-pressed', String(pins.includes(b.dataset.pin)));
+  }
+
   function fillForm() {
     $('#pr-title').value = options.title;
     $('#pr-subtitle').value = options.subtitle;
@@ -67,28 +168,45 @@ export function setupPrint({ repo, beforeOpen }) {
     $('#pr-paper').value = options.paper;
     $('#pr-columns').value = String(options.columns);
     $('#pr-margin').value = options.margin;
+    $('#pr-pageNumbers').checked = loadSettings().pageNumbers;
+    fillFonts(printSettings());
+    syncPins();
   }
 
   function readForm() {
-    options = {
+    const own = {
       title: $('#pr-title').value.trim(),
       subtitle: $('#pr-subtitle').value.trim(),
       cover: $('#pr-cover').checked,
       toc: $('#pr-toc').checked,
       useSavedTranspose: $('#pr-transpose').checked,
+    };
+    localStorage.setItem(OWN_KEY, JSON.stringify(own));
+    saveSettings({
+      ...loadSettings(),
       paper: $('#pr-paper').value,
       columns: Number($('#pr-columns').value),
       margin: Math.min(40, Math.max(5, Number($('#pr-margin').value) || 15)),
-    };
-    const { paper, columns, margin, ...own } = options;
-    localStorage.setItem('printOptions', JSON.stringify(own));
-    options = { ...options, ...pickLayout(saveSettings({ ...loadSettings(), paper, columns, margin })) };
+      pageNumbers: $('#pr-pageNumbers').checked,
+    });
+    savePrintFonts({
+      lyricFont: $('#pr-lyricFont').value,
+      lyricSize: Number($('#pr-lyricSize').value),
+      chordFont: $('#pr-chordFont').value,
+      chordSize: Number($('#pr-chordSize').value),
+    }, loadSettings());
+    overrides = {}; // im Dialog Gewähltes gilt
+    options = loadOptions();
   }
 
   async function openDialog({ keepSelection = false } = {}) {
     await beforeOpen?.();
-    options = loadOptions();
-    songs = await repo.list();
+    options = { ...loadOptions(), ...overrides };
+    if (!keepSelection) {
+      overrides = {};
+      options = loadOptions();
+      songs = await repo.list();
+    }
     const ids = new Set(songs.map((s) => s.id));
     if (!keepSelection) selected = new Set(ids);
     else selected = new Set([...selected].filter((id) => ids.has(id)));
@@ -109,12 +227,22 @@ export function setupPrint({ repo, beforeOpen }) {
     selected.clear();
     renderList();
   };
+  $('#pr-font-reset').onclick = () => fillFonts(loadSettings());
+  dlg.addEventListener('click', (e) => {
+    const b = e.target.closest('.pin');
+    if (!b) return;
+    togglePin(b.dataset.pin);
+    syncPins();
+    if (!view.hidden) renderQuick();
+  });
 
   dlg.addEventListener('close', async () => {
     if (dlg.returnValue !== 'ok') return;
     readForm();
     await showPreview();
   });
+
+  // ---------- Vorschau ----------
 
   function fitZoom() {
     const page = root.querySelector('.page');
@@ -124,53 +252,12 @@ export function setupPrint({ repo, beforeOpen }) {
     root.style.setProperty('--preview-zoom', zoom.toFixed(3));
   }
 
-  // ---------- Schrift nur für den Druck ----------
-  for (const id of ['#pv-lyricFont', '#pv-chordFont']) {
-    $(id).replaceChildren(...Object.keys(FONTS).map((f) => {
-      const o = new Option(f, f);
-      o.style.fontFamily = FONTS[f];
-      return o;
-    }));
-  }
-  const fmtPt = (v) => `${String(v).replace('.', ',')} pt`;
-
-  function printSettings() {
-    return withPrintFonts(loadSettings(), loadPrintFonts());
-  }
-
-  function syncFontBar() {
-    const s = printSettings();
-    $('#pv-lyricFont').value = s.lyricFont;
-    $('#pv-chordFont').value = s.chordFont;
-    $('#pv-lyricSize').textContent = fmtPt(s.lyricSize);
-    $('#pv-chordSize').textContent = fmtPt(s.chordSize);
-    const custom = Object.keys(loadPrintFonts()).length > 0;
-    $('#pv-font-reset').hidden = !custom;
-    $('.pv-fonts').classList.toggle('custom', custom);
-  }
-
+  // Schnell mehrmals tippen: erst danach neu setzen
   let relayoutTimer = 0;
-  function changeFonts(patch) {
-    savePrintFonts({ ...loadPrintFonts(), ...patch }, loadSettings());
-    syncFontBar();
-    // Schnell mehrmals tippen: erst danach neu setzen
+  function relayoutSoon() {
     clearTimeout(relayoutTimer);
     relayoutTimer = setTimeout(() => showPreview({ keepPlace: true }), 250);
   }
-
-  $('#pv-lyricFont').onchange = (e) => changeFonts({ lyricFont: e.target.value });
-  $('#pv-chordFont').onchange = (e) => changeFonts({ chordFont: e.target.value });
-  $('.pv-fonts').addEventListener('click', (e) => {
-    const b = e.target.closest('button[data-step]');
-    if (!b) return;
-    const key = b.dataset.step;
-    changeFonts({ [key]: stepSize(key, printSettings()[key], Number(b.dataset.dir)) });
-  });
-  $('#pv-font-reset').onclick = () => {
-    savePrintFonts({}, loadSettings());
-    syncFontBar();
-    showPreview({ keepPlace: true });
-  };
 
   /** Seite oben im Fenster (für "an derselben Stelle weiter" nach dem Neusetzen). */
   function currentPage() {
@@ -197,7 +284,7 @@ export function setupPrint({ repo, beforeOpen }) {
     view.hidden = false;
     root.style.setProperty('--preview-zoom', '1'); // Messen nur in Originalgröße
     applySettings(root, printSettings());
-    syncFontBar();
+    renderQuick();
     $('#pv-info').textContent = 'Seiten werden gesetzt …';
     const chosen = songs.filter((s) => selected.has(s.id)); // bereits alphabetisch
     const result = await buildSongbook(root, chosen, options);
@@ -236,8 +323,9 @@ export function setupPrint({ repo, beforeOpen }) {
   $('#btn-print').onclick = () => openDialog();
 
   /** Feste Auswahl in fester Reihenfolge drucken (z. B. Setliste) – direkt zur Vorschau. */
-  async function printSongs(list, overrides = {}) {
+  async function printSongs(list, opts = {}) {
     await beforeOpen?.();
+    overrides = { ...opts };
     options = { ...loadOptions(), ...overrides };
     songs = list;
     selected = new Set(list.map((s) => s.id));

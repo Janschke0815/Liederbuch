@@ -287,25 +287,32 @@
           <ul id="pr-list" class="pr-list"></ul>
           <p id="pr-count" class="hint"></p>
         </fieldset>
+        <div class="pr-right">
         <fieldset>
           <legend>Aufbau</legend>
           <label>Titel <input id="pr-title"></label>
           <label>Untertitel <input id="pr-subtitle" placeholder="z. B. Name, Jahr"></label>
-          <label class="check"><input type="checkbox" id="pr-cover"> Deckblatt</label>
-          <label class="check"><input type="checkbox" id="pr-toc"> Inhaltsverzeichnis</label>
-          <label class="check"><input type="checkbox" id="pr-transpose"> gespeicherte Transposition verwenden</label>
+          <div class="opt-row"><label class="check"><input type="checkbox" id="pr-cover"> Deckblatt</label><button type="button" class="pin" data-pin="cover" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row"><label class="check"><input type="checkbox" id="pr-toc"> Inhaltsverzeichnis</label><button type="button" class="pin" data-pin="toc" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row"><label class="check"><input type="checkbox" id="pr-transpose"> gespeicherte Transposition verwenden</label><button type="button" class="pin" data-pin="useSavedTranspose" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <legend class="sub">Seite</legend>
-          <div class="row">
-            <label>Papier
-              <select id="pr-paper"><option>A4</option><option>A5</option><option>Letter</option></select>
-            </label>
-            <label>Spalten
-              <select id="pr-columns"><option value="1">1</option><option value="2">2</option></select>
-            </label>
-            <label>Rand (mm) <input id="pr-margin" type="number" min="5" max="40" step="1"></label>
-          </div>
-          <p class="hint">Papier, Spalten und Rand gelten auch für spätere Ausdrucke (siehe Einstellungen).</p>
+          <div class="opt-row"><label>Papier <select id="pr-paper"><option>A4</option><option>A5</option><option>Letter</option></select></label><button type="button" class="pin" data-pin="paper" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row"><label>Spalten <select id="pr-columns"><option value="1">1 Spalte</option><option value="2">2 Spalten</option></select></label><button type="button" class="pin" data-pin="columns" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row"><label>Rand (mm) <input id="pr-margin" type="number" min="5" max="40" step="1"></label><button type="button" class="pin" data-pin="margin" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row"><label class="check"><input type="checkbox" id="pr-pageNumbers"> Seitenzahlen</label><button type="button" class="pin" data-pin="pageNumbers" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <p class="hint">Papier, Spalten, Rand und Seitenzahlen gelten auch für spätere Ausdrucke (siehe Einstellungen).</p>
         </fieldset>
+        <fieldset>
+          <legend>Schrift <small>(nur für den Druck)</small></legend>
+          <div class="opt-row"><label>Text – Schriftart <select id="pr-lyricFont"></select></label><button type="button" class="pin" data-pin="lyricFont" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row"><label>Text – Größe (pt) <input id="pr-lyricSize" type="number" min="7" max="28" step="0.5"></label><button type="button" class="pin" data-pin="lyricSize" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row"><label>Akkorde – Schriftart <select id="pr-chordFont"></select></label><button type="button" class="pin" data-pin="chordFont" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row"><label>Akkorde – Größe (pt) <input id="pr-chordSize" type="number" min="6" max="28" step="0.5"></label><button type="button" class="pin" data-pin="chordSize" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="row-end"><button type="button" id="pr-font-reset" class="link-btn">Wie Einstellungen</button></div>
+          <p class="hint">Gilt nur für den Druck – die Anzeige am Bildschirm bleibt, wie sie ist.</p>
+        </fieldset>
+        <p class="hint pin-hint">📌 heftet eine Option als Schnellwahl in die Leiste über der Druckvorschau.</p>
+        </div>
       </div>
       <footer class="dialog-foot">
         <button value="cancel" formnovalidate>Abbrechen</button>
@@ -735,33 +742,10 @@
     <div class="print-bar">
       <button type="button" id="pv-back">← Zurück zum Liederbuch</button>
       <button type="button" id="pv-settings">Optionen …</button>
+      <div id="pv-quick" class="pv-quick" role="group" aria-label="Schnellwahl (in den Optionen mit 📌 festlegen)"></div>
       <span id="pv-info" class="print-info"></span>
       <span class="spacer"></span>
       <button type="button" id="pv-print" class="primary">Drucken / als PDF speichern</button>
-      <div class="pv-fonts" role="group" aria-label="Schrift im Druck">
-        <span class="pv-fonts-title" title="Gilt nur für den Druck – die Anzeige am Bildschirm bleibt, wie sie ist">Schrift im Druck</span>
-        <span class="pv-pair">
-          <label class="pv-font">Text
-            <select id="pv-lyricFont" aria-label="Schriftart Text"></select>
-          </label>
-          <span class="stepper" role="group" aria-label="Schriftgröße Text">
-            <button type="button" data-step="lyricSize" data-dir="-1" title="Text kleiner">−</button>
-            <output id="pv-lyricSize">12 pt</output>
-            <button type="button" data-step="lyricSize" data-dir="1" title="Text größer">+</button>
-          </span>
-        </span>
-        <span class="pv-pair">
-          <label class="pv-font">Akkorde
-            <select id="pv-chordFont" aria-label="Schriftart Akkorde"></select>
-          </label>
-          <span class="stepper" role="group" aria-label="Schriftgröße Akkorde">
-            <button type="button" data-step="chordSize" data-dir="-1" title="Akkorde kleiner">−</button>
-            <output id="pv-chordSize">10,5 pt</output>
-            <button type="button" data-step="chordSize" data-dir="1" title="Akkorde größer">+</button>
-          </span>
-        </span>
-        <button type="button" id="pv-font-reset" class="link-btn" hidden title="Schrift wieder wie unter Einstellungen">Wie Einstellungen</button>
-      </div>
     </div>
     <div class="print-scroll">
       <div id="print-root" class="print-root"></div>
