@@ -10,7 +10,7 @@ import { attachContextMenu } from './context-menu.js';
 import { saveSettings } from './settings/settings.js';
 import { metronome, beatsPerBar } from './metronome.js';
 import { transposeChordPro, chordproToText } from './core/export-text.js';
-import { SongRepository } from './storage/repository.js';
+import { SongRepository, EXPORT_FORMAT, EXPORT_VERSION } from './storage/repository.js';
 import { openIdbStore } from './storage/stores.js';
 import { SAMPLE_SONG, NEW_SONG_TEMPLATE } from './sample.js';
 import { setupPrint } from './print-ui.js';
@@ -27,8 +27,8 @@ import { applySettings, loadSettings } from './settings/settings.js';
 import { bookmarkletHref, readUgHash, ugDataToText } from './core/ug-bookmarklet.js';
 import { toWindowsText } from './core/file-format.js';
 import { createZip, readZip, isZip } from './core/zip.js';
-import { backupFiles, parseBackupZip } from './core/backup.js';
-import { songToFile, fileToSong } from './sync/chordpro-files.js';
+import { backupFiles, backupJson, applyZipEdits } from './core/backup.js';
+import { fileToSong } from './sync/chordpro-files.js';
 import { versionLabel } from './version.js';
 
 const $ = (s) => document.querySelector(s);
@@ -821,6 +821,30 @@ async function importBackup(name, data) {
   return `${name}: ${parts.join(', ')}`;
 }
 
+/**
+ * ZIP öffnen: erst die JSON-Sicherung (falls vorhanden), dann die .cho-/.txt-Dateien abgleichen –
+ * mit der JSON bzw. ohne sie mit dem aktuellen Liederbuch. Von Hand geänderte Dateien gewinnen,
+ * neue werden angelegt, nichts wird gelöscht.
+ */
+async function importZip(name, entries) {
+  const json = backupJson(entries);
+  const parts = [];
+  if (json) parts.push(await importBackup(name, json));
+  // aktueller Stand des Liederbuchs (nach dem Übernehmen der JSON)
+  const current = await repo.exportData();
+  current.setlists = (await sets.allRecords()).filter((s) => !s.deletedAt).map(slimSetlist);
+  const edits = applyZipEdits(entries, json || current, new Date().toISOString(), current);
+  if (edits.songs.length) await repo.importData({ format: EXPORT_FORMAT, version: EXPORT_VERSION, songs: edits.songs });
+  if (edits.setlists.length) await sets.importRecords(edits.setlists);
+  const what = [];
+  if (edits.edited) what.push(`${edits.edited} ${edits.edited === 1 ? 'Lied' : 'Lieder'} aus geänderten .cho-Dateien`);
+  if (edits.added) what.push(`${edits.added} neue${edits.added === 1 ? 's Lied' : ' Lieder'} aus .cho-Dateien`);
+  if (edits.setlistsChanged) what.push(`${edits.setlistsChanged} ${edits.setlistsChanged === 1 ? 'Setliste' : 'Setlisten'} aus .txt-Dateien`);
+  if (what.length) parts.push(json ? `außerdem ${what.join(', ')}` : `${name}: ${what.join(', ')}`);
+  else if (!json) parts.push(`${name}: keine Änderungen`);
+  return parts.join(' · ');
+}
+
 /** Lied aus ChordPro-Text anlegen; {transpose}, {x_notiz} … werden zu Einstellungen. */
 async function createFromFile(text) {
   const s = fileToSong(text);
@@ -841,26 +865,7 @@ async function importFiles(files) {
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
       if (isZip(bytes)) {
-        const zipped = parseBackupZip(await readZip(bytes));
-        if (zipped.kind === 'backup') {
-          messages.push(await importBackup(file.name, zipped.data));
-        } else {
-          // nur .cho-/.txt-Dateien (ohne JSON): Lieder anlegen, Setlisten über die Dateinamen verknüpfen
-          const idOf = new Map();
-          for (const s of zipped.songs) {
-            const rec = await createFromFile(songToFile(s));
-            idOf.set(s.file.toLowerCase(), rec.id);
-            firstId ||= rec.id;
-            created++;
-          }
-          for (const sl of zipped.setlists) {
-            const items = sl.items
-              .map((i) => ({ ...i, songId: idOf.get(String(i.songId).toLowerCase()) }))
-              .filter((i) => i.songId);
-            await sets.create(sl.name, items);
-          }
-          if (zipped.setlists.length) messages.push(`${zipped.setlists.length} ${zipped.setlists.length === 1 ? 'Setliste' : 'Setlisten'} angelegt`);
-        }
+        messages.push(await importZip(file.name, await readZip(bytes)));
         continue;
       }
       const parsed = parseImportFile(file.name, new TextDecoder().decode(bytes));
@@ -880,7 +885,8 @@ async function importFiles(files) {
   if (created) messages.unshift(`${created} ${created === 1 ? 'Lied' : 'Lieder'} importiert`);
   if (firstId) await openSong(firstId);
   else if (!current) await openSong((await repo.list())[0]?.id);
-  else await refreshList();
+  // geöffnetes Lied neu laden – es kann durch die Sicherung geändert oder gelöscht worden sein
+  else await openSong((await repo.get(current.id)) ? current.id : (await repo.list())[0]?.id);
   toast(messages.join(' · ') || 'Nichts importiert');
 }
 

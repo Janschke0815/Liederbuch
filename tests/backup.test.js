@@ -1,6 +1,6 @@
 import { describe, it, expect } from './runner.js';
 import { createZip, readZip, isZip, crc32 } from '../src/core/zip.js';
-import { backupFiles, parseBackupZip, BACKUP_JSON } from '../src/core/backup.js';
+import { backupFiles, backupJson, applyZipEdits, BACKUP_JSON } from '../src/core/backup.js';
 import { SongRepository } from '../src/storage/repository.js';
 import { SetlistRepository, slimSetlist } from '../src/storage/setlists.js';
 import { createMemoryStore } from '../src/storage/stores.js';
@@ -63,6 +63,22 @@ async function exportOf(dev) {
   return data;
 }
 
+/** So öffnet die App eine ZIP: erst JSON (falls da), dann .cho/.txt abgleichen. */
+async function importZip(dev, entries) {
+  const json = backupJson(entries);
+  if (json) {
+    await dev.songs.importData(json);
+    await dev.sets.importRecords(json.setlists);
+  }
+  const current = await exportOf(dev);
+  const edits = applyZipEdits(entries, json || current, now(), current);
+  if (edits.songs.length) await dev.songs.importData({ format: 'liederbuch', version: 2, songs: edits.songs });
+  if (edits.setlists.length) await dev.sets.importRecords(edits.setlists);
+  return edits;
+}
+const fileText = (entries, name) => new TextDecoder().decode(entries.find((e) => e.name === name).data);
+const replaceFile = (entries, name, text) => entries.map((e) => (e.name === name ? { name, data: new TextEncoder().encode(text) } : e));
+
 describe('ZIP', () => {
   it('Prüfsumme (CRC-32) stimmt', () => {
     expect(crc32(enc.encode('123456789')).toString(16)).toBe('cbf43926');
@@ -124,11 +140,8 @@ describe('Sicherung als ZIP', () => {
     await A.songs.remove(w.id);
     await A.sets.create('Probe', [{ songId: c.id, transpose: 1 }]);
     const own = await B.songs.create('{title: Eigenes Lied}');
-    const parsed = parseBackupZip(await readZip(createZip(backupFiles(await exportOf(A)))));
-    expect(parsed.kind).toBe('backup');
-    const r = await B.songs.importData(parsed.data);
-    const nSets = await B.sets.importRecords(parsed.data.setlists);
-    expect([r.added, r.trash, nSets]).toEqual([1, 1, 1]);
+    const edits = await importZip(B, await readZip(createZip(backupFiles(await exportOf(A)))));
+    expect([edits.edited, edits.added, edits.setlistsChanged]).toEqual([0, 0, 0]); // Dateien unverändert
     expect((await B.songs.list()).map((s) => s.title)).toEqual(['Clementine', 'Eigenes Lied']);
     expect((await B.songs.get(c.id)).transpose).toBe(2);
     expect((await B.songs.trash()).map((s) => s.title)).toEqual(['Weg']);
@@ -136,21 +149,67 @@ describe('Sicherung als ZIP', () => {
     expect(await B.songs.get(own.id)).toBeTruthy(); // eigene Lieder bleiben
   });
 
-  it('ZIP nur mit .cho/.txt (ohne JSON): Lieder und Setlisten aus den Dateien', async () => {
-    const zip = createZip([
-      { name: 'Lieder/Clementine.cho', data: '{title: Clementine}\r\n{transpose: 2}\r\n[C]x' },
+  it('mit JSON: von Hand geänderte .cho-Datei gewinnt, neue Datei wird Lied, nichts doppelt', async () => {
+    const A = device('a');
+    const c = await A.songs.create('{title: Clementine}\n[C]alt');
+    await A.songs.create('{title: Beta}\n[G]b');
+    let entries = await readZip(createZip(backupFiles(await exportOf(A))));
+    entries = replaceFile(entries, 'Lieder/Clementine.cho', '{title: Clementine}\r\n{transpose: 3}\r\n{x_notiz: von Hand}\r\n[D]neu');
+    entries = [...entries, { name: 'Lieder/Wild Rover.cho', data: new TextEncoder().encode('[G]wild') }];
+    const edits = await importZip(A, entries);
+    expect([edits.edited, edits.added]).toEqual([1, 1]);
+    const cl = await A.songs.get(c.id);
+    expect([cl.chordpro, cl.transpose, cl.note]).toEqual(['{title: Clementine}\n[D]neu', 3, 'von Hand']);
+    expect((await A.songs.list()).map((s) => s.title)).toEqual(['Beta', 'Clementine', 'Wild Rover']);
+    // dieselbe ZIP noch einmal: keine Änderungen, keine Doppel
+    const again = await importZip(A, entries);
+    expect([again.edited, again.added]).toEqual([0, 0]);
+    expect((await A.songs.list()).length).toBe(3);
+  });
+
+  it('mit JSON: von Hand geänderte Setliste wird übernommen', async () => {
+    const A = device('a');
+    const k = await A.songs.create('{title: Kein schöner Land}\n[D]x');
+    const c = await A.songs.create('{title: Clementine}\n[C]y');
+    const set = await A.sets.create('Abend', [{ songId: k.id }, { songId: c.id }]);
+    let entries = await readZip(createZip(backupFiles(await exportOf(A))));
+    entries = replaceFile(entries, 'Setlisten/Abend.txt', 'Clementine.cho\r\n  Notiz: zuerst\r\nKein schöner Land.cho\r\n');
+    const edits = await importZip(A, entries);
+    expect(edits.setlistsChanged).toBe(1);
+    expect((await A.sets.get(set.id)).items).toEqual([{ songId: c.id, transpose: null, note: 'zuerst' }, { songId: k.id, transpose: null, note: '' }]);
+  });
+
+  it('ohne JSON: Abgleich mit dem Liederbuch – Gleichnamiges wird aktualisiert, Neues angelegt', async () => {
+    const A = device('a');
+    const c = await A.songs.create('{title: Clementine}\n[C]x');
+    const entries = await readZip(createZip([
+      { name: 'Lieder/Clementine.cho', data: '{title: Clementine}\r\n{transpose: 2}\r\n[C]x geändert' },
       { name: 'Lieder/Wild Rover.cho', data: '[G]wild' },
       { name: 'Setlisten/Abend.txt', data: 'Wild Rover.cho\r\nClementine.cho\r\n  Notiz: zum Schluss\r\n' },
-    ]);
-    const parsed = parseBackupZip(await readZip(zip));
-    expect(parsed.kind).toBe('files');
-    expect(parsed.songs.map((s) => [s.file, s.transpose, s.chordpro])).toEqual([
-      ['Clementine.cho', 2, '{title: Clementine}\n[C]x'],
-      ['Wild Rover.cho', 0, '{title: Wild Rover}\n[G]wild'],
-    ]);
-    expect(parsed.setlists[0]).toEqual({ name: 'Abend', items: [
-      { songId: 'Wild Rover.cho', transpose: null, note: '' }, { songId: 'Clementine.cho', transpose: null, note: 'zum Schluss' },
-    ] });
+    ]));
+    const edits = await importZip(A, entries);
+    expect([edits.edited, edits.added, edits.setlistsChanged]).toEqual([1, 1, 1]);
+    expect((await A.songs.list()).map((s) => s.title)).toEqual(['Clementine', 'Wild Rover']);
+    const cl = await A.songs.get(c.id);
+    expect([cl.chordpro, cl.transpose]).toEqual(['{title: Clementine}\n[C]x geändert', 2]);
+    const songs = await A.songs.list();
+    const abend = (await A.sets.list())[0];
+    expect(abend.items.map((i) => songs.find((s) => s.id === i.songId)?.title)).toEqual(['Wild Rover', 'Clementine']);
+    // noch einmal: nichts mehr zu tun
+    const again = await importZip(A, entries);
+    expect([again.edited, again.added, again.setlistsChanged]).toEqual([0, 0, 0]);
+  });
+
+  it('eine Sicherung ist mit ihrer JSON deckungsgleich (nichts gilt als geändert)', async () => {
+    const A = device('a');
+    const c = await A.songs.create('{title: Oh Susanna}\n{artist: Foster}\n[C]a');
+    await A.songs.update(c.id, { transpose: -2, accidentals: 'flat', note: 'Zeile 1\nZeile 2' });
+    await A.songs.create('{title: Oh Susanna}\n[C]b');
+    await A.sets.create('Mit Notiz', [{ songId: c.id, transpose: 1, note: 'leise' }]);
+    const entries = await readZip(createZip(backupFiles(await exportOf(A))));
+    const edits = applyZipEdits(entries, backupJson(entries), now());
+    expect([edits.edited, edits.added, edits.setlistsChanged]).toEqual([0, 0, 0]);
+    expect(fileText(entries, 'Lieder/Oh Susanna - Foster.cho')).toContain('{x_notiz: Zeile 2}');
   });
 
   it('alte Sicherungen (nur Lieder, Version 1) lassen sich weiter öffnen', async () => {

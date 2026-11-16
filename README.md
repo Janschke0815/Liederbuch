@@ -39,10 +39,19 @@ lesbar** ist – Windows öffnet sie per Doppelklick wie einen Ordner:
     liederbuch-sicherung.json          vollständig inkl. Papierkorb und Änderungszeiten
     LIESMICH.txt
 
-Zum Wiederherstellen die ZIP-Datei mit „Datei öffnen …“ wählen: Die App nimmt die JSON-Datei
-(Lieder, Setlisten, Papierkorb; vorhandene Lieder nur, wenn die Sicherung neuer ist). Fehlt sie,
-werden die `.cho`- und `.txt`-Dateien übernommen – so lassen sich auch Lieder aus anderen
-ChordPro-Programmen als ZIP einlesen. Ältere Sicherungen (`.json`) lassen sich weiter öffnen.
+Zum Wiederherstellen die ZIP-Datei mit „Datei öffnen …“ wählen:
+
+1. Die App übernimmt die JSON-Datei (Lieder, Setlisten, Papierkorb; vorhandene Lieder nur, wenn
+   die Sicherung neuer ist).
+2. Dann gleicht sie die `.cho`- und `.txt`-Dateien ab – mit der JSON bzw., wenn keine darin ist, mit
+   dem aktuellen Liederbuch. **Von Hand geänderte Dateien gewinnen** (Liedtext, `{transpose}`,
+   `{x_notiz}` … bzw. Setlisten), **neue `.cho`-Dateien** werden neue Lieder, gleichnamige werden
+   aktualisiert. Gelöschte Dateien löschen nichts; dieselbe ZIP zweimal zu öffnen erzeugt keine
+   Doppel.
+
+So lässt sich eine Sicherung entpacken, im Editor bearbeiten, wieder packen und öffnen – oder es
+lassen sich Lieder aus anderen ChordPro-Programmen als ZIP einlesen. Ältere Sicherungen (`.json`)
+lassen sich weiter öffnen.
 
 Updates: Der Service Worker lädt bei Verbindung immer die aktuelle Version („Netz zuerst“)
 und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zurück.
