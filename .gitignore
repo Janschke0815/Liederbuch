@@ -11,3 +11,6 @@ desktop.ini
 # Python
 __pycache__/
 praesentation/
+
+# Eigene Zugangsdaten/Adressen (z. B. fertige Caddy-Dateien für die eigene NAS)
+privat/

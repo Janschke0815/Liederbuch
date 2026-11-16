@@ -329,8 +329,13 @@ Browser nur, wenn der Server Zugriffe von der Adresse der App zulässt. Nötig s
 
 Nextcloud sendet sie von sich aus nicht. Bei einem eigenen Server lassen sie sich im Webserver
 (Apache/nginx) eintragen oder über eine Nextcloud-App wie *WebAppPassword*. Bei fertigen
-Speicherangeboten, deren Server man nicht selbst verwaltet, geht das meist nicht – dort meldet
-die App „Server nicht erreichbar … (CORS)“.
+Speicherangeboten, deren Server man nicht selbst verwaltet, geht das meist nicht (z. B. GMX
+Mediacenter: verlangt schon für die Vorabfrage ein Passwort) – dort meldet die App „Server nicht
+erreichbar … (CORS)“.
+
+**QNAP-NAS:** Schritt-für-Schritt-Anleitung mit einem kleinen Caddy-Container, der die Freigabe
+ergänzt und automatisch ein Zertifikat holt: [docs/webdav-qnap.md](docs/webdav-qnap.md). Das
+Caddyfile dort passt mit anderen Adressen auch für andere NAS oder Server.
 
 ## Aufbau
 
