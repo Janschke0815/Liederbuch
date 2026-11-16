@@ -346,3 +346,4 @@ die App „Server nicht erreichbar … (CORS)“.
 8. ✅ Mundharmonika-Tabs ([-4] …) und Gitarren-Tabs getrennt ein-/ausblendbar
 9. ✅ Schriftart und -größe in der Druckvorschau einstellbar (nur für den Druck)
 10. ✅ Harp-Tabs importieren (auch Akkord- und Harp-Zeile übereinander); Akkorde und Harp-Tabs wahlweise in einer oder zwei Zeilen
+11. ✅ Dateien passend für Windows: Sync-Datei, Sicherung und geteilte Lieder eingerückt und mit CR LF

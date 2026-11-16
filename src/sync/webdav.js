@@ -9,6 +9,7 @@
 // Abgleich wieder aus).
 
 import { AuthError, ConflictError } from './sync-engine.js';
+import { toFileJson } from '../core/file-format.js';
 
 export const WEBDAV_FILE = 'Liederbuch.json';
 
@@ -117,7 +118,7 @@ export class WebDavProvider {
   }
 
   async write(data, expectedVersion) {
-    const body = JSON.stringify(data);
+    const body = toFileJson(data);
     const headers = { 'Content-Type': 'application/json; charset=utf-8' };
     if (expectedVersion) headers['If-Match'] = expectedVersion;
     else if (!this.exists) headers['If-None-Match'] = '*'; // nur anlegen, nicht überschreiben

@@ -25,6 +25,7 @@ import { getAllMeta, setMeta, getTags, setTags } from './core/meta-edit.js';
 import { transposeChord } from './core/chords.js';
 import { applySettings, loadSettings } from './settings/settings.js';
 import { bookmarkletHref, readUgHash, ugDataToText } from './core/ug-bookmarklet.js';
+import { toFileJson, toWindowsText } from './core/file-format.js';
 
 const $ = (s) => document.querySelector(s);
 const editor = $('#editor');
@@ -531,7 +532,7 @@ $('#share-native').onclick = async () => {
 $('#share-file').onclick = () => {
   const { name, chordpro } = currentExport();
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([chordpro], { type: 'text/plain' }));
+  a.href = URL.createObjectURL(new Blob([toWindowsText(chordpro)], { type: 'text/plain' }));
   a.download = `${name}.cho`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -843,7 +844,7 @@ if ('launchQueue' in window) {
 $('#btn-export').onclick = async () => {
   await flushSave();
   const data = await repo.exportData();
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const blob = new Blob([toFileJson(data)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `liederbuch-${new Date().toISOString().slice(0, 10)}.json`;

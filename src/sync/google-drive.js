@@ -7,6 +7,7 @@
 // hat oder die man ihr über die Google-Dateiauswahl (Picker) gibt – nicht den Rest des Drives.
 
 import { AuthError, ConflictError } from './sync-engine.js';
+import { toFileJson } from '../core/file-format.js';
 
 const GIS_URL = 'https://accounts.google.com/gsi/client';
 const GAPI_URL = 'https://apis.google.com/js/api.js';
@@ -177,7 +178,7 @@ export class GoogleDriveProvider {
     const meta = { name, mimeType: 'application/json', appProperties: { [MARK_KEY]: mark } };
     const form = new FormData();
     form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
-    form.append('file', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    form.append('file', new Blob([toFileJson(data)], { type: 'application/json' }));
     return this.#json(`${UPLOAD}?uploadType=multipart&fields=id,version,name`, { method: 'POST', body: form });
   }
 
@@ -199,7 +200,7 @@ export class GoogleDriveProvider {
     const r = await this.#json(`${UPLOAD}/${this.fileId}?uploadType=media&fields=version`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: toFileJson(data),
     });
     return r.version;
   }
