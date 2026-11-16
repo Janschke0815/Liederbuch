@@ -381,6 +381,7 @@ function fillMeta(song) {
   const capo = Number(m.capo) || 0;
   $('#meta-summary').textContent = [
     m.key && `Tonart ${m.key}`, capo > 0 && `Capo ${capo}`, m.time && `${m.time}-Takt`, m.tempo && `${m.tempo} bpm`,
+    m.columns === '2' && 'zweispaltig', m.columns === '1' && 'einspaltig',
   ].filter(Boolean).join(' · ');
   const capoChip = $('#capo-chip');
   capoChip.hidden = !(capo > 0);

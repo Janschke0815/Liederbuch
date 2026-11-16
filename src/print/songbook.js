@@ -114,7 +114,9 @@ export async function buildSongbook(root, songs, options = {}) {
       ? { transpose: s.transpose || 0, accidentals: s.accidentals || 'auto' }
       : {};
     const article = prepareSong(renderSong(song, view), s.id);
-    pag.newPage({ className: 'page--song' });
+    // {columns: 1|2} im Lied geht vor der allgemeinen Einstellung
+    const own = Number(song.meta.columns);
+    pag.newPage({ className: 'page--song', columns: own === 1 || own === 2 ? own : spec.columns });
     firstSongPage.set(s.id, pag.pages.length);
     pag.flow(article);
   }

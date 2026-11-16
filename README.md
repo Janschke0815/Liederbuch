@@ -171,6 +171,11 @@ Capo, Takt und Tempo. Es schreibt die üblichen ChordPro-Angaben in den Kopf des
 Capo und Takt erscheinen im Liedkopf (auch im Druck) und als Kennzeichen über der Vorschau;
 beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ erkannt.
 
+**Spalten pro Lied:** Unter *Spalten* lässt sich je Lied **einspaltig** oder **zweispaltig**
+wählen (ChordPro `{columns: 1}` bzw. `{columns: 2}`). Das geht im Druck vor der allgemeinen
+Einstellung *Einstellungen → Druck → Spalten*, auch auf den Folgeseiten eines langen Liedes;
+„wie Einstellung“ entfernt die Angabe wieder. Deckblatt und Inhaltsverzeichnis bleiben einspaltig.
+
 ## Tags, Notizen, Papierkorb
 
 - **Tags** (Liedinfo → Tags, mit Komma trennen) werden als ChordPro-Standard `{tag: Advent}`

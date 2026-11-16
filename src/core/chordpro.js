@@ -21,12 +21,12 @@ const ALIASES = {
   soc: 'start_of_chorus', eoc: 'end_of_chorus', sov: 'start_of_verse', eov: 'end_of_verse',
   sob: 'start_of_bridge', eob: 'end_of_bridge', sot: 'start_of_tab', eot: 'end_of_tab',
   sog: 'start_of_grid', eog: 'end_of_grid', np: 'new_page', npp: 'new_physical_page',
-  colb: 'column_break', highlight: 'comment',
+  colb: 'column_break', highlight: 'comment', col: 'columns',
 };
 
 const MULTI_META = new Set(['subtitle', 'artist', 'composer', 'lyricist', 'arranger', 'tag']);
 const SINGLE_META = new Set([
-  'title', 'sorttitle', 'album', 'year', 'key', 'capo', 'tempo', 'time', 'duration', 'copyright',
+  'title', 'sorttitle', 'album', 'year', 'key', 'capo', 'tempo', 'time', 'duration', 'copyright', 'columns',
 ]);
 
 const VERBATIM_KINDS = new Set(['tab', 'grid']);

@@ -62,8 +62,12 @@ export class Paginator {
     return page;
   }
 
-  /** Neue Seite; columns überschreibt die Spaltenzahl (z. B. 1 für Deckblatt). */
-  newPage({ columns = this.spec.columns, className = '' } = {}) {
+  /**
+   * Neue Seite; columns überschreibt die Spaltenzahl (z. B. 1 für Deckblatt, oder die eines
+   * Liedes). Folgeseiten, die beim Umbruch entstehen, behalten diese Spaltenzahl.
+   */
+  newPage({ columns = this.currentColumns ?? this.spec.columns, className = '' } = {}) {
+    this.currentColumns = columns;
     const page = this.#makePageElement(columns);
     if (className) page.classList.add(...className.split(/\s+/));
     this.probePage.before(page);

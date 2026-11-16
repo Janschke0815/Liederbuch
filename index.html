@@ -185,6 +185,13 @@
           <button type="button" id="btn-capo-help" class="link-btn capo-help" title="Capo-Lage mit möglichst einfachen Griffen vorschlagen">Capo-Hilfe …</button>
           <label>Takt <input data-meta="time" list="dl-times" autocomplete="off" placeholder="z. B. 4/4"></label>
           <label>Tempo <input data-meta="tempo" type="number" min="20" max="320" step="1" placeholder="bpm"></label>
+          <label title="Spalten dieses Liedes im Druck – geht vor Einstellungen → Druck → Spalten">Spalten
+            <select data-meta="columns">
+              <option value="">wie Einstellung</option>
+              <option value="1">einspaltig</option>
+              <option value="2">zweispaltig</option>
+            </select>
+          </label>
           <label class="meta-full">Tags <input id="meta-tags" list="dl-tags" placeholder="z. B. Lagerfeuer, Weihnachten (mit Komma trennen)" autocomplete="off"></label>
           <label class="meta-full">Notiz <small>– privat, erscheint in Vorschau und Spielmodus, nicht im Druck</small>
             <textarea id="meta-note" rows="2" placeholder="z. B. Anschlag, Einsatz, wer singt …"></textarea>
@@ -300,7 +307,7 @@
           <div class="opt-row"><label>Spalten <select id="pr-columns"><option value="1">1 Spalte</option><option value="2">2 Spalten</option></select></label><button type="button" class="pin" data-pin="columns" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <div class="opt-row"><label>Rand (mm) <input id="pr-margin" type="number" min="5" max="40" step="1"></label><button type="button" class="pin" data-pin="margin" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <div class="opt-row"><label class="check"><input type="checkbox" id="pr-pageNumbers"> Seitenzahlen</label><button type="button" class="pin" data-pin="pageNumbers" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
-          <p class="hint">Papier, Spalten, Rand und Seitenzahlen gelten auch für spätere Ausdrucke (siehe Einstellungen).</p>
+          <p class="hint">Papier, Spalten, Rand und Seitenzahlen gelten auch für spätere Ausdrucke (siehe Einstellungen). Lieder mit eigener Spaltenzahl (Liedinfo) behalten diese.</p>
         </fieldset>
         <fieldset>
           <legend>Schrift <small>(nur für den Druck)</small></legend>
@@ -473,7 +480,7 @@
                 <div class="st-control"><select id="st-paper" data-segmented><option>A4</option><option>A5</option><option>Letter</option></select></div>
               </div>
               <div class="st-row">
-                <div class="st-text"><span class="st-title">Spalten</span><span class="st-hint">Zwei Spalten sparen Seiten bei kurzen Zeilen</span></div>
+                <div class="st-text"><span class="st-title">Spalten</span><span class="st-hint">Zwei Spalten sparen Seiten bei kurzen Zeilen. Einzelne Lieder können das in der Liedinfo ändern.</span></div>
                 <div class="st-control"><select id="st-columns" data-segmented><option value="1">einspaltig</option><option value="2">zweispaltig</option></select></div>
               </div>
               <div class="st-row">
@@ -534,6 +541,7 @@
             <tr><td><code>{time: 3/4}</code></td><td>Takt (für das Metronom)</td></tr>
             <tr><td><code>{tempo: 96}</code></td><td>Tempo in Schlägen pro Minute</td></tr>
             <tr><td><code>{duration: 3:20}</code></td><td>Dauer – danach richtet sich das automatische Scrollen im Spielmodus</td></tr>
+            <tr><td><code>{columns: 2}</code></td><td>Spalten dieses Liedes im Druck (1 oder 2) – geht vor der Einstellung</td></tr>
             <tr><td><code>{tag: Lagerfeuer}</code></td><td>Tag zum Filtern (mehrfach möglich)</td></tr>
             <tr><td><code>{album: …}</code> <code>{year: …}</code> <code>{copyright: …}</code> <code>{sorttitle: …}</code></td><td>weitere Angaben</td></tr>
           </table>
