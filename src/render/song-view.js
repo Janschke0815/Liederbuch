@@ -232,6 +232,7 @@ export function songKey(song, opts = {}) {
 }
 
 /**
+ * Ein Lied als HTML darstellen (Vorschau, Spielmodus, Druck).
  * @param {object} song  Ergebnis von parseChordPro
  * @param {{transpose?: number, accidentals?: 'auto'|'sharp'|'flat'}} [opts]
  * @returns {HTMLElement}

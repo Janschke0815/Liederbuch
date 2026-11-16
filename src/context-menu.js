@@ -16,6 +16,7 @@ function iconSvg(name) {
   return svg;
 }
 
+/** Offenes Kontextmenü schließen (falls eins offen ist). */
 export function closeMenu() {
   open?.close();
 }

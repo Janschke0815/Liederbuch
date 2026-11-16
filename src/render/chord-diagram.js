@@ -22,7 +22,10 @@ function findBarre(frets) {
   return to - from >= 2 ? { fret: low, from, to } : null;
 }
 
-/** @returns {HTMLElement | null} */
+/**
+ * Griffbild (SVG) für einen Akkord, oder null, wenn kein Griff bekannt ist.
+ * @returns {HTMLElement | null}
+ */
 export function chordDiagram(name) {
   const shape = chordShape(name);
   if (!shape) return null;

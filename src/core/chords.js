@@ -13,12 +13,17 @@ const NOTE_INDEX = {
 export const CHORD_RE =
   /^([A-H][#b]?)((?:maj|min|mi|m|M|dim|aug|sus|add|no|omit|alt|[+°øΔ-]|o(?=\d)|\d+|[#b](?=\d)|\/(?=\d)|\(|\)|,)*)(?:\/([A-H][#b]?))?$/;
 
+/**
+ * Akkord zerlegen: „F#m7/C#“ -> {root: 'F#', quality: 'm7', bass: 'C#'}.
+ * @returns {{root: string, quality: string, bass: string|null} | null}  null, wenn es kein Akkord ist
+ */
 export function parseChord(name) {
   const m = CHORD_RE.exec(name);
   if (!m) return null;
   return { root: m[1], quality: m[2], bass: m[3] || null };
 }
 
+/** Ist der Text ein Akkordname (C, Am7, D/F#, Bbsus4 …)? */
 export function isChord(name) {
   return CHORD_RE.test(name);
 }
@@ -28,6 +33,13 @@ const FLAT_KEYS = new Set([
   'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm',
 ]);
 
+/**
+ * Einen Ton um Halbtöne verschieben.
+ * @param {string} note      z. B. 'F#' oder 'Bb'
+ * @param {number} steps     Halbtöne (auch negativ)
+ * @param {boolean} useFlats mit b statt # schreiben
+ * @returns {string}
+ */
 export function transposeNote(note, steps, useFlats) {
   const idx = NOTE_INDEX[note];
   if (idx === undefined) return note;

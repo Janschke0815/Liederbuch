@@ -8,6 +8,7 @@ import { parsePropfind, PROPFIND_BODY } from '../formats/song-files.js';
 const TEXT = 'text/plain; charset=utf-8';
 const fileName = (url) => decodeURIComponent(url.split('/').pop());
 
+/** HTTP-Zugriff auf einen WebDAV-Ordner mit Anmeldung und verständlichen Fehlermeldungen. */
 export class WebdavClient {
   /**
    * @param {{user?: string, password?: string, fetch: typeof fetch, host?: string}} opts

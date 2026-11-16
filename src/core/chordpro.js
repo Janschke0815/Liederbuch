@@ -32,6 +32,11 @@ const SINGLE_META = new Set([
 const VERBATIM_KINDS = new Set(['tab', 'grid']);
 const FILLER_TEXT = /^[\s|/%.:\-()x×\d*]*$/i;
 
+/**
+ * Eine Textzeile mit [Akkorden] in Segmente zerlegen.
+ * @param {string} line
+ * @returns {{type: 'lyrics', segments: {chord: string|null, annotation: string|null, harp?: string, text: string}[], chordsOnly: boolean}}
+ */
 export function parseLyricsLine(line) {
   const segments = [];
   const re = /\[([^\]]*)\]/g;
@@ -71,6 +76,11 @@ function envKind(name) {
   return name.replace(/^(start|end)_of_/, '');
 }
 
+/**
+ * ChordPro-Text in das Song-Modell übersetzen (Aufbau siehe Kopf dieser Datei).
+ * @param {string} src  der Liedtext
+ * @returns {{meta: object, blocks: {kind: string|null, label: string, lines: object[]}[]}}
+ */
 export function parseChordPro(src) {
   const song = { meta: {}, blocks: [] };
   let current = null; // offener Block ({start_of_…})

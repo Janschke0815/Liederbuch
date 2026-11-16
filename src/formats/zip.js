@@ -8,6 +8,11 @@
 const enc = new TextEncoder();
 
 let crcTable = null;
+/**
+ * CRC-32-Prüfsumme (wie sie ZIP-Dateien verlangen).
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
 export function crc32(bytes) {
   if (!crcTable) {
     crcTable = new Uint32Array(256);
@@ -30,6 +35,7 @@ function dosTime(d) {
 }
 
 /**
+ * ZIP-Datei erzeugen (Einträge unkomprimiert, Namen in UTF-8).
  * @param {{name: string, data: string|Uint8Array, date?: Date}[]} files  Pfade mit „/“
  * @returns {Uint8Array}
  */
@@ -111,6 +117,7 @@ async function inflate(bytes) {
 }
 
 /**
+ * ZIP-Datei lesen – unkomprimierte und mit „deflate“ gepackte Einträge (wie von Windows/macOS erzeugt).
  * @param {Uint8Array} bytes
  * @returns {Promise<{name: string, data: Uint8Array}[]>}  nur Dateien, keine Ordner
  */

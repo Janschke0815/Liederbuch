@@ -143,6 +143,10 @@ export function applySettings(el, settings) {
 
 const KEY = 'settings';
 
+/**
+ * Gespeicherte Einstellungen lesen (fehlende Werte = Standard, ältere Speicherformate werden übernommen).
+ * @returns {object}
+ */
 export function loadSettings(storage = globalThis.localStorage) {
   let raw = {};
   try {
@@ -165,6 +169,10 @@ export function loadSettings(storage = globalThis.localStorage) {
   return sanitize(raw);
 }
 
+/**
+ * Einstellungen prüfen, speichern und überall anwenden (Ereignis „settingschange“).
+ * @returns {object} die gespeicherten (geprüften) Einstellungen
+ */
 export function saveSettings(settings, storage = globalThis.localStorage) {
   const s = sanitize(settings);
   storage.setItem(KEY, JSON.stringify(s));

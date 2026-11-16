@@ -26,6 +26,10 @@ export function stepSize(key, value, dir) {
   return Math.min(max, Math.max(min, Math.round((Number(value) + dir * 0.5) * 2) / 2));
 }
 
+/**
+ * Gespeicherte Druckschriften (nur die, die von den Einstellungen abweichen).
+ * @returns {object}
+ */
 export function loadPrintFonts(storage = globalThis.localStorage) {
   try {
     const v = JSON.parse(storage.getItem(KEY) || '{}');
@@ -35,6 +39,7 @@ export function loadPrintFonts(storage = globalThis.localStorage) {
   }
 }
 
+/** Druckschriften speichern; Werte, die den Einstellungen entsprechen, werden weggelassen. */
 export function savePrintFonts(overrides, settings, storage = globalThis.localStorage) {
   const clean = cleanPrintFonts(overrides, settings);
   if (Object.keys(clean).length) storage.setItem(KEY, JSON.stringify(clean));

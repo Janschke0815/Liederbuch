@@ -19,6 +19,11 @@ export const EXPORT_VERSION = 2; // 2: zusätzlich Papierkorb (trash); Setlisten
 /** Für die Suche vereinfachen (siehe core/text.js) – alter Name, bleibt für bestehende Aufrufer. */
 export const normalize = foldText;
 
+/**
+ * Titel, Interpret, Sortiertitel und Tags aus dem ChordPro-Text ableiten (für Liste und Suche).
+ * @param {string} chordpro
+ * @returns {{title: string, artist: string, sortTitle: string, tags: string[]}}
+ */
 export function deriveSummary(chordpro) {
   const { meta } = parseChordPro(chordpro || '');
   const title = (meta.title || '').trim();
@@ -44,6 +49,7 @@ function lyricsText(chordpro) {
 // note: private Notiz zum Lied (nicht im Druck)
 export const SYNC_FIELDS = ['id', 'chordpro', 'transpose', 'accidentals', 'note', 'createdAt', 'updatedAt', 'deletedAt'];
 
+/** Nur die Felder, die abgeglichen und gesichert werden (SYNC_FIELDS). */
 export function slimRecord(r) {
   const out = {};
   for (const k of SYNC_FIELDS) out[k] = r[k] ?? (k === 'deletedAt' ? null : r[k]);
@@ -121,6 +127,7 @@ export class SongRepository extends EventTarget {
     });
   }
 
+  /** Lieder nach Sortiertitel, dann Interpret sortieren (ändert das Array). */
   static sort(songs) {
     return songs.sort(
       (a, b) =>
@@ -146,11 +153,21 @@ export class SongRepository extends EventTarget {
     return [...SongRepository.sort(head), ...SongRepository.sort(body)];
   }
 
+  /**
+   * Lied mit dieser ID (gelöschte nicht).
+   * @returns {Promise<object|undefined>}
+   */
   async get(id) {
     const s = await this.store.get(id);
     return s && !s.deletedAt ? s : undefined;
   }
 
+  /**
+   * Neues Lied anlegen.
+   * @param {string} chordpro  Liedtext
+   * @param {object} [extra]   weitere Felder, z. B. {transpose, accidentals, note}
+   * @returns {Promise<object>} der neue Datensatz
+   */
   create(chordpro = '', extra = {}) {
     return this.#serial(async () => {
       const t = this.now();
@@ -259,6 +276,7 @@ export class SongRepository extends EventTarget {
     });
   }
 
+  /** Alle Lieder und den Papierkorb als Sicherung ({format, version, songs, trash}). */
   async exportData() {
     const songs = SongRepository.sort(await this.#live()).map(
       ({ id, chordpro, transpose, accidentals, note, createdAt, updatedAt }) =>

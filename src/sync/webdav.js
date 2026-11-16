@@ -72,6 +72,7 @@ const after = (t, candidate) => {
 
 const emptyState = () => ({ songs: {}, setlists: {} });
 
+/** Cloud-Anbieter WebDAV: Lieder als .cho-Dateien, Setlisten als .txt (Aufbau siehe Kopf dieser Datei). */
 export class WebDavProvider {
   id = 'webdav';
   name = 'WebDAV';
@@ -98,6 +99,7 @@ export class WebDavProvider {
     this.guard = null; // Inhalt von Liederbuch.json beim letzten Lesen (Hinweis oder altes Format)
   }
 
+  /** Servername aus der Adresse (für Anzeige und Fehlermeldungen). */
   get host() {
     try {
       return new URL(this.fileUrl).host;
@@ -158,12 +160,18 @@ export class WebDavProvider {
     this.signedIn = true;
   }
 
+  /** Abmelden (Zugangsdaten bleiben gespeichert, bis die Oberfläche sie löscht). */
   signOut() {
     this.signedIn = false;
   }
 
   // ---------- Lesen ----------
 
+  /**
+   * Alle Lieder und Setlisten aus den Dateien lesen.
+   * @param {string} [knownVersion]  Signatur der letzten Ordnerlisten – gleich = nichts zu tun
+   * @returns {Promise<null | {unchanged: true} | {data: object, version: string, rewrite: boolean}>}  rewrite: Dateien sollten neu geschrieben werden (altes Format)
+   */
   async read(knownVersion) {
     const [songs, sets] = await Promise.all([this.#list(this.songDirUrl), this.#list(this.setDirUrl)]);
     const version = listingSignature(songs) + '||' + listingSignature(sets);
@@ -325,6 +333,10 @@ export class WebDavProvider {
     return [this.folderUrl, dirUrl];
   }
 
+  /**
+   * Zusammengeführte Lieder und Setlisten als Dateien schreiben (nur Geändertes; umbenennen, löschen).
+   * @returns {Promise<string>} neue Signatur der Ordnerlisten
+   */
   async write(data) {
     const state = this.#loadState();
     const lists = this.lists || { songs: new Map(), sets: new Map() };

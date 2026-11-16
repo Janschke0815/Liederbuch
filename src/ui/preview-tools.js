@@ -8,8 +8,10 @@ import { preview } from './song.js';
 // ---------- Zoom der Vorschau ----------
 
 let viewZoom = prefs.get('viewZoom');
+/** Aktuelle Vergrößerung der Vorschau (1 = 100 %). */
 export const getViewZoom = () => viewZoom;
 
+/** Vorschau vergrößern/verkleinern (60–250 %), wird gemerkt. */
 export function setViewZoom(z) {
   viewZoom = Math.min(2.5, Math.max(0.6, Math.round(z * 10) / 10));
   prefs.set('viewZoom', viewZoom);
@@ -23,6 +25,7 @@ setViewZoom(viewZoom);
 
 // ---------- Metronom ----------
 
+/** Metronom im Tempo des Liedes an/aus (ohne Tempo: 100 bpm). */
 export function toggleMetronome() {
   const chip = $('#time-chip');
   const on = metronome.toggle(Number(chip.dataset.tempo) || 100, beatsPerBar(chip.dataset.time));

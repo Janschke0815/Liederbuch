@@ -7,6 +7,17 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.23.1 – 16.11.2026 · Dokumentation
+
+- **Architektur-Beschreibung** [`docs/architektur.md`](docs/architektur.md): Schichten, Datenmodell, was beim
+  Bearbeiten und Abgleichen passiert, Ereignisse zwischen den Modulen, Diagramme.
+- **API-Dokumentation** [`docs/api/`](docs/api/README.md): eine Seite pro Modul mit allen Funktionen, Parametern,
+  Rückgabewerten, Klassen und Methoden sowie „Benutzt“ / „Benutzt von“ – erzeugt aus den JSDoc-Kommentaren
+  (ähnlich Doxygen) mit `python tools/make-docs.py`, ohne zusätzliche Programme.
+- Alle exportierten Funktionen und Methoden haben jetzt einen Kommentar (77 ergänzt);
+  `python tools/make-docs.py --check` meldet künftig fehlende.
+- Zeichenklasse für Akzente in `core/text.js` wieder lesbar geschrieben.
+
 ## 1.23.0 – 16.11.2026 · Wartbarkeit
 
 Keine neuen Funktionen, das Aussehen ist unverändert – der Code ist für Menschen leichter zu pflegen.

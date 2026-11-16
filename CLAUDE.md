@@ -11,11 +11,13 @@ Aufbau und Bedienung: siehe README.md („Aufbau“, „Fahrplan“).
    Ein Test (`tests/version.test.js`) schlägt fehl, wenn die aktuelle Version im Changelog fehlt.
 3. Bei neuen Fahrplan-Punkten den „Fahrplan“ im README ergänzen.
 4. Tests unter `tests/index.html` müssen alle bestehen.
-5. Commit-Nachricht auf Deutsch mit Version in Klammern, z. B. „… (1.24.0)“.
+5. API-Dokumentation neu erzeugen: `python tools/make-docs.py` (meldet auch fehlende Kommentare).
+6. Commit-Nachricht auf Deutsch mit Version in Klammern, z. B. „… (1.24.0)“.
 
 ## Sonst
 
 - Der Ordner `privat/` wird nie committet oder gepusht.
 - Gepusht wird erst nach Freigabe.
 - Neue gespeicherte Werte gehören in `src/prefs.js`, neue Tastenkürzel in `src/ui/shortcuts.js`.
+- Jede exportierte Funktion, Klasse und öffentliche Methode bekommt einen JSDoc-Kommentar (siehe docs/architektur.md).
 - CSS-Umbauten mit `tools/css-snapshot.js` vorher/nachher vergleichen.

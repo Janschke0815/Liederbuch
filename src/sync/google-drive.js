@@ -37,6 +37,7 @@ function loadScript(src) {
   return scripts.get(src);
 }
 
+/** Fehler: Auf ein gemeinsames Liederbuch gibt es keinen Zugriff mehr (gelöscht oder Freigabe entfernt). */
 export class NoAccessError extends Error {
   constructor() {
     super('Kein Zugriff mehr auf dieses gemeinsame Liederbuch (gelöscht oder Freigabe entfernt)');
@@ -44,6 +45,7 @@ export class NoAccessError extends Error {
   }
 }
 
+/** Cloud-Anbieter Google Drive: eine JSON-Datei pro Liederbuch, gemeinsame Liederbücher über Freigaben. */
 export class GoogleDriveProvider {
   id = 'gdrive';
   name = 'Google Drive';
@@ -63,6 +65,7 @@ export class GoogleDriveProvider {
 
   // ---------- Anmeldung ----------
 
+  /** Gespeichertes Zugangstoken, solange es gültig ist, sonst null. */
   token() {
     try {
       const t = JSON.parse(this.storage.getItem('gdrive.token') || 'null');
@@ -73,6 +76,7 @@ export class GoogleDriveProvider {
     return null;
   }
 
+  /** Gibt es ein gültiges Zugangstoken? */
   get signedIn() {
     return Boolean(this.token());
   }
@@ -162,6 +166,11 @@ export class GoogleDriveProvider {
     this.storage.removeItem('gdrive.fileId');
   }
 
+  /**
+   * Liederbuch aus Drive lesen.
+   * @param {string} [knownVersion]  zuletzt gelesene Version – ist sie gleich, wird nichts geladen
+   * @returns {Promise<null | {unchanged: true} | {data: object, version: string}>}
+   */
   async read(knownVersion) {
     if (!(await this.#findFile())) return null;
     const version = await this.#version();
@@ -182,6 +191,10 @@ export class GoogleDriveProvider {
     return this.#json(`${UPLOAD}?uploadType=multipart&fields=id,version,name`, { method: 'POST', body: form });
   }
 
+  /**
+   * Liederbuch nach Drive schreiben (nur, wenn die Datei noch die erwartete Version hat).
+   * @returns {Promise<string>} neue Version
+   */
   async write(data, expectedVersion) {
     if (!(await this.#findFile())) {
       if (this.shared) throw new NoAccessError();
@@ -219,6 +232,10 @@ export class GoogleDriveProvider {
     return this.#json(`${API}/${this.fileId}?fields=name,ownedByMe,owners(displayName,emailAddress),capabilities(canShare,canEdit)`);
   }
 
+  /**
+   * Wer Zugriff auf das gemeinsame Liederbuch hat.
+   * @returns {Promise<{id: string, email: string, name: string, role: string}[]>}
+   */
   async members() {
     if (!(await this.#findFile())) return [];
     const r = await this.#json(`${API}/${this.fileId}/permissions?fields=permissions(id,type,role,emailAddress,displayName)`);
@@ -236,6 +253,7 @@ export class GoogleDriveProvider {
     });
   }
 
+  /** Zugriff einer Person entfernen. */
   async removeMember(permissionId) {
     await this.#json(`${API}/${this.fileId}/permissions/${permissionId}`, { method: 'DELETE' });
   }

@@ -17,6 +17,7 @@ export const SYNC_FORMAT = 'liederbuch-sync';
 // 2: zusätzlich Setlisten ("setlists"); Version-1-Dateien werden weiter gelesen
 export const SYNC_VERSION = 2;
 
+/** Fehler: Die Datei in der Cloud wurde inzwischen geändert – neu lesen und zusammenführen. */
 export class ConflictError extends Error {
   constructor() {
     super('Die Datei in der Cloud wurde gerade von einem anderen Gerät geändert');
@@ -24,6 +25,7 @@ export class ConflictError extends Error {
   }
 }
 
+/** Fehler: Anmeldung nötig oder abgelaufen (die Oberfläche zeigt dann „Neu anmelden“). */
 export class AuthError extends Error {
   constructor(msg = 'Anmeldung nötig') {
     super(msg);
@@ -116,6 +118,7 @@ export class SyncEngine extends EventTarget {
     this.sync();
   }
 
+  /** Abgleich beenden (Verbindung trennen). */
   stop() {
     for (const fn of this.cleanup) fn();
     this.cleanup = [];
@@ -126,6 +129,7 @@ export class SyncEngine extends EventTarget {
     this.#set('off');
   }
 
+  /** Abgleich bald ausführen (kurz gewartet, damit mehrere Änderungen zusammen übertragen werden). */
   schedule() {
     if (this.state === 'off') return;
     clearTimeout(this.timer);

@@ -86,6 +86,7 @@ export class Paginator {
     return page;
   }
 
+  /** In der nächsten Spalte weiterschreiben; nach der letzten Spalte auf einer neuen Seite. */
   nextColumn() {
     const page = this.pages.at(-1);
     if (page && this.colIndex + 1 < page.cols.length) {

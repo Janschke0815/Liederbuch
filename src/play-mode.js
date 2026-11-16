@@ -28,6 +28,7 @@ const fmtSpeed = (f) => `${f.toFixed(1).replace('.', ',')}×`;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 /**
+ * Spielmodus einrichten (Vollbild, automatisches Scrollen, Pedal).
  * @param {{repo, getSongIds: () => Promise<string[]>, onClose: (id: string) => void}} opts
  *   getSongIds: Reihenfolge zum Blättern (aktuelle Liste bzw. später Setliste)
  */

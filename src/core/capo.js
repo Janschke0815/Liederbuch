@@ -4,6 +4,7 @@ import { transposeChord } from './chords.js';
 import { isEasyChord } from './chord-shapes.js';
 
 /**
+ * Capo-Lagen vorschlagen, in denen das Lied gleich klingt, aber mit möglichst einfachen Griffen.
  * @param {string[]} sounding  klingende Akkorde (ohne Capo gespielt)
  * @param {{maxCapo?: number}} [opts]
  * @returns {{capo: number, chords: string[], easy: number, total: number}[]}  bester Vorschlag zuerst

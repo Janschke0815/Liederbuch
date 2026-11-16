@@ -3,6 +3,7 @@
 Persönliches Gitarren-Liederbuch. Lieder werden als ChordPro gespeichert.
 
 Was sich in welcher Version geändert hat: [CHANGELOG.md](CHANGELOG.md).
+Wie die App aufgebaut ist: [docs/architektur.md](docs/architektur.md), alle Module und Funktionen: [docs/api/](docs/api/README.md).
 
 ## Starten
 
@@ -460,7 +461,9 @@ Kein Build-Schritt: Der Browser lädt die ES-Module direkt. Abhängigkeiten zeig
     sw.js           Service Worker (Cache „Netz zuerst“)
     icons/          App-Icons (icon.svg ist die Vorlage)
     tests/          Browser-Tests (tests/index.html öffnen)
-    tools/          serve.py (lokaler Server), css-snapshot.js (CSS-Umbauten vorher/nachher vergleichen)
+    tools/          serve.py (lokaler Server), make-docs.py (API-Dokumentation erzeugen),
+                    css-snapshot.js (CSS-Umbauten vorher/nachher vergleichen)
+    docs/           architektur.md, api/ (erzeugt), Anleitung QNAP
 
 Neue gespeicherte Werte gehören in `src/prefs.js`, neue Tastenkürzel in `src/ui/shortcuts.js`.
 Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx prettier --write src`).

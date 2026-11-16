@@ -36,6 +36,7 @@ const button = (text, onclick, className = '') =>
   Object.assign(document.createElement('button'), { type: 'button', textContent: text, onclick, className });
 
 /**
+ * Cloud-Dialog und Abgleich einrichten (Google Drive oder WebDAV, gemeinsame Liederbücher).
  * @param {{repo, book, beforeSync: () => Promise<void>, beforeConnect?: () => Promise<void>,
  *          beforeSwitch: () => Promise<void>, toast: Function}} opts
  */

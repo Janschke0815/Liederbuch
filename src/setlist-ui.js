@@ -23,6 +23,7 @@ const fmtT = (t) => (t > 0 ? `+${t}` : String(t));
 const count = (n) => `${n} ${n === 1 ? 'Lied' : 'Lieder'}`;
 
 /**
+ * Setlisten-Reiter in der Liste einrichten (Übersicht, Bearbeiten, Spielen, Drucken).
  * @param {{repo, sets, getCurrentId: () => string|null, openSong: (id) => Promise<void>,
  *          play, printSongs: (songs, options) => Promise<void>, toast: Function}} opts
  */

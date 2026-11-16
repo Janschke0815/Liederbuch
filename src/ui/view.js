@@ -24,6 +24,7 @@ export function setFocusMode(on) {
   $('#btn-focus').setAttribute('aria-pressed', String(on));
   prefs.set('focusMode', on);
 }
+/** Ist der Editor gerade ausgeblendet? */
 export const isFocusMode = () => $('.workspace').classList.contains('focus');
 $('#btn-focus').onclick = () => setFocusMode(!isFocusMode());
 setFocusMode(prefs.get('focusMode'));
@@ -31,6 +32,7 @@ setFocusMode(prefs.get('focusMode'));
 // Menü „⋯“ (am Handy stehen die Aktionen der Kopfleiste darin)
 const menu = $('#actions');
 const menuBtn = $('#btn-menu');
+/** Menü „⋯“ öffnen oder schließen. */
 export function setMenu(open) {
   menu.classList.toggle('open', open);
   menuBtn.setAttribute('aria-expanded', String(open));

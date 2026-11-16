@@ -27,6 +27,7 @@ export const isDirty = () => Boolean(saveTimer);
 
 // ---------- Vorschau und Bedienelemente ----------
 
+/** Vorschau, Tonart-Anzeige und Liedinfo aus dem Editor-Text neu zeichnen. */
 export function renderPreview() {
   const current = state.current;
   if (!current) {
@@ -50,6 +51,7 @@ export function renderPreview() {
     (k && capo > 0 ? `\nGriffe in ${k.key}, klingt mit Capo ${capo} in ${transposeChord(k.key, capo)}` : '');
 }
 
+/** Knöpfe passend zum geöffneten Lied (Transposition, Schreibweise, gesperrt ohne Lied). */
 export function updateControls() {
   const current = state.current;
   editor.disabled = !current;

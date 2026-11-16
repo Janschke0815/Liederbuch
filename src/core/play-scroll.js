@@ -27,7 +27,9 @@ export const pixelsPerSecond = (travel, duration) => Math.max(200, travel) / son
  * @param w    Breite einer Doppelseite
  */
 export const pageCount = (max, w) => Math.max(1, Math.ceil(max / w - 0.02) + 1);
+/** Welche Doppelseite gerade sichtbar ist (0 = erste). */
 export const pageIndex = (pos, max, w) => (pos >= max - 2 ? pageCount(max, w) - 1 : Math.round(pos / w));
+/** Scroll-Position der Doppelseite i (begrenzt auf vorhandene Seiten). */
 export const pagePos = (i, max, w) => Math.min(Math.min(Math.max(i, 0), pageCount(max, w) - 1) * w, max);
 /** Nächste Doppelseite zu einer beliebigen Position. */
 export const snapPos = (pos, max, w) => pagePos(Math.round(pos / w), max, w);

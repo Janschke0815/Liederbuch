@@ -51,6 +51,7 @@ function fillSelect(sel, entries) {
 }
 
 /**
+ * Einstellungsdialog mit Live-Muster einrichten.
  * @param {{ targets: () => HTMLElement[] }} opts  Elemente, auf die Einstellungen live wirken
  */
 export function setupSettings({ targets }) {

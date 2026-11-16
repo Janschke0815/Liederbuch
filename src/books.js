@@ -28,14 +28,17 @@ export function listBooks(storage = localStorage) {
   return [PERSONAL, ...read(storage)];
 }
 
+/** Liederbuch mit dieser ID oder null. */
 export function getBook(id, storage = localStorage) {
   return listBooks(storage).find((b) => b.id === id) || null;
 }
 
+/** Das Liederbuch, das gerade geöffnet ist (sonst das persönliche). */
 export function activeBook(storage = localStorage) {
   return getBook(storage.getItem(ACTIVE), storage) || PERSONAL;
 }
 
+/** Liederbuch für den nächsten Start merken (nur bekannte IDs). */
 export function setActiveBook(id, storage = localStorage) {
   if (getBook(id, storage)) storage.setItem(ACTIVE, id);
 }
@@ -65,4 +68,5 @@ export function bookNameFromFile(fileName) {
   return (m ? m[1] : base).trim() || 'Gemeinsames Liederbuch';
 }
 
+/** Dateiname der Drive-Datei für ein gemeinsames Liederbuch: „Liederbuch – Name.json“. */
 export const fileNameForBook = (name) => `Liederbuch – ${String(name).trim()}.json`;

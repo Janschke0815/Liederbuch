@@ -14,6 +14,7 @@ export function splitRepeat(text) {
   return { text: s.slice(0, m.index + m[1].length).replace(/\s+$/, ''), times: Number(m[2] || m[3]) };
 }
 
+/** Anzahl als Wiederholungs-Text: 2 -> „2×“. */
 export const formatRepeat = (n) => `${n}×`;
 
 /**

@@ -32,6 +32,11 @@ function loadOptions() {
 /** Einstellungen für den Druck: gemeinsame Einstellungen + eigene Druckschrift. */
 const printSettings = () => withPrintFonts(loadSettings(), loadPrintFonts());
 
+/**
+ * Druckdialog und Druckvorschau einrichten.
+ * @param {{repo: object, beforeOpen?: () => Promise<void>}} opts  beforeOpen: z. B. Ungespeichertes sichern
+ * @returns {{printSongs: (list: object[], opts?: object) => Promise<void>}}  feste Auswahl direkt in die Vorschau
+ */
 export function setupPrint({ repo, beforeOpen }) {
   const dlg = $('#print-dialog');
   const view = $('#print-view');

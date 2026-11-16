@@ -71,11 +71,18 @@ export class SetlistRepository extends EventTarget {
     return all.sort((a, b) => collator.compare(a.name || '', b.name || ''));
   }
 
+  /** Setliste mit dieser ID (gelöschte nicht). */
   async get(id) {
     const s = await this.store.get(id);
     return s && !s.deletedAt ? s : undefined;
   }
 
+  /**
+   * Neue Setliste anlegen.
+   * @param {string} name
+   * @param {{songId: string}[]} [items]
+   * @returns {Promise<object>}
+   */
   create(name, items = []) {
     return this.#serial(async () => {
       const t = this.now();
@@ -98,6 +105,7 @@ export class SetlistRepository extends EventTarget {
     });
   }
 
+  /** Setliste löschen (bleibt als Grabstein für den Abgleich). */
   remove(id) {
     return this.#serial(async () => {
       const old = await this.store.get(id);
@@ -108,6 +116,7 @@ export class SetlistRepository extends EventTarget {
     });
   }
 
+  /** Gelöschte Setliste wiederherstellen. */
   restore(id) {
     return this.#serial(async () => {
       const old = await this.store.get(id);
@@ -119,10 +128,15 @@ export class SetlistRepository extends EventTarget {
     });
   }
 
+  /** Alle Datensätze, auch gelöschte (für Abgleich und Sicherung). */
   async allRecords() {
     return this.store.getAll();
   }
 
+  /**
+   * Setlisten aus dem Abgleich übernehmen – nur, was neuer ist als hier.
+   * @returns {Promise<string[]>} IDs der übernommenen Setlisten
+   */
   applyRemote(records) {
     return this.#serial(async () => {
       const toPut = [];

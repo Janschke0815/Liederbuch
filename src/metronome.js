@@ -20,6 +20,11 @@ export class Metronome {
     this.onBeat = null; // (beatIndex) => void, für die Anzeige
   }
 
+  /**
+   * Metronom starten.
+   * @param {number} bpm    Schläge pro Minute (20–300)
+   * @param {number} beats  Schläge pro Takt (der erste wird betont)
+   */
   start(bpm = 100, beats = 4) {
     this.bpm = Math.min(300, Math.max(20, Number(bpm) || 100));
     this.beats = beats;
@@ -33,11 +38,16 @@ export class Metronome {
     this.#schedule();
   }
 
+  /** Metronom anhalten. */
   stop() {
     this.running = false;
     clearInterval(this.timer);
   }
 
+  /**
+   * Starten bzw. anhalten.
+   * @returns {boolean} läuft es jetzt?
+   */
   toggle(bpm, beats) {
     if (this.running) this.stop();
     else this.start(bpm, beats);

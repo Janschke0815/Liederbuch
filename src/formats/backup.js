@@ -115,6 +115,14 @@ const sameSong = (a, p) => Boolean(a) && !a.deletedAt &&
 const itemsKey = (items) => JSON.stringify((items || []).map((i) => [i.songId, Number.isInteger(i.transpose) ? i.transpose : null, i.note || '']));
 const sameSetlist = (a, p) => Boolean(a) && !a.deletedAt && a.name === p.name && itemsKey(a.items) === itemsKey(p.items);
 
+/**
+ * Die .cho- und .txt-Dateien einer ZIP mit einem Stand abgleichen: von Hand geänderte Dateien gewinnen, unbekannte werden neu angelegt.
+ * @param {{name: string, data: Uint8Array}[]} entries  Inhalt der ZIP
+ * @param {object} base     Vergleichsstand: die JSON der Sicherung oder das aktuelle Liederbuch ({songs, setlists})
+ * @param {string} now      Zeitpunkt für geänderte/neue Einträge (gewinnt damit beim Zusammenführen)
+ * @param {object} [current] aktuelles Liederbuch – was dort schon so steht, gilt nicht als Änderung
+ * @returns {{songs: object[], setlists: object[], edited: number, added: number, setlistsChanged: number}}  nur die geänderten bzw. neuen Datensätze
+ */
 export function applyZipEdits(entries, base, now, current = null) {
   const plan = planBackup(base);
   const songById = new Map((base.songs || []).map((s) => [s.id, s]));

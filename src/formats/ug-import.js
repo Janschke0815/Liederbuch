@@ -59,6 +59,7 @@ export function isChordLine(line) {
   return chords > 0;
 }
 
+/** Ist die Zeile ein Gitarren-Tab (e|---0---3---| …)? Mundharmonika-Zeilen zählen nicht. */
 export function isTabLine(line) {
   if (isHarpLine(line)) return false; // "-4 -5 -6 -4 -5 -6" ist Mundharmonika, kein Gitarren-Tab
   const t = line.trim();
@@ -67,6 +68,7 @@ export function isTabLine(line) {
   return /^[|:]?[-0-9|hpbrsx/\\~^().*\s]+[|:]?$/.test(t) && dashes >= 6;
 }
 
+/** Abschnittsname aus einer Zeile wie „[Chorus]“ oder „Strophe 2:“, sonst null. */
 export function sectionLabel(line) {
   const br = /^\s*\[([^\]]+)\]\s*$/.exec(line);
   if (br && !isChord(br[1].trim())) return br[1].trim();
@@ -74,6 +76,7 @@ export function sectionLabel(line) {
   return plain ? plain[1].trim() : null;
 }
 
+/** Art eines Abschnitts aus seinem Namen: 'verse' | 'chorus' | 'bridge' | 'part'. */
 export function sectionKind(label) {
   const l = label.toLowerCase();
   if (/^(pre|post)/.test(l)) return 'part';

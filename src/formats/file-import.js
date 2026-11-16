@@ -6,12 +6,17 @@
 import { isChord } from '../core/chords.js';
 import { ugToChordPro } from './ug-import.js';
 
+/** Ist der Text schon ChordPro (Direktiven wie {title:} oder [Akkorde] im Text)? */
 export function looksLikeChordPro(text) {
   if (/^\s*\{\s*(title|t|artist|start_of_\w+|so[cvbtg]|c|comment|key)\s*[:}\s]/im.test(text)) return true;
   for (const m of text.matchAll(/\[([^\]\s]{1,12})\]/g)) if (isChord(m[1])) return true;
   return false;
 }
 
+/**
+ * Mehrere Lieder in einer Datei trennen (bei jedem neuen {title:} bzw. Linie „---“).
+ * @returns {string[]}
+ */
 export function splitChordProSongs(text) {
   return text
     .split(/^\s*\{\s*(?:new_song|ns)\s*\}\s*$/im)
@@ -29,6 +34,7 @@ function hasTitle(chordpro) {
 }
 
 /**
+ * Eine geöffnete Datei erkennen: Sicherung (JSON) oder ein bzw. mehrere Lieder (ChordPro oder Akkorde-über-Text).
  * @returns {{kind: 'backup', data: object} | {kind: 'songs', songs: string[]}}
  */
 export function parseImportFile(fileName, text) {
