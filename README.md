@@ -2,6 +2,8 @@
 
 Persönliches Gitarren-Liederbuch. Lieder werden als ChordPro gespeichert.
 
+Was sich in welcher Version geändert hat: [CHANGELOG.md](CHANGELOG.md).
+
 ## Starten
 
 Kein Build-Schritt nötig, nur ein einfacher Webserver:
