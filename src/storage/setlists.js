@@ -137,4 +137,17 @@ export class SetlistRepository extends EventTarget {
       return toPut.map((r) => r.id);
     });
   }
+
+  /**
+   * Setlisten aus einer Sicherung übernehmen: neue kommen dazu, vorhandene nur, wenn die
+   * Sicherung neuer ist. Zählt als eigene Änderung (wird also auch abgeglichen).
+   */
+  async importRecords(records) {
+    const valid = (Array.isArray(records) ? records : [])
+      .filter((r) => r && typeof r.id === 'string' && r.id && !r.deletedAt)
+      .map((r) => slimSetlist({ ...r, updatedAt: r.updatedAt || this.now(), createdAt: r.createdAt || this.now() }));
+    const ids = await this.applyRemote(valid);
+    if (ids.length) this.#changed();
+    return ids.length;
+  }
 }

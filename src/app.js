@@ -25,7 +25,10 @@ import { getAllMeta, setMeta, getTags, setTags } from './core/meta-edit.js';
 import { transposeChord } from './core/chords.js';
 import { applySettings, loadSettings } from './settings/settings.js';
 import { bookmarkletHref, readUgHash, ugDataToText } from './core/ug-bookmarklet.js';
-import { toFileJson, toWindowsText } from './core/file-format.js';
+import { toWindowsText } from './core/file-format.js';
+import { createZip, readZip, isZip } from './core/zip.js';
+import { backupFiles, parseBackupZip } from './core/backup.js';
+import { songToFile, fileToSong } from './sync/chordpro-files.js';
 import { versionLabel } from './version.js';
 
 const $ = (s) => document.querySelector(s);
@@ -807,7 +810,27 @@ $('#file-input').onchange = async (e) => {
   await importFiles(files);
 };
 
-/** Importiert Dateien (Sicherung, ChordPro, Text) – aus dem Dateidialog oder per "Öffnen mit". */
+/** Sicherung (JSON) übernehmen: Lieder, Papierkorb, Setlisten. */
+async function importBackup(name, data) {
+  const r = await repo.importData(data);
+  const nSets = await sets.importRecords(data.setlists);
+  const parts = [`${r.added} neu`, `${r.updated} aktualisiert`, `${r.skipped} übersprungen`];
+  if (r.trash) parts.push(`${r.trash} im Papierkorb`);
+  if (nSets) parts.push(`${nSets} ${nSets === 1 ? 'Setliste' : 'Setlisten'}`);
+  return `${name}: ${parts.join(', ')}`;
+}
+
+/** Lied aus ChordPro-Text anlegen; {transpose}, {x_notiz} … werden zu Einstellungen. */
+async function createFromFile(text) {
+  const s = fileToSong(text);
+  const rec = await repo.create(s.chordpro);
+  if (s.transpose || s.accidentals !== 'auto' || s.note) {
+    await repo.update(rec.id, { transpose: s.transpose, accidentals: s.accidentals, note: s.note });
+  }
+  return rec;
+}
+
+/** Importiert Dateien (Sicherung, ZIP, ChordPro, Text) – aus dem Dateidialog oder per "Öffnen mit". */
 async function importFiles(files) {
   await flushSave();
   let created = 0;
@@ -815,13 +838,36 @@ async function importFiles(files) {
   const messages = [];
   for (const file of files) {
     try {
-      const parsed = parseImportFile(file.name, await file.text());
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      if (isZip(bytes)) {
+        const zipped = parseBackupZip(await readZip(bytes));
+        if (zipped.kind === 'backup') {
+          messages.push(await importBackup(file.name, zipped.data));
+        } else {
+          // nur .cho-/.txt-Dateien (ohne JSON): Lieder anlegen, Setlisten über die Dateinamen verknüpfen
+          const idOf = new Map();
+          for (const s of zipped.songs) {
+            const rec = await createFromFile(songToFile(s));
+            idOf.set(s.file.toLowerCase(), rec.id);
+            firstId ||= rec.id;
+            created++;
+          }
+          for (const sl of zipped.setlists) {
+            const items = sl.items
+              .map((i) => ({ ...i, songId: idOf.get(String(i.songId).toLowerCase()) }))
+              .filter((i) => i.songId);
+            await sets.create(sl.name, items);
+          }
+          if (zipped.setlists.length) messages.push(`${zipped.setlists.length} ${zipped.setlists.length === 1 ? 'Setliste' : 'Setlisten'} angelegt`);
+        }
+        continue;
+      }
+      const parsed = parseImportFile(file.name, new TextDecoder().decode(bytes));
       if (parsed.kind === 'backup') {
-        const r = await repo.importData(parsed.data);
-        messages.push(`${file.name}: ${r.added} neu, ${r.updated} aktualisiert, ${r.skipped} übersprungen`);
+        messages.push(await importBackup(file.name, parsed.data));
       } else {
         for (const cp of parsed.songs) {
-          const rec = await repo.create(cp);
+          const rec = await createFromFile(cp);
           firstId ||= rec.id;
           created++;
         }
@@ -846,16 +892,20 @@ if ('launchQueue' in window) {
   });
 }
 
+// Sichern: eine ZIP-Datei mit lesbaren ChordPro-Dateien, Setlisten und vollständiger JSON
 $('#btn-export').onclick = async () => {
   await flushSave();
   const data = await repo.exportData();
-  const blob = new Blob([toFileJson(data)], { type: 'application/json' });
+  data.setlists = (await sets.allRecords()).filter((s) => !s.deletedAt).map(slimSetlist);
+  const zip = createZip(backupFiles(data));
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `liederbuch-${new Date().toISOString().slice(0, 10)}.json`;
+  a.href = URL.createObjectURL(new Blob([zip], { type: 'application/zip' }));
+  a.download = `Liederbuch-${new Date().toISOString().slice(0, 10)}.zip`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  toast(`${data.songs.length} Lieder gesichert`);
+  const n = data.setlists.length;
+  const songs = `${data.songs.length} ${data.songs.length === 1 ? 'Lied' : 'Lieder'}`;
+  toast(`${songs}${n ? ` und ${n} ${n === 1 ? 'Setliste' : 'Setlisten'}` : ''} gesichert`);
 };
 
 // ---------- Mobile Ansicht ----------

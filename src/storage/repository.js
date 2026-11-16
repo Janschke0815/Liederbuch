@@ -12,7 +12,7 @@
 import { parseChordPro } from '../core/chordpro.js';
 
 export const EXPORT_FORMAT = 'liederbuch';
-export const EXPORT_VERSION = 1;
+export const EXPORT_VERSION = 2; // 2: zusätzlich Papierkorb (trash); Setlisten stehen in der Sicherungsdatei der App
 
 const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
 
@@ -265,7 +265,12 @@ export class SongRepository extends EventTarget {
       ({ id, chordpro, transpose, accidentals, note, createdAt, updatedAt }) =>
         ({ id, chordpro, transpose, accidentals, note: note || '', createdAt, updatedAt }),
     );
-    return { format: EXPORT_FORMAT, version: EXPORT_VERSION, exportedAt: this.now(), songs };
+    // Papierkorb (gelöschte Lieder mit Text) – damit auch er wiederherstellbar ist
+    const trash = (await this.trash()).map(
+      ({ id, chordpro, transpose, accidentals, note, createdAt, updatedAt, deletedAt }) =>
+        ({ id, chordpro, transpose, accidentals, note: note || '', createdAt, updatedAt, deletedAt }),
+    );
+    return { format: EXPORT_FORMAT, version: EXPORT_VERSION, exportedAt: this.now(), songs, trash };
   }
 
   /**
@@ -310,6 +315,14 @@ export class SongRepository extends EventTarget {
         } else {
           result.skipped++;
         }
+      }
+      // Papierkorb der Sicherung: nur Lieder, die es hier noch gar nicht gibt (löscht nie etwas)
+      result.trash = 0;
+      for (const s of Array.isArray(data.trash) ? data.trash : []) {
+        if (typeof s?.chordpro !== 'string' || !s.chordpro || typeof s.id !== 'string' || !s.id) continue;
+        if (await this.store.get(s.id)) continue;
+        toPut.push(fullRecord({ ...s, createdAt: s.createdAt || t, updatedAt: s.updatedAt || t, deletedAt: s.deletedAt || t }));
+        result.trash++;
       }
       await this.store.putMany(toPut);
       if (toPut.length) this.#changed();

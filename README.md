@@ -30,6 +30,20 @@ Drag & Drop hochladen). Der Ordner `tests/` und `tools/` werden dafür nicht geb
 Jedes Gerät hat sein eigenes Liederbuch. Übertragen: auf Gerät A „Sichern“, auf Gerät B
 „Datei öffnen …“ (wird zusammengeführt, neuere Fassung gewinnt).
 
+**Sichern** lädt eine ZIP-Datei herunter (`Liederbuch-2026-11-16.zip`), die auch **ohne die App
+lesbar** ist – Windows öffnet sie per Doppelklick wie einen Ordner:
+
+    Lieder/<Titel - Interpret>.cho     jedes Lied als ChordPro-Datei (wie unter „Bearbeiten“,
+                                       Transposition/Notiz als {transpose: …} / {x_notiz: …})
+    Setlisten/<Name>.txt               eine Zeile pro Lied (Dateiname)
+    liederbuch-sicherung.json          vollständig inkl. Papierkorb und Änderungszeiten
+    LIESMICH.txt
+
+Zum Wiederherstellen die ZIP-Datei mit „Datei öffnen …“ wählen: Die App nimmt die JSON-Datei
+(Lieder, Setlisten, Papierkorb; vorhandene Lieder nur, wenn die Sicherung neuer ist). Fehlt sie,
+werden die `.cho`- und `.txt`-Dateien übernommen – so lassen sich auch Lieder aus anderen
+ChordPro-Programmen als ZIP einlesen. Ältere Sicherungen (`.json`) lassen sich weiter öffnen.
+
 Updates: Der Service Worker lädt bei Verbindung immer die aktuelle Version („Netz zuerst“)
 und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zurück.
 

@@ -85,12 +85,14 @@ describe('Speicher: Export und Import', () => {
     await src.remove(gone.id);
 
     const data = JSON.parse(JSON.stringify(await src.exportData()));
-    expect([data.format, data.version, data.songs.length]).toEqual(['liederbuch', 1, 2]);
+    expect([data.format, data.version, data.songs.length]).toEqual(['liederbuch', 2, 2]); // Version 2: mit Papierkorb
 
     const dst = makeRepo();
-    expect(await dst.importData(data)).toEqual({ added: 2, updated: 0, skipped: 0 });
+    // das gelöschte Lied kommt mit – aber nur in den Papierkorb
+    expect(await dst.importData(data)).toEqual({ added: 2, updated: 0, skipped: 0, trash: 1 });
     const list = await dst.list();
     expect(list.map((s) => [s.title, s.transpose])).toEqual([['Eins', 2], ['Zwei', 0]]);
+    expect((await dst.trash()).map((s) => s.title)).toEqual(['Gelöscht']);
   });
 
   it('beim Zusammenführen gewinnt die neuere Fassung', async () => {
@@ -104,7 +106,7 @@ describe('Speicher: Export und Import', () => {
     backup.songs.push({ chordpro: song('Ganz neu') }); // ohne ID
     backup.songs.push({ title: 'kaputt' }); // ungültig
 
-    expect(await repo.importData(backup)).toEqual({ added: 1, updated: 1, skipped: 2 });
+    expect(await repo.importData(backup)).toEqual({ added: 1, updated: 1, skipped: 2, trash: 0 });
     expect((await repo.list()).map((s) => s.title)).toEqual(['Alt – aus Sicherung', 'Bleibt – lokal geändert', 'Ganz neu']);
   });
 
