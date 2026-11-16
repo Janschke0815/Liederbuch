@@ -95,7 +95,8 @@ describe('WebDAV: Abgleich', () => {
     const before = srv.requests.length;
     await sa.sync();
     const last = srv.requests.slice(before);
-    expect(last.map((r) => r.method)).toEqual(['GET']);
+    // Verzeichnis mit If-None-Match, dazu die Ordnerliste (dieser Server kann kein PROPFIND)
+    expect(last.map((r) => r.method)).toEqual(['GET', 'PROPFIND']);
     expect(last[0].headers['If-None-Match']).toBeTruthy();
   });
 

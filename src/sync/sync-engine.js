@@ -7,7 +7,7 @@
 // Gerät sie beim nächsten Abgleich einfach wieder hoch.
 //
 // Ein Anbieter (Provider) braucht nur:
-//   read(knownVersion) -> null (noch keine Datei) | {unchanged: true} | {data, version}
+//   read(knownVersion) -> null (noch keine Datei) | {unchanged: true} | {data, version, rewrite?}
 //   write(data, expectedVersion) -> neue version; wirft ConflictError, wenn sich die Datei
 //                                   inzwischen geändert hat
 
@@ -200,7 +200,9 @@ export class SyncEngine extends EventTarget {
       data[c.key] = r.merged;
       if (r.remoteChanged) remoteChanged = true;
     }
-    if (remoteChanged || !remote || remote.data?.version !== SYNC_VERSION) {
+    // rewrite: der Anbieter möchte neu schreiben (z. B. altes Dateiformat umstellen oder
+    // Änderungen übernehmen, die direkt auf dem Server gemacht wurden)
+    if (remoteChanged || !remote || remote.rewrite || remote.data?.version !== SYNC_VERSION) {
       try {
         this.knownVersion = await this.provider.write(data, remote?.version ?? null);
       } catch (err) {

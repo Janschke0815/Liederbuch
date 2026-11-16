@@ -293,8 +293,22 @@ Dropbox) lassen sich in `src/sync/` mit `read`/`write` ergänzen.
 
 Statt Google Drive kann das persönliche Liederbuch auch auf einem eigenen WebDAV-Server liegen:
 **Cloud → Speicherort „WebDAV / Nextcloud“**, dann Ordner-Adresse, Benutzername und Passwort
-eintragen und **Verbinden**. Die App legt dort `Liederbuch.json` an (fehlt der Ordner, wird er
-angelegt). Gleichzeitige Änderungen erkennt sie über das ETag der Datei.
+eintragen und **Verbinden**. Fehlt der Ordner, wird er angelegt. Darin entsteht:
+
+    Liederbuch/
+      Liederbuch.json                      Verzeichnis: Lieder, Transposition, Notizen, Setlisten
+      Lieder/
+        Clementine - Percy Montrose.cho    jedes Lied als eigene ChordPro-Datei (Titel - Interpret)
+        Kein schöner Land.cho
+
+Die Liedtexte lassen sich auch **direkt auf dem Server** bearbeiten (z. B. im Editor über die
+Netzwerkfreigabe der NAS): geänderte Dateien übernimmt der nächste Abgleich, **neue `.cho`-Dateien**
+werden nach etwa einer Minute zu neuen Liedern (ohne `{title:}` gilt der Dateiname als Titel),
+**gelöschte Dateien** landen in der App im Papierkorb. Ändert sich der Titel, wird die Datei
+umbenannt. Gleichzeitige Änderungen mehrerer Geräte erkennt die App am ETag jeder Datei. Ein
+Liederbuch im alten Format (alles in einer `Liederbuch.json`) wird beim ersten Abgleich
+automatisch umgestellt; ältere App-Versionen melden danach „bitte App neu laden“, statt etwas
+zu überschreiben.
 
 - **Adresse** bei Nextcloud: `https://<server>/remote.php/dav/files/<benutzer>/Liederbuch/`
   (steht in Nextcloud unten links unter *Dateien-Einstellungen → WebDAV*).
@@ -309,8 +323,8 @@ Browser nur, wenn der Server Zugriffe von der Adresse der App zulässt. Nötig s
 (auch auf `OPTIONS`-Anfragen):
 
     Access-Control-Allow-Origin:   https://janschke0815.github.io
-    Access-Control-Allow-Methods:  GET, PUT, MKCOL, OPTIONS
-    Access-Control-Allow-Headers:  Authorization, Content-Type, If-Match, If-None-Match
+    Access-Control-Allow-Methods:  GET, HEAD, PUT, DELETE, MKCOL, PROPFIND, OPTIONS
+    Access-Control-Allow-Headers:  Authorization, Content-Type, Depth, If-Match, If-None-Match
     Access-Control-Expose-Headers: ETag
 
 Nextcloud sendet sie von sich aus nicht. Bei einem eigenen Server lassen sie sich im Webserver
@@ -347,3 +361,4 @@ die App „Server nicht erreichbar … (CORS)“.
 9. ✅ Schriftart und -größe in der Druckvorschau einstellbar (nur für den Druck)
 10. ✅ Harp-Tabs importieren (auch Akkord- und Harp-Zeile übereinander); Akkorde und Harp-Tabs wahlweise in einer oder zwei Zeilen
 11. ✅ Dateien passend für Windows: Sync-Datei, Sicherung und geteilte Lieder eingerückt und mit CR LF
+12. ✅ WebDAV: eine `.cho`-Datei pro Lied plus Verzeichnis; Dateien auch direkt auf dem Server bearbeitbar

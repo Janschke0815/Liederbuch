@@ -48,6 +48,9 @@ export const SYNC_FIELDS = ['id', 'chordpro', 'transpose', 'accidentals', 'note'
 export function slimRecord(r) {
   const out = {};
   for (const k of SYNC_FIELDS) out[k] = r[k] ?? (k === 'deletedAt' ? null : r[k]);
+  // Zeilenenden vereinheitlichen: Dateien auf dem Server haben CR LF, die App LF –
+  // sonst gälte ein Lied nach jedem Abgleich als geändert
+  if (typeof out.chordpro === 'string') out.chordpro = out.chordpro.replace(/\r\n?/g, '\n');
   return out;
 }
 
@@ -243,7 +246,11 @@ export class SongRepository extends EventTarget {
       const toPut = [];
       for (const r of records) {
         const local = await this.store.get(r.id);
-        if (isNewer(r, local)) toPut.push(fullRecord(r));
+        if (!isNewer(r, local)) continue;
+        // Löschung ohne Text (z. B. Datei auf dem Server gelöscht): eigenen Text behalten, damit das
+        // Lied im Papierkorb wiederherstellbar bleibt. Ein bewusst geleertes Lied hat chordpro ''.
+        const keepText = r.deletedAt && r.chordpro === undefined && local?.chordpro;
+        toPut.push(fullRecord(keepText ? { ...r, chordpro: local.chordpro } : r));
       }
       if (toPut.length) {
         await this.store.putMany(toPut);
