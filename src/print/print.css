@@ -14,6 +14,9 @@
   flex-direction: column;
 }
 .page-content { flex: 1; min-height: 0; display: flex; gap: var(--col-gap); }
+/* Liedkopf über beiden Spalten (zweispaltige Lieder) */
+.page-head { flex: none; }
+.page-head .song-header { margin-bottom: 0.8em; }
 .page-col { flex: 1; min-width: 0; height: 100%; overflow: hidden; }
 /* Seitenzahlen ausgeblendet (Einstellungen → Druck): Platz bleibt, damit sich nichts verschiebt */
 [data-page-numbers='hide'] .page-footer { visibility: hidden; }

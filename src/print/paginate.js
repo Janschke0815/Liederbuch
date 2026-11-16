@@ -54,10 +54,16 @@ export class Paginator {
     root.append(this.probePage);
   }
 
-  #makePageElement(columns) {
+  #makePageElement(columns, head = null) {
     const page = el('div', 'page');
     const content = el('div', 'page-content');
     for (let i = 0; i < columns; i++) content.append(el('div', 'page-col'));
+    if (head) {
+      // Kopfbereich über die ganze Breite (z. B. Liedkopf über beiden Spalten)
+      const top = el('div', 'page-head');
+      top.append(head);
+      page.append(top);
+    }
     page.append(content, el('div', 'page-footer'));
     return page;
   }
@@ -65,10 +71,11 @@ export class Paginator {
   /**
    * Neue Seite; columns überschreibt die Spaltenzahl (z. B. 1 für Deckblatt, oder die eines
    * Liedes). Folgeseiten, die beim Umbruch entstehen, behalten diese Spaltenzahl.
+   * head: Element, das über allen Spalten steht (nur auf dieser Seite).
    */
-  newPage({ columns = this.currentColumns ?? this.spec.columns, className = '' } = {}) {
+  newPage({ columns = this.currentColumns ?? this.spec.columns, className = '', head = null } = {}) {
     this.currentColumns = columns;
-    const page = this.#makePageElement(columns);
+    const page = this.#makePageElement(columns, head);
     if (className) page.classList.add(...className.split(/\s+/));
     this.probePage.before(page);
     const cols = [...page.querySelectorAll('.page-col')];

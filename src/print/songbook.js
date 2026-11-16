@@ -116,7 +116,19 @@ export async function buildSongbook(root, songs, options = {}) {
     const article = prepareSong(renderSong(song, view), s.id);
     // {columns: 1|2} im Lied geht vor der allgemeinen Einstellung
     const own = Number(song.meta.columns);
-    pag.newPage({ className: 'page--song', columns: own === 1 || own === 2 ? own : spec.columns });
+    const columns = own === 1 || own === 2 ? own : spec.columns;
+    // Zweispaltig: Liedkopf (Titel, Interpret, Infozeile, Griffbilder) über beide Spalten,
+    // die zweite Spalte beginnt erst darunter
+    let head = null;
+    const header = columns > 1 ? article.querySelector('.song-header') : null;
+    if (header) {
+      header.remove();
+      head = article.cloneNode(false); // gleiche Klassen wie das Lied (Schriften usw.)
+      head.removeAttribute('id');
+      head.classList.add('song-head');
+      head.append(header);
+    }
+    pag.newPage({ className: 'page--song', columns, head });
     firstSongPage.set(s.id, pag.pages.length);
     pag.flow(article);
   }

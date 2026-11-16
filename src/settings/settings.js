@@ -51,6 +51,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   titleColor: '#111111',
   headerAlign: 'left', // 'left' | 'center' – Titel, Interpret, Infozeile, Griffbilder
   showArtist: true,
+  artistInline: false, // Interpret in derselben Zeile wie der Titel („Titel – Interpret“)
   artistSize: 12, // pt
   artistItalic: true,
   artistColor: '#111111',
@@ -93,6 +94,7 @@ export function sanitize(input = {}) {
     titleColor: color(s.titleColor, d.titleColor),
     headerAlign: oneOf(s.headerAlign, ['left', 'center'], d.headerAlign),
     showArtist: bool(s.showArtist, d.showArtist),
+    artistInline: bool(s.artistInline, d.artistInline),
     artistSize: clamp(s.artistSize, 7, 24, d.artistSize),
     artistItalic: bool(s.artistItalic, d.artistItalic),
     artistColor: color(s.artistColor, d.artistColor),
@@ -125,6 +127,7 @@ export function applySettings(el, settings) {
   st.setProperty('--artist-color', s.artistColor);
   el.dataset.headerAlign = s.headerAlign;
   el.dataset.artist = s.showArtist ? 'show' : 'hide';
+  el.dataset.artistLayout = s.artistInline ? 'inline' : 'below';
   el.dataset.chorusStyle = s.chorusStyle;
   el.dataset.labels = s.showLabels ? 'show' : 'hide';
   el.dataset.diagrams = s.showDiagrams ? 'show' : 'hide';

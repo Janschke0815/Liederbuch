@@ -42,7 +42,7 @@ B|---1-------------1-|
 
 const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing',
   'headerAlign', 'titleFont', 'titleSize', 'titleBold', 'titleUppercase', 'titleColor',
-  'showArtist', 'artistSize', 'artistItalic', 'artistColor',
+  'showArtist', 'artistInline', 'artistSize', 'artistItalic', 'artistColor',
   'chordFont', 'chordSize', 'chordColor',
   'chordBold', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin', 'pageNumbers'];
 

@@ -41,6 +41,13 @@
   color: var(--artist-color, inherit);
 }
 .songbook[data-artist='hide'] .song-artist { display: none; }
+/* Interpret neben dem Titel: Kopf als Flex-Zeile, Titel und Interpret vorn, alles andere darunter */
+.songbook[data-artist-layout='inline'] .song-header { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.5em; }
+.songbook[data-artist-layout='inline'] .song-header > * { flex-basis: 100%; order: 2; }
+.songbook[data-artist-layout='inline'] .song-header > .song-title { flex-basis: auto; order: 0; }
+.songbook[data-artist-layout='inline'] .song-header > .song-artist { flex-basis: auto; order: 1; margin: 0; }
+.songbook[data-artist-layout='inline'] .song-artist::before { content: '– '; }
+.songbook[data-artist-layout='inline'][data-header-align='center'] .song-header { justify-content: center; }
 .songbook[data-header-align='center'] .song-header { text-align: center; }
 .songbook[data-header-align='center'] .chord-diagrams { justify-content: center; }
 .song-info { margin: 0.3em 0 0; font-size: 0.8em; color: var(--label-color); }

@@ -175,6 +175,8 @@ beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ er
 wählen (ChordPro `{columns: 1}` bzw. `{columns: 2}`). Das geht im Druck vor der allgemeinen
 Einstellung *Einstellungen → Druck → Spalten*, auch auf den Folgeseiten eines langen Liedes;
 „wie Einstellung“ entfernt die Angabe wieder. Deckblatt und Inhaltsverzeichnis bleiben einspaltig.
+Bei zweispaltigen Liedern steht der Liedkopf (Titel, Interpret, Infozeile, Griffbilder) über
+beiden Spalten – beide Spalten beginnen erst darunter.
 
 ## Tags, Notizen, Papierkorb
 
@@ -190,7 +192,8 @@ Unter **Einstellungen → Titel & Interpret**:
 
 - **Ausrichtung** des Liedkopfs: links oder mittig (Titel, Interpret, Infozeile und Griffbilder)
 - **Titel:** Schriftart (oder „wie Liedtext“), Größe, fett, Großbuchstaben, Farbe
-- **Interpret:** anzeigen ja/nein, Größe, kursiv, Farbe – gilt auch für den Untertitel
+- **Interpret:** anzeigen ja/nein, **neben dem Titel** („Titel – Interpret“ in einer Zeile) oder
+  darunter, Größe, kursiv, Farbe – Größe/kursiv/Farbe gelten auch für den Untertitel
 
 Das Muster im Dialog zeigt jede Änderung sofort. Die Einstellungen gelten für Vorschau,
 Spielmodus und Druck; die Standardwerte entsprechen dem bisherigen Aussehen.
