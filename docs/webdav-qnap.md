@@ -147,7 +147,8 @@ Die **myQNAPcloud**-Adresse muss auf deinen Anschluss zeigen (*myQNAPcloud → D
 - Ordner-Adresse: `https://DEIN-NAS.myqnapcloud.com/Liederbuch/`
 - Benutzername / App-Passwort: der Benutzer aus Schritt 1
 
-**Verbinden** – die App legt `Liederbuch.json` im Ordner an. Mehrere Personen tragen dieselbe
+**Verbinden** – die App legt die Ordner `Lieder` (eine `.cho`-Datei pro Lied) und `Setlisten` an.
+Mehrere Personen tragen dieselbe
 Adresse ein (eigene NAS-Benutzer mit Zugriff auf den Ordner).
 
 ## Prüfen, ob alles stimmt

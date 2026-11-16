@@ -1,6 +1,6 @@
 import { describe, it, expect } from './runner.js';
 import { toFileJson, toWindowsText } from '../src/core/file-format.js';
-import { WebDavProvider } from '../src/sync/webdav.js';
+import { songToFile, fileToSong } from '../src/sync/chordpro-files.js';
 import { parseChordPro } from '../src/core/chordpro.js';
 
 describe('Dateien für Windows (CR LF)', () => {
@@ -18,21 +18,10 @@ describe('Dateien für Windows (CR LF)', () => {
     expect(parseChordPro(toWindowsText('{title: T}\n[C]la')).meta.title).toBe('T');
   });
 
-  it('WebDAV schreibt die Datei mit CR LF und liest sie wieder', async () => {
-    let stored = null;
-    const fetch = async (url, { method, body }) => {
-      if (method === 'PUT') {
-        stored = body;
-        return new Response(null, { status: 201, headers: { ETag: '"1"' } });
-      }
-      if (method === 'GET') return stored ? new Response(stored, { status: 200, headers: { ETag: '"1"' } }) : new Response('', { status: 404 });
-      return new Response('', { status: 405 });
-    };
-    const p = new WebDavProvider({ url: 'https://nas.example/Liederbuch/', user: 'u', password: 'p', fetch });
-    await p.read(null);
-    await p.write({ format: 'liederbuch-sync', version: 2, songs: [{ id: 'a', chordpro: 'x' }] }, null);
-    expect(stored.includes('\r\n')).toBe(true);
-    expect(/[^\r]\n/.test(stored)).toBe(false);
-    expect((await p.read(null)).data.songs[0].id).toBe('a');
+  it('Lied-Datei für WebDAV: jede Zeile mit CR LF, liest sich wieder ein', () => {
+    const file = songToFile({ chordpro: '{title: A}\n\n[C]la\n[G]li', transpose: 0, accidentals: 'auto', note: '' });
+    expect(file).toBe('{title: A}\r\n\r\n[C]la\r\n[G]li');
+    expect(/[^\r]\n/.test(file)).toBe(false);
+    expect(fileToSong(file).chordpro).toBe('{title: A}\n\n[C]la\n[G]li');
   });
 });

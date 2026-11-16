@@ -1,53 +1,65 @@
-// WebDAV mit einer Datei pro Lied (Fahrplan 12): Lieder/<Titel>.cho + Verzeichnis Liederbuch.json
+// WebDAV als reine ChordPro-Ablage: Lieder/<Titel>.cho und Setlisten/<Name>.txt, keine Daten-JSON
 import { describe, it, expect } from './runner.js';
 import { SongRepository } from '../src/storage/repository.js';
+import { SetlistRepository, slimSetlist } from '../src/storage/setlists.js';
 import { createMemoryStore } from '../src/storage/stores.js';
 import { SyncEngine } from '../src/sync/sync-engine.js';
 import { WebDavProvider } from '../src/sync/webdav.js';
 import { songBaseName, cleanFileName, nameFits, parsePropfind } from '../src/sync/song-files.js';
+import { songToFile, fileToSong, setlistToFile, fileToSetlist } from '../src/sync/chordpro-files.js';
 
 let tick = 0;
 const now = () => new Date(Date.UTC(2026, 2, 1, 0, 0, tick++)).toISOString();
-const device = (name) => {
-  let n = 0;
-  return new SongRepository(createMemoryStore(), { now, newId: () => `${name}${++n}` });
+const memory = () => {
+  const m = new Map();
+  return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), clear: () => m.clear() };
 };
+/** Ein Gerät: Lieder, Setlisten und eigenes Gedächtnis (localStorage). */
+function device(name) {
+  let n = 0;
+  let s = 0;
+  return {
+    songs: new SongRepository(createMemoryStore(), { now, newId: () => `${name}${++n}` }),
+    sets: new SetlistRepository(createMemoryStore(), { now, newId: () => `${name}-set${++s}` }),
+    storage: memory(),
+  };
+}
 const BASE = 'https://nas.test/dav/Liederbuch/';
-const INDEX = '/dav/Liederbuch/Liederbuch.json';
+const GUARD = '/dav/Liederbuch/Liederbuch.json';
 const DIR = '/dav/Liederbuch/Lieder/';
-const later = () => Date.now() + 10 * 60_000; // „10 Minuten später“ für von Hand angelegte Dateien
+const SETS = '/dav/Liederbuch/Setlisten/';
 
 /** Nachgebauter WebDAV-Server mit Ordnern, PROPFIND, ETag, If-Match, DELETE. */
-function davServer({ propfind = true } = {}) {
+function davServer() {
   const files = new Map(); // Pfad -> {body, etag, modified}
   const folders = new Set(['/', '/dav/']);
   let n = 0;
+  let clock = Date.UTC(2026, 2, 1, 12);
   const parent = (p) => p.replace(/[^/]+\/?$/, '');
   const srv = {
     files,
     folders,
     log: [],
+    /** Datei „von Hand“ auf den Server legen (z. B. im Editor über die Netzwerkfreigabe). */
     put(path, body) {
-      files.set(path, { body, etag: `"${++n}"`, modified: Date.now() - 3600_000 });
+      for (let p = parent(path); p !== '/' && !folders.has(p); p = parent(p)) folders.add(p);
+      files.set(path, { body, etag: `"${++n}"`, modified: (clock += 1000) });
     },
     fetch: async (url, { method, headers = {}, body }) => {
       const path = decodeURIComponent(new URL(url).pathname);
       srv.log.push(`${method} ${path}`);
       const f = files.get(path);
-      const etagHeader = (e) => ({ ETag: e });
       switch (method) {
         case 'GET':
-        case 'HEAD':
           if (!f) return new Response(null, { status: 404 });
-          if (headers['If-None-Match'] && headers['If-None-Match'] === f.etag) return new Response(null, { status: 304, headers: etagHeader(f.etag) });
-          return new Response(method === 'GET' ? f.body : null, { status: 200, headers: etagHeader(f.etag) });
+          return new Response(f.body, { status: 200, headers: { ETag: f.etag } });
         case 'PUT': {
           if (!folders.has(parent(path))) return new Response(null, { status: 409 });
           if (headers['If-None-Match'] === '*' && f) return new Response(null, { status: 412 });
           if (headers['If-Match'] && headers['If-Match'] !== f?.etag) return new Response(null, { status: 412 });
           const etag = `"${++n}"`;
-          files.set(path, { body, etag, modified: Date.now() });
-          return new Response(null, { status: f ? 204 : 201, headers: etagHeader(etag) });
+          files.set(path, { body, etag, modified: (clock += 1000) });
+          return new Response(null, { status: f ? 204 : 201, headers: { ETag: etag } });
         }
         case 'MKCOL': {
           const p = path.endsWith('/') ? path : path + '/';
@@ -58,10 +70,10 @@ function davServer({ propfind = true } = {}) {
         }
         case 'DELETE':
           if (!f) return new Response(null, { status: 404 });
+          if (headers['If-Match'] && headers['If-Match'] !== f.etag) return new Response(null, { status: 412 });
           files.delete(path);
           return new Response(null, { status: 204 });
         case 'PROPFIND': {
-          if (!propfind) return new Response(null, { status: 405 });
           const p = path.endsWith('/') ? path : path + '/';
           if (!folders.has(p)) return new Response(null, { status: 404 });
           const rows = [`<d:response><d:href>${encodeURI(p)}</d:href><d:propstat><d:prop><d:resourcetype><d:collection/></d:resourcetype></d:prop></d:propstat></d:response>`];
@@ -79,167 +91,197 @@ function davServer({ propfind = true } = {}) {
   return srv;
 }
 
-const engineFor = (repo, srv, opts = {}) => {
-  const e = new SyncEngine(repo, new WebDavProvider({ url: BASE, user: 'jan', password: 'x', fetch: srv.fetch, now, ...opts }));
+const sync = (dev, srv) => {
+  const e = new SyncEngine(dev.songs, new WebDavProvider({ url: BASE, user: 'jan', password: 'x', fetch: srv.fetch, now, storage: dev.storage }), {
+    extra: [{ key: 'setlists', repo: dev.sets, slim: slimSetlist }],
+  });
   e.state = 'idle';
   return e;
 };
-const titles = async (repo) => (await repo.list()).map((s) => s.title);
-const songFiles = (srv) => [...srv.files.keys()].filter((p) => p.startsWith(DIR)).map((p) => p.slice(DIR.length)).sort();
-const index = (srv) => JSON.parse(srv.files.get(INDEX).body);
+const titles = async (dev) => (await dev.songs.list()).map((s) => s.title);
+const filesIn = (srv, dir) => [...srv.files.keys()].filter((p) => p.startsWith(dir)).map((p) => p.slice(dir.length)).sort();
+const body = (srv, path) => srv.files.get(path)?.body;
 
-describe('WebDAV: Dateinamen', () => {
-  it('Titel - Interpret, sicher für Windows', () => {
+describe('ChordPro-Dateien: Lied und Setliste', () => {
+  it('Dateinamen „Titel - Interpret“, sicher für Windows', () => {
     expect(songBaseName('{title: Clementine}\n{artist: Percy Montrose}')).toBe('Clementine - Percy Montrose');
     expect(songBaseName('{t: AC/DC: Highway?}')).toBe('AC DC Highway');
     expect(songBaseName('nur Text')).toBe('Ohne Titel');
     expect(cleanFileName('con')).toBe('con_');
-    expect(cleanFileName('Ende. ')).toBe('Ende');
     expect([nameFits('Clementine (2).cho', 'Clementine'), nameFits('Clementine.cho', 'Oh Susanna')]).toEqual([true, false]);
+  });
+
+  it('Transposition, Schreibweise, Notiz als Direktiven hinter dem Liedkopf – und zurück', () => {
+    const r = { chordpro: '{title: Clementine}\n{key: C}\n\n[C]Oh my darling', transpose: 2, accidentals: 'flat', note: 'Capo 2\nalle singen' };
+    const file = songToFile(r);
+    expect(file).toBe('{title: Clementine}\r\n{key: C}\r\n{transpose: 2}\r\n{x_accidentals: flat}\r\n{x_notiz: Capo 2}\r\n{x_notiz: alle singen}\r\n\r\n[C]Oh my darling');
+    expect(fileToSong(file)).toEqual({ chordpro: '{title: Clementine}\n{key: C}\n\n[C]Oh my darling', transpose: 2, accidentals: 'flat', note: 'Capo 2\nalle singen' });
+    // ohne Einstellungen: Datei = Text aus „Bearbeiten“ (nur CR LF)
+    expect(songToFile({ chordpro: '{title: A}\n[C]la', transpose: 0, accidentals: 'auto', note: '' })).toBe('{title: A}\r\n[C]la');
+  });
+
+  it('Setliste als lesbare Textdatei – und zurück', () => {
+    const files = { s1: 'Kein schöner Land.cho', s2: 'Clementine - Percy Montrose.cho' };
+    const text = setlistToFile({ name: 'Lagerfeuer', items: [{ songId: 's1', transpose: null, note: '' }, { songId: 's2', transpose: 2, note: 'Capo 2' }] }, (id) => files[id]);
+    expect(text).toBe('# Setliste „Lagerfeuer“ – eine Zeile pro Lied (Datei im Ordner Lieder)\r\nKein schöner Land.cho\r\nClementine - Percy Montrose.cho\r\n  Transposition: 2\r\n  Notiz: Capo 2\r\n');
+    const back = fileToSetlist(text, 'Lagerfeuer.txt', (f) => Object.keys(files).find((k) => files[k] === f));
+    expect(back).toEqual({ name: 'Lagerfeuer', items: [{ songId: 's1', transpose: null, note: '' }, { songId: 's2', transpose: 2, note: 'Capo 2' }] });
   });
 
   it('liest eine PROPFIND-Antwort (nur Dateien direkt im Ordner)', () => {
     const xml = '<d:multistatus xmlns:d="DAV:"><d:response><d:href>/dav/L/</d:href><d:propstat><d:prop><d:resourcetype><d:collection/></d:resourcetype></d:prop></d:propstat></d:response>' +
       '<d:response><d:href>/dav/L/Kein%20sch%C3%B6ner%20Land.cho</d:href><d:propstat><d:prop><d:getetag>"7"</d:getetag><d:resourcetype/></d:prop></d:propstat></d:response></d:multistatus>';
-    const m = parsePropfind(xml, 'https://nas.test/dav/L/');
-    expect([...m.keys()]).toEqual(['Kein schöner Land.cho']);
-    expect(m.get('Kein schöner Land.cho').etag).toBe('"7"');
+    expect([...parsePropfind(xml, 'https://nas.test/dav/L/').keys()]).toEqual(['Kein schöner Land.cho']);
   });
 });
 
-describe('WebDAV: eine Datei pro Lied', () => {
-  it('jedes Lied als .cho-Datei (CR LF), Verzeichnis ohne Liedtext; zweites Gerät bekommt alles', async () => {
+describe('WebDAV: nur ChordPro-Dateien, keine Daten-JSON', () => {
+  it('jedes Lied als .cho (wie „Bearbeiten“), Einstellungen als Direktiven; zweites Gerät bekommt alles', async () => {
     const srv = davServer();
     const A = device('a');
     const B = device('b');
-    await A.create('{title: Clementine}\n{artist: Percy Montrose}\n[C]Oh my darling');
-    await A.create('{title: Kein schöner Land}\n[D]Kein schöner Land');
-    const sa = engineFor(A, srv);
-    await sa.sync();
-    expect(sa.state).toBe('idle');
-    expect(songFiles(srv)).toEqual(['Clementine - Percy Montrose.cho', 'Kein schöner Land.cho']);
-    expect(srv.files.get(DIR + 'Clementine - Percy Montrose.cho').body).toBe('{title: Clementine}\r\n{artist: Percy Montrose}\r\n[C]Oh my darling');
-    const idx = index(srv);
-    expect([idx.version, idx.layout, idx.songs.length]).toEqual([3, 'files', 2]);
-    expect(idx.songs.some((s) => 'chordpro' in s)).toBe(false);
-    expect(srv.files.get(INDEX).body.includes('\r\n')).toBe(true);
+    const c = await A.songs.create('{title: Clementine}\n{artist: Percy Montrose}\n[C]Oh my darling');
+    await A.songs.update(c.id, { transpose: 2, note: 'Capo 2' });
+    await A.songs.create('{title: Kein schöner Land}\n[D]Kein schöner Land');
+    await sync(A, srv).sync();
+    expect(filesIn(srv, DIR)).toEqual(['Clementine - Percy Montrose.cho', 'Kein schöner Land.cho']);
+    expect(body(srv, DIR + 'Kein schöner Land.cho')).toBe('{title: Kein schöner Land}\r\n[D]Kein schöner Land');
+    expect(body(srv, DIR + 'Clementine - Percy Montrose.cho')).toBe('{title: Clementine}\r\n{artist: Percy Montrose}\r\n{transpose: 2}\r\n{x_notiz: Capo 2}\r\n[C]Oh my darling');
+    const guard = JSON.parse(body(srv, GUARD));
+    expect([guard.version, 'songs' in guard]).toEqual([4, false]); // nur Hinweis, keine Daten
 
-    const sb = engineFor(B, srv);
-    await sb.sync();
+    await sync(B, srv).sync();
     expect(await titles(B)).toEqual(['Clementine', 'Kein schöner Land']);
-    expect((await B.list()).find((s) => s.title === 'Clementine').chordpro).toBe('{title: Clementine}\n{artist: Percy Montrose}\n[C]Oh my darling');
+    const bc = (await B.songs.list()).find((s) => s.title === 'Clementine');
+    expect([bc.chordpro, bc.transpose, bc.note]).toEqual(['{title: Clementine}\n{artist: Percy Montrose}\n[C]Oh my darling', 2, 'Capo 2']);
   });
 
-  it('ohne Änderungen: nur Verzeichnis (304) und Ordnerliste, nichts wird geschrieben', async () => {
+  it('ohne Änderungen: nur die zwei Ordnerlisten, nichts wird geladen oder geschrieben', async () => {
     const srv = davServer();
     const A = device('a');
-    await A.create('{title: Alpha}');
-    const sa = engineFor(A, srv);
+    await A.songs.create('{title: Alpha}');
+    const sa = sync(A, srv);
     await sa.sync();
     await sa.sync();
     srv.log.length = 0;
     await sa.sync();
-    expect(srv.log).toEqual(['GET ' + INDEX, 'PROPFIND ' + DIR]);
+    expect(srv.log).toEqual(['PROPFIND ' + DIR, 'PROPFIND ' + SETS]);
   });
 
-  it('Titel geändert: neue Datei, alte wird gelöscht; Lied gelöscht: Datei weg, im Papierkorb', async () => {
+  it('Titel geändert: Datei umbenannt, anderes Gerät behält dasselbe Lied; Löschen: in den Papierkorb', async () => {
     const srv = davServer();
     const A = device('a');
     const B = device('b');
-    const s = await A.create('{title: Alt}\n[C]la');
-    const t = await A.create('{title: Weg}\n[G]li');
-    const sa = engineFor(A, srv);
-    const sb = engineFor(B, srv);
-    await sa.sync();
-    await sb.sync();
-    await A.update(s.id, { chordpro: '{title: Neu}\n[C]la' });
-    await A.remove(t.id);
-    await sa.sync();
-    expect(songFiles(srv)).toEqual(['Neu.cho']);
-    expect(index(srv).songs.find((e) => e.id === t.id).deletedAt).toBeTruthy();
-    await sb.sync();
+    const s = await A.songs.create('{title: Alt}\n[C]la');
+    const t = await A.songs.create('{title: Weg}\n[G]li');
+    await sync(A, srv).sync();
+    await sync(B, srv).sync();
+    const bOld = (await B.songs.list()).find((x) => x.title === 'Alt');
+    await B.songs.update(bOld.id, { transpose: 3 });
+    await sync(B, srv).sync();
+    await sync(A, srv).sync();
+    await A.songs.update(s.id, { chordpro: '{title: Neu}\n[C]la' });
+    await A.songs.remove(t.id);
+    await sync(A, srv).sync();
+    expect(filesIn(srv, DIR)).toEqual(['Neu.cho']);
+    await sync(B, srv).sync();
     expect(await titles(B)).toEqual(['Neu']);
-    expect((await B.trash()).map((x) => x.title)).toEqual(['Weg']);
+    const bNew = (await B.songs.list())[0];
+    expect([bNew.id, bNew.transpose]).toEqual([bOld.id, 3]); // umbenannt erkannt, nicht neu
+    expect((await B.songs.trash()).map((x) => x.title)).toEqual(['Weg']);
   });
 
-  it('gleicher Titel zweimal: "Titel (2).cho"', async () => {
+  it('gleicher Titel zweimal: „Titel (2).cho“', async () => {
     const srv = davServer();
     const A = device('a');
-    await A.create('{title: Oh Susanna}\n[C]eins');
-    await A.create('{title: Oh Susanna}\n[C]zwei');
-    await engineFor(A, srv).sync();
-    expect(songFiles(srv)).toEqual(['Oh Susanna (2).cho', 'Oh Susanna.cho']);
+    await A.songs.create('{title: Oh Susanna}\n[C]eins');
+    await A.songs.create('{title: Oh Susanna}\n[C]zwei');
+    await sync(A, srv).sync();
+    expect(filesIn(srv, DIR)).toEqual(['Oh Susanna (2).cho', 'Oh Susanna.cho']);
   });
 
-  it('Datei direkt auf dem Server bearbeitet: kommt auf allen Geräten an, danach Ruhe', async () => {
+  it('auf dem Server bearbeitet, angelegt, gelöscht: kommt an, danach Ruhe', async () => {
     const srv = davServer();
     const A = device('a');
     const B = device('b');
-    const s = await A.create('{title: Clementine}\n[C]alt');
-    const sa = engineFor(A, srv);
-    const sb = engineFor(B, srv);
-    await sa.sync();
-    await sb.sync();
-    srv.put(DIR + 'Clementine.cho', '{title: Clementine}\r\n[G]neu von Hand');
-    await sb.sync();
-    expect((await B.get(s.id)).chordpro).toBe('{title: Clementine}\n[G]neu von Hand');
-    await sa.sync();
-    expect((await A.get(s.id)).chordpro).toBe('{title: Clementine}\n[G]neu von Hand');
-    // keine Endlosschleife: weitere Abgleiche schreiben nichts mehr
+    const s = await A.songs.create('{title: Clementine}\n[C]alt');
+    await A.songs.create('{title: Beta}\n[G]b');
+    await sync(A, srv).sync();
+    await sync(B, srv).sync();
+    srv.put(DIR + 'Clementine.cho', '{title: Clementine}\r\n{transpose: -2}\r\n[G]neu von Hand');
+    srv.put(DIR + 'Wild Rover.cho', "[G]I've been a wild rover");
+    srv.files.delete(DIR + 'Beta.cho');
+    await sync(A, srv).sync();
+    await sync(B, srv).sync();
+    for (const dev of [A, B]) {
+      expect(await titles(dev)).toEqual(['Clementine', 'Wild Rover']);
+      expect((await dev.songs.trash()).map((x) => x.chordpro)).toEqual(['{title: Beta}\n[G]b']);
+    }
+    const a = await A.songs.get(s.id);
+    expect([a.chordpro, a.transpose]).toEqual(['{title: Clementine}\n[G]neu von Hand', -2]);
+    // Datei ohne {title:}: Dateiname als Titel, die Datei selbst bleibt unangetastet
+    expect(body(srv, DIR + 'Wild Rover.cho')).toBe("[G]I've been a wild rover");
     srv.log.length = 0;
-    await sa.sync();
-    await sb.sync();
-    expect(srv.log.filter((l) => l.startsWith('PUT')).length).toBe(0);
+    await sync(A, srv).sync();
+    await sync(B, srv).sync();
+    expect(srv.log.filter((l) => /^(PUT|DELETE)/.test(l))).toEqual([]);
   });
 
-  it('Datei von Hand angelegt: wird ein Lied (Titel aus dem Dateinamen), auf allen Geräten dasselbe', async () => {
+  it('Bearbeiten gewinnt gegen Löschen: Datei wieder hochgeladen', async () => {
     const srv = davServer();
     const A = device('a');
     const B = device('b');
-    await A.create('{title: Alpha}');
-    const sa = engineFor(A, srv, { clock: later });
-    const sb = engineFor(B, srv, { clock: later });
-    await sa.sync();
-    srv.put(DIR + 'Wild Rover.cho', '[G]I\'ve been a wild rover');
-    await sa.sync();
-    await sb.sync();
-    expect(await titles(A)).toEqual(['Alpha', 'Wild Rover']);
-    expect(await titles(B)).toEqual(['Alpha', 'Wild Rover']);
-    expect((await B.list()).filter((x) => x.title === 'Wild Rover').length).toBe(1);
-    expect(index(srv).songs.length).toBe(2);
-  });
-
-  it('Datei von Hand gelöscht: Lied landet im Papierkorb', async () => {
-    const srv = davServer();
-    const A = device('a');
-    await A.create('{title: Alpha}');
-    await A.create('{title: Beta}');
-    const sa = engineFor(A, srv);
-    await sa.sync();
-    srv.files.delete(DIR + 'Beta.cho');
-    await sa.sync();
+    const s = await A.songs.create('{title: Alpha}\n[C]la');
+    await sync(A, srv).sync();
+    await sync(B, srv).sync();
+    const b = (await B.songs.list())[0];
+    await B.songs.remove(b.id);
+    await sync(B, srv).sync(); // B löscht die Datei
+    await A.songs.update(s.id, { chordpro: '{title: Alpha}\n[C]la la' }); // A ändert (noch ohne Abgleich)
+    await sync(A, srv).sync();
+    expect(filesIn(srv, DIR)).toEqual(['Alpha.cho']);
     expect(await titles(A)).toEqual(['Alpha']);
-    expect((await A.trash()).map((x) => x.title)).toEqual(['Beta']);
   });
 
-  it('Datei gelöscht, Gerät kannte nur seinen eigenen Text: Text bleibt im Papierkorb', async () => {
+  it('Setlisten als Textdateien; auf jedem Gerät mit den eigenen Liedern verknüpft', async () => {
     const srv = davServer();
     const A = device('a');
     const B = device('b');
-    await A.create('{title: Beta}\n[C]la');
-    await engineFor(A, srv).sync();
-    await engineFor(B, srv).sync();
-    srv.files.delete(DIR + 'Beta.cho');
-    await engineFor(B, srv).sync(); // neuer Abgleich ohne Zwischenspeicher des Textes
-    expect(await titles(B)).toEqual([]);
-    expect((await B.trash()).map((x) => x.chordpro)).toEqual(['{title: Beta}\n[C]la']);
+    const k = await A.songs.create('{title: Kein schöner Land}\n[D]x');
+    const c = await A.songs.create('{title: Clementine}\n[C]y');
+    const set = await A.sets.create('Lagerfeuer Samstag', [{ songId: k.id }, { songId: c.id, transpose: 2, note: 'Capo 2' }]);
+    await sync(A, srv).sync();
+    expect(filesIn(srv, SETS)).toEqual(['Lagerfeuer Samstag.txt']);
+    expect(body(srv, SETS + 'Lagerfeuer Samstag.txt')).toContain('Kein schöner Land.cho\r\nClementine.cho\r\n  Transposition: 2\r\n  Notiz: Capo 2');
+    await sync(B, srv).sync();
+    const bs = (await B.sets.list())[0];
+    const bSongs = await B.songs.list();
+    expect(bs.name).toBe('Lagerfeuer Samstag');
+    expect(bs.items.map((i) => bSongs.find((x) => x.id === i.songId)?.title)).toEqual(['Kein schöner Land', 'Clementine']);
+    expect([bs.items[1].transpose, bs.items[1].note]).toEqual([2, 'Capo 2']);
+    // Reihenfolge von Hand in der Datei geändert
+    srv.put(SETS + 'Lagerfeuer Samstag.txt', 'Clementine.cho\r\nKein schöner Land.cho\r\n');
+    await sync(A, srv).sync();
+    expect((await A.sets.get(set.id)).items.map((i) => i.songId)).toEqual([c.id, k.id]);
+  });
+
+  it('Gedächtnis eines Geräts verloren: keine doppelten Lieder', async () => {
+    const srv = davServer();
+    const A = device('a');
+    await A.songs.create('{title: Alpha}\n[C]a');
+    await A.songs.create('{title: Beta}\n[C]b');
+    await sync(A, srv).sync();
+    A.storage.clear();
+    await sync(A, srv).sync();
+    expect(await titles(A)).toEqual(['Alpha', 'Beta']);
+    expect(filesIn(srv, DIR)).toEqual(['Alpha.cho', 'Beta.cho']);
   });
 
   it('Ordner „Lieder“ fehlt plötzlich: Fehler statt alles zu löschen', async () => {
     const srv = davServer();
     const A = device('a');
-    await A.create('{title: Alpha}');
-    const sa = engineFor(A, srv);
+    await A.songs.create('{title: Alpha}');
+    const sa = sync(A, srv);
     await sa.sync();
     for (const p of [...srv.files.keys()]) if (p.startsWith(DIR)) srv.files.delete(p);
     srv.folders.delete(DIR);
@@ -248,35 +290,41 @@ describe('WebDAV: eine Datei pro Lied', () => {
     expect(await titles(A)).toEqual(['Alpha']);
   });
 
-  it('altes Format (alles in einer Datei) wird gelesen und umgestellt', async () => {
+  it('ältestes Format (alles in Liederbuch.json) wird umgestellt', async () => {
     const srv = davServer();
     srv.folders.add('/dav/Liederbuch/');
     const t = '2026-01-01T00:00:00.000Z';
-    srv.put(INDEX, JSON.stringify({
-      format: 'liederbuch-sync', version: 2, songs: [
-        { id: 'x1', chordpro: '{title: Alt}\n[C]la', transpose: 2, accidentals: 'auto', createdAt: t, updatedAt: t, deletedAt: null },
-      ], setlists: [],
+    srv.put(GUARD, JSON.stringify({
+      format: 'liederbuch-sync', version: 2,
+      songs: [{ id: 'x1', chordpro: '{title: Alt}\n[C]la', transpose: 2, accidentals: 'auto', createdAt: t, updatedAt: t, deletedAt: null }],
+      setlists: [{ id: 'l1', name: 'Probe', items: [{ songId: 'x1', transpose: null, note: '' }], createdAt: t, updatedAt: t, deletedAt: null }],
     }));
     const A = device('a');
-    const sa = engineFor(A, srv);
+    const sa = sync(A, srv);
     await sa.sync();
     expect(sa.state).toBe('idle');
-    expect(await titles(A)).toEqual(['Alt']);
-    expect((await A.get('x1')).transpose).toBe(2);
-    const idx = index(srv);
-    expect([idx.version, idx.layout, idx.songs[0].file]).toEqual([3, 'files', 'Alt.cho']);
-    expect(songFiles(srv)).toEqual(['Alt.cho']);
+    expect((await A.songs.get('x1')).transpose).toBe(2);
+    expect(body(srv, DIR + 'Alt.cho')).toBe('{title: Alt}\r\n{transpose: 2}\r\n[C]la');
+    expect(body(srv, SETS + 'Probe.txt')).toContain('Alt.cho');
+    expect('songs' in JSON.parse(body(srv, GUARD))).toBe(false);
   });
 
-  it('Server ohne Ordnerliste (kein PROPFIND): Abgleich klappt trotzdem', async () => {
-    const srv = davServer({ propfind: false });
+  it('Format von Liederbuch 1.13 (Verzeichnis + Liedtexte) wird umgestellt, Lieder bleiben dieselben', async () => {
+    const srv = davServer();
+    const t = '2026-01-01T00:00:00.000Z';
+    srv.put(DIR + 'Alt.cho', '{title: Alt}\r\n[C]la');
+    srv.put(GUARD, JSON.stringify({
+      format: 'liederbuch-sync', version: 3, layout: 'files',
+      songs: [{ id: 'x1', transpose: 1, accidentals: 'sharp', note: 'n', createdAt: t, updatedAt: t, deletedAt: null, file: 'Alt.cho', hash: 'h', etag: 'e' }],
+      setlists: [],
+    }));
     const A = device('a');
-    const B = device('b');
-    await A.create('{title: Alpha}');
-    await engineFor(A, srv).sync();
-    const sb = engineFor(B, srv);
-    await sb.sync();
-    expect(sb.state).toBe('idle');
-    expect(await titles(B)).toEqual(['Alpha']);
+    await A.songs.applyRemote([{ id: 'x1', chordpro: '{title: Alt}\n[C]la', transpose: 1, accidentals: 'sharp', note: 'n', createdAt: t, updatedAt: t, deletedAt: null }]);
+    const sa = sync(A, srv);
+    await sa.sync();
+    expect(sa.state).toBe('idle');
+    expect((await A.songs.list()).map((s) => s.id)).toEqual(['x1']);
+    expect(body(srv, DIR + 'Alt.cho')).toBe('{title: Alt}\r\n{transpose: 1}\r\n{x_accidentals: sharp}\r\n{x_notiz: n}\r\n[C]la');
+    expect(JSON.parse(body(srv, GUARD)).version).toBe(4);
   });
 });

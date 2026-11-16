@@ -59,9 +59,19 @@ export async function hashText(text) {
   return [...new Uint8Array(digest).slice(0, 8)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** Eindeutige, auf allen Geräten gleiche ID für eine von Hand angelegte Datei. */
-export async function idForFile(name) {
-  return 'datei-' + (await hashText(String(name).toLowerCase()));
+/** Eindeutige, auf allen Geräten gleiche ID für eine Datei, die dieses Gerät noch nicht kennt. */
+export function idForFile(name, prefix = 'datei-') {
+  // FNV-1a, zweimal mit verschiedenem Startwert -> 16 Hex-Zeichen
+  const s = String(name).toLowerCase();
+  const fnv = (seed) => {
+    let h = seed >>> 0;
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(16).padStart(8, '0');
+  };
+  return prefix + fnv(0x811c9dc5) + fnv(0x01000193);
 }
 
 /** Dateiname als Titel, wenn eine Datei kein {title:} enthält. */

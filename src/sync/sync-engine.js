@@ -182,6 +182,12 @@ export class SyncEngine extends EventTarget {
   async #exchange() {
     const hadLocalChanges = this.dirty;
     this.dirty = false;
+    // Anbieter, die eigene Datensätze zum Wiedererkennen brauchen (z. B. Dateien ohne Verzeichnis)
+    if (this.provider.prepare) {
+      const local = {};
+      for (const c of this.collections) local[c.key] = (await c.repo.allRecords()).map(c.slim);
+      this.provider.prepare(local);
+    }
     const remote = await this.provider.read(hadLocalChanges ? null : this.knownVersion);
     if (remote?.unchanged) return; // nichts Neues, nichts Eigenes
     if (remote?.data && remote.data.format !== SYNC_FORMAT) {

@@ -293,22 +293,44 @@ Dropbox) lassen sich in `src/sync/` mit `read`/`write` ergänzen.
 
 Statt Google Drive kann das persönliche Liederbuch auch auf einem eigenen WebDAV-Server liegen:
 **Cloud → Speicherort „WebDAV / Nextcloud“**, dann Ordner-Adresse, Benutzername und Passwort
-eintragen und **Verbinden**. Fehlt der Ordner, wird er angelegt. Darin entsteht:
+eintragen und **Verbinden**. Fehlt der Ordner, wird er angelegt.
+
+Gespeichert wird wie beim Programm ChordPro selbst – **nur Textdateien, keine Datenbank-Datei**:
 
     Liederbuch/
-      Liederbuch.json                      Verzeichnis: Lieder, Transposition, Notizen, Setlisten
       Lieder/
-        Clementine - Percy Montrose.cho    jedes Lied als eigene ChordPro-Datei (Titel - Interpret)
+        Clementine - Percy Montrose.cho    ein Lied pro Datei, genau wie unter „Bearbeiten“
         Kein schöner Land.cho
+      Setlisten/
+        Lagerfeuer Samstag.txt             eine Zeile pro Lied (Dateiname)
+      Liederbuch.json                      nur ein Hinweis ohne Daten (hält alte App-Versionen ab)
 
-Die Liedtexte lassen sich auch **direkt auf dem Server** bearbeiten (z. B. im Editor über die
-Netzwerkfreigabe der NAS): geänderte Dateien übernimmt der nächste Abgleich, **neue `.cho`-Dateien**
-werden nach etwa einer Minute zu neuen Liedern (ohne `{title:}` gilt der Dateiname als Titel),
-**gelöschte Dateien** landen in der App im Papierkorb. Ändert sich der Titel, wird die Datei
-umbenannt. Gleichzeitige Änderungen mehrerer Geräte erkennt die App am ETag jeder Datei. Ein
-Liederbuch im alten Format (alles in einer `Liederbuch.json`) wird beim ersten Abgleich
-automatisch umgestellt; ältere App-Versionen melden danach „bitte App neu laden“, statt etwas
-zu überschreiben.
+Einstellungen eines Liedes stehen als Direktiven in seiner Datei, gleich hinter dem Liedkopf –
+und nur, wenn sie gesetzt sind:
+
+    {title: Clementine}
+    {artist: Percy Montrose}
+    {transpose: 2}                 Transposition (offizielles ChordPro)
+    {x_accidentals: flat}          Schreibweise ♯/♭ (nur Liederbuch)
+    {x_notiz: Capo 2, alle singen mit}
+
+Andere Programme ignorieren `x_`-Direktiven, so sieht es ChordPro vor. Eine Setliste sieht so aus:
+
+    # Setliste „Lagerfeuer Samstag“ – eine Zeile pro Lied (Datei im Ordner Lieder)
+    Kein schöner Land.cho
+    Clementine - Percy Montrose.cho
+      Transposition: 2
+      Notiz: Capo 2, alle singen mit
+
+Alles lässt sich auch **direkt auf dem Server** bearbeiten (z. B. im Editor über die
+Netzwerkfreigabe der NAS): Geänderte Dateien übernimmt der nächste Abgleich, **neue `.cho`-Dateien**
+werden neue Lieder (ohne `{title:}` gilt der Dateiname als Titel), **gelöschte Dateien** landen in
+der App im Papierkorb – außer das Lied wurde auf einem Gerät inzwischen geändert, dann wird es
+wieder hochgeladen. Ändert sich der Titel, wird die Datei umbenannt; andere Geräte erkennen das am
+gleichen Liedtext. Dazu merkt sich jedes Gerät, welche Dateien es beim letzten Abgleich gesehen hat.
+Ältere Ablagen (alles in einer `Liederbuch.json` oder Verzeichnis + Liedtexte) werden beim ersten
+Abgleich automatisch umgestellt; ältere App-Versionen melden danach „bitte App neu laden“, statt
+etwas zu überschreiben.
 
 - **Adresse** bei Nextcloud: `https://<server>/remote.php/dav/files/<benutzer>/Liederbuch/`
   (steht in Nextcloud unten links unter *Dateien-Einstellungen → WebDAV*).
@@ -366,5 +388,5 @@ Caddyfile dort passt mit anderen Adressen auch für andere NAS oder Server.
 9. ✅ Schriftart und -größe in der Druckvorschau einstellbar (nur für den Druck)
 10. ✅ Harp-Tabs importieren (auch Akkord- und Harp-Zeile übereinander); Akkorde und Harp-Tabs wahlweise in einer oder zwei Zeilen
 11. ✅ Dateien passend für Windows: Sync-Datei, Sicherung und geteilte Lieder eingerückt und mit CR LF
-12. ✅ WebDAV: eine `.cho`-Datei pro Lied plus Verzeichnis; Dateien auch direkt auf dem Server bearbeitbar
+12. ✅ WebDAV: reine ChordPro-Ablage – eine `.cho`-Datei pro Lied (Einstellungen als Direktiven), Setlisten als `.txt`, keine Daten-JSON; alles auch direkt auf dem Server bearbeitbar
 13. ✅ Versionsanzeige: in den Einstellungen und am App-Namen (`src/version.js`)

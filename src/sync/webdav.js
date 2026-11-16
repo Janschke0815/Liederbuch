@@ -1,34 +1,41 @@
 // Cloud-Anbieter WebDAV (z. B. Nextcloud, ownCloud, QNAP, Synology, eigener Server).
 //
-// Aufbau auf dem Server (ab Format 3 – eine Datei pro Lied):
-//   <Ordner>/Liederbuch.json         Verzeichnis: Lieder (ohne Text) mit Dateiname und Prüfsumme,
-//                                    Transposition, Notiz, Zeitstempel, Löschungen, Setlisten
-//   <Ordner>/Lieder/<Titel>.cho      der Liedtext jedes Liedes (ChordPro, CR LF)
+// Aufbau auf dem Server – reine ChordPro-Dateien, keine Datenbank-Datei (siehe chordpro-files.js):
+//   <Ordner>/Lieder/<Titel - Interpret>.cho   ein Lied pro Datei, Transposition/Notiz als Direktiven
+//   <Ordner>/Setlisten/<Name>.txt            eine Setliste pro Datei
+//   <Ordner>/Liederbuch.json                 nur ein Hinweis (enthält keine Daten): hält ältere
+//                                            App-Versionen davon ab, etwas zu überschreiben
 //
-// Liedtexte lassen sich auch direkt auf dem Server bearbeiten, anlegen oder löschen; das erkennt
-// der nächste Abgleich (Ordnerliste per PROPFIND, Prüfsumme je Lied). Ein Verzeichnis im alten
-// Format (alles in einer Datei) wird gelesen und beim nächsten Schreiben umgestellt; ältere
-// App-Versionen melden beim neuen Format „bitte App neu laden“ statt etwas zu überschreiben.
+// Ohne Verzeichnisdatei merkt sich jedes Gerät, welche Dateien es beim letzten Abgleich gesehen
+// hat (Dateiname -> Lied, ETag, Prüfsumme, Stand). Daran erkennt es:
+//   Datei neu          -> neues Lied (oder umbenannt: gleicher Text ohne Titel wie eine fehlende)
+//   Datei geändert     -> Lied geändert (ETag anders)
+//   Datei verschwunden -> Lied gelöscht (in den Papierkorb) – es sei denn, es wurde hier inzwischen
+//                         geändert; dann wird es wieder hochgeladen
+// Alles lässt sich daher auch direkt auf dem Server bearbeiten, anlegen und löschen.
 //
-// Gleichzeitige Änderungen: Verzeichnis und Liedtexte werden mit If-Match / If-None-Match
-// geschrieben; 412 = Konflikt -> die Sync-Engine liest neu und führt zusammen.
+// Für die Sync-Engine sieht das aus wie bisher: read() liefert alle Lieder und Setlisten als
+// Datensätze, write() bekommt alle zusammengeführten Datensätze. Geschrieben wird je Datei mit
+// If-Match / If-None-Match; 412 = Konflikt -> die Engine liest neu und führt zusammen.
 //
-// Für die Sync-Engine sieht das aus wie bisher: read() liefert alle Lieder mit Text, write()
-// bekommt alle Lieder mit Text. Die Aufteilung in Dateien passiert nur hier.
+// Ältere Ablageformate (alles in Liederbuch.json bzw. Verzeichnis + Dateien) werden gelesen und
+// beim ersten Schreiben umgestellt.
 
 import { AuthError, ConflictError, SYNC_FORMAT } from './sync-engine.js';
-import { toFileJson, toWindowsText } from '../core/file-format.js';
+import { toFileJson } from '../core/file-format.js';
 import { slimRecord } from '../storage/repository.js';
+import { slimSetlist } from '../storage/setlists.js';
 import {
   SONG_DIR, SONG_FILE, songBaseName, nameFits, uniqueName, normalizeText, hashText, idForFile,
-  withTitle, parsePropfind, listingSignature, PROPFIND_BODY,
+  withTitle, parsePropfind, listingSignature, PROPFIND_BODY, cleanFileName,
 } from './song-files.js';
+import {
+  SETLIST_DIR, SETLIST_EXT, songToFile, fileToSong, songBody, setlistToFile, fileToSetlist, setlistFileName,
+} from './chordpro-files.js';
 
 export const WEBDAV_FILE = 'Liederbuch.json';
-const LAYOUT = 'files';
-const INDEX_VERSION = 3;
-const ENGINE_VERSION = 2; // Format, das die Sync-Engine erwartet
-const SETTLE_MS = 60_000; // von Hand angelegte Dateien erst übernehmen, wenn sie so alt sind
+const GUARD_VERSION = 4; // Hinweisdatei: "Ablage als ChordPro-Dateien"
+const ENGINE_VERSION = 2;
 
 /** Ordner- oder Datei-Adresse -> Adresse der JSON-Datei. */
 export function webdavFileUrl(url) {
@@ -51,38 +58,44 @@ export function webdavUrlProblem(url) {
   return 'Die Adresse muss mit https:// beginnen, sonst würde das Passwort unverschlüsselt übertragen.';
 }
 
-const makeVersion = (etag, listing) => JSON.stringify([etag ?? null, listingSignature(listing)]);
-const splitVersion = (v) => {
-  try {
-    const [etag, sig] = JSON.parse(v);
-    return { etag, sig };
-  } catch {
-    return { etag: null, sig: null };
-  }
-};
 const lower = (s) => String(s).toLowerCase();
-/** Verzeichniseintrag eines Liedes -> Datensatz ohne Datei-Angaben. */
-const stripFile = ({ file, hash, etag, ...rest }) => rest;
+const iso = (ms) => new Date(ms).toISOString();
+/** Zeitpunkt, der sicher nach `t` liegt (für „auf dem Server geändert/gelöscht“). */
+const after = (t, candidate) => {
+  const min = t ? Date.parse(t) + 1 : 0;
+  const c = candidate ? Date.parse(candidate) : 0;
+  return iso(Math.max(min, c || 0, 0) || Date.now());
+};
+
+const emptyState = () => ({ songs: {}, setlists: {} });
 
 export class WebDavProvider {
   id = 'webdav';
   name = 'WebDAV';
 
-  /** @param {{url: string, user?: string, password?: string, fetch?: typeof fetch, now?: () => string}} opts */
-  constructor({ url, user = '', password = '', fetch: f = globalThis.fetch?.bind(globalThis), now = () => new Date().toISOString(), clock = () => Date.now() } = {}) {
+  /**
+   * @param {{url: string, user?: string, password?: string, fetch?: typeof fetch,
+   *          now?: () => string, storage?: Storage}} opts
+   */
+  constructor({
+    url, user = '', password = '', fetch: f = globalThis.fetch?.bind(globalThis),
+    now = () => new Date().toISOString(), storage = globalThis.localStorage,
+  } = {}) {
     this.fileUrl = webdavFileUrl(url);
     this.folderUrl = this.fileUrl.replace(/[^/]*$/, '');
     this.songDirUrl = this.folderUrl + SONG_DIR;
+    this.setDirUrl = this.folderUrl + SETLIST_DIR;
     this.user = user;
     this.password = password;
     this.fetch = f;
     this.now = now;
-    this.clock = clock;
+    this.storage = storage;
+    this.stateKey = `webdav.state:${this.folderUrl}`;
     this.signedIn = Boolean(this.fileUrl);
-    this.exists = false;
-    this.index = null; // zuletzt gelesenes/geschriebenes Verzeichnis (Format 3)
-    this.listing = null; // zuletzt gelesene Ordnerliste: Name -> {etag, modified}
-    this.texts = new Map(); // Liedtexte: Dateiname -> {etag, text}
+    this.texts = new Map(); // Adresse -> {etag, text}
+    this.local = null; // eigene Datensätze (von der Engine vor dem Lesen gereicht)
+    this.lists = null; // zuletzt gelesene Ordnerlisten {songs, setlists}
+    this.guard = null; // Inhalt von Liederbuch.json beim letzten Lesen (Hinweis oder altes Format)
   }
 
   get host() {
@@ -92,6 +105,33 @@ export class WebDavProvider {
       return '';
     }
   }
+
+  // ---------- Gedächtnis dieses Geräts ----------
+
+  #loadState() {
+    try {
+      const s = JSON.parse(this.storage?.getItem(this.stateKey) || 'null');
+      if (s && typeof s === 'object') return { songs: s.songs || {}, setlists: s.setlists || {} };
+    } catch {
+      /* neu anfangen */
+    }
+    return emptyState();
+  }
+
+  #saveState(state) {
+    try {
+      this.storage?.setItem(this.stateKey, JSON.stringify(state));
+    } catch {
+      /* Speicher voll: beim nächsten Mal wird neu abgeglichen */
+    }
+  }
+
+  /** Die Sync-Engine reicht vor dem Lesen die eigenen Datensätze (zum Wiedererkennen). */
+  prepare(local) {
+    this.local = local;
+  }
+
+  // ---------- Netzwerk ----------
 
   #headers(extra = {}) {
     const h = { ...extra };
@@ -118,16 +158,45 @@ export class WebDavProvider {
     return res;
   }
 
+  /** Ordnerliste (PROPFIND). Fehlt der Ordner: leere Liste mit folderMissing. */
+  async #list(dirUrl) {
+    const res = await this.#request('PROPFIND', dirUrl, {
+      headers: { Depth: '1', 'Content-Type': 'application/xml; charset=utf-8' },
+      body: PROPFIND_BODY,
+    });
+    if (res.status === 404) return Object.assign(new Map(), { folderMissing: true });
+    if (res.status !== 207) {
+      throw new Error(`Der Server liefert keine Ordnerliste (PROPFIND, Antwort ${res.status}) – für den Abgleich nötig`);
+    }
+    return parsePropfind(await res.text(), dirUrl);
+  }
+
+  /** Datei lesen (zwischengespeichert, solange sich das ETag nicht ändert). null = gibt es nicht. */
+  async #text(url, etag) {
+    const cached = this.texts.get(url);
+    if (cached && etag && cached.etag === etag) return cached.text;
+    const res = await this.#request('GET', url);
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Lesen von „${decodeURIComponent(url.split('/').pop())}“`);
+    const text = normalizeText(await res.text());
+    this.texts.set(url, { etag: etag || res.headers.get('ETag'), text });
+    return text;
+  }
+
   #songUrl(name) {
     return this.songDirUrl + encodeURIComponent(name);
   }
 
-  /** Prüft die Verbindung (Ordner bzw. Datei erreichbar, Anmeldung gültig). */
+  #setUrl(name) {
+    return this.setDirUrl + encodeURIComponent(name);
+  }
+
+  /** Prüft die Verbindung (Ordner erreichbar, Anmeldung gültig). */
   async signIn() {
     if (!this.fileUrl) throw new Error('Bitte die WebDAV-Adresse eintragen');
     const problem = webdavUrlProblem(this.fileUrl);
     if (problem) throw new Error(problem);
-    await this.read(null);
+    await this.#list(this.songDirUrl);
     this.signedIn = true;
   }
 
@@ -137,285 +206,312 @@ export class WebDavProvider {
 
   // ---------- Lesen ----------
 
-  /**
-   * Ordnerliste der Liedtexte; null, wenn der Server kein PROPFIND kann. Fehlt der Ordner,
-   * ist die Liste leer und trägt folderMissing (anders als ein leerer Ordner).
-   */
-  async #list() {
-    const res = await this.#request('PROPFIND', this.songDirUrl, {
-      headers: { Depth: '1', 'Content-Type': 'application/xml; charset=utf-8' },
-      body: PROPFIND_BODY,
-    });
-    if (res.status === 404) return Object.assign(new Map(), { folderMissing: true });
-    if (res.status !== 207) return null;
-    return parsePropfind(await res.text(), this.songDirUrl);
-  }
+  async read(knownVersion) {
+    const [songs, sets] = await Promise.all([this.#list(this.songDirUrl), this.#list(this.setDirUrl)]);
+    const version = listingSignature(songs) + '||' + listingSignature(sets);
+    if (knownVersion && knownVersion === version && this.lists) return { unchanged: true };
 
-  /** Liedtext einer Datei (zwischengespeichert, solange sich das ETag nicht ändert). */
-  async #text(name, etag) {
-    const cached = this.texts.get(name);
-    if (cached && etag && cached.etag === etag) return cached.text;
-    const res = await this.#request('GET', this.#songUrl(name));
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Lesen von „${name}“`);
-    const text = normalizeText(await res.text());
-    this.texts.set(name, { etag: etag || res.headers.get('ETag'), text });
-    return text;
-  }
-
-  async read(knownVersion, attempt = 0) {
-    // „Unverändert“ nur fragen, wenn das Verzeichnis hier zwischengespeichert ist – sonst würde
-    // ein 304 als leeres Liederbuch gelten
-    const known = this.index ? splitVersion(knownVersion) : { etag: null, sig: null };
-    // Erst das Verzeichnis, dann die Ordnerliste: Was das Verzeichnis nennt, wurde vorher geschrieben.
-    const res = await this.#request('GET', this.fileUrl, { headers: known.etag ? { 'If-None-Match': known.etag } : {} });
-    if (res.status !== 304 && res.status !== 404 && !res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Lesen`);
-    const listing = await this.#list();
-    if (res.status === 304 && known.sig === listingSignature(listing) && this.index) return { unchanged: true };
-
-    let index;
-    let etag = null;
-    if (res.status === 404) {
-      this.exists = false;
-      if (!listing?.size) {
-        this.index = null;
-        this.listing = listing;
-        return null;
-      }
-      index = { format: SYNC_FORMAT, version: INDEX_VERSION, layout: LAYOUT, songs: [] }; // nur Dateien da
-    } else if (res.status === 304) {
-      index = this.index;
-      etag = known.etag;
-    } else {
-      this.exists = true;
-      etag = res.headers.get('ETag');
+    // Liederbuch.json: Hinweisdatei (neu) oder älteres Ablageformat
+    const res = await this.#request('GET', this.fileUrl);
+    let guard = null;
+    if (res.ok) {
       try {
-        index = JSON.parse(await res.text());
+        guard = JSON.parse(await res.text());
       } catch {
-        throw new Error('Die Datei auf dem Server ist kein gültiges Liederbuch (kein JSON)');
+        guard = null;
       }
     }
-
-    // Altes Format (alles in einer Datei) oder fremde Version: so an die Engine geben,
-    // die prüft Format und Version; altes Format wird beim nächsten Schreiben umgestellt.
-    if (index?.layout !== LAYOUT) {
-      this.index = null;
-      this.listing = listing;
-      return { data: index, version: makeVersion(etag, listing), rewrite: index?.format === SYNC_FORMAT };
-    }
-    if (index.version > INDEX_VERSION) {
+    if (guard?.format === SYNC_FORMAT && guard.version > GUARD_VERSION) {
       throw new Error('Das Liederbuch auf dem Server stammt aus einer neueren Version der App – bitte App neu laden');
     }
+    this.guard = guard;
+    this.lists = { songs, sets };
 
-    const { songs, changed, missing } = await this.#assemble(index, listing);
-    // Datei fehlt: vielleicht hat ein anderes Gerät gerade umbenannt – Verzeichnis neu lesen
-    if (missing && attempt < 2) {
-      const again = await this.#request('HEAD', this.fileUrl);
-      if (again.headers.get('ETag') && again.headers.get('ETag') !== etag) return this.read(null, attempt + 1);
+    const state = this.#loadState();
+    let data;
+    let rewrite = false;
+    if (guard?.format === SYNC_FORMAT && guard.version <= 2) {
+      // ältestes Format: alle Lieder samt Text in Liederbuch.json
+      data = { songs: guard.songs || [], setlists: guard.setlists || [] };
+      rewrite = true;
+    } else if (guard?.format === SYNC_FORMAT && guard.version === 3) {
+      // Verzeichnis + Liedtext-Dateien (Liederbuch 1.13): Zuordnung Datei -> Lied übernehmen
+      data = await this.#readIndexV3(guard, songs, state);
+      rewrite = true;
+    } else {
+      data = await this.#readFiles(songs, sets, state);
+      if (!guard && (songs.size || sets.size)) rewrite = true; // Hinweisdatei fehlt noch
     }
-    this.index = index;
-    this.listing = listing;
-    const { layout, orphans, ...rest } = index;
+    this.#saveState(state);
+    if (!guard && !songs.size && !sets.size && !data.songs.length) return null; // noch leer
     return {
-      data: { ...rest, version: ENGINE_VERSION, songs },
-      version: makeVersion(etag, listing),
-      rewrite: changed, // Änderungen direkt auf dem Server -> ins Verzeichnis übernehmen
+      data: { format: SYNC_FORMAT, version: ENGINE_VERSION, ...data },
+      version,
+      rewrite,
     };
   }
 
-  /** Verzeichnis + Liedtexte -> vollständige Lieder; erkennt Änderungen direkt auf dem Server. */
-  async #assemble(index, listing) {
-    const songs = [];
-    let changed = false;
-    let missing = false;
-    const referenced = new Set((index.orphans || []).map(lower));
-    const liveHashes = new Set();
-    const entries = index.songs || [];
-    for (const e of entries) if (e.file) referenced.add(lower(e.file));
-    if (listing?.folderMissing && entries.some((e) => e.file && !e.deletedAt)) {
+  /** Format von Liederbuch 1.13: Verzeichnis mit Dateinamen + reine Liedtexte. */
+  async #readIndexV3(index, songs, state) {
+    const out = [];
+    for (const e of index.songs || []) {
+      if (e.deletedAt || !e.file) {
+        const { file, hash, etag, ...rest } = e;
+        out.push(rest);
+        continue;
+      }
+      const f = songs.get(e.file);
+      const text = f ? await this.#text(this.#songUrl(e.file), f.etag) : null;
+      const { file, hash, etag, ...rest } = e;
+      if (text == null) continue; // Datei fehlt: Eintrag fallen lassen, das Gerät behält seine Fassung
+      out.push(slimRecord({ ...rest, chordpro: text }));
+      state.songs[e.file] = { id: e.id, etag: f.etag, hash: '', updatedAt: e.updatedAt, createdAt: e.createdAt };
+    }
+    return { songs: out, setlists: index.setlists || [] };
+  }
+
+  /** Normales Format: nur Dateien. */
+  async #readFiles(songs, sets, state) {
+    const local = this.local?.songs || [];
+    const localById = new Map(local.map((r) => [r.id, r]));
+    const usedIds = new Set();
+    const records = [];
+    const nameToId = new Map();
+
+    // bekannte Dateien, die fehlen (gelöscht oder umbenannt)
+    const missing = Object.entries(state.songs).filter(([name]) => !songs.has(name));
+    const missingByBody = new Map();
+    for (const [name, st] of missing) if (st.body) missingByBody.set(st.body, name);
+
+    const names = [...songs.keys()].filter((n) => SONG_FILE.test(n)).sort();
+    for (const name of names) {
+      const f = songs.get(name);
+      const text = await this.#text(this.#songUrl(name), f.etag);
+      if (text == null) continue;
+      const parsed = fileToSong(withTitle(text, name));
+      // Prüfsumme der Form, in der die App die Datei schreiben würde: So wird eine von Hand
+      // gepflegte Datei (anders angeordnet, ohne {title:}) erst neu geschrieben, wenn sich das
+      // Lied in der App wirklich ändert.
+      const hash = await hashText(normalizeText(songToFile({ ...parsed })));
+      const body = await hashText(songBody(parsed.chordpro));
+      let st = state.songs[name];
+      let id = st?.id;
+      if (!id && missingByBody.has(body)) {
+        // umbenannt (Titel geändert, Text gleich): Lied behalten
+        const old = missingByBody.get(body);
+        missingByBody.delete(body);
+        st = { ...state.songs[old] };
+        id = st.id;
+        delete state.songs[old];
+      }
+      if (!id) {
+        // unbekannt: vielleicht ein eigenes Lied, dessen Gedächtnis verloren ging (gleicher Inhalt/Name)
+        const same = local.find((r) => !r.deletedAt && !usedIds.has(r.id) &&
+          (normalizeText(songToFile(r)) === text || songBaseName(r.chordpro) + '.cho' === name));
+        id = same?.id || idForFile(name);
+      }
+      if (usedIds.has(id)) id = idForFile(name); // zwei Dateien, ein Lied: die zweite wird eigenes Lied
+      usedIds.add(id);
+      nameToId.set(lower(name), id);
+      const changed = !st || st.etag !== f.etag;
+      const fileTime = f.modified ? iso(f.modified) : this.now();
+      const updatedAt = changed ? after(st?.updatedAt, fileTime) : st.updatedAt;
+      const createdAt = st?.createdAt || localById.get(id)?.createdAt || fileTime;
+      records.push(slimRecord({ id, ...parsed, createdAt, updatedAt, deletedAt: null }));
+      state.songs[name] = { id, etag: f.etag, hash, body, updatedAt, createdAt };
+    }
+
+    // gelöscht: Datei fehlt und wurde nicht umbenannt -> Löschung (der eigene Text bleibt im Papierkorb).
+    // Fehlt der ganze Ordner, ist eher etwas schiefgegangen: dann lieber abbrechen.
+    if (songs.folderMissing && missing.length) {
       throw new Error(`Der Ordner „${SONG_DIR.replace('/', '')}“ fehlt auf dem Server – Liederbuch wird nicht verändert`);
     }
-
-    // Liedtexte parallel holen (höchstens 6 gleichzeitig)
-    const live = entries.filter((e) => e.file && !e.deletedAt);
-    const texts = new Map();
-    for (let i = 0; i < live.length; i += 6) {
-      await Promise.all(live.slice(i, i + 6).map(async (e) => {
-        const f = listing?.get(e.file);
-        if (listing && !f) return; // fehlt
-        texts.set(e.id, await this.#text(e.file, f?.etag));
-      }));
+    for (const [name, st] of missing) {
+      if (!state.songs[name]) continue; // als umbenannt erkannt
+      const t = after(st.updatedAt);
+      records.push(slimRecord({ id: st.id, chordpro: undefined, createdAt: st.createdAt, updatedAt: t, deletedAt: t }));
+      delete state.songs[name];
     }
 
-    for (const e of entries) {
-      if (e.deletedAt || !e.file) {
-        songs.push(stripFile(e));
-        continue;
-      }
-      const text = texts.get(e.id);
-      if (text == null) {
-        // Datei wurde auf dem Server gelöscht -> Lied in den Papierkorb
-        missing = true;
-        changed = true;
-        const t = this.now();
-        const last = this.texts.get(e.file)?.text; // zuletzt gelesener Text, falls bekannt
-        songs.push({ ...stripFile(e), ...(last != null ? { chordpro: last } : {}), updatedAt: t, deletedAt: t });
-        continue;
-      }
-      const hash = await hashText(text);
-      liveHashes.add(hash);
-      if (hash !== e.hash) {
-        // Liedtext wurde direkt auf dem Server geändert
-        changed = true;
-        songs.push({ ...stripFile(e), chordpro: text, updatedAt: this.now() });
-      } else {
-        songs.push({ ...stripFile(e), chordpro: text });
-      }
+    // Setlisten
+    const setRecords = [];
+    const localSets = this.local?.setlists || [];
+    const idOf = (file) => nameToId.get(lower(file)) || idForFile(file);
+    for (const name of [...sets.keys()].filter((n) => n.toLowerCase().endsWith(SETLIST_EXT)).sort()) {
+      const f = sets.get(name);
+      const text = await this.#text(this.#setUrl(name), f.etag);
+      if (text == null) continue;
+      const parsed = fileToSetlist(text, name, idOf);
+      const st = state.setlists[name];
+      const id = st?.id || localSets.find((s) => !s.deletedAt && setlistFileName(s.name) === name)?.id || idForFile(name, 'setliste-');
+      const changed = !st || st.etag !== f.etag;
+      const fileTime = f.modified ? iso(f.modified) : this.now();
+      const updatedAt = changed ? after(st?.updatedAt, fileTime) : st.updatedAt;
+      const createdAt = st?.createdAt || fileTime;
+      setRecords.push(slimSetlist({ id, ...parsed, createdAt, updatedAt, deletedAt: null }));
+      state.setlists[name] = { id, etag: f.etag, hash: await hashText(text), updatedAt, createdAt };
     }
-
-    // Von Hand neu angelegte Dateien als neue Lieder übernehmen
-    if (listing) {
-      for (const [name, f] of listing) {
-        if (!SONG_FILE.test(name) || referenced.has(lower(name))) continue;
-        if (f.modified && this.clock() - f.modified < SETTLE_MS) continue; // evtl. gerade von einem Gerät geschrieben
-        const text = await this.#text(name, f.etag);
-        if (text == null || liveHashes.has(await hashText(text))) continue; // Doppel eines vorhandenen Liedes
-        const t = this.now();
-        songs.push(slimRecord({
-          id: await idForFile(name), chordpro: withTitle(text, name), transpose: 0, accidentals: 'auto',
-          createdAt: t, updatedAt: t, deletedAt: null,
-        }));
-        changed = true;
-      }
+    for (const [name, st] of Object.entries(state.setlists)) {
+      if (sets.has(name)) continue;
+      const t = after(st.updatedAt);
+      setRecords.push(slimSetlist({ id: st.id, name: name.replace(/\.txt$/i, ''), items: [], createdAt: st.createdAt, updatedAt: t, deletedAt: t }));
+      delete state.setlists[name];
     }
-    return { songs, changed, missing };
+    return { songs: records, setlists: setRecords };
   }
 
   // ---------- Schreiben ----------
 
-  async #ensureFolders() {
-    for (const url of [this.folderUrl, this.songDirUrl]) {
-      const mk = await this.#request('MKCOL', url);
+  async #ensureFolder(url) {
+    for (const u of [this.folderUrl, url]) {
+      const mk = await this.#request('MKCOL', u);
       if (!mk.ok && ![405, 301].includes(mk.status)) throw new Error(`Ordner konnte nicht angelegt werden (${mk.status})`);
     }
   }
 
-  async #put(url, body, headers) {
-    let res = await this.#request('PUT', url, { headers, body });
+  async #put(url, body, headers, dirUrl) {
+    let res = await this.#request('PUT', url, { headers: { 'Content-Type': 'text/plain; charset=utf-8', ...headers }, body });
     if (res.status === 409) {
-      await this.#ensureFolders(); // Ordner fehlt noch
-      res = await this.#request('PUT', url, { headers, body });
+      await this.#ensureFolder(dirUrl); // Ordner fehlt noch
+      res = await this.#request('PUT', url, { headers: { 'Content-Type': 'text/plain; charset=utf-8', ...headers }, body });
     }
-    return res;
+    if (res.status === 412) throw new ConflictError();
+    if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Speichern von „${decodeURIComponent(url.split('/').pop())}“`);
+    return res.headers.get('ETag');
   }
 
-  /** Neue Liedtext-Datei anlegen; ist der Name belegt, mit gleichem Inhalt übernehmen, sonst nächster Name. */
-  async #putNew(base, body, hash, taken) {
+  /** Neue Datei unter freiem Namen anlegen (gleicher Inhalt unter dem Namen = schon da). */
+  async #putNew(dirUrl, urlOf, base, ext, body, taken) {
     for (let i = 0; i < 30; i++) {
-      const name = uniqueName(base, taken);
-      const res = await this.#put(this.#songUrl(name), body, { 'Content-Type': 'text/plain; charset=utf-8', 'If-None-Match': '*' });
-      if (res.ok) return { name, etag: res.headers.get('ETag') };
-      if (res.status !== 412) throw new Error(`WebDAV-Fehler ${res.status} beim Speichern von „${name}“`);
-      const existing = await this.#text(name, null); // belegt: vielleicht von einem früheren Versuch
-      if (existing != null && (await hashText(existing)) === hash) {
-        return { name, etag: this.texts.get(name)?.etag || null };
+      const name = i === 0 ? base + ext : `${base} (${i + 1})${ext}`;
+      if (taken.has(lower(name))) continue;
+      const res = await this.#request('PUT', urlOf(name), { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'If-None-Match': '*' }, body });
+      let r = res;
+      if (r.status === 409) {
+        await this.#ensureFolder(dirUrl);
+        r = await this.#request('PUT', urlOf(name), { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'If-None-Match': '*' }, body });
       }
+      if (r.ok) return { name, etag: r.headers.get('ETag') };
+      if (r.status !== 412) throw new Error(`WebDAV-Fehler ${r.status} beim Speichern von „${name}“`);
+      const existing = await this.#text(urlOf(name), null);
+      if (existing != null && existing === normalizeText(body)) return { name, etag: this.texts.get(urlOf(name))?.etag || null };
       taken.add(lower(name));
     }
     throw new Error(`Kein freier Dateiname für „${base}“`);
   }
 
-  async write(data, expectedVersion) {
-    const expected = splitVersion(expectedVersion);
-    const prev = new Map((this.index?.songs || []).map((e) => [e.id, e]));
-    const listing = this.listing;
+  async #delete(url, etag) {
+    const d = await this.#request('DELETE', url, { headers: etag ? { 'If-Match': etag } : {} });
+    if (d.status === 412) throw new ConflictError();
+    if (!d.ok && d.status !== 404) throw new Error(`WebDAV-Fehler ${d.status} beim Löschen`);
+    this.texts.delete(url);
+  }
+
+  async write(data) {
+    const state = this.#loadState();
+    const lists = this.lists || { songs: new Map(), sets: new Map() };
     const songs = [...(data.songs || [])].sort((a, b) => (a.id < b.id ? -1 : 1));
-    const live = songs.filter((r) => !r.deletedAt);
+    const fileOfId = new Map(Object.entries(state.songs).map(([name, st]) => [st.id, name]));
+    const taken = new Set([...lists.songs.keys()].map(lower));
 
-    // Dateinamen: vorhandene Namen behalten, solange sie zum Titel passen
-    const taken = new Set([...(listing?.keys() || [])].map(lower));
-    const names = new Map();
-    for (const r of live) {
-      const p = prev.get(r.id);
-      if (p?.file && nameFits(p.file, songBaseName(r.chordpro))) names.set(r.id, p.file);
-    }
-    for (const r of live) {
-      const p = prev.get(r.id);
-      if (!names.has(r.id) && p?.file) taken.delete(lower(p.file)); // alter Name wird frei (umbenannt)
-    }
-    for (const n of names.values()) taken.add(lower(n));
-
-    const entries = [];
-    const remove = new Set((this.index?.orphans || []).filter((n) => !listing || listing.has(n)));
     for (const r of songs) {
-      const p = prev.get(r.id);
+      const current = fileOfId.get(r.id);
+      const st = current ? state.songs[current] : null;
       if (r.deletedAt) {
-        // Gelöscht: Text im Verzeichnis behalten (Papierkorb), Datei entfernen
-        if (p?.file) remove.add(p.file);
-        entries.push(slimRecord(r));
+        if (current) {
+          await this.#delete(this.#songUrl(current), lists.songs.get(current)?.etag || st.etag);
+          delete state.songs[current];
+          fileOfId.delete(r.id);
+        }
         continue;
       }
-      const text = normalizeText(r.chordpro);
+      const body = songToFile(r);
+      const text = normalizeText(body);
       const hash = await hashText(text);
-      const body = toWindowsText(text);
-      let file = names.get(r.id);
-      let etag = p?.etag ?? null;
-      if (file) {
-        const onServer = listing ? listing.get(file) : { etag };
-        if (p.hash !== hash || !onServer) {
-          const headers = { 'Content-Type': 'text/plain; charset=utf-8' };
-          if (onServer?.etag) headers['If-Match'] = onServer.etag;
-          else if (!onServer) headers['If-None-Match'] = '*';
-          const res = await this.#put(this.#songUrl(file), body, headers);
-          if (res.status === 412) throw new ConflictError();
-          if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Speichern von „${file}“`);
-          etag = res.headers.get('ETag');
-        } else {
-          etag = onServer.etag ?? etag;
+      const base = songBaseName(r.chordpro);
+      let name = current;
+      let etag = st?.etag;
+      if (current && nameFits(current, base)) {
+        if (st.hash !== hash || !lists.songs.has(current)) {
+          const onServer = lists.songs.get(current);
+          etag = await this.#put(this.#songUrl(current), body, onServer ? { 'If-Match': onServer.etag || st.etag } : { 'If-None-Match': '*' }, this.songDirUrl);
         }
       } else {
-        const created = await this.#putNew(songBaseName(r.chordpro), body, hash, taken);
-        file = created.name;
+        const created = await this.#putNew(this.songDirUrl, (n) => this.#songUrl(n), base, '.cho', body, taken);
+        name = created.name;
         etag = created.etag;
-        taken.add(lower(file));
-        if (p?.file && p.file !== file) remove.add(p.file); // umbenannt: alte Datei weg
+        if (current) {
+          await this.#delete(this.#songUrl(current), lists.songs.get(current)?.etag || st.etag);
+          delete state.songs[current];
+          taken.delete(lower(current));
+        }
       }
-      this.texts.set(file, { etag, text });
-      const { chordpro, ...meta } = slimRecord(r);
-      entries.push({ ...meta, file, hash, etag });
+      taken.add(lower(name));
+      fileOfId.set(r.id, name);
+      this.texts.set(this.#songUrl(name), { etag, text });
+      state.songs[name] = {
+        id: r.id, etag, hash, body: await hashText(songBody(r.chordpro)), updatedAt: r.updatedAt, createdAt: r.createdAt,
+      };
     }
 
-    const { songs: _s, version: _v, ...rest } = data;
-    const index = { ...rest, format: SYNC_FORMAT, version: INDEX_VERSION, layout: LAYOUT, songs: entries };
-    const keep = new Set(entries.filter((e) => e.file && !e.deletedAt).map((e) => lower(e.file)));
-    const orphans = [...remove].filter((n) => !keep.has(lower(n)));
-    if (orphans.length) index.orphans = orphans;
-
-    const headers = { 'Content-Type': 'application/json; charset=utf-8' };
-    if (expected.etag) headers['If-Match'] = expected.etag;
-    else if (!this.exists) headers['If-None-Match'] = '*';
-    const res = await this.#put(this.fileUrl, toFileJson(index), headers);
-    if (res.status === 412) throw new ConflictError();
-    if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Speichern`);
-    this.exists = true;
-    const newEtag = res.headers.get('ETag');
-
-    // Alte Dateien (umbenannt/gelöscht) erst entfernen, wenn das Verzeichnis sie nicht mehr nennt
-    const left = [];
-    for (const name of orphans) {
-      const d = await this.#request('DELETE', this.#songUrl(name));
-      if (d.ok || d.status === 404) this.texts.delete(name);
-      else left.push(name);
+    // Setlisten
+    const setFileOfId = new Map(Object.entries(state.setlists).map(([name, st]) => [st.id, name]));
+    const setTaken = new Set([...lists.sets.keys()].map(lower));
+    for (const s of [...(data.setlists || [])].sort((a, b) => (a.id < b.id ? -1 : 1))) {
+      const current = setFileOfId.get(s.id);
+      const st = current ? state.setlists[current] : null;
+      if (s.deletedAt) {
+        if (current) {
+          await this.#delete(this.#setUrl(current), lists.sets.get(current)?.etag || st.etag);
+          delete state.setlists[current];
+        }
+        continue;
+      }
+      const body = setlistToFile(s, (id) => fileOfId.get(id) || null);
+      const text = normalizeText(body);
+      const hash = await hashText(text);
+      const wanted = setlistFileName(s.name);
+      let name = current;
+      let etag = st?.etag;
+      if (current && lower(current) === lower(wanted)) {
+        if (st.hash !== hash || !lists.sets.has(current)) {
+          const onServer = lists.sets.get(current);
+          etag = await this.#put(this.#setUrl(current), body, onServer ? { 'If-Match': onServer.etag || st.etag } : { 'If-None-Match': '*' }, this.setDirUrl);
+        }
+      } else {
+        const created = await this.#putNew(this.setDirUrl, (n) => this.#setUrl(n), cleanFileName(s.name || 'Setliste'), SETLIST_EXT, body, setTaken);
+        name = created.name;
+        etag = created.etag;
+        if (current) {
+          await this.#delete(this.#setUrl(current), lists.sets.get(current)?.etag || st.etag);
+          delete state.setlists[current];
+        }
+      }
+      setTaken.add(lower(name));
+      this.texts.set(this.#setUrl(name), { etag, text });
+      state.setlists[name] = { id: s.id, etag, hash, updatedAt: s.updatedAt, createdAt: s.createdAt };
     }
-    index.orphans = left.length ? left : undefined;
-    this.index = index;
-    // Ordnerliste nachführen, damit der nächste Abgleich nicht unnötig neu lädt
-    const nextListing = listing ? new Map(listing) : null;
-    if (nextListing) {
-      for (const n of orphans) if (!left.includes(n)) nextListing.delete(n);
-      for (const e of entries) if (e.file && !e.deletedAt) nextListing.set(e.file, { etag: e.etag, modified: this.clock() });
+
+    // Hinweisdatei statt Daten-JSON (ersetzt auch ein älteres Format)
+    if (!(this.guard?.format === SYNC_FORMAT && this.guard.version === GUARD_VERSION)) {
+      const guard = {
+        format: SYNC_FORMAT,
+        version: GUARD_VERSION,
+        hinweis: 'Die Lieder liegen als ChordPro-Dateien im Ordner „Lieder“, Setlisten als Textdateien im Ordner ' +
+          '„Setlisten“. Diese Datei enthält keine Daten – sie hält nur ältere Versionen der Liederbuch-App davon ab, ' +
+          'etwas zu überschreiben.',
+      };
+      const res = await this.#request('PUT', this.fileUrl, { headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: toFileJson(guard) });
+      if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Speichern von „${WEBDAV_FILE}“`);
+      this.guard = guard;
     }
-    this.listing = nextListing;
-    return makeVersion(newEtag, nextListing);
+
+    this.#saveState(state);
+    // Ordnerlisten nachführen, damit der nächste Abgleich nichts unnötig neu lädt
+    const songList = new Map(Object.entries(state.songs).map(([n, st]) => [n, { etag: st.etag, modified: 0 }]));
+    for (const [n, f] of lists.songs) if (!songList.has(n) && !SONG_FILE.test(n)) songList.set(n, f);
+    const setList = new Map(Object.entries(state.setlists).map(([n, st]) => [n, { etag: st.etag, modified: 0 }]));
+    this.lists = { songs: songList, sets: setList };
+    return listingSignature(songList) + '||' + listingSignature(setList);
   }
 }
