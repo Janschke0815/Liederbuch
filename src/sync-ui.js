@@ -256,18 +256,50 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     return true;
   }
 
+  /**
+   * Verbindungsfehler im Dialog stehen lassen (nicht nur kurz als Meldung): was schiefging,
+   * was zu tun ist, und das betroffene Feld markieren.
+   */
+  function showProblem(message) {
+    const m = String(message || '').replace(/[.\s]+$/, '');
+    let field = null;
+    let tip = '';
+    if (/Passwort falsch|401/.test(m)) {
+      field = '#webdav-pass';
+      tip = 'Benutzername und Passwort prüfen (Groß-/Kleinschreibung). Bei Nextcloud ein App-Passwort nehmen.';
+    } else if (/Berechtigung|403/.test(m)) {
+      field = '#webdav-user';
+      tip = 'Der Benutzer darf in diesen Ordner nicht schreiben – Freigabe bzw. Rechte auf dem Server prüfen.';
+    } else if (/nicht erreichbar|Adresse|PROPFIND|404|405/.test(m)) {
+      field = '#webdav-url';
+      tip = /PROPFIND|405/.test(m)
+        ? 'Die Adresse zeigt auf keinen WebDAV-Ordner. Bei Nextcloud: …/remote.php/dav/files/NAME/Ordner/'
+        : 'Tipp: Liegt der Ordner auf demselben Server wie die App (gleiche Adresse und Port), gibt es keine CORS-Probleme.';
+    } else if (/Offline/.test(m)) {
+      tip = 'Dieses Gerät hat gerade keine Internetverbindung.';
+    }
+    for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).classList.toggle('invalid', id === field);
+    $('#sync-status').dataset.state = 'error';
+    $('#sync-status-title').textContent = 'Verbinden fehlgeschlagen';
+    $('#sync-status-text').textContent = tip ? `${m}. ${tip}` : m;
+    if (field) $(field).focus();
+  }
+  for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).addEventListener('input', (e) => e.target.classList.remove('invalid'));
+
   async function connectWebdav() {
     const problem = saveWebdav();
     if (problem) {
-      toast(problem);
+      showProblem(problem);
+      $('#webdav-url').classList.add('invalid');
       $('#webdav-url').focus();
       return false;
     }
     try {
       await provider.signIn();
     } catch (err) {
-      toast(`Verbinden fehlgeschlagen: ${err.message}`);
       if (engine.state === 'auth') render();
+      showProblem(err.message);
+      if (!dlg.open) toast(`Verbinden fehlgeschlagen: ${err.message}`);
       return false;
     }
     const first = !connectedFlag();

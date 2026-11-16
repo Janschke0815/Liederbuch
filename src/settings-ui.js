@@ -137,6 +137,17 @@ export function setupSettings({ targets }) {
     setCollapsed(card, collapsed.has(card.id));
   }
 
+  // Muster einklappbar (am Handy nimmt es sonst viel Platz über den Reglern weg)
+  const sampleBox = $('.settings-sample');
+  const sampleToggle = $('#st-sample-toggle');
+  function setSampleHidden(hidden) {
+    sampleBox.classList.toggle('collapsed', hidden);
+    sampleToggle.setAttribute('aria-expanded', String(!hidden));
+    localStorage.setItem('settingsSampleHidden', hidden ? '1' : '');
+  }
+  sampleToggle.onclick = () => setSampleHidden(!sampleBox.classList.contains('collapsed'));
+  setSampleHidden(localStorage.getItem('settingsSampleHidden') === '1');
+
   // Bereichs-Navigation: springen und beim Scrollen mitführen
   const fields = $('#st-fields');
   const navLinks = [...dlg.querySelectorAll('.st-nav a')];

@@ -812,3 +812,90 @@ kbd { font-family: inherit; font-size: .85em; border: 1px solid var(--border-str
   #tr-value { min-width: 2.1em; }
   .info-chip { padding: .2em .5em; }
 }
+
+/* ---------- 1.22: Bedienung am Handy, Sortierung, Dialoge ---------- */
+
+/* Liste: Griff-Filter und Sortierung in einer Zeile */
+.list-tools { display: flex; align-items: center; gap: .4em; justify-content: space-between; }
+.sort-box { display: inline-flex; align-items: center; gap: .25em; font-size: .85em; color: var(--muted); }
+.sort-box select { font-size: .95em; min-height: 1.8rem; padding: 0 .3em; border-color: transparent; background: transparent; color: var(--text); max-width: 10em; }
+
+/* Suche: Lupe sitzt vor dem Text, nicht darauf */
+.search-box .icon { left: 1.35em; width: 1em; height: 1em; }
+.search-box input[type=search] { padding-left: 2.4em; } /* schlägt die allgemeine Eingabefeld-Regel */
+
+/* Liedinfo am Handy: höchstens die halbe Höhe, Rest scrollt – der Editor bleibt sichtbar */
+@media (max-width: 760px) {
+  .song-meta[open] .meta-grid { max-height: 42vh; overflow-y: auto; }
+  .song-meta summary { min-height: 2.4rem; align-items: center; }
+  /* Symbolleiste über dem Editor: umbrechen statt abschneiden */
+  .editor-bar { align-items: flex-start; }
+  .editor-bar .snippets { flex: 1 1 0; flex-wrap: wrap; overflow: visible; }
+  .editor-bar .snippets button { min-height: 2.5rem; min-width: 2.75rem; }
+}
+
+/* Fingertaugliche Knöpfe (mind. 44 px) auf Touch-Geräten */
+@media (pointer: coarse) {
+  .view-bar .segmented button, .view-bar .stepper button { min-width: 2.75rem; min-height: 2.75rem; }
+  .play-bar button, .play-bar .icon-btn { min-width: 2.75rem; min-height: 2.75rem; }
+}
+@media (max-width: 760px) {
+  .view-bar { flex-wrap: wrap; row-gap: .3em; }
+  .view-bar .segmented button { min-width: 2.75rem; min-height: 2.6rem; }
+  .view-bar .stepper button { min-width: 2.6rem; min-height: 2.6rem; }
+}
+
+/* Spielmodus: Zusatzknöpfe; am Handy hinter "⋯" */
+.play-extra { display: contents; }
+#pl-more { display: none; }
+#pl-toggle { min-width: 2.6rem; }
+@media (max-width: 760px) {
+  .play-bar { flex-wrap: nowrap; }
+  .play-title { flex: 1; min-width: 0; }
+  .play-title small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #pl-more { display: inline-flex; }
+  .play-extra { display: none; }
+  .play-view.extra-open .play-bar { flex-wrap: wrap; }
+  .play-view.extra-open .play-extra {
+    display: flex; flex-wrap: wrap; gap: .35em; order: 10; flex: 1 1 100%;
+    padding-top: .35em; border-top: 1px solid #e2ddd4;
+  }
+  .play-view.night.extra-open .play-extra { border-color: #333; }
+  .play-scroll { padding-top: 4.2em; }
+  .play-bar #pl-prev, .play-bar #pl-next { min-width: 2.4rem; }
+}
+
+/* Einstellungen: Muster einklappbar */
+button.settings-sample-label { display: flex; align-items: center; gap: .5em; width: 100%; border: 0; background: transparent; padding: 0; min-height: 1.6rem; cursor: pointer; justify-content: flex-start; }
+.settings-sample.collapsed #st-sample { display: none; }
+.settings-sample.collapsed .st-chevron { transform: rotate(-45deg); }
+@media (max-width: 760px) {
+  .settings-sample { max-height: 26vh; padding: .5em 1em; }
+  .settings-sample.collapsed { max-height: none; }
+}
+
+/* Cloud: fehlerhaftes Feld markieren */
+.sync-dialog input.invalid { border-color: #d18f1c; box-shadow: 0 0 0 2px rgba(209, 143, 28, .25); }
+
+/* Einfügen: Hinweis auf schon vorhandene Lieder */
+.imp-info.warn { color: #a3600b; }
+
+/* Doppelte Lieder, Import-Bericht */
+.report-list { margin: .2em 0 .8em; padding-left: 1.3em; max-height: 40vh; overflow-y: auto; }
+.report-list li { margin: .15em 0; }
+#report-body h3 { font-size: .95em; margin: .6em 0 .2em; }
+.dup-foot { flex-wrap: wrap; }
+
+/* Tastenkürzel */
+.kbd-icon { display: inline-grid; place-items: center; font-weight: 700; font-size: .95em; }
+.keys-btn .label { display: none; }
+.keys-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(16em, 1fr)); gap: 0 1.5em; }
+.keys-body h3 { font-size: .95em; margin: .3em 0 .4em; }
+.keys-table { border-collapse: collapse; width: 100%; font-size: .9em; }
+.keys-table td { padding: .25em .4em .25em 0; vertical-align: top; }
+.keys-table td:first-child { white-space: nowrap; width: 1%; padding-right: .8em; }
+kbd { display: inline-block; min-width: 1.4em; padding: .05em .4em; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); font: 600 .85em system-ui, sans-serif; text-align: center; }
+@media (max-width: 760px) {
+  .actions .keys-btn .label { display: inline; }
+}
+.keys-dialog { width: min(760px, 95vw); }

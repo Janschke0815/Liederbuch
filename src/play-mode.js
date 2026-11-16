@@ -59,7 +59,8 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   let raf = 0;
   let hideTimer = 0;
   let wakeLock = null;
-  let zoom = Number(localStorage.getItem('playZoom')) || 0;
+  let zoom = Number(localStorage.getItem('playZoom')) || 0; // allgemeine Schriftgröße
+  let songZoom = 0; // Schriftgröße dieses Liedes (gemerkt), sonst 0
   let cols = localStorage.getItem('playColumns') === '2'; // zwei Spalten, seitenweise
   let pageClock = 0; // Sekunden seit dem letzten automatischen Umblättern
 
@@ -90,18 +91,25 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   // ---------- Darstellung ----------
 
   function applyZoom() {
-    if (zoom) view.style.setProperty('--play-zoom', zoom.toFixed(2));
+    const z = songZoom || zoom;
+    if (z) view.style.setProperty('--play-zoom', z.toFixed(2));
     else view.style.removeProperty('--play-zoom');
   }
 
   function currentZoom() {
-    return zoom || Number(getComputedStyle(view).getPropertyValue('--play-zoom')) || 1.3;
+    return songZoom || zoom || Number(getComputedStyle(view).getPropertyValue('--play-zoom')) || 1.3;
   }
 
   function setZoom(z) {
     const rel = pos() / Math.max(1, maxPos());
-    zoom = clamp(Math.round(z * 20) / 20, ZOOM_MIN, ZOOM_MAX);
+    // pro Lied merken; die letzte Wahl gilt außerdem für Lieder ohne eigene Größe
+    zoom = songZoom = clamp(Math.round(z * 20) / 20, ZOOM_MIN, ZOOM_MAX);
     localStorage.setItem('playZoom', String(zoom));
+    if (song?.id) {
+      const map = loadMap('playZoomSong');
+      map[song.id] = songZoom;
+      localStorage.setItem('playZoomSong', JSON.stringify(map));
+    }
     applyZoom();
     layout();
     setPos(cols ? snap(rel * maxPos()) : rel * maxPos());
@@ -187,11 +195,19 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
       note.textContent = entry.note;
       sheet.querySelector('.song-header')?.append(note);
     }
+    // zuletzt gespielt (für die Sortierung der Liste)
+    const played = loadMap('playedAt');
+    played[song.id] = new Date().toISOString();
+    localStorage.setItem('playedAt', JSON.stringify(played));
+    songZoom = Number(loadMap('playZoomSong')[song.id]) || 0;
+    applyZoom();
+    const next = index < entries.length - 1 ? await repo.get(entries[index + 1].id) : null;
     $('#pl-title').textContent = song.title || 'Ohne Titel';
-    $('#pl-pos').textContent = entries.length > 1 ? `${index + 1} von ${entries.length}` : song.artist || '';
+    $('#pl-pos').textContent = entries.length > 1
+      ? `${index + 1} / ${entries.length}${next ? ` · Nächstes: ${next.title || 'Ohne Titel'}` : ' · Letztes Lied'}`
+      : song.artist || '';
     $('#pl-prev').disabled = index === 0;
     $('#pl-next').disabled = index >= entries.length - 1;
-    const next = index < entries.length - 1 ? await repo.get(entries[index + 1].id) : null;
     const endBtn = $('#pl-next-end');
     endBtn.hidden = !next;
     endBtn.textContent = next ? `Nächstes Lied: ${next.title || 'Ohne Titel'} →` : '';
@@ -262,6 +278,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     cancelAnimationFrame(raf);
     toggleBtn.innerHTML = `<svg class="icon"><use href="#i-${on ? 'pause' : 'play'}"/></svg>`;
     toggleBtn.setAttribute('aria-label', on ? 'Scrollen anhalten' : 'Scrollen starten');
+    if (on) setExtra(false);
     if (on) {
       lastT = 0;
       raf = requestAnimationFrame(step);
@@ -358,6 +375,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
 
   function close() {
     setPlaying(false);
+    setExtra(false);
     metronome.stop();
     syncMetro();
     clearTimeout(hideTimer);
@@ -371,6 +389,12 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   // ---------- Bedienelemente ----------
 
   $('#pl-exit').onclick = close;
+  // Handy: selten gebrauchte Knöpfe hinter "⋯"
+  function setExtra(open) {
+    view.classList.toggle('extra-open', open);
+    $('#pl-more').setAttribute('aria-expanded', String(open));
+  }
+  $('#pl-more').onclick = () => setExtra(!view.classList.contains('extra-open'));
   $('#pl-prev').onclick = () => go(-1);
   $('#pl-next').onclick = () => go(1);
   $('#pl-next-end').onclick = () => go(1);

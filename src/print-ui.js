@@ -141,7 +141,7 @@ export function setupPrint({ repo, beforeOpen }) {
 
   function updateCount() {
     $('#pr-count').textContent = `${selected.size} von ${songs.length} ausgewählt`;
-    $('#pr-ok').disabled = selected.size === 0;
+    $('#pr-ok').disabled = $('#pr-print').disabled = selected.size === 0;
   }
 
   fontOptions($('#pr-lyricFont'));
@@ -237,9 +237,11 @@ export function setupPrint({ repo, beforeOpen }) {
   });
 
   dlg.addEventListener('close', async () => {
-    if (dlg.returnValue !== 'ok') return;
+    if (dlg.returnValue !== 'ok' && dlg.returnValue !== 'print') return;
     readForm();
     await showPreview();
+    // „Drucken / PDF“: Seiten setzen und gleich den Druckdialog öffnen (Vorschau bleibt dahinter)
+    if (dlg.returnValue === 'print') $('#pv-print').click();
   });
 
   // ---------- Vorschau ----------

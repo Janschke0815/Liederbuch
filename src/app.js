@@ -10,7 +10,7 @@ import { attachContextMenu } from './context-menu.js';
 import { saveSettings } from './settings/settings.js';
 import { metronome, beatsPerBar } from './metronome.js';
 import { transposeChordPro, chordproToText } from './core/export-text.js';
-import { SongRepository, EXPORT_FORMAT, EXPORT_VERSION } from './storage/repository.js';
+import { SongRepository, EXPORT_FORMAT, EXPORT_VERSION, deriveSummary } from './storage/repository.js';
 import { openIdbStore } from './storage/stores.js';
 import { SAMPLE_SONG, NEW_SONG_TEMPLATE } from './sample.js';
 import { setupPrint } from './print-ui.js';
@@ -30,6 +30,7 @@ import { createZip, readZip, isZip } from './core/zip.js';
 import { backupFiles, backupJson, applyZipEdits } from './core/backup.js';
 import { fileToSong } from './sync/chordpro-files.js';
 import { versionLabel } from './version.js';
+import { SORT_MODES, sortSongs, letterOf, findDuplicates } from './core/song-list.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -172,15 +173,37 @@ function setupChordFilter() {
 }
 setupChordFilter();
 
+// Sortierung der Liste (gilt ohne Suchbegriff; Suchtreffer bleiben nach Relevanz)
+const sortSelect = $('#sort-select');
+sortSelect.replaceChildren(...Object.entries(SORT_MODES).map(([v, l]) => new Option(l, v)));
+sortSelect.value = SORT_MODES[localStorage.getItem('listSort')] ? localStorage.getItem('listSort') : 'title';
+sortSelect.onchange = () => {
+  localStorage.setItem('listSort', sortSelect.value);
+  refreshList();
+};
+const playedMap = () => {
+  try {
+    return JSON.parse(localStorage.getItem('playedAt') || '{}') || {};
+  } catch {
+    return {};
+  }
+};
+
+/** Lieder in der Reihenfolge der Liste (Suche, Tag, Griff-Filter, Sortierung). */
+async function listedSongs() {
+  const songs = applyChordFilter(await repo.list({ query: search.value, tag: activeTag }));
+  return search.value ? songs : sortSongs(songs, sortSelect.value, playedMap());
+}
+
 async function refreshList() {
   await renderTagFilter();
-  const songs = applyChordFilter(await repo.list({ query: search.value, tag: activeTag }));
+  const songs = await listedSongs();
+  const mode = sortSelect.value;
   const items = [];
   let letter = null;
   for (const s of songs) {
-    if (!search.value) {
-      const first = (s.sortTitle || s.title || '#').trim().charAt(0).toLocaleUpperCase('de');
-      const l = /[A-ZÄÖÜ]/.test(first) ? first.normalize('NFD').charAt(0) : '#';
+    if (!search.value && (mode === 'title' || mode === 'artist')) {
+      const l = mode === 'artist' ? (s.artist ? letterOf(s.artist) : '–') : letterOf(s.sortTitle || s.title);
       if (l !== letter) {
         letter = l;
         items.push(Object.assign(document.createElement('li'), { className: 'song-letter', textContent: l }));
@@ -361,8 +384,10 @@ setupSettings({ targets: () => [preview, $('#imp-preview')] });
 
 const metaBox = $('#song-meta');
 const metaInputs = [...metaBox.querySelectorAll('[data-meta]')];
-metaBox.open = localStorage.getItem('songMetaOpen') !== '0';
-metaBox.addEventListener('toggle', () => localStorage.setItem('songMetaOpen', metaBox.open ? '1' : '0'));
+// Am Handy eigener, standardmäßig eingeklappter Zustand – sonst bleibt vom Editor kaum etwas
+const metaKey = () => (isMobile() ? 'songMetaOpenMobile' : 'songMetaOpen');
+metaBox.open = isMobile() ? localStorage.getItem(metaKey()) === '1' : localStorage.getItem(metaKey()) !== '0';
+metaBox.addEventListener('toggle', () => localStorage.setItem(metaKey(), metaBox.open ? '1' : '0'));
 
 function fillMeta(song) {
   const m = getAllMeta(editor.value);
@@ -743,6 +768,10 @@ function renderImportPreview() {
     : n === 1
       ? `1 Lied${songs[0].title ? `: ${songs[0].title}${songs[0].artist ? ' – ' + songs[0].artist : ''}` : ' (Titel unten eintragen oder im Editor ergänzen)'}`
       : `${n} Lieder erkannt: ${songs.map((s) => s.title || 'Ohne Titel').join(', ')}`;
+  // schon vorhandene Lieder gleich hier anzeigen (gefragt wird beim Anlegen)
+  const dupCount = songs.filter((s) => findDuplicates(impExisting, s).length).length;
+  $('#imp-info').classList.toggle('warn', dupCount > 0);
+  if (dupCount) $('#imp-info').textContent += n === 1 ? ' – ⚠ gibt es schon im Liederbuch' : ` – ⚠ ${dupCount} davon gibt es schon`;
   if (!n) {
     impPreview.replaceChildren(Object.assign(document.createElement('p'), {
       className: 'empty', textContent: 'Links Text einfügen – hier erscheint das Ergebnis.',
@@ -761,7 +790,9 @@ dlg.addEventListener('input', () => {
   clearTimeout(impTimer);
   impTimer = setTimeout(renderImportPreview, 120);
 });
-function openImport(text = '') {
+let impExisting = []; // vorhandene Lieder, für den Hinweis auf Doppelte
+async function openImport(text = '') {
+  impExisting = await repo.list();
   $('#imp-title').value = '';
   $('#imp-artist').value = '';
   $('#imp-text').value = text;
@@ -785,22 +816,91 @@ dlg.addEventListener('close', async () => {
   if (dlg.returnValue !== 'ok') return;
   const songs = importSongs();
   if (!songs.length) return;
-  if (songs.length === 1) {
-    await createAndOpen(songs[0].chordpro);
+  const r = await addSongs(songs.map((s) => ({ chordpro: s.chordpro })));
+  if (!r) return;
+  if (songs.length === 1 && r.firstId) {
     setView('editor');
-    toast('Umgewandelt – bitte im Editor prüfen');
+    toast(r.replaced ? 'Vorhandenes Lied ersetzt – bitte im Editor prüfen' : 'Umgewandelt – bitte im Editor prüfen');
     return;
   }
-  await flushSave();
-  let first = null;
-  for (const s of songs) {
-    const rec = await repo.create(s.chordpro);
-    first ||= rec;
-  }
-  search.value = '';
-  await openSong(first.id);
-  toast(`${songs.length} Lieder angelegt`);
+  toast(r.message || 'Nichts angelegt');
 });
+
+// ---------- Doppelte Lieder ----------
+
+/**
+ * Fragt nach, was mit Liedern geschehen soll, die es schon gibt.
+ * @param dups [{ title, artist }]
+ * @returns {Promise<'copy'|'replace'|'skip'|'cancel'>}
+ */
+function askDuplicates(dups) {
+  const d = $('#dup-dialog');
+  const one = dups.length === 1;
+  $('#dup-text').textContent = one
+    ? 'Dieses Lied gibt es schon im Liederbuch:'
+    : `${dups.length} dieser Lieder gibt es schon im Liederbuch:`;
+  $('#dup-list').replaceChildren(...dups.map((x) => Object.assign(document.createElement('li'), {
+    textContent: `${x.title || 'Ohne Titel'}${x.artist ? ' – ' + x.artist : ''}`,
+  })));
+  $('#dup-skip').textContent = one ? 'Nicht anlegen' : 'Diese überspringen';
+  $('#dup-replace').textContent = one ? 'Vorhandenes ersetzen' : 'Vorhandene ersetzen';
+  d.returnValue = '';
+  d.showModal();
+  return new Promise((resolve) => d.addEventListener('close', () => resolve(d.returnValue || 'cancel'), { once: true }));
+}
+
+/**
+ * Lieder anlegen – vorher prüfen, ob es sie schon gibt (gleicher Titel und Interpret).
+ * @param items [{ chordpro, transpose?, accidentals?, note? }]
+ * @returns {Promise<null | {firstId, created, replaced, skipped, message}>} null = abgebrochen
+ */
+async function addSongs(items) {
+  await flushSave();
+  const existing = await repo.list();
+  const plan = items.map((it) => {
+    const sum = deriveSummary(it.chordpro);
+    return { it, sum, dup: findDuplicates(existing, sum)[0] || null };
+  });
+  // auch innerhalb des Imports nicht doppelt nachfragen: nur gegen das vorhandene Liederbuch
+  const dups = plan.filter((p) => p.dup);
+  let choice = 'copy';
+  if (dups.length) {
+    choice = await askDuplicates(dups.map((p) => p.sum));
+    if (choice === 'cancel') return null;
+  }
+  let firstId = null;
+  let created = 0;
+  let replaced = 0;
+  let skipped = 0;
+  for (const { it, dup } of plan) {
+    const extra = {};
+    if (it.transpose) extra.transpose = it.transpose;
+    if (it.accidentals && it.accidentals !== 'auto') extra.accidentals = it.accidentals;
+    if (it.note) extra.note = it.note;
+    if (dup && choice === 'skip') {
+      skipped++;
+      continue;
+    }
+    if (dup && choice === 'replace') {
+      await repo.update(dup.id, { chordpro: it.chordpro, ...extra });
+      firstId ||= dup.id;
+      replaced++;
+      continue;
+    }
+    const rec = await repo.create(it.chordpro, extra);
+    firstId ||= rec.id;
+    created++;
+  }
+  if (firstId) {
+    search.value = '';
+    await openSong(firstId);
+  }
+  const parts = [];
+  if (created) parts.push(`${created} ${created === 1 ? 'Lied' : 'Lieder'} angelegt`);
+  if (replaced) parts.push(`${replaced} ersetzt`);
+  if (skipped) parts.push(`${skipped} übersprungen (gab es schon)`);
+  return { firstId, created, replaced, skipped, message: parts.join(', ') };
+}
 
 // ---------- Datei öffnen / Sichern ----------
 
@@ -834,6 +934,17 @@ async function importZip(name, entries) {
   const current = await repo.exportData();
   current.setlists = (await sets.allRecords()).filter((s) => !s.deletedAt).map(slimSetlist);
   const edits = applyZipEdits(entries, json || current, new Date().toISOString(), current);
+  // für den Bericht: welche Lieder und Setlisten geändert bzw. neu sind
+  const known = new Set(current.songs.map((x) => x.id));
+  const label = (cp) => {
+    const sum = deriveSummary(cp);
+    return `${sum.title || 'Ohne Titel'}${sum.artist ? ' – ' + sum.artist : ''}`;
+  };
+  const report = {
+    edited: edits.songs.filter((x) => known.has(x.id)).map((x) => label(x.chordpro)),
+    added: edits.songs.filter((x) => !known.has(x.id)).map((x) => label(x.chordpro)),
+    setlists: edits.setlists.map((x) => x.name || 'Setliste'),
+  };
   if (edits.songs.length) await repo.importData({ format: EXPORT_FORMAT, version: EXPORT_VERSION, songs: edits.songs });
   if (edits.setlists.length) await sets.importRecords(edits.setlists);
   const what = [];
@@ -842,52 +953,67 @@ async function importZip(name, entries) {
   if (edits.setlistsChanged) what.push(`${edits.setlistsChanged} ${edits.setlistsChanged === 1 ? 'Setliste' : 'Setlisten'} aus .txt-Dateien`);
   if (what.length) parts.push(json ? `außerdem ${what.join(', ')}` : `${name}: ${what.join(', ')}`);
   else if (!json) parts.push(`${name}: keine Änderungen`);
-  return parts.join(' · ');
+  return { message: parts.join(' · '), report };
 }
 
-/** Lied aus ChordPro-Text anlegen; {transpose}, {x_notiz} … werden zu Einstellungen. */
-async function createFromFile(text) {
-  const s = fileToSong(text);
-  const rec = await repo.create(s.chordpro);
-  if (s.transpose || s.accidentals !== 'auto' || s.note) {
-    await repo.update(rec.id, { transpose: s.transpose, accidentals: s.accidentals, note: s.note });
+const mergeReport = (a, b) => (a ? { edited: [...a.edited, ...b.edited], added: [...a.added, ...b.added], setlists: [...a.setlists, ...b.setlists] } : b);
+
+/** Nach dem Öffnen einer ZIP: was aus den Dateien übernommen wurde. */
+function showImportReport(summary, report) {
+  const d = $('#report-dialog');
+  $('#report-summary').textContent = summary;
+  const body = $('#report-body');
+  body.replaceChildren();
+  for (const [title, items] of [['Geändert (von Hand bearbeitete .cho-Dateien)', report.edited], ['Neu angelegt', report.added], ['Setlisten', report.setlists]]) {
+    if (!items.length) continue;
+    const h = Object.assign(document.createElement('h3'), { textContent: `${title}: ${items.length}` });
+    const ul = document.createElement('ul');
+    ul.className = 'report-list';
+    ul.append(...items.map((t) => Object.assign(document.createElement('li'), { textContent: t })));
+    body.append(h, ul);
   }
-  return rec;
+  d.showModal();
 }
 
 /** Importiert Dateien (Sicherung, ZIP, ChordPro, Text) – aus dem Dateidialog oder per "Öffnen mit". */
 async function importFiles(files) {
   await flushSave();
-  let created = 0;
-  let firstId = null;
+  const songFiles = []; // einzelne Lieder aus ChordPro-/Textdateien – zusammen auf Doppel prüfen
   const messages = [];
+  let report = null;
   for (const file of files) {
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
       if (isZip(bytes)) {
-        messages.push(await importZip(file.name, await readZip(bytes)));
+        const r = await importZip(file.name, await readZip(bytes));
+        messages.push(r.message);
+        report = mergeReport(report, r.report);
         continue;
       }
       const parsed = parseImportFile(file.name, new TextDecoder().decode(bytes));
       if (parsed.kind === 'backup') {
         messages.push(await importBackup(file.name, parsed.data));
       } else {
-        for (const cp of parsed.songs) {
-          const rec = await createFromFile(cp);
-          firstId ||= rec.id;
-          created++;
-        }
+        // {transpose}, {x_notiz} … werden zu Einstellungen des Liedes
+        for (const cp of parsed.songs) songFiles.push(fileToSong(cp));
       }
     } catch (err) {
       messages.push(`${file.name}: ${err.message}`);
     }
   }
-  if (created) messages.unshift(`${created} ${created === 1 ? 'Lied' : 'Lieder'} importiert`);
-  if (firstId) await openSong(firstId);
-  else if (!current) await openSong((await repo.list())[0]?.id);
+  let firstId = null;
+  if (songFiles.length) {
+    const r = await addSongs(songFiles);
+    if (r?.message) messages.unshift(r.message);
+    firstId = r?.firstId || null;
+  }
+  if (firstId) {
+    // schon von addSongs geöffnet
+  } else if (!current) await openSong((await repo.list())[0]?.id);
   // geöffnetes Lied neu laden – es kann durch die Sicherung geändert oder gelöscht worden sein
   else await openSong((await repo.get(current.id)) ? current.id : (await repo.list())[0]?.id);
-  toast(messages.join(' · ') || 'Nichts importiert');
+  if (report && (report.edited.length || report.added.length || report.setlists.length)) showImportReport(messages.join(' · '), report);
+  else toast(messages.join(' · ') || 'Nichts importiert');
 }
 
 // Installierte App: Dateien per "Öffnen mit Liederbuch" (Desktop-Chrome/Edge)
@@ -972,6 +1098,8 @@ for (const d of document.querySelectorAll('#print-dialog, #settings-dialog')) {
 
 // ---------- Tastenkürzel ----------
 
+$('#btn-keys').onclick = () => $('#keys-dialog').showModal();
+
 addEventListener('keydown', (e) => {
   const mod = e.ctrlKey || e.metaKey;
   const key = e.key.toLowerCase();
@@ -1001,6 +1129,11 @@ addEventListener('keydown', (e) => {
     $('#btn-focus').click();
     return;
   }
+  if (e.key === '?' && !mod && !isTyping(document.activeElement)) {
+    e.preventDefault();
+    $('#keys-dialog').showModal();
+    return;
+  }
   if (mod || e.altKey || isTyping(document.activeElement) || !current) return;
   if (e.key === 'f' || e.key === 'F') $('#btn-play').click();
   else if (e.key === 'm' || e.key === 'M') toggleMetronome();
@@ -1013,7 +1146,7 @@ addEventListener('keydown', (e) => {
 const play = setupPlayMode({
   repo,
   // Blättern in der Reihenfolge der (ggf. gefilterten) Liste
-  getSongIds: async () => applyChordFilter(await repo.list({ query: search.value, tag: activeTag })).map((s) => s.id),
+  getSongIds: async () => (await listedSongs()).map((s) => s.id),
   onClose: (id) => {
     if (id && id !== current?.id) openSong(id);
   },

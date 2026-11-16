@@ -93,6 +93,9 @@
       <button id="btn-settings" type="button" title="Schrift, Farben, Druck">
         <svg class="icon"><use href="#i-gear"/></svg><span class="label">Einstellungen</span>
       </button>
+      <button id="btn-keys" type="button" class="keys-btn" title="Tastenkürzel (?)">
+        <span class="icon kbd-icon" aria-hidden="true">?</span><span class="label">Tastenkürzel</span>
+      </button>
     </nav>
     <input id="file-input" type="file" multiple hidden
            accept=".zip,.json,.cho,.chordpro,.chopro,.crd,.pro,.txt,application/zip,application/json,text/plain">
@@ -110,7 +113,10 @@
           <input id="search" type="search" placeholder="Suchen …" autocomplete="off" title="Titel, Interpret oder Text (Strg+K)">
         </div>
         <div class="chord-filter">
-          <button type="button" id="cf-toggle" class="link-btn" aria-expanded="false" title="Nur Lieder zeigen, die aus Griffen bestehen, die du kannst">🎸 Was kann ich spielen?</button>
+          <div class="list-tools">
+            <button type="button" id="cf-toggle" class="link-btn" aria-expanded="false" title="Nur Lieder zeigen, die aus Griffen bestehen, die du kannst">🎸 Was kann ich spielen?</button>
+            <label class="sort-box" title="Reihenfolge der Liste">↕ <select id="sort-select" aria-label="Sortieren nach"></select></label>
+          </div>
           <div id="cf-panel" class="cf-panel" hidden>
             <input id="cf-chords" placeholder="Deine Griffe, z. B. G C D Em Am" autocomplete="off" spellcheck="false">
             <label class="check"><input type="checkbox" id="cf-capo"> auch mit Capo</label>
@@ -323,7 +329,8 @@
       </div>
       <footer class="dialog-foot">
         <button value="cancel" formnovalidate>Abbrechen</button>
-        <button id="pr-ok" value="ok" class="primary">Vorschau</button>
+        <button id="pr-ok" value="ok">Vorschau</button>
+        <button id="pr-print" value="print" class="primary" title="Seiten setzen und gleich drucken bzw. als PDF speichern">Drucken / PDF</button>
       </footer>
     </form>
   </dialog>
@@ -514,7 +521,7 @@
           </section>
         </div>
         <aside class="settings-sample">
-          <div class="settings-sample-label">Muster</div>
+          <button type="button" class="settings-sample-label" id="st-sample-toggle" aria-expanded="true" title="Muster ein-/ausklappen">Muster <span class="st-chevron" aria-hidden="true"></span></button>
           <div id="st-sample" class="songbook"></div>
         </aside>
       </div>
@@ -775,6 +782,87 @@
     </form>
   </dialog>
 
+  <dialog id="dup-dialog" class="capo-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Schon vorhanden</h2>
+        <p class="hint" id="dup-text"></p>
+      </header>
+      <div class="dialog-body">
+        <ul id="dup-list" class="report-list"></ul>
+        <p class="hint">Gleicher Titel und Interpret. „Ersetzen“ übernimmt den neuen Text ins vorhandene Lied – es bleibt in seinen Setlisten.</p>
+      </div>
+      <footer class="dialog-foot dup-foot">
+        <button value="cancel" formnovalidate>Abbrechen</button>
+        <span class="spacer"></span>
+        <button value="skip" id="dup-skip">Nicht anlegen</button>
+        <button value="replace" id="dup-replace">Vorhandenes ersetzen</button>
+        <button value="copy" class="primary">Als Kopie anlegen</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="report-dialog" class="capo-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Übernommen</h2>
+        <p class="hint" id="report-summary"></p>
+      </header>
+      <div class="dialog-body" id="report-body"></div>
+      <footer class="dialog-foot">
+        <span class="spacer"></span>
+        <button value="close" class="primary">OK</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="keys-dialog" class="capo-dialog keys-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Tastenkürzel</h2>
+        <p class="hint">Mit <kbd>?</kbd> jederzeit wieder aufrufen. Ein Bluetooth-Fußpedal sendet meist Bild↑/Bild↓ oder Pfeiltasten.</p>
+      </header>
+      <div class="dialog-body keys-body">
+        <section>
+          <h3>Überall</h3>
+          <table class="keys-table">
+            <tr><td><kbd>Strg</kbd>+<kbd>K</kbd></td><td>Suchen</td></tr>
+            <tr><td><kbd>Strg</kbd>+<kbd>S</kbd></td><td>Speichern (passiert auch automatisch)</td></tr>
+            <tr><td><kbd>Strg</kbd>+<kbd>P</kbd></td><td>Drucken / PDF</td></tr>
+            <tr><td><kbd>Strg</kbd>+<kbd>E</kbd></td><td>Editor ein-/ausblenden</td></tr>
+            <tr><td><kbd>Strg</kbd>+<kbd>V</kbd></td><td>Text einfügen (außerhalb des Editors)</td></tr>
+            <tr><td><kbd>F</kbd></td><td>Spielmodus</td></tr>
+            <tr><td><kbd>M</kbd></td><td>Metronom an/aus</td></tr>
+            <tr><td><kbd>+</kbd> / <kbd>−</kbd></td><td>Transponieren</td></tr>
+            <tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>in der Liste: vorheriges/nächstes Lied</td></tr>
+            <tr><td><kbd>Entf</kbd></td><td>in der Liste: Lied löschen</td></tr>
+            <tr><td><kbd>?</kbd></td><td>diese Übersicht</td></tr>
+          </table>
+        </section>
+        <section>
+          <h3>Spielmodus</h3>
+          <table class="keys-table">
+            <tr><td><kbd>Bild↓</kbd> / <kbd>↓</kbd></td><td>weiterblättern, am Ende nächstes Lied</td></tr>
+            <tr><td><kbd>Bild↑</kbd> / <kbd>↑</kbd></td><td>zurückblättern</td></tr>
+            <tr><td><kbd>→</kbd> / <kbd>←</kbd></td><td>nächstes / vorheriges Lied</td></tr>
+            <tr><td><kbd>Leertaste</kbd></td><td>automatisch scrollen an/aus</td></tr>
+            <tr><td><kbd>&lt;</kbd> / <kbd>&gt;</kbd></td><td>langsamer / schneller</td></tr>
+            <tr><td><kbd>+</kbd> / <kbd>−</kbd></td><td>Schrift größer / kleiner</td></tr>
+            <tr><td><kbd>G</kbd> <kbd>H</kbd> <kbd>T</kbd></td><td>Griffbilder, Harp-Tabs, Gitarren-Tabs</td></tr>
+            <tr><td><kbd>S</kbd></td><td>zweispaltig</td></tr>
+            <tr><td><kbd>N</kbd></td><td>Nachtmodus</td></tr>
+            <tr><td><kbd>M</kbd></td><td>Metronom</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>beenden</td></tr>
+          </table>
+        </section>
+      </div>
+      <footer class="dialog-foot">
+        <span class="spacer"></span>
+        <button value="close" class="primary">Schließen</button>
+      </footer>
+    </form>
+  </dialog>
+
   <section id="play-view" class="play-view" hidden aria-label="Spielmodus">
     <div class="play-bar" id="pl-bar">
       <button type="button" id="pl-exit" class="icon-btn" title="Spielmodus beenden (Esc)"><svg class="icon"><use href="#i-x"/></svg></button>
@@ -782,22 +870,25 @@
       <div class="play-title"><strong id="pl-title"></strong><small id="pl-pos"></small></div>
       <button type="button" id="pl-next" class="icon-btn" title="Nächstes Lied (→)"><svg class="icon"><use href="#i-right"/></svg></button>
       <span class="spacer"></span>
-      <div class="play-group" title="Schriftgröße (+ / −)">
-        <button type="button" id="pl-smaller" aria-label="Schrift kleiner">A−</button>
-        <button type="button" id="pl-bigger" aria-label="Schrift größer">A+</button>
+      <div class="play-extra" id="pl-extra">
+        <div class="play-group" title="Schriftgröße (+ / −) – wird pro Lied gemerkt">
+          <button type="button" id="pl-smaller" aria-label="Schrift kleiner">A−</button>
+          <button type="button" id="pl-bigger" aria-label="Schrift größer">A+</button>
+        </div>
+        <button type="button" id="pl-metro" class="icon-btn" title="Metronom im Liedtempo (M)" aria-pressed="false"><svg class="icon"><use href="#i-metro"/></svg></button>
+        <button type="button" id="pl-diagrams" class="icon-btn" title="Griffbilder ein/aus (G)" aria-pressed="true"><svg class="icon"><use href="#i-grid"/></svg></button>
+        <button type="button" id="pl-harp" class="text-btn" title="Mundharmonika-Tabs ein/aus (H)" aria-pressed="true" hidden>Harp</button>
+        <button type="button" id="pl-tabs" class="text-btn" title="Gitarren-Tabs ein/aus (T)" aria-pressed="true" hidden>Tab</button>
+        <button type="button" id="pl-cols" class="icon-btn" title="Zwei Spalten nebeneinander, seitenweise blättern (S)" aria-pressed="false"><svg class="icon"><use href="#i-columns"/></svg></button>
+        <button type="button" id="pl-night" class="icon-btn" title="Nachtmodus (N)" aria-pressed="false"><svg class="icon"><use href="#i-moon"/></svg></button>
+        <div class="play-group" title="Scroll-Geschwindigkeit (&lt; / &gt;) – wird pro Lied gemerkt">
+          <button type="button" id="pl-slower" aria-label="Langsamer">−</button>
+          <output id="pl-speed">1,0×</output>
+          <button type="button" id="pl-faster" aria-label="Schneller">+</button>
+        </div>
       </div>
-      <button type="button" id="pl-metro" class="icon-btn" title="Metronom im Liedtempo (M)" aria-pressed="false"><svg class="icon"><use href="#i-metro"/></svg></button>
-      <button type="button" id="pl-diagrams" class="icon-btn" title="Griffbilder ein/aus (G)" aria-pressed="true"><svg class="icon"><use href="#i-grid"/></svg></button>
-      <button type="button" id="pl-harp" class="text-btn" title="Mundharmonika-Tabs ein/aus (H)" aria-pressed="true" hidden>Harp</button>
-      <button type="button" id="pl-tabs" class="text-btn" title="Gitarren-Tabs ein/aus (T)" aria-pressed="true" hidden>Tab</button>
-      <button type="button" id="pl-cols" class="icon-btn" title="Zwei Spalten nebeneinander, seitenweise blättern (S)" aria-pressed="false"><svg class="icon"><use href="#i-columns"/></svg></button>
-      <button type="button" id="pl-night" class="icon-btn" title="Nachtmodus (N)" aria-pressed="false"><svg class="icon"><use href="#i-moon"/></svg></button>
-      <div class="play-group play-scroll-ctl" title="Automatisch scrollen (Leertaste); Geschwindigkeit wird pro Lied gemerkt">
-        <button type="button" id="pl-slower" aria-label="Langsamer">−</button>
-        <button type="button" id="pl-toggle" class="primary" aria-label="Scrollen starten"><svg class="icon"><use href="#i-play"/></svg></button>
-        <output id="pl-speed">1,0×</output>
-        <button type="button" id="pl-faster" aria-label="Schneller">+</button>
-      </div>
+      <button type="button" id="pl-toggle" class="primary icon-btn" title="Automatisch scrollen an/aus (Leertaste)" aria-label="Scrollen starten"><svg class="icon"><use href="#i-play"/></svg></button>
+      <button type="button" id="pl-more" class="icon-btn" title="Weitere Einstellungen" aria-expanded="false" aria-controls="pl-extra"><svg class="icon"><use href="#i-more"/></svg></button>
     </div>
     <div id="pl-scroll" class="play-scroll" tabindex="-1">
       <div id="pl-sheet" class="songbook play-sheet"></div>

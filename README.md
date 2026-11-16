@@ -71,6 +71,11 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 - **Bausteine** über dem Editor: Akkord, Strophe, Refrain, Bridge, Refrain wiederholen, Hinweis. Markierter Text wird eingeschlossen.
 - **Dateien** einfach ins Fenster ziehen, um sie zu importieren.
 - **Löschen** lässt sich in der Meldung unten rückgängig machen.
+- **Sortieren** (↕ über der Liste): nach Titel, Interpret, zuletzt geändert oder zuletzt gespielt.
+- **Doppelte Lieder**: Beim Einfügen, über das Lesezeichen und beim Öffnen von Dateien fragt die App
+  nach, wenn es Titel und Interpret schon gibt – überspringen, vorhandenes ersetzen oder als Kopie anlegen.
+- **ZIP öffnen** zeigt danach, welche Lieder und Setlisten geändert oder neu angelegt wurden.
+- **Tastenkürzel**: Taste **?** oder Menü → Tastenkürzel zeigt alle auf einen Blick.
 
 | Taste | Wirkung |
 |---|---|
@@ -82,6 +87,7 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | Strg+P | Drucken |
 | F | Spielmodus |
 | M | Metronom an/aus |
+| ? | Übersicht der Tastenkürzel |
 
 ## ChordPro-Syntax (Kurzüberblick)
 
@@ -136,7 +142,10 @@ und Stimmung (wenn nicht Standard) inklusive. Angelegt wird erst nach dem Bestä
 Knopf **Spielen** über der Vorschau (oder Taste **F**): Vollbild nur mit dem Lied, der
 Bildschirm bleibt an. **Automatisch scrollen** läuft so, dass das Lied in seiner Dauer
 (`{duration: 3:20}`, sonst 3 Minuten) einmal durchläuft; mit − / + schneller oder langsamer,
-die Geschwindigkeit wird pro Lied gemerkt. Tippen aufs Lied blendet die Leiste ein/aus.
+Geschwindigkeit und Schriftgröße werden pro Lied gemerkt. Tippen aufs Lied blendet die Leiste
+ein/aus. Am Handy stehen nur Schließen, Liedwechsel, Titel und Start/Stopp in der Leiste, alles
+Weitere unter **⋯**. Bei einer Setliste steht unter dem Titel die Position und das nächste Lied
+(„3 / 12 · Nächstes: …“).
 
 | Taste / Pedal | Wirkung |
 |---|---|
@@ -445,3 +454,6 @@ Caddyfile dort passt mit anderen Adressen auch für andere NAS oder Server.
 11. ✅ Dateien passend für Windows: Sync-Datei, Sicherung und geteilte Lieder eingerückt und mit CR LF
 12. ✅ WebDAV: reine ChordPro-Ablage – eine `.cho`-Datei pro Lied (Einstellungen als Direktiven), Setlisten als `.txt`, keine Daten-JSON; alles auch direkt auf dem Server bearbeitbar
 13. ✅ Versionsanzeige: in den Einstellungen und am App-Namen (`src/version.js`)
+14. ✅ Bedienbarkeit (1.22): Handy-Ansicht (Liedinfo, Bausteine, Spielmodus-Leiste, größere Knöpfe),
+    Sortierung, Warnung bei doppelten Liedern, Tastenkürzel-Übersicht, nächstes Lied im Spielmodus,
+    Schriftgröße pro Lied, klarere Cloud-Fehler, „Drucken / PDF“ direkt aus dem Druckdialog, Import-Bericht
