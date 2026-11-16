@@ -362,3 +362,4 @@ die App „Server nicht erreichbar … (CORS)“.
 10. ✅ Harp-Tabs importieren (auch Akkord- und Harp-Zeile übereinander); Akkorde und Harp-Tabs wahlweise in einer oder zwei Zeilen
 11. ✅ Dateien passend für Windows: Sync-Datei, Sicherung und geteilte Lieder eingerückt und mit CR LF
 12. ✅ WebDAV: eine `.cho`-Datei pro Lied plus Verzeichnis; Dateien auch direkt auf dem Server bearbeitbar
+13. ✅ Versionsanzeige: in den Einstellungen und am App-Namen (`src/version.js`)

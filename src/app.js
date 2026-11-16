@@ -26,8 +26,13 @@ import { transposeChord } from './core/chords.js';
 import { applySettings, loadSettings } from './settings/settings.js';
 import { bookmarkletHref, readUgHash, ugDataToText } from './core/ug-bookmarklet.js';
 import { toFileJson, toWindowsText } from './core/file-format.js';
+import { versionLabel } from './version.js';
 
 const $ = (s) => document.querySelector(s);
+
+// Version der App: in den Einstellungen und als Hinweis am App-Namen
+$('#app-version').textContent = versionLabel();
+$('#app-name').title = `Liederbuch ${versionLabel()}`;
 const editor = $('#editor');
 const preview = $('#preview');
 const listEl = $('#song-list');
