@@ -45,6 +45,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   lineSpacing: 'normal',
   columns: 1, // Druck
   margin: 15, // mm, Druck
+  pageNumbers: true, // Seitenzahlen unten auf jeder Druckseite
   paper: 'A4', // Druck
 });
 
@@ -74,6 +75,7 @@ export function sanitize(input = {}) {
     lineSpacing: oneOf(s.lineSpacing, Object.keys(LINE_SPACING), d.lineSpacing),
     columns: Number(s.columns) === 2 ? 2 : 1,
     margin: Math.round(clamp(s.margin, 5, 40, d.margin)),
+    pageNumbers: typeof s.pageNumbers === 'boolean' ? s.pageNumbers : d.pageNumbers,
     paper: oneOf(s.paper, PAPERS, d.paper),
   };
 }
@@ -96,6 +98,7 @@ export function applySettings(el, settings) {
   el.dataset.harp = s.showHarp ? 'show' : 'hide';
   el.dataset.harpLayout = s.harpLayout;
   el.dataset.tabs = s.showTabs ? 'show' : 'hide';
+  el.dataset.pageNumbers = s.pageNumbers ? 'show' : 'hide';
 }
 
 // ---------- Speicher ----------

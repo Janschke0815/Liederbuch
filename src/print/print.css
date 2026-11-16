@@ -15,6 +15,8 @@
 }
 .page-content { flex: 1; min-height: 0; display: flex; gap: var(--col-gap); }
 .page-col { flex: 1; min-width: 0; height: 100%; overflow: hidden; }
+/* Seitenzahlen ausgeblendet (Einstellungen → Druck): Platz bleibt, damit sich nichts verschiebt */
+[data-page-numbers='hide'] .page-footer { visibility: hidden; }
 .page-footer {
   position: absolute;
   left: 0;

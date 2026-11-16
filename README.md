@@ -179,6 +179,11 @@ beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ er
   nicht im Druck; wird mit gesichert und synchronisiert.
 - **Papierkorb** (Menü): gelöschte Lieder wiederherstellen oder endgültig löschen.
 
+## Seitenzahlen im Druck
+
+Unter **Einstellungen → Druck → Seitenzahlen** lassen sich die Zahlen unten auf den Druckseiten
+abschalten. Der Seitenumbruch bleibt dabei gleich, das Inhaltsverzeichnis nennt die Seiten weiterhin.
+
 ## Druckvorschau: Schrift nur für den Druck
 
 In der Druckvorschau stehen unter der Leiste **Schriftart und -größe für Text und Akkorde**.

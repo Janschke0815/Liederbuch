@@ -41,7 +41,7 @@ B|---1-------------1-|
 `;
 
 const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing', 'chordFont', 'chordSize', 'chordColor',
-  'chordBold', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin'];
+  'chordBold', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin', 'pageNumbers'];
 
 function fillSelect(sel, entries) {
   sel.replaceChildren(...entries.map(([value, label]) => new Option(label, value)));
