@@ -106,6 +106,37 @@ export function setupSettings({ targets }) {
     }
   }
 
+  // Bereiche einklappbar: Klick auf die Überschrift; der Zustand bleibt gespeichert
+  const COLLAPSED_KEY = 'settingsCollapsed';
+  const collapsed = new Set((() => {
+    try {
+      return JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  })());
+  function setCollapsed(card, value) {
+    card.classList.toggle('collapsed', value);
+    card.querySelector('.st-card-toggle').setAttribute('aria-expanded', String(!value));
+    if (value) collapsed.add(card.id);
+    else collapsed.delete(card.id);
+    localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed]));
+  }
+  for (const card of dlg.querySelectorAll('.st-card')) {
+    const h3 = card.querySelector(':scope > h3');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'st-card-toggle';
+    btn.title = 'Bereich ein-/ausklappen';
+    const chevron = document.createElement('span');
+    chevron.className = 'st-chevron';
+    chevron.setAttribute('aria-hidden', 'true');
+    btn.append(...h3.childNodes, chevron);
+    h3.replaceChildren(btn);
+    btn.onclick = () => setCollapsed(card, !card.classList.contains('collapsed'));
+    setCollapsed(card, collapsed.has(card.id));
+  }
+
   // Bereichs-Navigation: springen und beim Scrollen mitführen
   const fields = $('#st-fields');
   const navLinks = [...dlg.querySelectorAll('.st-nav a')];
@@ -113,6 +144,7 @@ export function setupSettings({ targets }) {
     a.onclick = (e) => {
       e.preventDefault();
       const target = $(a.getAttribute('href'));
+      setCollapsed(target, false); // eingeklappten Bereich beim Anspringen öffnen
       fields.scrollTo({ top: target.offsetTop - fields.offsetTop - 8, behavior: 'smooth' });
       setTimeout(() => fields.scrollTop !== target.offsetTop - fields.offsetTop - 8 && (fields.scrollTop = target.offsetTop - fields.offsetTop - 8), 400);
     };
