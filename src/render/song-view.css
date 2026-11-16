@@ -23,9 +23,26 @@
   color: #111;
 }
 
-.song-header { margin-bottom: 1em; }
-.song-title { font-size: 1.6em; margin: 0; }
-.song-subtitle, .song-artist { margin: 0.1em 0 0; font-style: italic; }
+.song-header { margin-bottom: 1em; text-align: var(--header-align, left); }
+/* Liedkopf – einstellbar unter Einstellungen → Titel & Interpret (Rückfallwerte = bisheriges Aussehen) */
+.song-title {
+  margin: 0;
+  font-family: var(--title-font, inherit);
+  font-size: var(--title-size, 1.6em);
+  font-weight: var(--title-weight, 700);
+  text-transform: var(--title-transform, none);
+  color: var(--title-color, inherit);
+  line-height: 1.15;
+}
+.song-subtitle, .song-artist {
+  margin: 0.1em 0 0;
+  font-size: var(--artist-size, 1em);
+  font-style: var(--artist-style, italic);
+  color: var(--artist-color, inherit);
+}
+.songbook[data-artist='hide'] .song-artist { display: none; }
+.songbook[data-header-align='center'] .song-header { text-align: center; }
+.songbook[data-header-align='center'] .chord-diagrams { justify-content: center; }
 .song-info { margin: 0.3em 0 0; font-size: 0.8em; color: var(--label-color); }
 
 .song-body { column-count: var(--columns); column-gap: 2em; }

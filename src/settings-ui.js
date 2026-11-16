@@ -40,7 +40,10 @@ B|---1-------------1-|
 {chorus}
 `;
 
-const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing', 'chordFont', 'chordSize', 'chordColor',
+const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing',
+  'headerAlign', 'titleFont', 'titleSize', 'titleBold', 'titleUppercase', 'titleColor',
+  'showArtist', 'artistSize', 'artistItalic', 'artistColor',
+  'chordFont', 'chordSize', 'chordColor',
   'chordBold', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin', 'pageNumbers'];
 
 function fillSelect(sel, entries) {
@@ -57,9 +60,11 @@ export function setupSettings({ targets }) {
   let draft = { ...saved };
 
   // Schriftauswahl: jede Option in ihrer eigenen Schrift
-  for (const id of ['#st-lyricFont', '#st-chordFont']) {
-    fillSelect($(id), Object.keys(FONTS).map((f) => [f, f]));
-    [...$(id).options].forEach((o) => (o.style.fontFamily = FONTS[o.value]));
+  for (const id of ['#st-lyricFont', '#st-chordFont', '#st-titleFont']) {
+    const entries = Object.keys(FONTS).map((f) => [f, f]);
+    if (id === '#st-titleFont') entries.unshift(['', 'wie Liedtext']);
+    fillSelect($(id), entries);
+    [...$(id).options].forEach((o) => o.value && (o.style.fontFamily = FONTS[o.value]));
   }
   fillSelect($('#st-chorusStyle'), Object.entries(CHORUS_STYLES));
   sample.replaceChildren(renderSong(parseChordPro(SAMPLE)));
@@ -94,8 +99,11 @@ export function setupSettings({ targets }) {
       const v = Number($(`#${out.dataset.for}`).value);
       out.textContent = `${String(v).replace('.', ',')} ${out.dataset.unit}`;
     }
-    const color = input('chordColor').value.toLowerCase();
-    for (const sw of dlg.querySelectorAll('.swatch')) sw.setAttribute('aria-pressed', String(sw.dataset.color === color));
+    // Farbfelder: jede Reihe gehört zu einem Farbwert (data-for)
+    for (const row of dlg.querySelectorAll('.color-row[data-for]')) {
+      const color = input(row.dataset.for).value.toLowerCase();
+      for (const sw of row.querySelectorAll('.swatch')) sw.setAttribute('aria-pressed', String(sw.dataset.color === color));
+    }
   }
 
   // Bereichs-Navigation: springen und beim Scrollen mitführen
@@ -148,9 +156,9 @@ export function setupSettings({ targets }) {
     syncControls();
   });
 
-  for (const sw of dlg.querySelectorAll('.swatch')) {
+  for (const sw of dlg.querySelectorAll('.color-row[data-for] .swatch')) {
     sw.onclick = () => {
-      input('chordColor').value = sw.dataset.color;
+      input(sw.closest('.color-row').dataset.for).value = sw.dataset.color;
       dlg.dispatchEvent(new Event('input'));
     };
   }

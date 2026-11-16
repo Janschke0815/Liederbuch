@@ -43,6 +43,17 @@ export const DEFAULT_SETTINGS = Object.freeze({
   harpLayout: 'inline', // Akkorde und Harp-Tabs: 'inline' = eine Zeile, 'split' = zwei Zeilen
   showTabs: true, // Gitarren-Tabs ({start_of_tab})
   lineSpacing: 'normal',
+  // Liedkopf: Titel und Interpret
+  titleFont: '', // '' = wie Liedtext
+  titleSize: 19, // pt
+  titleBold: true,
+  titleUppercase: false,
+  titleColor: '#111111',
+  headerAlign: 'left', // 'left' | 'center' – Titel, Interpret, Infozeile, Griffbilder
+  showArtist: true,
+  artistSize: 12, // pt
+  artistItalic: true,
+  artistColor: '#111111',
   columns: 1, // Druck
   margin: 15, // mm, Druck
   pageNumbers: true, // Seitenzahlen unten auf jeder Druckseite
@@ -54,6 +65,8 @@ const clamp = (v, min, max, fallback) => {
   return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
 };
 const oneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
+const bool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
+const color = (v, fallback) => (/^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : fallback);
 
 /** Macht aus beliebigen (z. B. alten oder kaputten) Werten gültige Einstellungen. */
 export function sanitize(input = {}) {
@@ -73,6 +86,16 @@ export function sanitize(input = {}) {
     harpLayout: oneOf(s.harpLayout, ['inline', 'split'], d.harpLayout),
     showTabs: typeof s.showTabs === 'boolean' ? s.showTabs : d.showTabs,
     lineSpacing: oneOf(s.lineSpacing, Object.keys(LINE_SPACING), d.lineSpacing),
+    titleFont: oneOf(s.titleFont, ['', ...Object.keys(FONTS)], d.titleFont),
+    titleSize: clamp(s.titleSize, 10, 40, d.titleSize),
+    titleBold: bool(s.titleBold, d.titleBold),
+    titleUppercase: bool(s.titleUppercase, d.titleUppercase),
+    titleColor: color(s.titleColor, d.titleColor),
+    headerAlign: oneOf(s.headerAlign, ['left', 'center'], d.headerAlign),
+    showArtist: bool(s.showArtist, d.showArtist),
+    artistSize: clamp(s.artistSize, 7, 24, d.artistSize),
+    artistItalic: bool(s.artistItalic, d.artistItalic),
+    artistColor: color(s.artistColor, d.artistColor),
     columns: Number(s.columns) === 2 ? 2 : 1,
     margin: Math.round(clamp(s.margin, 5, 40, d.margin)),
     pageNumbers: typeof s.pageNumbers === 'boolean' ? s.pageNumbers : d.pageNumbers,
@@ -92,6 +115,16 @@ export function applySettings(el, settings) {
   st.setProperty('--chord-bar-color', s.chordColor + '40');
   st.setProperty('--chord-weight', s.chordBold ? '700' : '400');
   st.setProperty('--line-height', String(LINE_SPACING[s.lineSpacing]));
+  st.setProperty('--title-font', s.titleFont ? FONTS[s.titleFont] : 'var(--lyric-font)');
+  st.setProperty('--title-size', s.titleSize + 'pt');
+  st.setProperty('--title-weight', s.titleBold ? '700' : '400');
+  st.setProperty('--title-transform', s.titleUppercase ? 'uppercase' : 'none');
+  st.setProperty('--title-color', s.titleColor);
+  st.setProperty('--artist-size', s.artistSize + 'pt');
+  st.setProperty('--artist-style', s.artistItalic ? 'italic' : 'normal');
+  st.setProperty('--artist-color', s.artistColor);
+  el.dataset.headerAlign = s.headerAlign;
+  el.dataset.artist = s.showArtist ? 'show' : 'hide';
   el.dataset.chorusStyle = s.chorusStyle;
   el.dataset.labels = s.showLabels ? 'show' : 'hide';
   el.dataset.diagrams = s.showDiagrams ? 'show' : 'hide';

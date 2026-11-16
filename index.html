@@ -330,6 +330,7 @@
       <div class="settings-body">
         <nav class="st-nav" aria-label="Bereiche">
           <a href="#st-sec-text" class="active"><span>Aa</span>Liedtext</a>
+          <a href="#st-sec-head"><span>T</span>Titel &amp; Interpret</a>
           <a href="#st-sec-chords"><span>C<sup>7</sup></span>Akkorde</a>
           <a href="#st-sec-parts"><span>¶</span>Abschnitte</a>
           <a href="#st-sec-print"><span>⎙</span>Druck</a>
@@ -353,6 +354,63 @@
               </div>
           </section>
 
+          <section class="st-card" id="st-sec-head">
+            <h3>Titel &amp; Interpret</h3>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Ausrichtung</span><span class="st-hint">Titel, Interpret, Infozeile und Griffbilder</span></div>
+                <div class="st-control"><select id="st-headerAlign" data-segmented><option value="left">links</option><option value="center">mittig</option></select></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Titel – Schrift</span></div>
+                <div class="st-control"><select id="st-titleFont"></select></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Titel – Größe</span></div>
+                <div class="st-control"><input id="st-titleSize" type="range" min="10" max="40" step="1"><output class="range-val" data-for="st-titleSize" data-unit="pt"></output></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Titel fett</span></div>
+                <div class="st-control"><label class="switch"><input id="st-titleBold" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Titel in Großbuchstaben</span></div>
+                <div class="st-control"><label class="switch"><input id="st-titleUppercase" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Titel – Farbe</span></div>
+                <div class="st-control"><span class="color-row" data-for="titleColor">
+                  <button type="button" class="swatch" data-color="#111111" style="--c:#111111" title="Schwarz"></button>
+                  <button type="button" class="swatch" data-color="#b3261e" style="--c:#b3261e" title="Rot"></button>
+                  <button type="button" class="swatch" data-color="#1f4e9c" style="--c:#1f4e9c" title="Blau"></button>
+                  <button type="button" class="swatch" data-color="#2e7d32" style="--c:#2e7d32" title="Grün"></button>
+                  <button type="button" class="swatch" data-color="#6a1b9a" style="--c:#6a1b9a" title="Lila"></button>
+                  <input id="st-titleColor" type="color" title="Eigene Farbe">
+                </span></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Interpret anzeigen</span><span class="st-hint">Zeile unter dem Titel</span></div>
+                <div class="st-control"><label class="switch"><input id="st-showArtist" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Interpret – Größe</span><span class="st-hint">gilt auch für den Untertitel</span></div>
+                <div class="st-control"><input id="st-artistSize" type="range" min="7" max="24" step="0.5"><output class="range-val" data-for="st-artistSize" data-unit="pt"></output></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Interpret kursiv</span></div>
+                <div class="st-control"><label class="switch"><input id="st-artistItalic" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row">
+                <div class="st-text"><span class="st-title">Interpret – Farbe</span></div>
+                <div class="st-control"><span class="color-row" data-for="artistColor">
+                  <button type="button" class="swatch" data-color="#111111" style="--c:#111111" title="Schwarz"></button>
+                  <button type="button" class="swatch" data-color="#666666" style="--c:#666666" title="Grau"></button>
+                  <button type="button" class="swatch" data-color="#b3261e" style="--c:#b3261e" title="Rot"></button>
+                  <button type="button" class="swatch" data-color="#1f4e9c" style="--c:#1f4e9c" title="Blau"></button>
+                  <input id="st-artistColor" type="color" title="Eigene Farbe">
+                </span></div>
+              </div>
+          </section>
+
           <section class="st-card" id="st-sec-chords">
             <h3>Akkorde</h3>
               <div class="st-row">
@@ -365,7 +423,7 @@
               </div>
               <div class="st-row">
                 <div class="st-text"><span class="st-title">Farbe</span></div>
-                <div class="st-control"><span class="color-row">
+                <div class="st-control"><span class="color-row" data-for="chordColor">
                   <button type="button" class="swatch" data-color="#b3261e" style="--c:#b3261e" title="Rot"></button>
                   <button type="button" class="swatch" data-color="#1f4e9c" style="--c:#1f4e9c" title="Blau"></button>
                   <button type="button" class="swatch" data-color="#2e7d32" style="--c:#2e7d32" title="Grün"></button>

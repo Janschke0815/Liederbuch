@@ -179,6 +179,17 @@ beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ er
   nicht im Druck; wird mit gesichert und synchronisiert.
 - **Papierkorb** (Menü): gelöschte Lieder wiederherstellen oder endgültig löschen.
 
+## Titel & Interpret gestalten
+
+Unter **Einstellungen → Titel & Interpret**:
+
+- **Ausrichtung** des Liedkopfs: links oder mittig (Titel, Interpret, Infozeile und Griffbilder)
+- **Titel:** Schriftart (oder „wie Liedtext“), Größe, fett, Großbuchstaben, Farbe
+- **Interpret:** anzeigen ja/nein, Größe, kursiv, Farbe – gilt auch für den Untertitel
+
+Das Muster im Dialog zeigt jede Änderung sofort. Die Einstellungen gelten für Vorschau,
+Spielmodus und Druck; die Standardwerte entsprechen dem bisherigen Aussehen.
+
 ## Druck: Optionen und Schnellwahl
 
 Im Druckdialog bzw. in der Druckvorschau unter **Optionen …** stehen alle Einstellungen für den
