@@ -91,6 +91,7 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | F | Spielmodus |
 | M | Metronom an/aus |
 | ? | Übersicht der Tastenkürzel |
+| Enter | im Dialog: bestätigen (roter Knopf); in großen Textfeldern Strg+Enter |
 
 ## ChordPro-Syntax (Kurzüberblick)
 
@@ -277,7 +278,8 @@ Mundharmonika-Töne stehen wie Akkorde in eckigen Klammern über der Silbe und e
     [4] [-4] [5] [6] [6] [-6] [6] [5]
 
 `4` blasen, `-4` ziehen (`+4` geht auch), `-3'` `-3''` oder `-3b` Bending, `6o` Overblow,
-`[4 -4 5]` mehrere Töne an einer Stelle; Kanäle 1–16. Sie werden nie transponiert und zählen
+`[7 8]` (auch `[(7 8)]`, `[7,8]`, `[7+8]`) mehrere Löcher gleichzeitig – angezeigt als **(7 8)**;
+Kanäle 1–16. Sie werden nie transponiert und zählen
 nicht als Akkorde (keine Griffbilder). Beim **Einfügen** wird eine Zeile wie `4  -4  5` über dem
 Text automatisch erkannt – auch zusammen mit einer Akkordzeile darüber oder darunter:
 
@@ -286,8 +288,11 @@ Text automatisch erkannt – auch zusammen mit einer Akkordzeile darüber oder d
     Oh my darling, oh my darling, oh my darling Clementine
 
 Auch die Schreibweise von **harptabs.com** wird verstanden: `-6-6` (Töne ohne Leerzeichen),
-`7,8` oder `4+5` (zwei Löcher zugleich -> `[7 8]`) und `-3"` (ganzer Ton gebogen -> `[-3'']`).
-Ein „Intro:“ oder „Solo:“ endet an der Leerzeile, wenn danach Liedtext kommt.
+`7,8`, `4+5` oder `(7 8)` (zwei Löcher zugleich) und `-3"` (ganzer Ton gebogen -> `[-3'']`).
+Dort stehen die Zahlen oft eine Spalte neben dem Silbenanfang – sie rücken auf den Wortanfang;
+bei Wörtern mit Bindestrich („Gas-o-line“) auf den Silbenanfang. Ein „Intro:“ oder „Solo:“ endet
+an der Leerzeile, wenn danach Liedtext kommt; „Key: C Major (… Harp)“ wird ein Hinweis. Das
+Lesezeichen „Ins Liederbuch“ übernimmt auf harptabs.com auch Titel und Interpret.
 
 **Eine oder zwei Zeilen:** Unter *Einstellungen → Akkorde → Akkorde und Harp-Tabs* (oder per
 Rechtsklick auf die Vorschau → *Anzeigen → Harp-Tabs in eigener Zeile*) wählst du, ob Akkord und

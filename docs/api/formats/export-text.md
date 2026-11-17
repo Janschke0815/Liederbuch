@@ -4,7 +4,7 @@
 
 Lied exportieren: transponierter ChordPro-Text und "Akkorde über dem Text" (z. B. für Nachrichten oder Foren). Reine Funktionen, kein DOM.
 
-**Benutzt:** [`core/chordpro.js`](../core/chordpro.md), [`core/chords.js`](../core/chords.md)  
+**Benutzt:** [`core/chordpro.js`](../core/chordpro.md), [`core/chords.js`](../core/chords.md), [`core/harp.js`](../core/harp.md)  
 **Benutzt von:** [`ui/share.js`](../ui/share.md)
 
 ## Exportiert

@@ -8,7 +8,7 @@ Erkannt wird, was dort üblich ist:
 
 ```text
   -6-6        zwei Töne ohne Leerzeichen dazwischen   -> [-6] [-6] (jeder an seiner Stelle)
-  7,8  4+5    zwei Löcher zugleich                     -> [7 8]
+  7,8  4+5  (7 8)   zwei Löcher zugleich               -> [7 8], angezeigt als „(7 8)“
   -3"         ganzer Ton gebogen                       -> [-3'']
   -3’ -3´     Bending mit typografischem Apostroph     -> [-3']
   | 4 -4 |    Taktstriche werden übergangen
@@ -23,7 +23,7 @@ Erkannt wird, was dort üblich ist:
 
 Bending-Zeichen vereinheitlichen: " -> '', ’ und ´ -> '.
 
-### `harpTokens(line)`
+### `harpTokens(line, { loose = false } = {})`
 
 Harp-Töne einer Zeile mit ihrer Spalte (für das Einfügen über dem Text).
 Damit eine Zeile wie „1 2 3“ (Zählzeit) nicht versehentlich als Tab gilt: mindestens ein Ziehton,
@@ -32,6 +32,7 @@ Bending oder Doppelton, oder mindestens drei Töne.
 | Parameter | Typ | Bedeutung |
 |---|---|---|
 | `line` | `string` |  |
+| `[opts]` | `{loose?: boolean}` | loose: auch einzelne Töne gelten (wenn der Zusammenhang klar ist, z. B. zwischen Akkordzeile und Liedtext) |
 
 **Rückgabe:** `{col: number, text: string}[] | null` null, wenn es keine Harp-Zeile ist
 

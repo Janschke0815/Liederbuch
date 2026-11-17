@@ -48,6 +48,7 @@ function liederbuchBookmarklet(app) {
       d.artist = mt[2];
     }
   }
+  if (d.content && !d.title) d.page = document.title;
   if (!d.content) {
     alert('Liederbuch: Hier wurde kein Lied gefunden. Öffne ein Lied auf Ultimate Guitar oder markiere den Liedtext und tippe dann noch einmal auf das Lesezeichen.');
     return;
@@ -115,8 +116,22 @@ export function stripUgMarkup(content) {
     .join('\n');
 }
 
+/**
+ * Titel und Interpret aus dem Seitentitel anderer Seiten, z. B. harptabs.com:
+ * „Heart Of Gold (w/lyrics & chords) by Neil Young · Harptabs“ -> {title: 'Heart Of Gold', artist: 'Neil Young'}.
+ * Zusätze wie „(w/lyrics & chords)“ oder „(Full Song)“ fallen weg.
+ * @returns {{title: string, artist: string} | null}
+ */
+export function titleFromPage(pageTitle) {
+  const m = /^(.*?)\s+by\s+(.+?)\s+[·|–—-]\s+[^·|–—]+$/i.exec(clean(pageTitle));
+  if (!m) return null;
+  const title = m[1].replace(/\s*\((?:w\/|with\b|[^)]*\b(?:lyrics|chords|tabs?|full song|complete|updated)\b)[^)]*\)/gi, '').trim();
+  return title ? { title, artist: m[2].trim() } : null;
+}
+
 /** Rohdaten des Lesezeichens -> Text für den Einfügen-Dialog (mit Kopfzeilen für Titel usw.). */
 export function ugDataToText(d) {
+  if (!clean(d.title) && d.page) d = { ...d, ...titleFromPage(d.page) };
   const head = [];
   if (clean(d.title)) head.push(`Title: ${clean(d.title)}`);
   if (clean(d.artist)) head.push(`Artist: ${clean(d.artist)}`);

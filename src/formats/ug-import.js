@@ -102,6 +102,8 @@ function metaLine(line) {
   const tempo = /^\s*(?:tempo|bpm)\s*:?\s*(\d{2,3})\s*(?:bpm)?\s*$/i.exec(line);
   if (tempo) return `{tempo: ${tempo[1]}}`;
   if (/^\s*(tuning|stimmung)\s*:/i.test(line)) return `{comment: ${line.trim()}}`;
+  // „Key: C Major (Transposed … on a C Harp)“ (harptabs.com: Tonart der Mundharmonika) -> Hinweis
+  if (/^\s*(?:key|tonart)\s*:\s*\S.*\s\S/i.test(line)) return `{comment: ${line.trim().replace(/[{}]/g, '')}}`;
   return null;
 }
 
@@ -119,6 +121,41 @@ function chordMarker(text) {
 }
 
 /**
+ * Töne und Akkorde, die knapp neben einem Wortanfang stehen, auf den Wortanfang rücken
+ * (Akkorde und Harp-Töne getrennt betrachtet):
+ *   - mitten im Wort, und davor im selben Wort noch keiner -> an den Wortanfang („I[4]'ve“ -> „[4]I've“)
+ *   - auf einem Leerzeichen -> an den Anfang des nächsten Wortes
+ * Weitere Töne im selben Wort bleiben, wo sie sind – das sind Silben („[-6]mi[-6]ner“).
+ * Ein Bindestrich trennt Silben wie ein Leerzeichen („Gas-o-line“ -> drei Silben).
+ * @param {{col: number, harp?: boolean}[]} inline  Tokens mit Spalte im Liedtext (wird geändert)
+ * @param {string} lyrics
+ */
+export function snapToWords(inline, lyrics) {
+  const isSpace = (i) => i < 0 || i >= lyrics.length || /\s/.test(lyrics[i]);
+  // Silbenanfang: davor Leerzeichen oder ein Bindestrich mitten im Wort
+  const startsUnit = (i) => isSpace(i - 1) || (lyrics[i - 1] === '-' && !isSpace(i - 2));
+  for (const t of [...inline].sort((a, b) => a.col - b.col)) {
+    const sameKind = inline.filter((o) => o !== t && Boolean(o.harp) === Boolean(t.harp));
+    if (isSpace(t.col)) {
+      let j = t.col;
+      while (j < lyrics.length && isSpace(j)) j++;
+      if (j < lyrics.length && !sameKind.some((o) => o.col > t.col && o.col <= j)) t.col = j;
+      continue;
+    }
+    if (startsUnit(t.col)) continue; // steht schon am Wort- bzw. Silbenanfang
+    let w = t.col;
+    while (!startsUnit(w)) w--;
+    // Nur den typischen Versatz um eine Spalte korrigieren – weiter drin ist es eine gewollte Silbe
+    // („Su[-4]sanna“). Hat der Autor die Silben mit Bindestrich getrennt, gilt die ganze Silbe.
+    let end = t.col;
+    while (end < lyrics.length && !isSpace(end)) end++;
+    const hyphenated = /\S-\S/.test(lyrics.slice(w > 0 ? w - 1 : 0, end)) || lyrics[w - 1] === '-';
+    if (t.col - w > 1 && !hyphenated) continue;
+    if (!sameKind.some((o) => o.col >= w && o.col < t.col)) t.col = w;
+  }
+}
+
+/**
  * Akkordzeile + Textzeile -> eine ChordPro-Zeile. Optional zusätzlich eine Zeile
  * Mundharmonika-Töne (Akkorde und Tabs untereinander über dem Text); an derselben Stelle
  * steht der Akkord vor dem Ton: [C][4]Text.
@@ -129,10 +166,10 @@ export function mergeChordLine(chordLine, lyricLine, harpLine = null) {
   lyrics = lyrics.slice(indent);
 
   // Harp-Töne in der Schreibweise der App (harptabs.com: „-6-6“, „7,8“, „-3"“)
-  const lineTokens = (line) => harpTokens(line)?.map((t) => ({ ...t, harp: true })) || tokenize(line);
+  const lineTokens = (line, loose = false) => harpTokens(line, { loose })?.map((t) => ({ ...t, harp: true })) || tokenize(line);
   const tokens = [
     ...lineTokens(chordLine).map((t) => ({ ...t, ord: 0 })),
-    ...(harpLine ? lineTokens(harpLine).map((t) => ({ ...t, ord: 1 })) : []),
+    ...(harpLine ? lineTokens(harpLine, true).map((t) => ({ ...t, ord: 1 })) : []),
   ]
     .filter((t) => !PURE_PUNCT.test(t.text))
     .sort((a, b) => a.col - b.col || a.ord - b.ord);
@@ -145,6 +182,10 @@ export function mergeChordLine(chordLine, lyricLine, harpLine = null) {
     else if (col < lyrics.length) inline.push({ ...t, col });
     else after.push(t);
   }
+
+  // Mit Harp-Zeile (z. B. harptabs.com) stehen die Zahlen oft eine Spalte neben dem Silbenanfang
+  // („-6“: das Minus belegt eine Spalte). Dann auf den Wortanfang rücken – siehe snapToWords.
+  if (tokens.some((t) => t.harp)) snapToWords(inline, lyrics);
 
   let out = lyrics;
   // von hinten einfügen; bei gleicher Spalte zuerst den Ton, damit der Akkord davor landet
@@ -304,8 +345,23 @@ export function ugToChordPro(input, meta = {}) {
       continue;
     }
 
+    // Harp-Zeile mit nur ein, zwei Tönen über einer Akkordzeile und dem Text („4    4“)
+    const looseHarp = (l) => l !== undefined && !isChordLine(l) && harpTokens(l, { loose: true }) !== null;
+    const plainLyrics = (l) =>
+      l !== undefined && l.trim() !== '' && !isChordLine(l) && !looseHarp(l) && !isTabLine(l) && !sectionLabel(l) && !metaLine(l);
+    if (looseHarp(line) && isChordLine(lines[i + 1]) && !isHarpRow(lines[i + 1]) && plainLyrics(lines[i + 2])) {
+      emitContent(mergeChordLine(lines[i + 1], lines[i + 2], line));
+      i += 2;
+      continue;
+    }
+
     if (isChordLine(line)) {
       const next = lines[i + 1];
+      if (!isHarpRow(line) && looseHarp(next) && plainLyrics(lines[i + 2])) {
+        emitContent(mergeChordLine(line, lines[i + 2], next));
+        i += 2;
+        continue;
+      }
       const isLyrics = (l) =>
         l !== undefined && l.trim() !== '' && !isChordLine(l) && !isTabLine(l) && !sectionLabel(l) && !metaLine(l);
       const nextIsLyrics = isLyrics(next);

@@ -29,6 +29,20 @@ Abschnitt ohne Gesang (Intro, Solo …)? Er endet an der nächsten Leerzeile, we
 
 Art eines Abschnitts aus seinem Namen: 'verse' | 'chorus' | 'bridge' | 'part'.
 
+### `snapToWords(inline, lyrics)`
+
+Töne und Akkorde, die knapp neben einem Wortanfang stehen, auf den Wortanfang rücken
+(Akkorde und Harp-Töne getrennt betrachtet):
+  - mitten im Wort, und davor im selben Wort noch keiner -> an den Wortanfang („I[4]'ve“ -> „[4]I've“)
+  - auf einem Leerzeichen -> an den Anfang des nächsten Wortes
+Weitere Töne im selben Wort bleiben, wo sie sind – das sind Silben („[-6]mi[-6]ner“).
+Ein Bindestrich trennt Silben wie ein Leerzeichen („Gas-o-line“ -> drei Silben).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `inline` | `{col: number, harp?: boolean}[]` | Tokens mit Spalte im Liedtext (wird geändert) |
+| `lyrics` | `string` |  |
+
 ### `mergeChordLine(chordLine, lyricLine, harpLine = null)`
 
 Akkordzeile + Textzeile -> eine ChordPro-Zeile. Optional zusätzlich eine Zeile

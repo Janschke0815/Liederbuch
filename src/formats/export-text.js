@@ -3,6 +3,7 @@
 
 import { parseChordPro } from '../core/chordpro.js';
 import { transposeChord, shouldUseFlats, parseChord } from '../core/chords.js';
+import { harpLabel } from '../core/harp.js';
 
 const DEFAULT_LABELS = { verse: 'Strophe', chorus: 'Refrain', bridge: 'Bridge', tab: 'Tab', grid: 'Grid' };
 
@@ -45,7 +46,7 @@ function lyricsToSplitText(line, map) {
   for (const s of line.segments) {
     if (s.chord) {
       const key = s.harp ? 'harp' : 'chords';
-      const name = s.annotation || s.harp ? s.chord : map(s.chord);
+      const name = s.harp ? harpLabel(s.chord) : s.annotation ? s.chord : map(s.chord);
       if (rows[key].length > text.length) text = text.padEnd(rows[key].length);
       rows[key] = rows[key].padEnd(text.length) + name + ' ';
     }
@@ -63,7 +64,7 @@ function lyricsToText(line, map, harpLayout = 'inline') {
   let chords = '';
   for (const s of line.segments) {
     if (s.chord) {
-      const name = s.annotation ? s.chord : map(s.chord);
+      const name = s.harp ? harpLabel(s.chord) : s.annotation ? s.chord : map(s.chord);
       // Akkord an die aktuelle Textspalte; überlappt er den vorigen, Text auffüllen
       if (chords.length > text.length) text = text.padEnd(chords.length, line.chordsOnly ? ' ' : ' ');
       chords = chords.padEnd(text.length) + name + ' ';

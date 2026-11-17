@@ -3,12 +3,12 @@
 //
 // Erkannt wird, was dort üblich ist:
 //   -6-6        zwei Töne ohne Leerzeichen dazwischen   -> [-6] [-6] (jeder an seiner Stelle)
-//   7,8  4+5    zwei Löcher zugleich                     -> [7 8]
+//   7,8  4+5  (7 8)   zwei Löcher zugleich               -> [7 8], angezeigt als „(7 8)“
 //   -3"         ganzer Ton gebogen                       -> [-3'']
 //   -3’ -3´     Bending mit typografischem Apostroph     -> [-3']
 //   | 4 -4 |    Taktstriche werden übergangen
 
-import { isHarpNote } from '../core/harp.js';
+import { isHarpNote, harpNotes } from '../core/harp.js';
 
 // ein Ton: Vorzeichen, Kanal 1–16, optional Bending/Overblow
 const NOTE_SRC = String.raw`[+-]?(?:1[0-6]|[1-9])(?:'{1,3}|"|’{1,3}|´{1,3}|b{1,3}|o|°)?`;
@@ -26,9 +26,10 @@ export function normalizeHarpNote(note) {
  * @returns {{offset: number, text: string}[] | null}  null, wenn der Block keine Harp-Töne sind
  */
 function splitChunk(chunk) {
-  if (GROUP.test(chunk)) {
-    const notes = chunk.split(/,|\+(?=[+-]?\d)/).filter(Boolean).map(normalizeHarpNote);
-    return notes.every(isHarpNote) ? [{ offset: 0, text: notes.join(' ') }] : null;
+  // mehrere Löcher gleichzeitig: „7,8“, „4+5“ oder „(7 8)“
+  if (GROUP.test(chunk) || /^\(.*\)$/.test(chunk)) {
+    const notes = harpNotes(normalizeHarpNote(chunk));
+    return notes ? [{ offset: 0, text: notes.join(' ') }] : null;
   }
   const out = [];
   let pos = 0;
@@ -46,11 +47,14 @@ function splitChunk(chunk) {
  * Damit eine Zeile wie „1 2 3“ (Zählzeit) nicht versehentlich als Tab gilt: mindestens ein Ziehton,
  * Bending oder Doppelton, oder mindestens drei Töne.
  * @param {string} line
+ * @param {{loose?: boolean}} [opts]  loose: auch einzelne Töne gelten (wenn der Zusammenhang klar
+ *   ist, z. B. zwischen Akkordzeile und Liedtext)
  * @returns {{col: number, text: string}[] | null}  null, wenn es keine Harp-Zeile ist
  */
-export function harpTokens(line) {
+export function harpTokens(line, { loose = false } = {}) {
   const tokens = [];
-  for (const m of String(line).matchAll(/\S+/g)) {
+  // „(7 8)“ ist trotz Leerzeichen ein Token
+  for (const m of String(line).matchAll(/\([^()]*\)|\S+/g)) {
     if (/^\|{1,2}$/.test(m[0])) continue;
     const parts = splitChunk(m[0]);
     if (!parts) return null;
@@ -58,7 +62,7 @@ export function harpTokens(line) {
   }
   if (!tokens.length) return null;
   const typical = tokens.some((t) => /^-|['b°o]$|\s/i.test(t.text));
-  return typical || tokens.length >= 3 ? tokens : null;
+  return loose || typical || tokens.length >= 3 ? tokens : null;
 }
 
 /** Ist die Zeile eine Zeile Mundharmonika-Töne (auch in fremder Schreibweise)? */

@@ -93,3 +93,19 @@ describe('Lesezeichen: Ultimate Guitar', () => {
     expect(d).toBe('Title: A B\nTuning: D A D G B E\n\nC\nla');
   });
 });
+
+describe('Lesezeichen: andere Seiten (harptabs.com)', () => {
+  it('Titel und Interpret aus dem Seitentitel', async () => {
+    const { titleFromPage } = await import('../src/formats/ug-bookmarklet.js');
+    expect(titleFromPage('Heart Of Gold (w/lyrics & chords) by Neil Young · Harptabs')).toEqual({ title: 'Heart Of Gold', artist: 'Neil Young' });
+    expect(titleFromPage('A Bar Song (Tipsy) by Shaboozey · Harptabs')).toEqual({ title: 'A Bar Song (Tipsy)', artist: 'Shaboozey' });
+    expect(titleFromPage('Harptabs — Free Harmonica Tabs')).toBe(null);
+  });
+  it('Einfügetext bekommt Titel und Interpret', () => {
+    const t = ugDataToText({ page: 'Heart Of Gold (w/lyrics & chords) by Neil Young · Harptabs', content: '4 -4\nText' });
+    expect(t.startsWith('Title: Heart Of Gold\nArtist: Neil Young\n\n')).toBe(true);
+  });
+  it('das Lesezeichen schickt den Seitentitel mit', () => {
+    expect(decodeURIComponent(bookmarkletHref('https://x/')).includes('d.page = document.title')).toBe(true);
+  });
+});

@@ -48,7 +48,7 @@ describe('Mundharmonika: im Lied', () => {
   it('Einfügen: Tab-Zeile über dem Text wird zu Klammern an der richtigen Silbe', () => {
     const out = ugToChordPro('4    -4   5\nOh Susanna don\'t\n\n-4 -5 -6 -4 -5 -6');
     // Spalten: 4 über "O", -4 über "s" (Spalte 5), 5 über dem Leerzeichen vor "don't"
-    expect(out).toContain("[4]Oh Su[-4]sanna[5] don't");
+    expect(out).toContain("[4]Oh Su[-4]sanna [5]don't");
     expect(out).toContain('[-4] [-5] [-6] [-4] [-5] [-6]');
     expect(out).notToContain('start_of_tab');
   });

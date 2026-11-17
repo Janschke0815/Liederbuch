@@ -7,6 +7,21 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.24.1 – 17.11.2026 · harptabs.com genauer, Doppeltöne, Enter in Dialogen
+
+- **Töne an der richtigen Silbe:** Auf harptabs.com stehen die Zahlen oft eine Spalte neben dem Silbenanfang
+  (das Minuszeichen belegt eine Spalte). Beim Einfügen rücken sie jetzt auf den Wortanfang – aus
+  `I[4]'ve` wird `[4]I've`. Bei Wörtern mit Bindestrich („Gas-o-line“) auf den Silbenanfang. Genau gesetzte
+  Tabs (z. B. `Su[-4]sanna`) bleiben, wie sie sind.
+- **Harp-Zeile mit wenigen Tönen** (z. B. nur `4    4`) zwischen Akkordzeile und Text wird jetzt erkannt.
+- **„Key: C Major (… on a C Harp)“** wird ein Hinweis statt Liedtext.
+- **Lesezeichen „Ins Liederbuch“** übernimmt auf harptabs.com auch Titel und Interpret (Lesezeichen dafür
+  einmal neu anlegen).
+- **Mehrere Löcher gleichzeitig** werden als **(7 8)** angezeigt – in Vorschau, Spielmodus, Druck und beim
+  Teilen als Text. Im Editor gehen `[7 8]`, `[(7 8)]`, `[7,8]` und `[7+8]`.
+- **Enter bestätigt Dialoge:** Enter drückt den roten Knopf (z. B. „Speichern“, „Als neues Lied anlegen“).
+  Vorher löste Enter „Abbrechen“ aus, weil das der erste Knopf ist. In großen Textfeldern bestätigt Strg+Enter.
+
 ## 1.24.0 – 17.11.2026 · Einfügen von harptabs.com
 
 - **Akkorde, Harp-Tabs und Text in einer Zeile:** Steht über dem Liedtext eine Zeile mit Gitarren-Akkorden

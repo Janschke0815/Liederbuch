@@ -42,6 +42,11 @@ Dialog öffnen und auf die Antwort warten: den `value` des gedrückten Knopfes
 (<button value="…"> in <form method="dialog">), bei Esc/Abbruch 'cancel'.
   const wahl = await ask('#dup-dialog');
 
+### `primaryButtonFor(node)`
+
+Der Hauptknopf (.primary), der zu einem Element im Dialog gehört: der nächstgelegene sichtbare
+und nicht gesperrte – im Cloud-Dialog z. B. „Anlegen“ beim Namensfeld, sonst „Verbinden“ unten.
+
 ### `closeOnBackdrop(...dialogs)`
 
 Klick auf den abgedunkelten Rand neben dem Dialog schließt ihn.

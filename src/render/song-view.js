@@ -7,6 +7,7 @@
 import { transposeChord, transposeNote, shouldUseFlats, parseChord } from '../core/chords.js';
 import { splitRepeat, formatRepeat } from '../core/repeat.js';
 import { chordDiagram } from './chord-diagram.js';
+import { harpLabel } from '../core/harp.js';
 
 const DEFAULT_LABELS = { chorus: 'Refrain', bridge: 'Bridge' };
 
@@ -66,7 +67,7 @@ function renderLyricsLine(original, chordName) {
 /** Akkord, Anmerkung oder Mundharmonika-Tab über dem Text. */
 function chordSpan(s, chordName) {
   if (s.annotation) return el('span', 'chord annotation', s.chord);
-  if (s.harp) return el('span', 'chord harp', s.chord); // wird nie transponiert
+  if (s.harp) return el('span', 'chord harp', harpLabel(s.chord)); // wird nie transponiert; mehrere Löcher als (7 8)
   return el('span', 'chord', chordName(s.chord));
 }
 

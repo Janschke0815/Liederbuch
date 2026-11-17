@@ -7,12 +7,12 @@ Mundharmonika-Tabs (Harp-Tabs): Kanalnummern über dem Text, wie Akkorde in ecki
 ```text
   [4]  blasen        [-4]  ziehen         [+4]  blasen (andere Schreibweise)
   [-3'] [-3''] [-3b]  Bendings           [6o] [6°]  Overblow
-  [4 -4 5]  mehrere Töne an einer Stelle
+  [7 8] [(7 8)] [7,8] [7+8]  mehrere Löcher gleichzeitig – angezeigt als „(7 8)“
 ```
 
 Diatonisch 1–10, chromatisch bis 16. Reine Funktionen, kein DOM.
 
-**Benutzt von:** [`core/chordpro.js`](chordpro.md), [`formats/harp-import.js`](../formats/harp-import.md), [`formats/ug-import.js`](../formats/ug-import.md)
+**Benutzt von:** [`core/chordpro.js`](chordpro.md), [`formats/export-text.js`](../formats/export-text.md), [`formats/harp-import.js`](../formats/harp-import.md), [`formats/ug-import.js`](../formats/ug-import.md), [`render/song-view.js`](../render/song-view.md)
 
 ## Exportiert
 
@@ -20,9 +20,20 @@ Diatonisch 1–10, chromatisch bis 16. Reine Funktionen, kein DOM.
 
 Einzelner Ton, z. B. "-4" oder "3'".
 
+### `harpNotes(text)`
+
+Töne in einer Klammer: „-4“ -> ['-4']; „7 8“, „(7 8)“, „7,8“, „7+8“ -> ['7', '8'].
+Ein „+“ vor einer Zahl am Anfang bleibt Blaston („+4“), zwischen zwei Tönen trennt es.
+
+**Rückgabe:** `string[] | null` null, wenn es keine Harp-Töne sind
+
 ### `isHarpTab(text)`
 
-Inhalt einer Klammer: ein oder mehrere Töne, durch Leerzeichen getrennt.
+Inhalt einer Klammer: ein oder mehrere Töne (siehe harpNotes).
+
+### `harpLabel(text)`
+
+Anzeige eines Harp-Tabs: einzelner Ton wie geschrieben, mehrere Löcher gleichzeitig als „(7 8)“.
 
 ### `isHarpLine(line)`
 

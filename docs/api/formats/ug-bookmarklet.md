@@ -24,6 +24,14 @@ Ultimate-Guitar-Markierungen entfernen: [tab]…[/tab] weg, [ch]C[/ch] -> C. Nor
 steht eine Akkordzeile über dem Text; stehen Akkorde mitten im Text, wird daraus ebenfalls
 eine Akkordzeile darüber.
 
+### `titleFromPage(pageTitle)`
+
+Titel und Interpret aus dem Seitentitel anderer Seiten, z. B. harptabs.com:
+„Heart Of Gold (w/lyrics & chords) by Neil Young · Harptabs“ -> {title: 'Heart Of Gold', artist: 'Neil Young'}.
+Zusätze wie „(w/lyrics & chords)“ oder „(Full Song)“ fallen weg.
+
+**Rückgabe:** `{title: string, artist: string} | null`
+
 ### `ugDataToText(d)`
 
 Rohdaten des Lesezeichens -> Text für den Einfügen-Dialog (mit Kopfzeilen für Titel usw.).

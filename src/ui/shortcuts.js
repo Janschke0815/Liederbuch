@@ -15,6 +15,8 @@ export const SHORTCUTS = {
     { id: 'print', keys: ['Mod+p'], show: 'Strg+P', label: 'Drucken / PDF' },
     { id: 'focus', keys: ['Mod+e'], show: 'Strg+E', label: 'Editor ein-/ausblenden' },
     { id: null, keys: [], show: 'Strg+V', label: 'Text einfügen (außerhalb des Editors)' },
+    { id: null, keys: [], show: 'Enter', label: 'im Dialog: bestätigen (roter Knopf)' },
+    { id: null, keys: [], show: 'Strg+Enter', label: 'im Dialog mit großem Textfeld: bestätigen' },
     { id: 'play', keys: ['f'], show: 'F', label: 'Spielmodus', song: true },
     { id: 'metronome', keys: ['m'], show: 'M', label: 'Metronom an/aus', song: true },
     { id: 'up', keys: ['+', '='], show: '+ / −', label: 'Transponieren', song: true },

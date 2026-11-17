@@ -51,6 +51,36 @@ export function ask(dialog) {
   return new Promise((resolve) => d.addEventListener('close', () => resolve(d.returnValue || 'cancel'), { once: true }));
 }
 
+/**
+ * Der Hauptknopf (.primary), der zu einem Element im Dialog gehört: der nächstgelegene sichtbare
+ * und nicht gesperrte – im Cloud-Dialog z. B. „Anlegen“ beim Namensfeld, sonst „Verbinden“ unten.
+ */
+export function primaryButtonFor(node) {
+  const dialog = node.closest?.('dialog');
+  if (!dialog) return null;
+  const usable = (b) => !b.disabled && !b.hidden && b.offsetParent !== null;
+  for (let n = node; n && dialog.contains(n); n = n.parentElement) {
+    const b = [...n.querySelectorAll('button.primary')].find(usable);
+    if (b) return b;
+  }
+  return null;
+}
+
+// Enter bestätigt Dialoge mit dem Hauptknopf. Ohne das drückt der Browser den *ersten* Knopf des
+// Formulars – und das ist meist „Abbrechen“. In mehrzeiligen Feldern bleibt Enter ein Zeilenumbruch,
+// dort bestätigt Strg+Enter. Felder mit eigener Enter-Taste (preventDefault) haben Vorrang.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || e.defaultPrevented || e.isComposing || e.altKey || e.shiftKey) return;
+  const t = e.target;
+  if (!t.closest?.('dialog[open]')) return;
+  if (/^(BUTTON|A|SUMMARY)$/.test(t.tagName)) return; // ein Knopf reagiert selbst auf Enter
+  if (t.tagName === 'TEXTAREA' && !(e.ctrlKey || e.metaKey)) return;
+  const primary = primaryButtonFor(t);
+  if (!primary) return;
+  e.preventDefault();
+  primary.click();
+});
+
 /** Klick auf den abgedunkelten Rand neben dem Dialog schließt ihn. */
 export function closeOnBackdrop(...dialogs) {
   for (const d of dialogs.map((x) => (typeof x === 'string' ? $(x) : x))) {
