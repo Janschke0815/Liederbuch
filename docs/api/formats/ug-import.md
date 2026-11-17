@@ -4,7 +4,7 @@
 
 Import: "Akkorde über dem Text" (z. B. Ultimate Guitar) -> ChordPro-Text. Reine Funktionen, kein DOM.
 
-**Benutzt:** [`core/chords.js`](../core/chords.md), [`core/harp.js`](../core/harp.md), [`core/repeat.js`](../core/repeat.md)  
+**Benutzt:** [`core/chords.js`](../core/chords.md), [`core/harp.js`](../core/harp.md), [`core/repeat.js`](../core/repeat.md), [`formats/harp-import.js`](harp-import.md)  
 **Benutzt von:** [`formats/file-import.js`](file-import.md), [`formats/paste-import.js`](paste-import.md)
 
 ## Exportiert
@@ -20,6 +20,10 @@ Ist die Zeile ein Gitarren-Tab (e|---0---3---| …)? Mundharmonika-Zeilen zähle
 ### `sectionLabel(line)`
 
 Abschnittsname aus einer Zeile wie „[Chorus]“ oder „Strophe 2:“, sonst null.
+
+### `isInstrumentalLabel(label)`
+
+Abschnitt ohne Gesang (Intro, Solo …)? Er endet an der nächsten Leerzeile, wenn danach Liedtext kommt.
 
 ### `sectionKind(label)`
 
@@ -61,3 +65,4 @@ Nicht exportiert – nur innerhalb des Moduls benutzt.
 - `metaLine(line)`
 - `escapeLyrics(text)` – Eckige Klammern im Liedtext würden als Akkorde gelesen -> runde Klammern.
 - `chordMarker(text)`
+- `paragraphHasLyrics(lines, i)` – Enthält der Absatz ab Zeile i (bis zur nächsten Leerzeile) eine Zeile Liedtext?

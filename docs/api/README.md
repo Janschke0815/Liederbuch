@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-67 Module, 236 exportierte Funktionen, Konstanten und Klassen.
+68 Module, 240 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -72,6 +72,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`formats/export-text.js`](formats/export-text.md) | Lied exportieren: transponierter ChordPro-Text und "Akkorde über dem Text" (z. |
 | [`formats/file-format.js`](formats/file-format.md) | Dateien, die Menschen zu sehen bekommen (NAS, Drive, Sicherung, geteilte Lieder), so schreiben, dass sie auch in Windows-Programmen wie dem Editor sauber aussehen: eingerückt und mit Windows-Zeilenumbrüchen (CR LF). |
 | [`formats/file-import.js`](formats/file-import.md) | Erkennt, was in einer geöffneten Datei steckt. |
+| [`formats/harp-import.js`](formats/harp-import.md) | Mundharmonika-Zeilen aus fremden Quellen lesen (z. |
 | [`formats/paste-import.js`](formats/paste-import.md) | Eingefügter Text (z. |
 | [`formats/song-files.js`](formats/song-files.md) | Hilfen für „eine Datei pro Lied“ auf einem WebDAV-Server: Dateinamen aus Titel und Interpret, Prüfsummen zum Erkennen von Änderungen, Ordnerliste (PROPFIND) lesen. |
 | [`formats/ug-bookmarklet.js`](formats/ug-bookmarklet.md) | Lesezeichen „Ins Liederbuch“ (Bookmarklet): läuft auf der Ultimate-Guitar-Seite, die man gerade selbst ansieht, liest Titel, Interpret, Capo, Tonart, Stimmung, Tempo und den Liedtext aus und öffnet das Liederbuch mit dem Einfügen-Dialog (Daten in der Adresse hinter #ug=, sie gehen an keinen Server). |

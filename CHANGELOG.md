@@ -7,6 +7,16 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.24.0 – 17.11.2026 · Einfügen von harptabs.com
+
+- **Akkorde, Harp-Tabs und Text in einer Zeile:** Steht über dem Liedtext eine Zeile mit Gitarren-Akkorden
+  und eine mit Mundharmonika-Tönen (wie oft auf harptabs.com), wird beim Einfügen alles in eine Zeile
+  geschrieben – z. B. `[Em][4]Ich geh hinaus`. Die Reihenfolge der beiden Zeilen ist egal.
+- **Schreibweisen von harptabs.com:** `-6-6` (Töne ohne Leerzeichen) behält jeden Ton an seiner Stelle,
+  `7,8` bzw. `4+5` (zwei Löcher zugleich) wird `[7 8]`, `-3"` (ganzer Ton gebogen) wird `[-3'']`.
+- **Intro, Solo & Co.:** Ein Abschnitt wie „INTRO:“ oder „SOLO 1:“ endet an der Leerzeile, wenn danach
+  gesungen wird – vorher galt sonst das ganze restliche Lied als Intro.
+
 ## 1.23.1 – 16.11.2026 · Dokumentation
 
 - **Architektur-Beschreibung** [`docs/architektur.md`](docs/architektur.md): Schichten, Datenmodell, was beim

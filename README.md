@@ -285,6 +285,10 @@ Text automatisch erkannt – auch zusammen mit einer Akkordzeile darüber oder d
           6        6      6     5   -4
     Oh my darling, oh my darling, oh my darling Clementine
 
+Auch die Schreibweise von **harptabs.com** wird verstanden: `-6-6` (Töne ohne Leerzeichen),
+`7,8` oder `4+5` (zwei Löcher zugleich -> `[7 8]`) und `-3"` (ganzer Ton gebogen -> `[-3'']`).
+Ein „Intro:“ oder „Solo:“ endet an der Leerzeile, wenn danach Liedtext kommt.
+
 **Eine oder zwei Zeilen:** Unter *Einstellungen → Akkorde → Akkorde und Harp-Tabs* (oder per
 Rechtsklick auf die Vorschau → *Anzeigen → Harp-Tabs in eigener Zeile*) wählst du, ob Akkord und
 Ton nebeneinander stehen oder untereinander – Akkorde oben, Tabs direkt über dem Text. Das gilt
@@ -491,3 +495,5 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
 15. ✅ Wartbarkeit (1.23): `app.js` in Module unter `src/ui/` aufgeteilt, Dateiformate in `src/formats/`,
     gemeinsame Hilfen (`ui/dom.js`, `core/text.js`), gespeicherte Werte zentral (`prefs.js`), Tastenkürzel
     aus einer Tabelle, CSS nach Bereichen (`src/styles/`), Spielmodus-Rechnungen und WebDAV-HTTP getrennt
+16. ✅ Einfügen von harptabs.com (1.24): Akkord-, Harp- und Textzeile werden eine Zeile; Schreibweisen
+    `-6-6`, `7,8`, `-3"` erkannt; Intro/Solo endet vor dem Liedtext

@@ -12,7 +12,7 @@ Mundharmonika-Tabs (Harp-Tabs): Kanalnummern über dem Text, wie Akkorde in ecki
 
 Diatonisch 1–10, chromatisch bis 16. Reine Funktionen, kein DOM.
 
-**Benutzt von:** [`core/chordpro.js`](chordpro.md), [`formats/ug-import.js`](../formats/ug-import.md)
+**Benutzt von:** [`core/chordpro.js`](chordpro.md), [`formats/harp-import.js`](../formats/harp-import.md), [`formats/ug-import.js`](../formats/ug-import.md)
 
 ## Exportiert
 
