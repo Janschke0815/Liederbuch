@@ -74,6 +74,7 @@ Darstellungs-Einstellungen (settings/settings.js, DEFAULT_SETTINGS).
 | `chordFont` | `string` |  |
 | `chordSize` | `number` |  |
 | `chordColor` | `string` |  |
+| `showChords` | `boolean` |  |
 | `showDiagrams` | `boolean` |  |
 | `showHarp` | `boolean` |  |
 | `harpLayout` | `'inline'\|'split'` |  |

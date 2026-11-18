@@ -118,3 +118,45 @@ describe('Einstellungen: Darstellung', () => {
     expect(big > small).toBe(true);
   });
 });
+
+describe('Einstellungen: Gitarren-Akkorde ausblenden', () => {
+  const SONG = '{title: T}\n{start_of_part: Intro}\n| [C] | [G] |\n{end_of_part}\n[C]Oh my [-4]dar[*leise]ling\n[C] [4]';
+  const mount = (settings) => {
+    const box = document.createElement('div');
+    box.className = 'songbook';
+    document.body.append(box);
+    applySettings(box, { ...DEFAULT_SETTINGS, ...settings });
+    box.append(renderSong(parseChordPro(SONG)));
+    return box;
+  };
+  const shown = (box, sel) => [...box.querySelectorAll(sel)].filter((e) => e.offsetParent !== null).map((e) => e.textContent);
+
+  it('Standard: an; alte Einstellungen ohne den Wert bleiben an', () => {
+    expect(DEFAULT_SETTINGS.showChords).toBe(true);
+    expect(sanitize({}).showChords).toBe(true);
+    expect(sanitize({ showChords: false }).showChords).toBe(false);
+  });
+  it('aus: Akkorde, Akkord-Abschnitt und Griffbilder weg, Harp-Tabs und Anmerkungen bleiben', () => {
+    const box = mount({ showChords: false });
+    try {
+      expect(box.dataset.chords).toBe('hide');
+      expect(shown(box, '.chord:not(.harp):not(.annotation)')).toEqual([]);
+      expect(shown(box, '.chord.harp')).toEqual(['-4', '4']);
+      expect(shown(box, '.chord.annotation')).toEqual(['leise']);
+      expect(shown(box, '.block--chords-only').length).toBe(0);
+      expect(shown(box, '.chord-diagrams').length).toBe(0);
+      expect(shown(box, '.lyric').join('')).toContain('Oh my dar');
+    } finally {
+      box.remove();
+    }
+  });
+  it('an: alles sichtbar', () => {
+    const box = mount({ showChords: true });
+    try {
+      expect(shown(box, '.chord:not(.harp):not(.annotation)').length > 0).toBe(true);
+      expect(shown(box, '.block--chords-only').length).toBe(1);
+    } finally {
+      box.remove();
+    }
+  });
+});

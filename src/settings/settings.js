@@ -38,6 +38,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   chordBold: true,
   chorusStyle: 'bar',
   showLabels: true,
+  showChords: true, // Gitarren-Akkorde über dem Text (aus: nur Text und ggf. Harp-Tabs)
   showDiagrams: true, // Griffbilder im Liedkopf
   showHarp: true, // Mundharmonika-Tabs wie [-4]
   harpLayout: 'inline', // Akkorde und Harp-Tabs: 'inline' = eine Zeile, 'split' = zwei Zeilen
@@ -82,6 +83,7 @@ export function sanitize(input = {}) {
     chordBold: typeof s.chordBold === 'boolean' ? s.chordBold : d.chordBold,
     chorusStyle: oneOf(s.chorusStyle, Object.keys(CHORUS_STYLES), d.chorusStyle),
     showLabels: typeof s.showLabels === 'boolean' ? s.showLabels : d.showLabels,
+    showChords: bool(s.showChords, d.showChords),
     showDiagrams: typeof s.showDiagrams === 'boolean' ? s.showDiagrams : d.showDiagrams,
     showHarp: typeof s.showHarp === 'boolean' ? s.showHarp : d.showHarp,
     harpLayout: oneOf(s.harpLayout, ['inline', 'split'], d.harpLayout),
@@ -130,6 +132,7 @@ export function applySettings(el, settings) {
   el.dataset.artistLayout = s.artistInline ? 'inline' : 'below';
   el.dataset.chorusStyle = s.chorusStyle;
   el.dataset.labels = s.showLabels ? 'show' : 'hide';
+  el.dataset.chords = s.showChords ? 'show' : 'hide';
   el.dataset.diagrams = s.showDiagrams ? 'show' : 'hide';
   el.dataset.harp = s.showHarp ? 'show' : 'hide';
   el.dataset.harpLayout = s.harpLayout;

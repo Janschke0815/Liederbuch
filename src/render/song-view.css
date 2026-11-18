@@ -96,6 +96,15 @@
 .songbook[data-harp='hide'] .chord.harp,
 .songbook[data-harp='hide'] .line--harp-only,
 .songbook[data-harp='hide'] .block--harp-only { display: none; }
+/* Gitarren-Akkorde ein-/ausblendbar (data-chords="hide"): Akkorde, Akkordzeilen und -raster,
+   Griffbilder; Mundharmonika-Tabs und Anmerkungen bleiben */
+.songbook[data-chords='hide'] .chord:not(.harp):not(.annotation),
+.songbook[data-chords='hide'] .chord-row:not(:has(.annotation)),
+.songbook[data-chords='hide'] .line--chords-only,
+.songbook[data-chords='hide'] .block--chords-only,
+.songbook[data-chords='hide'] .block--grid,
+.songbook[data-chords='hide'] .chord-diagrams { display: none; }
+.songbook[data-chords='hide'] .line--with-chords:not(.line--harp) { margin-top: 0; }
 /* Gitarren-Tabs ({start_of_tab}) ein-/ausblendbar */
 .songbook[data-tabs='hide'] .block--tab { display: none; }
 .line--chords { font-family: var(--chord-font); }

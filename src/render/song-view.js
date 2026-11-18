@@ -75,6 +75,8 @@ function renderLyricsLineBody(line, chordName) {
   const div = el('div', line.chordsOnly ? 'line line--chords' : 'line');
   if (line.segments.some((s) => s.harp)) div.classList.add('line--harp');
   if (line.harpOnly) div.classList.add('line--harp-only');
+  // nur Gitarren-Akkorde (z. B. „| C | G |“): verschwindet, wenn Akkorde aus sind
+  if (line.chordsOnly && !line.segments.some((s) => s.harp || s.annotation)) div.classList.add('line--chords-only');
   if (line.chordsOnly) {
     for (const s of line.segments) {
       if (s.chord) div.append(chordSpan(s, chordName));
@@ -154,6 +156,10 @@ function renderBlock(block, chordName) {
   // Abschnitt nur aus Mundharmonika-Zeilen (z. B. Solo): verschwindet ganz, wenn Tabs aus sind
   const content = block.lines.filter((l) => !['empty', 'repeat-start', 'repeat-end'].includes(l.type));
   if (content.length && content.every((l) => l.harpOnly)) section.classList.add('block--harp-only');
+  // Abschnitt nur aus Akkordzeilen (z. B. Intro „| C | G |“): verschwindet, wenn Akkorde aus sind
+  if (content.length && content.every((l) => l.type === 'lyrics' && l.chordsOnly && !l.segments.some((s) => s.harp || s.annotation))) {
+    section.classList.add('block--chords-only');
+  }
   const { text: labelText, times } = splitRepeat(block.label || '');
   const label = labelText || DEFAULT_LABELS[block.kind];
   if (label) section.append(el('div', 'block-label', label));

@@ -170,7 +170,8 @@ Weitere unter **⋯**. Bei einer Setliste steht unter dem Titel die Position und
 **Zwei Spalten** (Symbol in der Leiste oder Taste S), ideal für Tablets im Querformat: Das Lied
 fließt in Spalten von Bildschirmhöhe, je zwei nebeneinander; Blättern schiebt um eine
 Doppelseite weiter, automatisch im Liedtempo. **Griffbilder** lassen sich hier direkt ein- und
-ausschalten (gleiche Einstellung wie unter Einstellungen → Akkorde).
+ausschalten (gleiche Einstellung wie unter Einstellungen → Anzeigen), ebenso die Gitarren-Akkorde
+(**Akk.** bzw. Taste A).
 
 Bluetooth-Fußpedale („Page Turner“) senden meist Bild↑/↓ oder Pfeiltasten und funktionieren
 damit ohne Einrichtung. Geblättert wird in der Reihenfolge der Liederliste (ggf. gefiltert).
@@ -208,13 +209,32 @@ beiden Spalten – beide Spalten beginnen erst darunter.
   nicht im Druck; wird mit gesichert und synchronisiert.
 - **Papierkorb** (Menü): gelöschte Lieder wiederherstellen oder endgültig löschen.
 
+## Einstellungen
+
+Die Einstellungen sind nach Fragen gegliedert; links springt man zu einem Bereich, jeder Bereich
+lässt sich einklappen:
+
+| Bereich | Inhalt |
+|---|---|
+| **Anzeigen** | was im Lied zu sehen ist: Gitarren-Akkorde, Griffbilder, Mundharmonika-Tabs (eine oder zwei Zeilen), Gitarren-Tabs, Abschnittsnamen, Interpret |
+| **Liedtext** | Schrift, Größe, Zeilenabstand, wie der Refrain hervorgehoben wird |
+| **Akkorde** | Schrift und Größe (auch für Harp-Tabs), Farbe, fett |
+| **Titel & Interpret** | Ausrichtung, Titel und Interpret gestalten |
+| **Druck** | Papier, Spalten, Seitenrand, Seitenzahlen |
+| **App** | dauerhaft speichern, Version |
+
+Optionen, die gerade nicht wirken, sind ausgegraut – z. B. „Griffbilder“, wenn die Gitarren-Akkorde
+aus sind. **Gitarren-Akkorde aus** zeigt nur Text (und ggf. Mundharmonika-Tabs): Akkorde,
+reine Akkordzeilen wie `| C | G |`, Akkordraster und Griffbilder verschwinden – in Vorschau,
+Spielmodus und Druck. Auch per Rechtsklick auf die Vorschau → *Anzeigen*.
+
 ## Titel & Interpret gestalten
 
 Unter **Einstellungen → Titel & Interpret**:
 
 - **Ausrichtung** des Liedkopfs: links oder mittig (Titel, Interpret, Infozeile und Griffbilder)
 - **Titel:** Schriftart (oder „wie Liedtext“), Größe, fett, Großbuchstaben, Farbe
-- **Interpret:** anzeigen ja/nein, **neben dem Titel** („Titel – Interpret“ in einer Zeile) oder
+- **Interpret:** (anzeigen unter *Anzeigen*) **neben dem Titel** („Titel – Interpret“ in einer Zeile) oder
   darunter, Größe, kursiv, Farbe – Größe/kursiv/Farbe gelten auch für den Untertitel
 
 Das Muster im Dialog zeigt jede Änderung sofort. Die Einstellungen gelten für Vorschau,
@@ -261,7 +281,7 @@ Der Spielmodus blättert in dieser gefilterten Liste.
 ## Griffbilder und Capo-Hilfe
 
 Im Liedkopf erscheinen **Griffbilder** aller vorkommenden Akkorde – in der gespielten, also
-transponierten Form (abschaltbar unter Einstellungen → Akkorde). Bekannte offene Griffe kommen
+transponierten Form (abschaltbar unter Einstellungen → Anzeigen). Bekannte offene Griffe kommen
 aus einer Tabelle, alle anderen werden aus den verschiebbaren E- und A-Barré-Formen berechnet;
 ein Test prüft jeden Griff (12 Grundtöne × 17 Akkordtypen) gegen die Akkordtöne.
 Slash-Akkorde (G/B) zeigen den Grundgriff.
@@ -294,7 +314,7 @@ bei Wörtern mit Bindestrich („Gas-o-line“) auf den Silbenanfang. Ein „Int
 an der Leerzeile, wenn danach Liedtext kommt; „Key: C Major (… Harp)“ wird ein Hinweis. Das
 Lesezeichen „Ins Liederbuch“ übernimmt auf harptabs.com auch Titel und Interpret.
 
-**Eine oder zwei Zeilen:** Unter *Einstellungen → Akkorde → Akkorde und Harp-Tabs* (oder per
+**Eine oder zwei Zeilen:** Unter *Einstellungen → Anzeigen → Akkorde und Harp-Tabs* (oder per
 Rechtsklick auf die Vorschau → *Anzeigen → Harp-Tabs in eigener Zeile*) wählst du, ob Akkord und
 Ton nebeneinander stehen oder untereinander – Akkorde oben, Tabs direkt über dem Text. Das gilt
 für Vorschau, Spielmodus und Druck, und **Lied teilen → als Text** schreibt die Tabs dann ebenfalls
@@ -302,7 +322,7 @@ in eine eigene Zeile (die sich wieder einfügen lässt).
 
 Gitarren-Tabs stehen wie bisher in `{start_of_tab}` … `{end_of_tab}`.
 
-Beide lassen sich getrennt ausblenden – unter **Einstellungen** (Akkorde bzw. Abschnitte), per
+Beide lassen sich getrennt ausblenden – unter **Einstellungen → Anzeigen**, per
 Rechtsklick auf die Vorschau → *Anzeigen* oder im Spielmodus mit **Harp** / **Tab** (H / T).
 Das gilt auch für den Druck. Ein Abschnitt, der nur aus Mundharmonika-Tönen besteht (z. B. ein
 Solo), verschwindet dann ganz.
@@ -502,3 +522,5 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     aus einer Tabelle, CSS nach Bereichen (`src/styles/`), Spielmodus-Rechnungen und WebDAV-HTTP getrennt
 16. ✅ Einfügen von harptabs.com (1.24): Akkord-, Harp- und Textzeile werden eine Zeile; Schreibweisen
     `-6-6`, `7,8`, `-3"` erkannt; Intro/Solo endet vor dem Liedtext
+17. ✅ Einstellungen übersichtlicher (1.25): Bereiche nach Fragen (Anzeigen, Liedtext, Akkorde,
+    Titel & Interpret, Druck, App), abhängige Optionen ausgegraut; Gitarren-Akkorde ausblendbar

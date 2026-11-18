@@ -73,7 +73,8 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
     {
       label: 'Anzeigen',
       items: [
-        toggleItem(s, 'Griffbilder', 'showDiagrams'),
+        toggleItem(s, 'Gitarren-Akkorde', 'showChords'),
+        toggleItem(s, 'Griffbilder', 'showDiagrams', { disabled: !s.showChords }),
         toggleItem(s, 'Mundharmonika-Tabs', 'showHarp'),
         {
           label: 'Harp-Tabs in eigener Zeile',

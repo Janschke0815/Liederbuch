@@ -44,7 +44,7 @@ const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing',
   'headerAlign', 'titleFont', 'titleSize', 'titleBold', 'titleUppercase', 'titleColor',
   'showArtist', 'artistInline', 'artistSize', 'artistItalic', 'artistColor',
   'chordFont', 'chordSize', 'chordColor',
-  'chordBold', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin', 'pageNumbers'];
+  'chordBold', 'showChords', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin', 'pageNumbers'];
 
 function fillSelect(sel, entries) {
   sel.replaceChildren(...entries.map(([value, label]) => new Option(label, value)));
@@ -105,6 +105,13 @@ export function setupSettings({ targets }) {
       const color = input(row.dataset.for).value.toLowerCase();
       for (const sw of row.querySelectorAll('.swatch')) sw.setAttribute('aria-pressed', String(sw.dataset.color === color));
     }
+    // Abhängige Zeilen ausgrauen, solange ein nötiger Schalter aus ist (data-needs="showChords …")
+    for (const row of dlg.querySelectorAll('.st-row[data-needs]')) {
+      const off = row.dataset.needs.split(/\s+/).some((key) => !input(key).checked);
+      row.classList.toggle('st-off', off);
+      for (const c of row.querySelectorAll('input, select, button')) c.disabled = off;
+      row.title = off ? 'Wirkt erst, wenn die übergeordnete Anzeige eingeschaltet ist' : '';
+    }
   }
 
   // Bereiche einklappbar: Klick auf die Überschrift; der Zustand bleibt gespeichert
@@ -125,6 +132,9 @@ export function setupSettings({ targets }) {
     const chevron = document.createElement('span');
     chevron.className = 'st-chevron';
     chevron.setAttribute('aria-hidden', 'true');
+    // dasselbe Symbol wie in der Navigation links
+    const navIcon = dlg.querySelector(`.st-nav a[href="#${card.id}"] span`);
+    if (navIcon) btn.append(Object.assign(document.createElement('span'), { className: 'st-card-icon', innerHTML: navIcon.innerHTML }));
     btn.append(...h3.childNodes, chevron);
     h3.replaceChildren(btn);
     btn.onclick = () => setCollapsed(card, !card.classList.contains('collapsed'));

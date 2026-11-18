@@ -7,6 +7,22 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.25.0 – 18.11.2026 · Einstellungen übersichtlicher, Akkorde ausblendbar
+
+- **Gitarren-Akkorde ausblenden:** neuer Schalter unter Einstellungen → Anzeigen. Aus: nur Text (und
+  Mundharmonika-Tabs) – Akkorde, reine Akkordzeilen wie `| C | G |`, Akkordraster und Griffbilder
+  verschwinden in Vorschau, Spielmodus und Druck. Auch per Rechtsklick auf die Vorschau und im
+  Spielmodus (Knopf **Akk.**, Taste **A**).
+- **Einstellungen neu gegliedert** – nach Fragen statt nach Technik:
+  **Anzeigen** (alle Ein/Aus-Schalter zum Inhalt an einer Stelle), **Liedtext**, **Akkorde**,
+  **Titel & Interpret** (mit Unterüberschriften „Titel“ und „Interpret“), **Druck**, **App**
+  (Speicher und Version zusammen).
+- Optionen, die gerade nicht wirken, sind **ausgegraut** – z. B. „Griffbilder“ ohne Akkorde oder die
+  Interpret-Gestaltung, wenn der Interpret ausgeblendet ist. Unteroptionen sind eingerückt.
+- **Bereiche klar abgegrenzt:** Jeder Bereich hat eine farbige Kopfleiste mit demselben Symbol wie in der
+  Navigation, eine rote Kante links und mehr Abstand zum nächsten; Unterüberschriften („Titel“,
+  „Interpret“) sind eine Stufe kleiner.
+
 ## 1.24.1 – 17.11.2026 · harptabs.com genauer, Doppeltöne, Enter in Dialogen
 
 - **Töne an der richtigen Silbe:** Auf harptabs.com stehen die Zahlen oft eine Spalte neben dem Silbenanfang

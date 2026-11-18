@@ -16,18 +16,33 @@
 .st-nav a:hover { background: var(--hover); }
 .st-nav a.active { background: var(--accent-soft); color: var(--accent); }
 .st-nav a.active span { color: var(--accent); }
-.settings-fields { padding: 1em 1.2em 2em; display: flex; flex-direction: column; gap: 1em; overflow-y: auto; min-height: 0; }
-.st-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); scroll-margin-top: .5em; }
-.st-card h3 { margin: 0; padding: .75em 1em .5em; font-size: .78em; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
-/* Bereiche einklappbar (Klick auf die Überschrift) */
-.st-card h3 { padding: 0; }
-.st-card-toggle { all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; width: 100%; padding: .75em 1em .5em; cursor: pointer; border-radius: 12px; }
-.st-card-toggle:hover { color: var(--text); }
+.settings-fields { padding: 1em 1.2em 2em; display: flex; flex-direction: column; gap: 1.6em; overflow-y: auto; min-height: 0; }
+/* Bereich: Karte mit farbiger Kopfleiste und roter Kante links – so sieht man, wo ein neuer beginnt */
+.st-card {
+  border: 1px solid var(--border-strong); border-left: 4px solid var(--accent); border-radius: 12px;
+  background: var(--surface); box-shadow: var(--shadow); scroll-margin-top: .5em; overflow: hidden;
+  flex-shrink: 0; /* sonst drückt die Spalte die Karten (wegen overflow: hidden) zusammen */
+}
+.st-card h3 { margin: 0; padding: 0; }
+/* Bereiche einklappbar (Klick auf die Kopfleiste) */
+.st-card-toggle {
+  all: unset; box-sizing: border-box; display: flex; align-items: center; gap: .65em; width: 100%;
+  padding: .7em 1em; cursor: pointer;
+  background: var(--accent-soft); border-bottom: 1px solid var(--border);
+  font-size: 1.02em; font-weight: 700; color: var(--text); letter-spacing: 0; text-transform: none;
+}
+.st-card-toggle:hover { filter: brightness(.97); }
 .st-card-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.st-card-toggle .st-chevron { margin-left: auto; color: var(--muted); }
+/* Symbol wie in der Navigation links */
+.st-card-icon {
+  display: inline-grid; place-items: center; width: 1.8em; height: 1.8em; border-radius: 50%;
+  background: var(--accent); color: var(--on-accent); font-family: Georgia, serif; font-size: .85em; font-weight: 700;
+}
+.st-card.collapsed .st-card-toggle { border-bottom: 0; }
 .st-chevron { width: .55em; height: .55em; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-25%); transition: transform .15s; }
 .st-card.collapsed .st-chevron { transform: rotate(-45deg); }
 .st-card.collapsed > :not(h3) { display: none; }
-.st-card.collapsed .st-card-toggle { padding-bottom: .75em; }
 .st-row { display: flex; align-items: center; justify-content: space-between; gap: 1em; padding: .65em 1em; border-top: 1px solid var(--border); }
 .st-row-stack { flex-direction: column; align-items: stretch; }
 .st-row-stack .st-control { justify-content: flex-start; }
@@ -83,3 +98,19 @@ button.settings-sample-label { display: flex; align-items: center; gap: .5em; wi
   .settings-sample { max-height: 26vh; padding: .5em 1em; }
   .settings-sample.collapsed { max-height: none; }
 }
+
+/* Gliederung innerhalb eines Bereichs */
+.st-card-hint { margin: 0; padding: .6em 1em; font-size: .82em; color: var(--muted); }
+.st-card-hint + .st-row { border-top: 1px solid var(--border); }
+.st-card > h3 + .st-row { border-top: 0; }
+/* Unterüberschrift im Bereich („Titel“, „Interpret“): eine Stufe kleiner als die Kopfleiste */
+.st-sub {
+  margin: 0; padding: .9em 1em .35em; border-top: 1px solid var(--border);
+  font-size: .74em; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted);
+}
+.st-sub + .st-row { border-top: 0; }
+/* Unteroption (gehört zum Schalter darüber) etwas eingerückt */
+.st-row-sub .st-text { padding-left: 1.1em; border-left: 2px solid var(--border); }
+/* Wirkt gerade nicht, weil ein übergeordneter Schalter aus ist */
+.st-row.st-off .st-text, .st-row.st-off .st-control { opacity: .45; }
+.st-row.st-off .st-control { pointer-events: none; }

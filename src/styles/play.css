@@ -54,7 +54,7 @@
 }
 .play-note { font-family: var(--chord-font, system-ui); font-size: .9em; color: #b3261e; margin: 0 0 .8em; font-style: italic; }
 /* Spielmodus zweispaltig: Spalten in Bildschirmhöhe, waagerecht blättern */
-#pl-diagrams[aria-pressed='true'], #pl-harp[aria-pressed='true'], #pl-tabs[aria-pressed='true'],
+#pl-chords[aria-pressed='true'], #pl-diagrams[aria-pressed='true'], #pl-harp[aria-pressed='true'], #pl-tabs[aria-pressed='true'],
 #pl-cols[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 .play-view.cols2 .play-scroll { overflow: hidden; padding-bottom: 1.2em; }
 .play-view.cols2 .play-sheet {

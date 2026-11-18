@@ -35,6 +35,7 @@ export const SHORTCUTS = {
     { id: 'faster', keys: ['>', '.'], show: null, label: '' },
     { id: 'bigger', keys: ['+', '='], show: '+ / −', label: 'Schrift größer / kleiner' },
     { id: 'smaller', keys: ['-'], show: null, label: '' },
+    { id: 'chords', keys: ['a'], show: 'A', label: 'Gitarren-Akkorde ein/aus' },
     { id: 'diagrams', keys: ['g'], show: 'G H T', label: 'Griffbilder, Harp-Tabs, Gitarren-Tabs' },
     { id: 'harp', keys: ['h'], show: null, label: '' },
     { id: 'tabs', keys: ['t'], show: null, label: '' },

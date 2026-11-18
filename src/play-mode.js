@@ -394,7 +394,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
 
   // Griffbilder, Mundharmonika- und Gitarren-Tabs ein/aus – dieselben Einstellungen wie im
   // Einstellungsdialog. Die Tab-Knöpfe erscheinen nur, wenn das Lied solche Tabs enthält.
-  const TOGGLES = { showDiagrams: '#pl-diagrams', showHarp: '#pl-harp', showTabs: '#pl-tabs' };
+  const TOGGLES = { showChords: '#pl-chords', showDiagrams: '#pl-diagrams', showHarp: '#pl-harp', showTabs: '#pl-tabs' };
   function syncDiagramButton() {
     const s = loadSettings();
     for (const [key, sel] of Object.entries(TOGGLES)) $(sel).setAttribute('aria-pressed', String(s[key]));
@@ -412,6 +412,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   }
   const toggleDiagrams = () => toggleSetting('showDiagrams');
   $('#pl-diagrams').onclick = toggleDiagrams;
+  $('#pl-chords').onclick = () => toggleSetting('showChords');
   $('#pl-harp').onclick = () => toggleSetting('showHarp');
   $('#pl-tabs').onclick = () => toggleSetting('showTabs');
   addEventListener('resize', () => {
@@ -449,6 +450,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     slower: () => setSpeed(speed - 0.1),
     metronome: toggleMetro,
     diagrams: toggleDiagrams,
+    chords: () => toggleSetting('showChords'),
     harp: () => !$('#pl-harp').hidden && toggleSetting('showHarp'),
     tabs: () => !$('#pl-tabs').hidden && toggleSetting('showTabs'),
     columns: () => setCols(!cols),

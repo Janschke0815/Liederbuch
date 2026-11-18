@@ -53,6 +53,7 @@
  * @property {string} chordFont
  * @property {number} chordSize
  * @property {string} chordColor
+ * @property {boolean} showChords
  * @property {boolean} showDiagrams
  * @property {boolean} showHarp
  * @property {'inline'|'split'} harpLayout
