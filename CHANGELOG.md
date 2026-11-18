@@ -7,6 +7,13 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.25.1 – 18.11.2026 · Harp-Tabs in Blau, Farbe einstellbar
+
+- **Harp-Tabs jetzt blau statt türkis-grün:** Bei Rot-Grün-Schwäche waren sie kaum vom Rot der Akkorde zu
+  unterscheiden (Farbabstand bei Rot-Schwäche 28, jetzt 84; bei Grün-Schwäche 52, jetzt 111).
+- **Farbe der Harp-Tabs einstellbar** unter Einstellungen → *Akkorde & Harp-Tabs* (Blau, Lila, Schwarz, Grau,
+  das bisherige Türkis oder eine eigene Farbe) – z. B. falls die Akkorde selbst blau sind.
+
 ## 1.25.0 – 18.11.2026 · Einstellungen übersichtlicher, Akkorde ausblendbar
 
 - **Gitarren-Akkorde ausblenden:** neuer Schalter unter Einstellungen → Anzeigen. Aus: nur Text (und

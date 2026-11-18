@@ -160,3 +160,24 @@ describe('Einstellungen: Gitarren-Akkorde ausblenden', () => {
     }
   });
 });
+
+describe('Einstellungen: Farbe der Harp-Tabs', () => {
+  it('Standard Blau, einstellbar, ungültige Werte -> Standard', () => {
+    expect(DEFAULT_SETTINGS.harpColor).toBe('#1565c0');
+    expect(sanitize({ harpColor: '#6A1B9A' }).harpColor).toBe('#6a1b9a');
+    expect(sanitize({ harpColor: 'grün' }).harpColor).toBe('#1565c0');
+  });
+  it('wirkt auf die Harp-Tabs, nicht auf die Akkorde', () => {
+    const box = document.createElement('div');
+    box.className = 'songbook';
+    document.body.append(box);
+    try {
+      applySettings(box, { ...DEFAULT_SETTINGS, harpColor: '#6a1b9a' });
+      box.append(renderSong(parseChordPro('[C][4]Oh')));
+      expect(getComputedStyle(box.querySelector('.chord.harp')).color).toBe('rgb(106, 27, 154)');
+      expect(getComputedStyle(box.querySelector('.chord:not(.harp)')).color).toBe('rgb(179, 38, 30)');
+    } finally {
+      box.remove();
+    }
+  });
+});

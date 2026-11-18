@@ -218,7 +218,7 @@ lässt sich einklappen:
 |---|---|
 | **Anzeigen** | was im Lied zu sehen ist: Gitarren-Akkorde, Griffbilder, Mundharmonika-Tabs (eine oder zwei Zeilen), Gitarren-Tabs, Abschnittsnamen, Interpret |
 | **Liedtext** | Schrift, Größe, Zeilenabstand, wie der Refrain hervorgehoben wird |
-| **Akkorde** | Schrift und Größe (auch für Harp-Tabs), Farbe, fett |
+| **Akkorde & Harp-Tabs** | Schrift und Größe, Farbe der Akkorde, fett, Farbe der Harp-Tabs |
 | **Titel & Interpret** | Ausrichtung, Titel und Interpret gestalten |
 | **Druck** | Papier, Spalten, Seitenrand, Seitenzahlen |
 | **App** | dauerhaft speichern, Version |
@@ -292,7 +292,9 @@ Capo und Transposition so, dass der Klang gleich bleibt.
 
 ## Mundharmonika- und Gitarren-Tabs
 
-Mundharmonika-Töne stehen wie Akkorde in eckigen Klammern über der Silbe und erscheinen in Grün:
+Mundharmonika-Töne stehen wie Akkorde in eckigen Klammern über der Silbe und erscheinen in einer
+eigenen Farbe – Standard Blau, das sich auch bei Rot-Grün-Schwäche gut von roten Akkorden abhebt
+(einstellbar unter *Einstellungen → Akkorde & Harp-Tabs*):
 
     I [C][4]come from [5]Ala[6]bama with my [G][-5]banjo
     [4] [-4] [5] [6] [6] [-6] [6] [5]

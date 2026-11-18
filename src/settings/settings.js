@@ -41,6 +41,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   showChords: true, // Gitarren-Akkorde über dem Text (aus: nur Text und ggf. Harp-Tabs)
   showDiagrams: true, // Griffbilder im Liedkopf
   showHarp: true, // Mundharmonika-Tabs wie [-4]
+  harpColor: '#1565c0', // Blau: auch bei Rot-Grün-Schwäche gut vom Rot der Akkorde zu unterscheiden
   harpLayout: 'inline', // Akkorde und Harp-Tabs: 'inline' = eine Zeile, 'split' = zwei Zeilen
   showTabs: true, // Gitarren-Tabs ({start_of_tab})
   lineSpacing: 'normal',
@@ -86,6 +87,7 @@ export function sanitize(input = {}) {
     showChords: bool(s.showChords, d.showChords),
     showDiagrams: typeof s.showDiagrams === 'boolean' ? s.showDiagrams : d.showDiagrams,
     showHarp: typeof s.showHarp === 'boolean' ? s.showHarp : d.showHarp,
+    harpColor: color(s.harpColor, d.harpColor),
     harpLayout: oneOf(s.harpLayout, ['inline', 'split'], d.harpLayout),
     showTabs: typeof s.showTabs === 'boolean' ? s.showTabs : d.showTabs,
     lineSpacing: oneOf(s.lineSpacing, Object.keys(LINE_SPACING), d.lineSpacing),
@@ -118,6 +120,7 @@ export function applySettings(el, settings) {
   st.setProperty('--chord-color', s.chordColor);
   st.setProperty('--chord-bar-color', s.chordColor + '40');
   st.setProperty('--chord-weight', s.chordBold ? '700' : '400');
+  st.setProperty('--harp-color', s.harpColor);
   st.setProperty('--line-height', String(LINE_SPACING[s.lineSpacing]));
   st.setProperty('--title-font', s.titleFont ? FONTS[s.titleFont] : 'var(--lyric-font)');
   st.setProperty('--title-size', s.titleSize + 'pt');

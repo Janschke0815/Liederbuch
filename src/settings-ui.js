@@ -44,7 +44,7 @@ const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing',
   'headerAlign', 'titleFont', 'titleSize', 'titleBold', 'titleUppercase', 'titleColor',
   'showArtist', 'artistInline', 'artistSize', 'artistItalic', 'artistColor',
   'chordFont', 'chordSize', 'chordColor',
-  'chordBold', 'showChords', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin', 'pageNumbers'];
+  'chordBold', 'harpColor', 'showChords', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin', 'pageNumbers'];
 
 function fillSelect(sel, entries) {
   sel.replaceChildren(...entries.map(([value, label]) => new Option(label, value)));

@@ -357,7 +357,7 @@
         <nav class="st-nav" aria-label="Bereiche">
           <a href="#st-sec-show" class="active"><span>◉</span>Anzeigen</a>
           <a href="#st-sec-text"><span>Aa</span>Liedtext</a>
-          <a href="#st-sec-chords"><span>C<sup>7</sup></span>Akkorde</a>
+          <a href="#st-sec-chords"><span>C<sup>7</sup></span>Akkorde &amp; Harp</a>
           <a href="#st-sec-head"><span>T</span>Titel &amp; Interpret</a>
           <a href="#st-sec-print"><span>⎙</span>Druck</a>
           <a href="#st-sec-app"><span>ⓘ</span>App</a>
@@ -377,7 +377,7 @@
                 <div class="st-control"><label class="switch"><input id="st-showDiagrams" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
               </div>
               <div class="st-row">
-                <div class="st-text"><span class="st-title">Mundharmonika-Tabs</span><span class="st-hint">Kanäle wie [4] [-4] [-3'] über dem Text – in Grün</span></div>
+                <div class="st-text"><span class="st-title">Mundharmonika-Tabs</span><span class="st-hint">Kanäle wie [4] [-4] [-3'] über dem Text – in eigener Farbe (unter „Akkorde &amp; Harp-Tabs“)</span></div>
                 <div class="st-control"><label class="switch"><input id="st-showHarp" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
               </div>
               <div class="st-row st-row-sub" data-needs="showChords showHarp">
@@ -419,17 +419,17 @@
           </section>
 
           <section class="st-card" id="st-sec-chords">
-            <h3>Akkorde</h3>
+            <h3>Akkorde &amp; Harp-Tabs</h3>
               <div class="st-row">
-                <div class="st-text"><span class="st-title">Schrift</span><span class="st-hint">gilt auch für Harp-Tabs</span></div>
+                <div class="st-text"><span class="st-title">Schrift</span><span class="st-hint">für Akkorde und Harp-Tabs</span></div>
                 <div class="st-control"><select id="st-chordFont"></select></div>
               </div>
               <div class="st-row">
-                <div class="st-text"><span class="st-title">Größe</span><span class="st-hint">gilt auch für Harp-Tabs</span></div>
+                <div class="st-text"><span class="st-title">Größe</span><span class="st-hint">für Akkorde und Harp-Tabs</span></div>
                 <div class="st-control"><input id="st-chordSize" type="range" min="6" max="28" step="0.5"><output class="range-val" data-for="st-chordSize" data-unit="pt"></output></div>
               </div>
               <div class="st-row" data-needs="showChords">
-                <div class="st-text"><span class="st-title">Farbe</span></div>
+                <div class="st-text"><span class="st-title">Farbe der Akkorde</span></div>
                 <div class="st-control"><span class="color-row" data-for="chordColor">
                   <button type="button" class="swatch" data-color="#b3261e" style="--c:#b3261e" title="Rot"></button>
                   <button type="button" class="swatch" data-color="#1f4e9c" style="--c:#1f4e9c" title="Blau"></button>
@@ -440,8 +440,19 @@
                 </span></div>
               </div>
               <div class="st-row" data-needs="showChords">
-                <div class="st-text"><span class="st-title">Fett</span><span class="st-hint">Akkorde kräftiger hervorheben</span></div>
+                <div class="st-text"><span class="st-title">Akkorde fett</span><span class="st-hint">kräftiger hervorheben</span></div>
                 <div class="st-control"><label class="switch"><input id="st-chordBold" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row" data-needs="showHarp">
+                <div class="st-text"><span class="st-title">Farbe der Harp-Tabs</span><span class="st-hint">Blau ist auch bei Rot-Grün-Schwäche gut von roten Akkorden zu unterscheiden</span></div>
+                <div class="st-control"><span class="color-row" data-for="harpColor">
+                  <button type="button" class="swatch" data-color="#1565c0" style="--c:#1565c0" title="Blau"></button>
+                  <button type="button" class="swatch" data-color="#6a1b9a" style="--c:#6a1b9a" title="Lila"></button>
+                  <button type="button" class="swatch" data-color="#222222" style="--c:#222222" title="Schwarz"></button>
+                  <button type="button" class="swatch" data-color="#616161" style="--c:#616161" title="Grau"></button>
+                  <button type="button" class="swatch" data-color="#00796b" style="--c:#00796b" title="Türkis (bisherige Farbe)"></button>
+                  <input id="st-harpColor" type="color" title="Eigene Farbe">
+                </span></div>
               </div>
           </section>
 
