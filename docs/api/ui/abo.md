@@ -21,6 +21,17 @@ Dialog „Liederbuch abonnieren“ öffnen.
 
 Neuen Stand holen (nur, wenn sich die Datei geändert hat).
 
+### `leaveAbo(entry = book)`
+
+Abo auf diesem Gerät beenden (nach Rückfrage): Eintrag, Stand und Lieder löschen. War es geöffnet,
+geht es zurück zu „Mein Liederbuch“.
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `[entry]` | `object` | Liederbuch-Eintrag aus books.js (sonst das geöffnete Abo) |
+
+**Rückgabe:** `boolean` beendet?
+
 ### `startAbo()`
 
 Beim Start: Einladungslink prüfen und – in einem Abo – den neuesten Stand holen.
@@ -43,4 +54,3 @@ Nicht exportiert – nur innerhalb des Moduls benutzt.
 - `async check()` – Vorschau: laden und anzeigen, was abonniert würde.
 - `async checkAboHash()` – Einladungslink geöffnet: <App>#abo=…
 - `renderBar()`
-- `async leaveAbo()`

@@ -32,7 +32,7 @@ import { flushSave, openSong, preview } from './ui/song.js';
 import { listedSongs, refreshList } from './ui/list.js';
 import { setView } from './ui/view.js';
 import { checkBookmarkHash } from './ui/paste.js';
-import { startAbo } from './ui/abo.js';
+import { leaveAbo, refreshAbo, startAbo } from './ui/abo.js';
 import './ui/publish.js';
 import './ui/song-actions.js';
 import './ui/snippets.js';
@@ -95,6 +95,8 @@ setupSync({
   toast,
   beforeSync: flushSave,
   beforeSwitch: flushSave,
+  leaveAbo,
+  refreshAbo,
   // Neues Gerät: das unveränderte Beispiellied nicht in das gemeinsame Liederbuch tragen
   beforeConnect: async () => {
     const all = await repo.list();

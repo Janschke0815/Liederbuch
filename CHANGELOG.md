@@ -7,6 +7,18 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.27.0 – 19.11.2026 · Cloud-Dialog übersichtlicher
+
+- Der Cloud-Dialog ist in klar getrennte Bereiche gegliedert (wie die Einstellungen):
+  **Liederbücher auf diesem Gerät** · **Abgleich zwischen Geräten** · **Mitglieder** (nur gemeinsame
+  Liederbücher) · **Für eine Gruppe veröffentlichen**.
+- **Abos in der Liste:** Bei jedem abonnierten Liederbuch stehen jetzt die **Adresse** (mit „Kopieren“),
+  Herausgeber, Stand und Anzahl der Lieder, dazu „Jetzt aktualisieren“ und **„Abo beenden“** – auch für
+  Abos, die gerade nicht geöffnet sind.
+- „Verbinden“ und „Trennen“ sitzen jetzt im Bereich „Abgleich“, nicht mehr ganz unten. Ist ein Abo
+  geöffnet, blendet der Dialog die Einstellungen zum Abgleich aus (ein Abo wird nie abgeglichen).
+- Der lange WebDAV-Erklärtext ist eingeklappt („Was passiert dort? Was muss der Server können?“).
+
 ## 1.26.3 – 19.11.2026 · Vom Abo zurück zu den eigenen Liedern
 
 - **„Mein Liederbuch“** in der Abo-Leiste über der Liste: ein Tipp, und du bist wieder bei deinen eigenen

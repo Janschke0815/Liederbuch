@@ -351,7 +351,7 @@ Eine Person pflegt ein Liederbuch, die anderen **abonnieren** es: Sie sehen es a
 Liederbuch, **nur zum Lesen**, und bekommen Änderungen automatisch (beim Öffnen und alle
 30 Minuten). Gedacht für einen **privaten Kreis** – Band, Familie, Freunde.
 
-**Veröffentlichen** (Cloud → Liederbücher → *Für eine Gruppe veröffentlichen …*):
+**Veröffentlichen** (Cloud → *Für eine Gruppe veröffentlichen* → *Veröffentlichen …*):
 alle Lieder, Lieder mit einem Tag oder eine Setliste. Die App legt die Abo-Datei in euren
 **Sync-Ordner** (WebDAV, Unterordner `Abo/`; nur, wenn die App gerade darüber abgleicht) – Abonnenten
 melden sich dort mit ihrem eigenen Benutzer an –
@@ -368,6 +368,8 @@ diesem Gerät). Im Abo kann man transponieren, eigene Notizen schreiben, spielen
 **Rechtsklick → In „Mein Liederbuch“ kopieren** macht aus einem Lied eine eigene, bearbeitbare
 Fassung. Die Leiste über der Liste zeigt den Stand, führt zurück zu **„Mein Liederbuch“**, aktualisiert auf
 Knopfdruck und beendet das Abo. Zwischen den Liederbüchern wechselt man auch oben über den Namen.
+Unter **Cloud → Liederbücher auf diesem Gerät** steht bei jedem Abo die Adresse (zum Kopieren), der Stand
+und „Abo beenden“.
 
 **Urheberrecht:** Liedtexte und Melodien (auch Harp-Tabs) sind meist geschützt (bis 70 Jahre nach
 dem Tod der Urheber). Weitergeben an einen privaten Kreis ist erlaubt, öffentlich bereitstellen
@@ -411,7 +413,7 @@ die Google-Anmeldung des jeweiligen Kontos, und die App bekommt nur die Berechti
    *Websites* (`https://janschke0815.github.io/*`, `http://localhost:5173/*`) und die *Google Picker API*.
 5. **Projektnummer** steht im Dashboard des Projekts (nur Ziffern).
 6. Client-ID, API-Schlüssel und Projektnummer in `src/sync/config.js` eintragen (gilt dann für
-   alle Geräte und Mitglieder) oder in der App unter **Cloud → Einrichtung**.
+   alle Geräte und Mitglieder) oder in der App unter **Cloud → Abgleich → Google-Einrichtung**.
 
 Keiner dieser Werte ist geheim (sie stehen bei jeder Web-App sichtbar im Code); Google nimmt sie
 nur von den eingetragenen Adressen an. Das *Client-Secret* wird nicht gebraucht – nicht weitergeben.
@@ -562,3 +564,5 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     Titel & Interpret, Druck, App), abhängige Optionen ausgegraut; Gitarren-Akkorde ausblendbar
 18. ✅ Liederbücher abonnieren (1.26): für private Gruppen veröffentlichen (WebDAV-Ordner oder Datei),
     per Einladungslink abonnieren, nur lesen, automatisch aktualisieren, Lieder ins eigene Buch kopieren
+19. ✅ Cloud-Dialog übersichtlicher (1.27): Bereiche „Liederbücher auf diesem Gerät“, „Abgleich zwischen
+    Geräten“, „Mitglieder“, „Für eine Gruppe veröffentlichen“; Abo-Adresse und „Abo beenden“ dort

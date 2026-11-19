@@ -1,7 +1,29 @@
 /* Cloud-Sync und Liederbücher. */
 
 .sync-dialog { width: min(640px, 95vw); }
-.sync-body { display: flex; flex-direction: column; gap: 1em; }
+.sync-body { display: flex; flex-direction: column; gap: 1.2em; }
+/* Bereich im Cloud-Dialog: Karte mit Kopfleiste und roter Kante links (wie in den Einstellungen) */
+.cloud-card {
+  border: 1px solid var(--border-strong); border-left: 4px solid var(--accent); border-radius: 12px;
+  background: var(--surface); box-shadow: var(--shadow); overflow: hidden; flex-shrink: 0;
+}
+.cloud-card > h3 {
+  display: flex; align-items: center; gap: .55em; margin: 0; padding: .65em 1em;
+  background: var(--accent-soft); border-bottom: 1px solid var(--border); font-size: 1.02em;
+}
+.cloud-card > h3 .icon { width: 1.2em; height: 1.2em; color: var(--accent); flex-shrink: 0; }
+.cloud-card.muted { border-left-color: var(--border-strong); }
+.cloud-card.muted > h3 .icon { color: var(--muted); }
+.cloud-card-body { display: flex; flex-direction: column; gap: .75em; padding: .9em 1em 1em; }
+.cloud-card-body > .hint, .cloud-sub > .hint { margin: 0; }
+.cloud-sub { display: flex; flex-direction: column; gap: .75em; }
+.cloud-sub[hidden] { display: none; }
+.cloud-actions { display: flex; flex-wrap: wrap; gap: .5em; }
+.cloud-actions[hidden] { display: none; }
+.cloud-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: .5em; padding-top: .2em; }
+.cloud-buttons .spacer { flex: 1; }
+.cloud-buttons .link-btn { padding-inline: 0; }
+.sync-setup .hint { margin: .4em 0 0; }
 .sync-status {
   display: flex; gap: .9em; align-items: center; padding: .9em 1em;
   border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2);
@@ -24,14 +46,12 @@
   border-color: transparent; background-color: transparent; padding-inline: .4em;
 }
 .book-select:hover { background-color: var(--hover); }
-.sync-section { display: flex; flex-direction: column; gap: .6em; }
 .sync-provider-row { display: flex; align-items: center; gap: .7em; flex-wrap: wrap; }
 .sync-provider-row .segmented button { padding-inline: .9em; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6em; }
 @media (max-width: 520px) {
   .field-row { grid-template-columns: 1fr; }
 }
-.sync-section h3 { margin: 0; font-size: .95em; }
 .sync-status-main { flex: 1; min-width: 0; }
 .book-list, .member-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .book-list li, .member-list li { display: flex; align-items: center; gap: .6em; padding: .5em .8em; border-bottom: 1px solid var(--border); }
@@ -41,9 +61,15 @@
 .book-name small, .member-name small { display: block; font-weight: 400; color: var(--muted); font-size: .8em; }
 .member-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .book-list button, .member-list button { min-height: 1.9rem; padding: .15em .6em; font-size: .85em; }
-.book-actions { display: flex; flex-direction: column; gap: .5em; align-items: flex-start; }
-.book-actions details { align-self: stretch; }
-.book-actions .field { margin-bottom: .5em; }
+.sync-setup .field { margin-bottom: .5em; }
+/* Abo in der Liste: Adresse, Stand, Aktualisieren/Beenden */
+#book-list li { flex-wrap: wrap; }
+.abo-details { flex-basis: 100%; display: flex; flex-direction: column; gap: .4em; padding: .1em 0 .2em; }
+.abo-url-row { display: flex; gap: .4em; }
+.abo-url { flex: 1; min-width: 0; font-family: ui-monospace, Consolas, monospace; font-size: .8em; color: var(--muted); }
+.abo-details .hint { font-size: .8em; }
+.abo-details .warn { color: #a3600b; }
+.abo-detail-actions { display: flex; flex-wrap: wrap; gap: .4em; }
 .sync-setup label.check { display: flex; gap: .5em; align-items: center; font-size: .9em; }
 .invite-row { display: flex; gap: .5em; }
 .invite-row input { flex: 1; min-width: 0; }

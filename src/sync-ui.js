@@ -7,6 +7,7 @@ import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID } from './sync/config.j
 import {
   listBooks, setActiveBook, addSharedBook, removeBook, bookNameFromFile, fileNameForBook,
 } from './books.js';
+import { prefs } from './prefs.js';
 import { slimRecord } from './storage/repository.js';
 import { $ } from './ui/dom.js';
 
@@ -20,6 +21,7 @@ const TITLES = {
 };
 
 const fmtTime = (d) => d?.toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+const fmtWhen = (iso) => (iso ? new Date(iso).toLocaleString('de', { day: 'numeric', month: 'numeric', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '–');
 const li = (...children) => {
   const el = document.createElement('li');
   el.append(...children);
@@ -38,9 +40,11 @@ const button = (text, onclick, className = '') =>
 /**
  * Cloud-Dialog und Abgleich einrichten (Google Drive oder WebDAV, gemeinsame Liederbücher).
  * @param {{repo, book, beforeSync: () => Promise<void>, beforeConnect?: () => Promise<void>,
- *          beforeSwitch: () => Promise<void>, toast: Function}} opts
+ *          beforeSwitch: () => Promise<void>, toast: Function,
+ *          leaveAbo?: (entry: object) => boolean, refreshAbo?: (o: {quiet: boolean}) => Promise<void>}} opts
+ *   leaveAbo/refreshAbo: Abo beenden bzw. aktualisieren (aus ui/abo.js)
  */
-export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, beforeSwitch, toast }) {
+export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, beforeSwitch, toast, leaveAbo, refreshAbo }) {
   const dlg = $('#sync-dialog');
   const btn = $('#btn-cloud');
   $('#sync-origin').textContent = location.origin;
@@ -115,7 +119,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     btn.title = `Cloud-Sync: ${TITLES[state]}${text ? ' – ' + text : ''}`;
     $('#cloud-label').textContent = state === 'off' ? 'Cloud' : state === 'auth' ? 'Anmelden' : TITLES[state];
     $('#sync-status').dataset.state = state;
-    $('#sync-status-title').textContent = `${book.name}: ${TITLES[state]}`;
+    $('#sync-status-title').textContent = book.abo ? `${book.name}: Abo` : `${book.name}: ${TITLES[state]}`;
     $('#sync-status-text').textContent = text;
 
     const connected = state !== 'off';
@@ -125,8 +129,13 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#sync-connect').hidden = usable;
     $('#sync-connect').textContent = state === 'auth' ? 'Neu anmelden' : 'Verbinden';
     $('#book-actions').hidden = !usable || dav;
-    $('#book-offline-hint').hidden = usable || dav;
-    $('#book-webdav-hint').hidden = !dav;
+    $('#book-new').hidden = !usable || dav;
+    // Abo: wird nie mit der Cloud abgeglichen – keine Einstellungen zum Abgleich zeigen
+    $('#sync-config').hidden = Boolean(book.abo);
+    $('#sync-card').classList.toggle('muted', Boolean(book.abo));
+    $('#publish-from').textContent = book.name;
+    $('#book-offline-hint').hidden = usable || dav || Boolean(book.abo);
+    $('#book-webdav-hint').hidden = !dav || Boolean(book.abo);
     $('#book-new-from').textContent = book.name;
     for (const id of ['#sync-client-id', '#sync-api-key', '#sync-app-id']) $(id).disabled = usable;
     for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).disabled = usable;
@@ -146,10 +155,49 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       : 'Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.';
   }
 
+  /** Angaben zu einem Abo: Adresse (zum Kopieren), Stand, Aktualisieren und Beenden. */
+  function aboDetails(b, isActive) {
+    const st = prefs.get('aboState')[b.id] || {};
+    const box = document.createElement('div');
+    box.className = 'abo-details';
+    const url = Object.assign(document.createElement('input'), { readOnly: true, value: b.abo.url, title: 'Adresse des Abos', className: 'abo-url' });
+    url.onfocus = () => url.select();
+    const copy = button('Kopieren', async () => {
+      try {
+        await navigator.clipboard.writeText(b.abo.url);
+        toast('Adresse kopiert');
+      } catch {
+        url.select();
+      }
+    });
+    const urlRow = document.createElement('div');
+    urlRow.className = 'abo-url-row';
+    urlRow.append(url, copy);
+    const facts = [
+      b.abo.publisher && `von ${b.abo.publisher}`,
+      `Stand ${fmtWhen(st.publishedAt)}`,
+      st.count != null && `${st.count} ${st.count === 1 ? 'Lied' : 'Lieder'}`,
+      b.abo.user && `angemeldet als ${b.abo.user}`,
+    ];
+    const info = span('hint', facts.filter(Boolean).join(' · '));
+    if (st.error) info.append(Object.assign(document.createElement('span'), { className: 'warn', textContent: ` · ⚠ ${st.error}` }));
+    const actions = document.createElement('div');
+    actions.className = 'abo-detail-actions';
+    if (isActive && refreshAbo) {
+      actions.append(button('Jetzt aktualisieren', async () => {
+        await refreshAbo({ quiet: false });
+        renderBooks();
+      }));
+    }
+    if (leaveAbo) actions.append(button('Abo beenden', () => leaveAbo(b) && (renderBooks(), renderBookSelect()), 'danger'));
+    box.append(urlRow, info, actions);
+    return box;
+  }
+
   function renderBooks() {
     const items = listBooks().map((b) => {
       const isActive = b.id === book.id;
-      const row = li(span('book-name', b.name, b.abo ? `abonniert${b.abo.publisher ? ' · von ' + b.abo.publisher : ''} · nur lesen` : b.shared ? 'gemeinsam' : 'persönlich'));
+      const row = li(span('book-name', b.name, b.abo ? 'abonniert · nur lesen' : b.shared ? 'gemeinsam' : 'persönlich'));
       if (isActive) {
         row.classList.add('active');
         row.append(span('hint', 'geöffnet'));
@@ -157,6 +205,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         row.append(button('Öffnen', () => switchTo(b.id)));
       }
       if (b.shared && isActive) row.append(button('Verlassen', leaveBook, 'danger'));
+      if (b.abo) row.append(aboDetails(b, isActive));
       return row;
     });
     $('#book-list').replaceChildren(...items);

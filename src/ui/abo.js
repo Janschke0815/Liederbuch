@@ -156,22 +156,32 @@ export function refreshAbo({ quiet = true } = {}) {
   return checking;
 }
 
-async function leaveAbo() {
-  if (!confirm(`Abo „${book.name}“ auf diesem Gerät beenden? Die Lieder verschwinden hier; das Original bleibt, wo es ist.`)) return;
-  removeBook(book.id);
+/**
+ * Abo auf diesem Gerät beenden (nach Rückfrage): Eintrag, Stand und Lieder löschen. War es geöffnet,
+ * geht es zurück zu „Mein Liederbuch“.
+ * @param {object} [entry]  Liederbuch-Eintrag aus books.js (sonst das geöffnete Abo)
+ * @returns {boolean} beendet?
+ */
+export function leaveAbo(entry = book) {
+  if (!entry?.abo) return false;
+  if (!confirm(`Abo „${entry.name}“ auf diesem Gerät beenden? Die Lieder verschwinden hier; das Original bleibt, wo es ist.`)) return false;
+  removeBook(entry.id);
   const st = prefs.get('aboState');
-  delete st[book.id];
+  delete st[entry.id];
   prefs.set('aboState', st);
-  indexedDB.deleteDatabase(book.dbName);
-  setActiveBook(PERSONAL.id);
-  location.reload();
+  indexedDB.deleteDatabase(entry.dbName);
+  if (entry.id === book.id) {
+    setActiveBook(PERSONAL.id);
+    location.reload();
+  }
+  return true;
 }
 
 if (readOnly) {
   document.body.dataset.readonly = 'abo';
   $('#abo-bar').hidden = false;
   $('#abo-refresh').onclick = () => refreshAbo({ quiet: false });
-  $('#abo-leave').onclick = leaveAbo;
+  $('#abo-leave').onclick = () => leaveAbo();
   $('#abo-home').onclick = () => {
     setActiveBook(PERSONAL.id);
     location.reload();
@@ -180,7 +190,7 @@ if (readOnly) {
     sessionStorage.removeItem('aboJustAdded');
     toast(`Abo „${book.name}“ geöffnet. Deine eigenen Lieder: oben auf den Namen tippen oder „Mein Liederbuch“`, { ms: 8000 });
   }
-  $('#btn-publish').hidden = true; // ein Abo veröffentlicht man nicht weiter
+  $('#publish-card').hidden = true; // ein Abo veröffentlicht man nicht weiter
   renderBar();
   // erstes Nachsehen startet app.js nach dem Öffnen des ersten Liedes (startAbo)
   setInterval(() => !document.hidden && refreshAbo(), CHECK_EVERY_MS);

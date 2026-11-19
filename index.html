@@ -679,92 +679,123 @@
   <dialog id="sync-dialog" class="sync-dialog">
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
-        <h2>Cloud-Sync &amp; Liederbücher</h2>
-        <p class="hint">Alle Geräte teilen sich ein Liederbuch über Google Drive oder einen WebDAV-Server (z. B. Nextcloud). Änderungen erscheinen nach wenigen Sekunden überall; offline wird lokal weitergearbeitet.</p>
+        <h2>Cloud &amp; Liederbücher</h2>
       </header>
       <div class="dialog-body sync-body">
-        <div class="sync-provider-row" id="sync-provider-row">
-          <span class="hint">Speicherort</span>
-          <div class="segmented" role="radiogroup" aria-label="Speicherort" id="sync-provider">
-            <button type="button" role="radio" data-value="gdrive">Google Drive</button>
-            <button type="button" role="radio" data-value="webdav">WebDAV / Nextcloud</button>
-          </div>
-        </div>
-        <div id="sync-status" class="sync-status" data-state="off">
-          <svg class="icon"><use href="#i-cloud"/></svg>
-          <div class="sync-status-main">
-            <strong id="sync-status-title">Nicht verbunden</strong>
-            <div id="sync-status-text" class="hint"></div>
-          </div>
-          <button type="button" id="sync-now" class="icon-btn" title="Jetzt abgleichen"><svg class="icon"><use href="#i-sync"/></svg></button>
-        </div>
 
-        <section id="webdav-setup" class="sync-section" hidden>
-          <h3>WebDAV-Server</h3>
-          <label class="field">Ordner-Adresse
-            <input id="webdav-url" type="url" placeholder="https://cloud.example.de/remote.php/dav/files/NAME/Liederbuch/" autocomplete="off" spellcheck="false">
-          </label>
-          <div class="field-row">
-            <label class="field">Benutzername
-              <input id="webdav-user" autocomplete="username" spellcheck="false">
-            </label>
-            <label class="field">App-Passwort
-              <input id="webdav-pass" type="password" autocomplete="current-password">
-            </label>
-          </div>
-          <p class="hint">Die App legt dort für jedes Lied eine ChordPro-Datei (Ordner <code>Lieder</code>) und für jede Setliste eine Textdatei (Ordner <code>Setlisten</code>) an – lesbar und bearbeitbar auch ohne die App. Nimm ein eigenes <b>App-Passwort</b> (Nextcloud: Einstellungen → Sicherheit), nicht dein Hauptpasswort – es wird auf diesem Gerät gespeichert. Mehrere Personen: den Ordner in der Nextcloud teilen und alle tragen dieselbe Adresse ein. Der Server muss Zugriffe von <code id="webdav-origin"></code> erlauben (CORS, siehe README).</p>
-          <button type="button" id="webdav-forget" class="link-btn danger" hidden>Gespeicherte Adresse und Zugangsdaten löschen</button>
-        </section>
-
-        <section class="sync-section" id="books-section">
-          <h3>Liederbücher</h3>
-          <ul id="book-list" class="book-list"></ul>
-          <div id="book-actions" class="book-actions">
+        <!-- 1. Welche Liederbücher es auf diesem Gerät gibt (eigenes, gemeinsame, Abos) -->
+        <section class="cloud-card" id="books-section">
+          <h3><svg class="icon"><use href="#i-note"/></svg>Liederbücher auf diesem Gerät</h3>
+          <div class="cloud-card-body">
+            <ul id="book-list" class="book-list"></ul>
+            <p class="hint">Wechseln geht auch oben über den Namen des Liederbuchs.</p>
+            <div class="cloud-actions">
+              <button type="button" id="btn-subscribe"><svg class="icon"><use href="#i-plus"/></svg>Abo hinzufügen …</button>
+              <div id="book-actions" class="cloud-actions">
+                <button type="button" id="book-join"><svg class="icon"><use href="#i-open"/></svg>Einladung öffnen …</button>
+              </div>
+            </div>
             <details id="book-new" class="sync-setup">
-              <summary>+ Neues gemeinsames Liederbuch</summary>
+              <summary>Neues gemeinsames Liederbuch (Google Drive)</summary>
               <label class="field">Name <input id="book-new-name" placeholder="z. B. Band, Lagerfeuer" autocomplete="off"></label>
               <label class="check"><input type="checkbox" id="book-new-copy"> Lieder aus „<span id="book-new-from"></span>“ übernehmen</label>
               <div class="row-end"><button type="button" id="book-new-ok" class="primary">Anlegen</button></div>
             </details>
-            <button type="button" id="book-join"><svg class="icon"><use href="#i-open"/></svg>Einladung öffnen …</button>
+            <p id="book-offline-hint" class="hint">Gemeinsame Liederbücher anlegen und Einladungen öffnen: zuerst unten mit Google Drive verbinden.</p>
+            <p id="book-webdav-hint" class="hint" hidden>Gemeinsame Liederbücher mit Einladung gibt es über Google Drive. Mit WebDAV teilt ihr einfach den Ordner.</p>
           </div>
-          <div class="book-actions abo-actions">
-            <button type="button" id="btn-subscribe"><svg class="icon"><use href="#i-plus"/></svg>Abo hinzufügen …</button>
-            <button type="button" id="btn-publish"><svg class="icon"><use href="#i-share"/></svg>Für eine Gruppe veröffentlichen …</button>
-          </div>
-          <p id="book-offline-hint" class="hint">Zum Anlegen und Beitreten zuerst mit Google Drive verbinden.</p>
-          <p id="book-webdav-hint" class="hint" hidden>Gemeinsame Liederbücher mit Einladung gibt es über Google Drive. Mit WebDAV teilt ihr einfach den Ordner.</p>
         </section>
 
-        <section id="members" class="sync-section" hidden>
-          <h3>Mitglieder von „<span id="members-book"></span>“</h3>
-          <ul id="member-list" class="member-list"></ul>
-          <div class="invite-row">
-            <input id="invite-email" type="email" placeholder="E-Mail-Adresse (Google-Konto)" autocomplete="off">
-            <button type="button" id="invite-ok" class="primary">Einladen</button>
+        <!-- 2. Abgleich des geöffneten Liederbuchs zwischen Geräten -->
+        <section class="cloud-card" id="sync-card">
+          <h3><svg class="icon"><use href="#i-cloud"/></svg>Abgleich zwischen Geräten</h3>
+          <div class="cloud-card-body">
+            <div id="sync-status" class="sync-status" data-state="off">
+              <svg class="icon"><use href="#i-cloud"/></svg>
+              <div class="sync-status-main">
+                <strong id="sync-status-title">Nicht verbunden</strong>
+                <div id="sync-status-text" class="hint"></div>
+              </div>
+              <button type="button" id="sync-now" class="icon-btn" title="Jetzt abgleichen"><svg class="icon"><use href="#i-sync"/></svg></button>
+            </div>
+            <div id="sync-config" class="cloud-sub">
+              <div class="sync-provider-row" id="sync-provider-row">
+                <span class="hint">Speicherort</span>
+                <div class="segmented" role="radiogroup" aria-label="Speicherort" id="sync-provider">
+                  <button type="button" role="radio" data-value="gdrive">Google Drive</button>
+                  <button type="button" role="radio" data-value="webdav">WebDAV / Nextcloud</button>
+                </div>
+              </div>
+
+              <div id="webdav-setup" class="cloud-sub" hidden>
+                <label class="field">Ordner-Adresse
+                  <input id="webdav-url" type="url" placeholder="https://cloud.example.de/remote.php/dav/files/NAME/Liederbuch/" autocomplete="off" spellcheck="false">
+                </label>
+                <div class="field-row">
+                  <label class="field">Benutzername
+                    <input id="webdav-user" autocomplete="username" spellcheck="false">
+                  </label>
+                  <label class="field">App-Passwort
+                    <input id="webdav-pass" type="password" autocomplete="current-password">
+                  </label>
+                </div>
+                <details class="sync-setup">
+                  <summary>Was passiert dort? Was muss der Server können?</summary>
+                  <p class="hint">Die App legt dort für jedes Lied eine ChordPro-Datei (Ordner <code>Lieder</code>) und für jede Setliste eine Textdatei (Ordner <code>Setlisten</code>) an – lesbar und bearbeitbar auch ohne die App. Nimm ein eigenes <b>App-Passwort</b> (Nextcloud: Einstellungen → Sicherheit), nicht dein Hauptpasswort – es wird auf diesem Gerät gespeichert. Mehrere Personen: den Ordner teilen, alle tragen dieselbe Adresse ein. Der Server muss Zugriffe von <code id="webdav-origin"></code> erlauben (CORS, siehe README).</p>
+                </details>
+              </div>
+
+              <details id="sync-setup" class="sync-setup">
+                <summary>Google-Einrichtung (einmalig)</summary>
+                <label class="field">Google-Client-ID
+                  <input id="sync-client-id" placeholder="….apps.googleusercontent.com" autocomplete="off" spellcheck="false">
+                </label>
+                <label class="field">API-Schlüssel <small>(nur für „Einladung öffnen“)</small>
+                  <input id="sync-api-key" placeholder="AIza…" autocomplete="off" spellcheck="false">
+                </label>
+                <label class="field">Projektnummer <small>(nur für „Einladung öffnen“)</small>
+                  <input id="sync-app-id" placeholder="z. B. 123456789012" autocomplete="off" spellcheck="false" inputmode="numeric">
+                </label>
+                <p class="hint">Anleitung im README („Cloud-Sync einrichten“). JavaScript-Quelle für diese Seite: <code id="sync-origin"></code></p>
+              </details>
+
+              <div class="cloud-buttons">
+                <button type="button" id="webdav-forget" class="link-btn danger" hidden>Gespeicherte Adresse und Zugangsdaten löschen</button>
+                <button type="button" id="sync-disconnect" class="danger">Trennen</button>
+                <span class="spacer"></span>
+                <button type="button" id="sync-connect" class="primary">Verbinden</button>
+              </div>
+              <p class="hint" id="sync-foot-hint">Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.</p>
+            </div>
           </div>
-          <p class="hint">Google schickt eine Einladung. Die Person öffnet dann die App, verbindet sich und tippt auf „Einladung öffnen …“. Alle Mitglieder können Lieder bearbeiten.</p>
         </section>
 
-        <details id="sync-setup" class="sync-setup">
-          <summary>Einrichtung (einmalig)</summary>
-          <label class="field">Google-Client-ID
-            <input id="sync-client-id" placeholder="….apps.googleusercontent.com" autocomplete="off" spellcheck="false">
-          </label>
-          <label class="field">API-Schlüssel <small>(nur für „Einladung öffnen“)</small>
-            <input id="sync-api-key" placeholder="AIza…" autocomplete="off" spellcheck="false">
-          </label>
-          <label class="field">Projektnummer <small>(nur für „Einladung öffnen“)</small>
-            <input id="sync-app-id" placeholder="z. B. 123456789012" autocomplete="off" spellcheck="false" inputmode="numeric">
-          </label>
-          <p class="hint">Anleitung im README („Cloud-Sync einrichten“). JavaScript-Quelle für diese Seite: <code id="sync-origin"></code></p>
-        </details>
-        <p class="hint" id="sync-foot-hint">Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.</p>
+        <!-- 3. Mitglieder (nur gemeinsame Liederbücher über Google Drive) -->
+        <section id="members" class="cloud-card" hidden>
+          <h3><svg class="icon"><use href="#i-share"/></svg>Mitglieder von „<span id="members-book"></span>“</h3>
+          <div class="cloud-card-body">
+            <ul id="member-list" class="member-list"></ul>
+            <div class="invite-row">
+              <input id="invite-email" type="email" placeholder="E-Mail-Adresse (Google-Konto)" autocomplete="off">
+              <button type="button" id="invite-ok" class="primary">Einladen</button>
+            </div>
+            <p class="hint">Google schickt eine Einladung. Die Person öffnet dann die App, verbindet sich und tippt auf „Einladung öffnen …“. Alle Mitglieder können Lieder bearbeiten.</p>
+          </div>
+        </section>
+
+        <!-- 4. Für eine Gruppe veröffentlichen (Abo anbieten) -->
+        <section id="publish-card" class="cloud-card">
+          <h3><svg class="icon"><use href="#i-share"/></svg>Für eine Gruppe veröffentlichen</h3>
+          <div class="cloud-card-body">
+            <p class="hint">Lieder aus „<span id="publish-from"></span>“ als Abo anbieten: Andere sehen sie nur zum Lesen und bekommen Änderungen automatisch. Nur für einen privaten Kreis.</p>
+            <div class="cloud-actions">
+              <button type="button" id="btn-publish"><svg class="icon"><use href="#i-share"/></svg>Veröffentlichen …</button>
+            </div>
+          </div>
+        </section>
       </div>
       <footer class="dialog-foot">
-        <button type="button" id="sync-disconnect" class="danger">Trennen</button>
         <span class="spacer"></span>
-        <button type="button" id="sync-connect" class="primary">Verbinden</button>
         <button value="close" formnovalidate>Schließen</button>
       </footer>
     </form>
