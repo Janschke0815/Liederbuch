@@ -7,7 +7,7 @@ import { parseImportFile } from '../formats/file-import.js';
 import { createZip, readZip, isZip } from '../formats/zip.js';
 import { EXPORT_FORMAT, EXPORT_VERSION, deriveSummary } from '../storage/repository.js';
 import { slimSetlist } from '../storage/setlists.js';
-import { repo, sets, state, services } from './app-state.js';
+import { readOnly, repo, sets, state, services } from './app-state.js';
 import { $, el, download, toast } from './dom.js';
 import { addSongs } from './add-songs.js';
 import { flushSave, openSong } from './song.js';
@@ -86,6 +86,10 @@ function showImportReport(summary, report) {
 
 /** Importiert Dateien (Sicherung, ZIP, ChordPro, Text). */
 export async function importFiles(files) {
+  if (readOnly) {
+    toast('Ein abonniertes Liederbuch ist nur zum Lesen – zum Öffnen von Dateien oben zu „Mein Liederbuch“ wechseln');
+    return;
+  }
   await flushSave();
   const songFiles = []; // einzelne Lieder aus ChordPro-/Textdateien – zusammen auf Doppel prüfen
   const messages = [];

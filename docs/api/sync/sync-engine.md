@@ -15,7 +15,7 @@ Ein Anbieter (Provider) braucht nur:
 ```
 
 **Benutzt:** [`storage/repository.js`](../storage/repository.md)  
-**Benutzt von:** [`sync-ui.js`](../sync-ui.md), [`sync/google-drive.js`](google-drive.md), [`sync/webdav-client.js`](webdav-client.md), [`sync/webdav.js`](webdav.md)
+**Benutzt von:** [`sync-ui.js`](../sync-ui.md), [`sync/abo-client.js`](abo-client.md), [`sync/google-drive.js`](google-drive.md), [`sync/webdav-client.js`](webdav-client.md), [`sync/webdav.js`](webdav.md)
 
 ## Exportiert
 

@@ -15,6 +15,9 @@ export const book = activeBook();
 export const repo = new SongRepository(await openIdbStore(book.dbName));
 export const sets = new SetlistRepository(await openIdbStore(book.dbName, 'setlists'));
 
+/** Abonniertes Liederbuch: nur lesen (Text ändern, anlegen, löschen gesperrt). */
+export const readOnly = Boolean(book.abo);
+
 /** Veränderlicher Zustand. current: das geöffnete Lied (Datensatz aus repo) oder null. */
 export const state = { current: null };
 

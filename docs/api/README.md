@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-68 Module, 245 exportierte Funktionen, Konstanten und Klassen.
+72 Module, 261 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -29,6 +29,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 
 | Modul | Inhalt |
 |---|---|
+| [`ui/abo.js`](ui/abo.md) | Abonnierte Liederbücher: per Einladungslink abonnieren, regelmäßig aktualisieren, beenden – und einzelne Lieder ins eigene Liederbuch kopieren. |
 | [`ui/add-songs.js`](ui/add-songs.md) | Neue Lieder anlegen – mit Nachfrage, wenn es Titel und Interpret schon gibt (eingefügter Text, Lesezeichen von Ultimate Guitar, ChordPro-/Textdateien). |
 | [`ui/app-keys.js`](ui/app-keys.md) | Tastenkürzel der Hauptansicht (die des Spielmodus stehen in play-mode.js). |
 | [`ui/app-state.js`](ui/app-state.md) | Gemeinsamer Zustand der Oberfläche: welches Liederbuch, seine Datenbanken und das gerade geöffnete Lied. |
@@ -39,6 +40,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/list.js`](ui/list.md) | Liederliste links: Suche, Tag-Filter, „Was kann ich spielen?“, Sortierung. |
 | [`ui/paste.js`](ui/paste.md) | Text einfügen: Akkorde-über-Text (z. |
 | [`ui/preview-tools.js`](ui/preview-tools.md) | Werkzeuge an der Vorschau: Vergrößern/Verkleinern und Metronom (Klick auf Takt/Tempo). |
+| [`ui/publish.js`](ui/publish.md) | „Für eine Gruppe veröffentlichen“: Lieder (alle, nach Tag oder aus einer Setliste) als Abo-Datei in den WebDAV-Ordner legen oder herunterladen, und den Einladungslink zum Weitergeben zeigen. |
 | [`ui/share.js`](ui/share.md) | Lied teilen: über das Teilen-Menü des Geräts, als ChordPro-Datei, als Text oder als PDF – jeweils in der aktuellen Transposition. |
 | [`ui/shortcuts.js`](ui/shortcuts.md) | Alle Tastenkürzel an einer Stelle: Daraus entstehen die Tasten-Abfrage (app-keys.js, play-mode.js) und die Übersicht im Dialog „Tastenkürzel“. |
 | [`ui/snippets.js`](ui/snippets.md) | Bausteine über dem Editor: Akkord, Strophe, Refrain, Bridge, Tab, Wiederholung, Hinweis – und die Übersicht der ChordPro-Syntax („?“). |
@@ -67,6 +69,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 
 | Modul | Inhalt |
 |---|---|
+| [`formats/abo.js`](formats/abo.md) | Abo-Datei: ein Liederbuch, das jemand für einen privaten Kreis veröffentlicht. |
 | [`formats/backup.js`](formats/backup.md) | Sicherung als ZIP: lesbare ChordPro-Dateien (wie auf dem WebDAV-Server) + vollständige JSON. |
 | [`formats/chordpro-files.js`](formats/chordpro-files.md) | Liederbuch als reine ChordPro-Dateien (wie beim Programm ChordPro selbst): Lieder/<Titel - Interpret>.cho   Liedtext; Einstellungen der App als Direktiven: {transpose: 2}            (offizielles ChordPro) {x_accidentals: flat}     (♯/♭-Schreibweise, nur Liederbuch) {x_notiz: …}              (Notiz, eine Zeile je Direktive) Setlisten/<Name>.txt             eine Zeile pro Lied (Dateiname), darunter eingerückt „Transposition: 2“ und „Notiz: …“ Andere Programme ignorieren x_-Direktiven (so sieht es der ChordPro-Standard vor). |
 | [`formats/export-text.js`](formats/export-text.md) | Lied exportieren: transponierter ChordPro-Text und "Akkorde über dem Text" (z. |
@@ -113,6 +116,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 
 | Modul | Inhalt |
 |---|---|
+| [`sync/abo-client.js`](sync/abo-client.md) | Abo-Datei vom Server laden – mit Anmeldung, falls der Ordner geschützt ist, und nur, wenn sie sich seit dem letzten Mal geändert hat (ETag). |
 | [`sync/config.js`](sync/config.md) | Google-Zugangsdaten für den Drive-Sync (siehe README, Abschnitt "Cloud-Sync einrichten"). |
 | [`sync/google-drive.js`](sync/google-drive.md) | Cloud-Anbieter Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive. |
 | [`sync/sync-engine.js`](sync/sync-engine.md) | Abgleich der lokalen Datenbank mit einer gemeinsamen Datei in der Cloud. |

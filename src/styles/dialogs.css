@@ -119,3 +119,22 @@ kbd { display: inline-block; min-width: 1.4em; padding: .05em .4em; border: 1px 
   .actions .keys-btn .label { display: inline; }
 }
 .keys-dialog { width: min(760px, 95vw); }
+
+/* Abonnieren / Veröffentlichen */
+.abo-body, .publish-body { display: flex; flex-direction: column; gap: .7em; }
+.abo-preview { display: flex; flex-direction: column; gap: .15em; padding: .7em .9em; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
+.abo-preview strong { font-size: 1.05em; }
+#abo-status.warn { color: #a3600b; }
+.abo-rights, .pub-confirm { font-size: .85em; }
+.pub-choice { border: 1px solid var(--border); border-radius: var(--radius); padding: .5em .8em .6em; display: flex; flex-direction: column; gap: .35em; }
+.pub-choice legend { font-weight: 600; font-size: .9em; padding: 0 .3em; }
+.pub-choice .check { display: block; line-height: 1.6; padding-left: 1.6em; text-indent: -1.6em; }
+.pub-choice .check input[type=radio] { margin: 0 .45em 0 0; vertical-align: -.1em; }
+.pub-choice .check select { margin-left: .3em; text-indent: 0; }
+.pub-choice select { min-height: 1.9rem; font-size: .9em; }
+.pub-confirm { display: block; line-height: 1.5; padding-left: 1.7em; text-indent: -1.7em; }
+.pub-confirm input { margin: 0 .5em 0 0; vertical-align: -.15em; }
+.pub-result { display: flex; flex-direction: column; gap: .4em; padding: .7em .9em; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--accent-soft); }
+.pub-result .invite-row { display: flex; gap: .4em; }
+.pub-result input { flex: 1; min-width: 0; font-size: .85em; }
+.publish-dialog { width: min(620px, 96vw); }

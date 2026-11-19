@@ -84,7 +84,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   function renderBookSelect() {
     const books = listBooks();
     const sel = $('#book-select');
-    sel.replaceChildren(...books.map((b) => new Option(b.shared ? `${b.name} 👥` : b.name, b.id, false, b.id === book.id)));
+    sel.replaceChildren(...books.map((b) => new Option(b.abo ? `${b.name} (Abo)` : b.shared ? `${b.name} 👥` : b.name, b.id, false, b.id === book.id)));
     const several = books.length > 1;
     sel.hidden = !several;
     $('#app-name').hidden = several;
@@ -106,6 +106,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         ? `${engine.error?.message || 'Anmeldung fehlgeschlagen'}. Zugangsdaten prüfen und „Neu anmelden“ tippen – deine Lieder bleiben erhalten.`
         : 'Die Google-Anmeldung ist abgelaufen. „Neu anmelden“ tippen – deine Lieder bleiben erhalten.';
     } else if (state === 'error') text = engine.error?.message || '';
+    else if (book.abo) text = 'Abonniertes Liederbuch – wird über das Abo aktualisiert, nicht über die Cloud.';
     else if (book.shared) text = 'Dieses gemeinsame Liederbuch braucht die Verbindung zu Google Drive.';
     else if (dav) text = 'Adresse und Zugangsdaten eintragen, dann „Verbinden“.';
     else text = clientId() ? 'Mit Google Drive verbinden, um alle Geräte abzugleichen.' : 'Zuerst die Einrichtung unten erledigen.';
@@ -146,7 +147,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   function renderBooks() {
     const items = listBooks().map((b) => {
       const isActive = b.id === book.id;
-      const row = li(span('book-name', b.name, b.shared ? 'gemeinsam' : 'persönlich'));
+      const row = li(span('book-name', b.name, b.abo ? `abonniert${b.abo.publisher ? ' · von ' + b.abo.publisher : ''} · nur lesen` : b.shared ? 'gemeinsam' : 'persönlich'));
       if (isActive) {
         row.classList.add('active');
         row.append(span('hint', 'geöffnet'));
@@ -227,6 +228,10 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   }
 
   async function connect({ silent = false } = {}) {
+    if (book.abo) {
+      if (!silent) toast('Ein Abo wird nicht mit der Cloud abgeglichen – oben zu „Mein Liederbuch“ wechseln');
+      return false;
+    }
     if (kind() === 'webdav') return connectWebdav();
     saveSetup();
     if (!clientId()) {
@@ -444,7 +449,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   build();
   render();
   renderBookSelect();
-  if (connectedFlag() && configured()) engine.start();
+  // Abo: wird über das Abo aktualisiert, nie mit der eigenen Cloud abgeglichen
+  if (!book.abo && connectedFlag() && configured()) engine.start();
   if (localStorage.getItem('openSyncDialog')) {
     localStorage.removeItem('openSyncDialog');
     openDialog();

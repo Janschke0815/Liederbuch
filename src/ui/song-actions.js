@@ -3,7 +3,7 @@
 
 import { setMeta } from '../core/meta-edit.js';
 import { NEW_SONG_TEMPLATE } from '../sample.js';
-import { repo, sets, state, services } from './app-state.js';
+import { readOnly, repo, sets, state, services } from './app-state.js';
 import { $, isMobile, toast } from './dom.js';
 import { clearSearch } from './list.js';
 import { editor, flushSave, openSong } from './song.js';
@@ -19,6 +19,7 @@ export async function createAndOpen(chordpro) {
 }
 
 $('#btn-new').onclick = async () => {
+  if (readOnly) return;
   await createAndOpen(NEW_SONG_TEMPLATE);
   setView('editor');
   editor.focus();
@@ -27,6 +28,7 @@ $('#btn-new').onclick = async () => {
 
 /** Lied löschen (in den Papierkorb), mit "Rückgängig". */
 export async function deleteSong(id) {
+  if (readOnly) return;
   await flushSave();
   const song = await repo.get(id);
   if (!song) return;

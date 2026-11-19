@@ -2,6 +2,7 @@
 // Jedes hat eine eigene lokale Datenbank; gemeinsame sind an eine geteilte Drive-Datei gebunden.
 //
 // Buch: { id, name, dbName, shared, fileId }
+//   abonniertes Liederbuch (nur lesen): { id: 'abo-…', name, dbName, abo: { url, publisher, user, password } }
 
 export const PERSONAL = Object.freeze({
   id: 'personal',
@@ -17,7 +18,7 @@ const ACTIVE = 'activeBook';
 function read(storage) {
   try {
     const list = JSON.parse(storage.getItem(KEY) || '[]');
-    return Array.isArray(list) ? list.filter((b) => b && typeof b.id === 'string' && b.fileId) : [];
+    return Array.isArray(list) ? list.filter((b) => b && typeof b.id === 'string' && (b.fileId || b.abo?.url)) : [];
   } catch {
     return [];
   }
@@ -48,6 +49,30 @@ export function addSharedBook({ fileId, name }, storage = localStorage) {
   const list = read(storage);
   const id = `shared-${fileId}`;
   const book = { id, name: name || 'Gemeinsames Liederbuch', dbName: `liederbuch-${fileId}`, shared: true, fileId };
+  const i = list.findIndex((b) => b.id === id);
+  if (i >= 0) list[i] = book;
+  else list.push(book);
+  storage.setItem(KEY, JSON.stringify(list));
+  return book;
+}
+
+/** Kurze, feste Kennung aus einem Text (für IDs und Datenbanknamen). */
+function shortHash(text) {
+  let h = 2166136261;
+  for (const ch of String(text)) h = Math.imul(h ^ ch.codePointAt(0), 16777619);
+  return (h >>> 0).toString(36);
+}
+
+/**
+ * Abonniertes Liederbuch eintragen (oder Namen/Schlüssel aktualisieren). Eigene Datenbank, nur lesen.
+ * @param {{url: string, name?: string, publisher?: string, user?: string, password?: string}} abo
+ *   user/password: Anmeldung am Server, falls der Ordner geschützt ist (bleibt auf diesem Gerät)
+ */
+export function addAboBook({ url, name, publisher = '', user = '', password = '' }, storage = localStorage) {
+  const list = read(storage);
+  const h = shortHash(url);
+  const id = `abo-${h}`;
+  const book = { id, name: name || 'Abonniertes Liederbuch', dbName: `liederbuch-abo-${h}`, shared: false, abo: { url, publisher, user, password } };
   const i = list.findIndex((b) => b.id === id);
   if (i >= 0) list[i] = book;
   else list.push(book);

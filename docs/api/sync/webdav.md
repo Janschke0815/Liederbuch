@@ -31,7 +31,7 @@ Für die Sync-Engine sieht das aus wie bisher: read() liefert alle Lieder und Se
 Die HTTP-Seite (Anmeldung, PROPFIND, PUT, DELETE, Fehlermeldungen) steht in webdav-client.js.
 
 **Benutzt:** [`formats/chordpro-files.js`](../formats/chordpro-files.md), [`formats/file-format.js`](../formats/file-format.md), [`formats/song-files.js`](../formats/song-files.md), [`storage/repository.js`](../storage/repository.md), [`storage/setlists.js`](../storage/setlists.md), [`sync/sync-engine.js`](sync-engine.md), [`sync/webdav-client.js`](webdav-client.md)  
-**Benutzt von:** [`sync-ui.js`](../sync-ui.md)
+**Benutzt von:** [`sync-ui.js`](../sync-ui.md), [`ui/publish.js`](../ui/publish.md)
 
 ## Exportiert
 

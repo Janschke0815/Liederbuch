@@ -16,7 +16,7 @@ Datensatz:
 ```
 
 **Benutzt:** [`core/chordpro.js`](../core/chordpro.md), [`core/text.js`](../core/text.md)  
-**Benutzt von:** [`print-ui.js`](../print-ui.md), [`storage/setlists.js`](setlists.md), [`sync-ui.js`](../sync-ui.md), [`sync/sync-engine.js`](../sync/sync-engine.md), [`sync/webdav.js`](../sync/webdav.md), [`ui/add-songs.js`](../ui/add-songs.md), [`ui/app-state.js`](../ui/app-state.md), [`ui/files.js`](../ui/files.md)
+**Benutzt von:** [`print-ui.js`](../print-ui.md), [`storage/setlists.js`](setlists.md), [`sync-ui.js`](../sync-ui.md), [`sync/sync-engine.js`](../sync/sync-engine.md), [`sync/webdav.js`](../sync/webdav.md), [`ui/abo.js`](../ui/abo.md), [`ui/add-songs.js`](../ui/add-songs.md), [`ui/app-state.js`](../ui/app-state.md), [`ui/files.js`](../ui/files.md)
 
 ## Exportiert
 
@@ -132,6 +132,17 @@ Alle Datensätze einschließlich gelöschter (Grabsteine) – für den Sync.
 (falls hier inzwischen weiter bearbeitet wurde, bleibt die lokale Fassung).
 
 **Rückgabe:** `Promise<string[]>` geänderte IDs
+
+#### `replaceFromAbo(records)`
+
+Stand eines Abos übernehmen: Was im Abo steht, gilt; was fehlt, wird entfernt (endgültig – ein
+Abo hat keinen Papierkorb). Eigene Ansicht bleibt: Transposition, Schreibweise, Notiz.
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `records` | `{id: string, chordpro: string, createdAt?: string, updatedAt?: string}[]` |  |
+
+**Rückgabe:** `Promise<{added: number, changed: number, removed: number}>`
 
 #### `async exportData()`
 

@@ -115,6 +115,11 @@
 
   <main class="workspace" data-view="preview">
     <aside class="pane pane-list" aria-label="Lieder">
+      <div id="abo-bar" class="abo-bar" hidden>
+        <div class="abo-bar-text"><strong>Abo – nur lesen</strong><span id="abo-bar-status" class="hint"></span></div>
+        <button type="button" id="abo-refresh" class="icon-btn" title="Jetzt aktualisieren"><svg class="icon"><use href="#i-sync"/></svg></button>
+        <button type="button" id="abo-leave" class="link-btn danger" title="Abo auf diesem Gerät beenden">Beenden</button>
+      </div>
       <div class="list-tabs" role="tablist">
         <button type="button" role="tab" data-tab="songs" aria-selected="true">Lieder</button>
         <button type="button" role="tab" data-tab="sets" aria-selected="false">Setlisten</button>
@@ -721,6 +726,10 @@
             </details>
             <button type="button" id="book-join"><svg class="icon"><use href="#i-open"/></svg>Einladung öffnen …</button>
           </div>
+          <div class="book-actions abo-actions">
+            <button type="button" id="btn-subscribe"><svg class="icon"><use href="#i-plus"/></svg>Abo hinzufügen …</button>
+            <button type="button" id="btn-publish"><svg class="icon"><use href="#i-share"/></svg>Für eine Gruppe veröffentlichen …</button>
+          </div>
           <p id="book-offline-hint" class="hint">Zum Anlegen und Beitreten zuerst mit Google Drive verbinden.</p>
           <p id="book-webdav-hint" class="hint" hidden>Gemeinsame Liederbücher mit Einladung gibt es über Google Drive. Mit WebDAV teilt ihr einfach den Ordner.</p>
         </section>
@@ -857,6 +866,83 @@
       <footer class="dialog-foot">
         <span class="spacer"></span>
         <button value="close" class="primary">Schließen</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="abo-dialog" class="capo-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Liederbuch abonnieren</h2>
+        <p class="hint">Ein Liederbuch, das jemand für eure Gruppe veröffentlicht hat. Es erscheint als eigenes Liederbuch, nur zum Lesen, und aktualisiert sich von selbst.</p>
+      </header>
+      <div class="dialog-body abo-body">
+        <label class="field" id="abo-link-row">Einladungslink
+          <input id="abo-link" placeholder="https://…#abo=…" autocomplete="off" spellcheck="false">
+        </label>
+        <div id="abo-login" class="field-row" hidden>
+          <label class="field">Benutzername <input id="abo-user" autocomplete="username" spellcheck="false"></label>
+          <label class="field">Passwort <input id="abo-pass" type="password" autocomplete="current-password"></label>
+        </div>
+        <p id="abo-status" class="hint" aria-live="polite"></p>
+        <div id="abo-preview" class="abo-preview" hidden>
+          <strong id="abo-name"></strong>
+          <span id="abo-meta" class="hint"></span>
+          <span id="abo-desc"></span>
+        </div>
+        <p class="hint abo-rights">Nur für den privaten Kreis, für den es veröffentlicht wurde – bitte nicht weitergeben.</p>
+      </div>
+      <footer class="dialog-foot">
+        <button value="cancel" formnovalidate>Abbrechen</button>
+        <span class="spacer"></span>
+        <button type="button" id="abo-check">Prüfen</button>
+        <button type="button" id="abo-ok" class="primary" disabled>Abonnieren</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="publish-dialog" class="capo-dialog publish-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Für eine Gruppe veröffentlichen</h2>
+        <p class="hint">Andere können das Liederbuch dann abonnieren – nur lesen, mit automatischen Aktualisierungen. Die Datei ist nicht verschlüsselt: Leg sie dorthin, wo nur eure Gruppe hinkommt (z. B. in den WebDAV-Ordner mit Anmeldung).</p>
+      </header>
+      <div class="dialog-body publish-body">
+        <div class="field-row">
+          <label class="field">Name <input id="pub-name" autocomplete="off"></label>
+          <label class="field">Von <input id="pub-publisher" placeholder="z. B. dein Name, Bandname" autocomplete="off"></label>
+        </div>
+        <label class="field">Beschreibung <small>(optional)</small> <input id="pub-desc" placeholder="z. B. Unser Programm 2027" autocomplete="off"></label>
+        <fieldset class="pub-choice">
+          <legend>Welche Lieder?</legend>
+          <label class="check"><input type="radio" name="pub-scope" value="all" checked> alle Lieder</label>
+          <label class="check"><input type="radio" name="pub-scope" value="tag"> mit Tag <select id="pub-tag"></select></label>
+          <label class="check"><input type="radio" name="pub-scope" value="setlist"> aus Setliste <select id="pub-setlist"></select></label>
+          <p id="pub-count" class="hint"></p>
+        </fieldset>
+        <fieldset class="pub-choice">
+          <legend>Wohin?</legend>
+          <label class="check" id="pub-target-webdav-row"><input type="radio" name="pub-target" value="webdav"> in den WebDAV-Ordner (<span id="pub-webdav-host"></span>) – Abonnenten brauchen dort eine Anmeldung</label>
+          <label class="check"><input type="radio" name="pub-target" value="file" checked> Datei herunterladen – du legst sie selbst in einen <b>geschützten</b> Ordner (Name mit Zufallsteil)</label>
+          <label class="field" id="pub-url-row">Adresse, unter der die Datei liegen wird
+            <input id="pub-url" type="url" autocomplete="off" spellcheck="false">
+          </label>
+        </fieldset>
+        <label class="check pub-confirm"><input type="checkbox" id="pub-private"> Ich gebe dieses Liederbuch nur an einen <b>privaten Kreis</b> weiter (Band, Familie, Freunde) – nicht öffentlich. Liedtexte und Melodien sind meist urheberrechtlich geschützt.</label>
+        <div id="pub-result" class="pub-result" hidden>
+          <strong>Einladungslink</strong>
+          <div class="invite-row">
+            <input id="pub-link" readonly>
+            <button type="button" id="pub-copy">Kopieren</button>
+            <button type="button" id="pub-share" hidden>Teilen …</button>
+          </div>
+          <p class="hint">Nur an die Gruppe schicken. Änderst du später Lieder, einfach erneut veröffentlichen – der Link bleibt gleich.</p>
+        </div>
+      </div>
+      <footer class="dialog-foot">
+        <button value="cancel" formnovalidate>Schließen</button>
+        <span class="spacer"></span>
+        <button type="button" id="pub-ok" class="primary" disabled>Veröffentlichen</button>
       </footer>
     </form>
   </dialog>

@@ -6,7 +6,11 @@ Mehrere Liederbücher auf einem Gerät: das persönliche und beliebig viele geme
 
 Buch: { id, name, dbName, shared, fileId }
 
-**Benutzt von:** [`sync-ui.js`](sync-ui.md), [`ui/app-state.js`](ui/app-state.md)
+```text
+  abonniertes Liederbuch (nur lesen): { id: 'abo-…', name, dbName, abo: { url, publisher, user, password } }
+```
+
+**Benutzt von:** [`sync-ui.js`](sync-ui.md), [`ui/abo.js`](ui/abo.md), [`ui/app-state.js`](ui/app-state.md)
 
 ## Exportiert
 
@@ -34,6 +38,14 @@ Liederbuch für den nächsten Start merken (nur bekannte IDs).
 
 Gemeinsames Liederbuch eintragen (oder Namen aktualisieren).
 
+### `addAboBook({ url, name, publisher = '', user = '', password = '' }, storage = localStorage)`
+
+Abonniertes Liederbuch eintragen (oder Namen/Schlüssel aktualisieren). Eigene Datenbank, nur lesen.
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `abo` | `{url: string, name?: string, publisher?: string, user?: string, password?: string}` | user/password: Anmeldung am Server, falls der Ordner geschützt ist (bleibt auf diesem Gerät) |
+
 ### `removeBook(id, storage = localStorage)`
 
 Aus der Liste entfernen; die lokale Datenbank löscht der Aufrufer.
@@ -51,3 +63,4 @@ Dateiname der Drive-Datei für ein gemeinsames Liederbuch: „Liederbuch – Nam
 Nicht exportiert – nur innerhalb des Moduls benutzt.
 
 - `read(storage)`
+- `shortHash(text)` – Kurze, feste Kennung aus einem Text (für IDs und Datenbanknamen).

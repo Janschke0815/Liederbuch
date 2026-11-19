@@ -6,7 +6,7 @@ import { transposeChord } from '../core/chords.js';
 import { getAllMeta, setMeta, getTags, setTags } from '../core/meta-edit.js';
 import { renderSong, songKey } from '../render/song-view.js';
 import { prefs } from '../prefs.js';
-import { repo, state } from './app-state.js';
+import { readOnly, repo, state } from './app-state.js';
 import { $, $$, isMobile, toast } from './dom.js';
 
 export const editor = $('#editor');
@@ -55,7 +55,9 @@ export function renderPreview() {
 export function updateControls() {
   const current = state.current;
   editor.disabled = !current;
+  editor.readOnly = readOnly; // Abo: lesen, markieren, kopieren – aber nicht ändern
   for (const b of $$('#tr-up, #tr-down, #accidentals button, #btn-delete, #btn-play, .snippets button[data-snippet]')) b.disabled = !current;
+  if (readOnly) for (const b of $$('#btn-delete, .snippets button[data-snippet]')) b.disabled = true;
   const t = current?.transpose || 0;
   const out = $('#tr-value');
   out.textContent = (t > 0 ? '+' : '') + t;
@@ -155,7 +157,7 @@ function fillMeta() {
   const current = state.current;
   const m = getAllMeta(editor.value);
   for (const input of metaInputs) {
-    input.disabled = !current;
+    input.disabled = !current || readOnly;
     if (input === document.activeElement) continue;
     const v = m[input.dataset.meta];
     if (input.tagName === 'SELECT' && v && ![...input.options].some((o) => o.value === v)) input.add(new Option(v, v));
@@ -163,7 +165,8 @@ function fillMeta() {
   }
   const tagsInput = $('#meta-tags');
   const noteInput = $('#meta-note');
-  tagsInput.disabled = noteInput.disabled = !current;
+  tagsInput.disabled = !current || readOnly;
+  noteInput.disabled = !current; // eigene Notiz geht auch im Abo (bleibt auf diesem Gerät)
   if (tagsInput !== document.activeElement) tagsInput.value = getTags(editor.value).join(', ');
   if (noteInput !== document.activeElement) noteInput.value = current?.note || '';
   const capo = Number(m.capo) || 0;

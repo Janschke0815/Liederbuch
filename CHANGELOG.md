@@ -7,6 +7,22 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.26.0 – 19.11.2026 · Liederbücher abonnieren (private Gruppen)
+
+- **Für eine Gruppe veröffentlichen** (Cloud → Liederbücher): alle Lieder, Lieder mit einem Tag oder eine
+  Setliste. Die Datei kommt in den WebDAV-Ordner (Unterordner „Abo“, Abonnenten melden sich dort an)
+  oder zum Herunterladen. Danach gibt es einen Einladungslink; erneut veröffentlichen ersetzt die Datei,
+  der Link bleibt. Notizen und eigene Transpositionen gehen nicht mit.
+- **Abonnieren** per Einladungslink oder „Abo hinzufügen …“. Das Abo ist ein eigenes Liederbuch, **nur zum
+  Lesen**, und aktualisiert sich beim Öffnen und alle 30 Minuten („3 neu, 1 geändert“). Transponieren,
+  eigene Notizen, Spielen und Drucken gehen; eigene Transposition und Notiz bleiben bei Aktualisierungen.
+- **In „Mein Liederbuch“ kopieren** (Rechtsklick) macht aus einem abonnierten Lied eine eigene,
+  bearbeitbare Fassung.
+- Leiste über der Liste mit Stand, „Aktualisieren“ und „Beenden“. Abos werden nie mit der eigenen Cloud
+  abgeglichen.
+- Hinweis zum **Urheberrecht** beim Veröffentlichen (nur privater Kreis) und im README. Die Datei ist
+  lesbares JSON und nicht verschlüsselt – geschützt durch den Ordner mit Anmeldung.
+
 ## 1.25.1 – 18.11.2026 · Harp-Tabs in Blau, Farbe einstellbar
 
 - **Harp-Tabs jetzt blau statt türkis-grün:** Bei Rot-Grün-Schwäche waren sie kaum vom Rot der Akkorde zu

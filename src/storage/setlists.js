@@ -153,6 +153,24 @@ export class SetlistRepository extends EventTarget {
   }
 
   /**
+   * Setlisten eines Abos übernehmen: Abo-Setlisten werden ersetzt bzw. entfernt; eigene, hier
+   * angelegte Setlisten (ohne Abo-Kennung) bleiben.
+   * @param {object[]} records  Setlisten aus dem Abo
+   */
+  replaceFromAbo(records) {
+    return this.#serial(async () => {
+      const incoming = new Set(records.map((r) => r.id));
+      for (const r of await this.store.getAll()) {
+        if (r.fromAbo && !incoming.has(r.id)) await this.store.delete(r.id);
+      }
+      const now = this.now();
+      await this.store.putMany(records.map((r) => slimSetlist({ ...r, createdAt: r.createdAt || now, updatedAt: r.updatedAt || now, deletedAt: null })).map((r) => ({ ...r, fromAbo: true })));
+      this.dispatchEvent(new CustomEvent('remote-change', { detail: [...incoming] }));
+      this.#changed();
+    });
+  }
+
+  /**
    * Setlisten aus einer Sicherung übernehmen: neue kommen dazu, vorhandene nur, wenn die
    * Sicherung neuer ist. Zählt als eigene Änderung (wird also auch abgeglichen).
    */

@@ -276,6 +276,50 @@ export class SongRepository extends EventTarget {
     });
   }
 
+  /**
+   * Stand eines Abos übernehmen: Was im Abo steht, gilt; was fehlt, wird entfernt (endgültig – ein
+   * Abo hat keinen Papierkorb). Eigene Ansicht bleibt: Transposition, Schreibweise, Notiz.
+   * @param {{id: string, chordpro: string, createdAt?: string, updatedAt?: string}[]} records
+   * @returns {Promise<{added: number, changed: number, removed: number}>}
+   */
+  replaceFromAbo(records) {
+    return this.#serial(async () => {
+      const now = this.now();
+      const local = new Map((await this.store.getAll()).map((r) => [r.id, r]));
+      const toPut = [];
+      let added = 0;
+      let changed = 0;
+      for (const r of records) {
+        const old = local.get(r.id);
+        local.delete(r.id);
+        if (old && !old.deletedAt && old.chordpro === r.chordpro) continue;
+        if (old && !old.deletedAt) changed++;
+        else added++;
+        toPut.push({
+          ...old,
+          id: r.id,
+          chordpro: r.chordpro,
+          ...deriveSummary(r.chordpro),
+          transpose: old?.transpose ?? 0,
+          accidentals: old?.accidentals ?? 'auto',
+          note: old?.note ?? '',
+          createdAt: r.createdAt || old?.createdAt || now,
+          updatedAt: r.updatedAt || now,
+          deletedAt: null,
+        });
+      }
+      const removed = [...local.values()].filter((r) => !r.deletedAt);
+      for (const r of local.values()) await this.store.delete(r.id);
+      if (toPut.length) await this.store.putMany(toPut);
+      const ids = [...toPut.map((r) => r.id), ...removed.map((r) => r.id)];
+      if (ids.length) {
+        this.dispatchEvent(new CustomEvent('remote-change', { detail: ids }));
+        this.#changed();
+      }
+      return { added, changed, removed: removed.length };
+    });
+  }
+
   /** Alle Lieder und den Papierkorb als Sicherung ({format, version, songs, trash}). */
   async exportData() {
     const songs = SongRepository.sort(await this.#live()).map(

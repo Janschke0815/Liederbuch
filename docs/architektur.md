@@ -88,6 +88,14 @@ geändert (`ConflictError`), liest sie neu und versucht es noch einmal.
 | Google Drive (`google-drive.js`) | eine JSON-Datei pro Liederbuch | gemeinsame Liederbücher über Drive-Freigaben |
 | WebDAV (`webdav.js`, `webdav-client.js`) | `Lieder/*.cho`, `Setlisten/*.txt`, `Liederbuch.json` nur als Hinweis | Dateien auch direkt auf dem Server bearbeitbar; jedes Gerät merkt sich, welche Dateien es gesehen hat, und erkennt so Umbenennen und Löschen |
 
+## Abos (private Gruppen)
+
+Ein abonniertes Liederbuch ist ein eigenes Liederbuch (`books.js`: `abo: { url, … }`, eigene Datenbank)
+mit `readOnly` (`ui/app-state.js`). Es wird nie mit der Cloud abgeglichen, sondern über die Abo-Datei:
+`sync/abo-client.js` lädt sie (Anmeldung, ETag), `SongRepository.replaceFromAbo` übernimmt den Stand
+(eigene Transposition und Notiz bleiben). Veröffentlichen (`ui/publish.js`) schreibt die Datei
+(`formats/abo.js`, lesbares JSON) in den WebDAV-Ordner oder zum Herunterladen.
+
 ## Oberfläche
 
 `src/app.js` steckt nur zusammen. Gemeinsamer Zustand liegt in [`ui/app-state.js`](api/ui/app-state.md):

@@ -345,6 +345,35 @@ Im Editor setzt der Knopf **2×** die Angabe passend: an die Zeile mit dem Curso
 markierte Zeilen, oder – auf der Abschnittszeile – an den ganzen Abschnitt. Nochmal klicken
 zählt hoch. Beim Import aus Ultimate Guitar werden „[Chorus x2]“ und „x2“ am Zeilenende erkannt.
 
+## Liederbücher abonnieren (private Gruppen)
+
+Eine Person pflegt ein Liederbuch, die anderen **abonnieren** es: Sie sehen es als eigenes
+Liederbuch, **nur zum Lesen**, und bekommen Änderungen automatisch (beim Öffnen und alle
+30 Minuten). Gedacht für einen **privaten Kreis** – Band, Familie, Freunde.
+
+**Veröffentlichen** (Cloud → Liederbücher → *Für eine Gruppe veröffentlichen …*):
+alle Lieder, Lieder mit einem Tag oder eine Setliste. Die App legt die Abo-Datei in den
+**WebDAV-Ordner** (Unterordner `Abo/`) – Abonnenten melden sich dort mit ihrem eigenen Benutzer an –
+oder bietet sie zum **Herunterladen** an (dann selbst in einen geschützten Ordner legen; der
+vorgeschlagene Name enthält einen Zufallsteil). Danach gibt es einen **Einladungslink** zum
+Weitergeben. Erneut veröffentlichen ersetzt die Datei, der Link bleibt gleich. Notizen und eigene
+Transpositionen gehen nicht mit.
+
+**Abonnieren:** Einladungslink öffnen – oder Cloud → *Abo hinzufügen …* und den Link einfügen.
+Verlangt der Ordner eine Anmeldung, fragt die App nach Benutzername und Passwort (bleiben auf
+diesem Gerät). Im Abo kann man transponieren, eigene Notizen schreiben, spielen und drucken;
+**Rechtsklick → In „Mein Liederbuch“ kopieren** macht aus einem Lied eine eigene, bearbeitbare
+Fassung. Die Leiste über der Liste zeigt den Stand, aktualisiert auf Knopfdruck und beendet das Abo.
+
+**Urheberrecht:** Liedtexte und Melodien (auch Harp-Tabs) sind meist geschützt (bis 70 Jahre nach
+dem Tod der Urheber). Weitergeben an einen privaten Kreis ist erlaubt, öffentlich bereitstellen
+nicht. Die Abo-Datei ist **nicht verschlüsselt** – geschützt ist sie nur durch den Ort: Sie gehört
+in einen Ordner mit Anmeldung, nicht unter eine offene Adresse (z. B. GitHub Pages). Frei öffentlich
+geteilt werden dürfen nur gemeinfreie Lieder (z. B. Volkslieder), eigene Lieder und Lieder unter
+freier Lizenz. (Keine Rechtsberatung.)
+
+Die Datei ist lesbares JSON (`format: "liederbuch-abo"`, siehe `src/formats/abo.js`).
+
 ## Cloud-Sync und gemeinsame Liederbücher (Google Drive)
 
 Jedes Liederbuch ist eine Datei in Google Drive; jedes Gerät hat zusätzlich eine vollständige
@@ -480,7 +509,8 @@ Kein Build-Schritt: Der Browser lädt die ES-Module direkt. Abhängigkeiten zeig
                       list.js        Liederliste (Suche, Filter, Sortierung)
                       view.js        Handy-Reiter, Editor ausblenden, Menü
                       song-actions.js, snippets.js, preview-tools.js, paste.js, add-songs.js,
-                      files.js, trash.js, share.js, capo-help.js, context-menus.js
+                      files.js, trash.js, share.js, capo-help.js, context-menus.js,
+                      abo.js (abonnieren, nur lesen), publish.js (für eine Gruppe veröffentlichen)
                       shortcuts.js   alle Tastenkürzel (daraus auch die Übersicht „?“)
                       app-keys.js    was die Kürzel der Hauptansicht tun
     src/styles/     CSS, eine Datei pro Bereich; Reihenfolge der <link> in index.html zählt
@@ -526,3 +556,5 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     `-6-6`, `7,8`, `-3"` erkannt; Intro/Solo endet vor dem Liedtext
 17. ✅ Einstellungen übersichtlicher (1.25): Bereiche nach Fragen (Anzeigen, Liedtext, Akkorde,
     Titel & Interpret, Druck, App), abhängige Optionen ausgegraut; Gitarren-Akkorde ausblendbar
+18. ✅ Liederbücher abonnieren (1.26): für private Gruppen veröffentlichen (WebDAV-Ordner oder Datei),
+    per Einladungslink abonnieren, nur lesen, automatisch aktualisieren, Lieder ins eigene Buch kopieren

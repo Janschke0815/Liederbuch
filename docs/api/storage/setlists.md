@@ -16,7 +16,7 @@ Datensatz:
 ```
 
 **Benutzt:** [`core/text.js`](../core/text.md), [`storage/repository.js`](repository.md)  
-**Benutzt von:** [`app.js`](../app.md), [`sync/webdav.js`](../sync/webdav.md), [`ui/app-state.js`](../ui/app-state.md), [`ui/files.js`](../ui/files.md)
+**Benutzt von:** [`app.js`](../app.md), [`sync/webdav.js`](../sync/webdav.md), [`ui/abo.js`](../ui/abo.md), [`ui/app-state.js`](../ui/app-state.md), [`ui/files.js`](../ui/files.md)
 
 ## Exportiert
 
@@ -70,6 +70,15 @@ Alle Datensätze, auch gelöschte (für Abgleich und Sicherung).
 Setlisten aus dem Abgleich übernehmen – nur, was neuer ist als hier.
 
 **Rückgabe:** `Promise<string[]>` IDs der übernommenen Setlisten
+
+#### `replaceFromAbo(records)`
+
+Setlisten eines Abos übernehmen: Abo-Setlisten werden ersetzt bzw. entfernt; eigene, hier
+angelegte Setlisten (ohne Abo-Kennung) bleiben.
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `records` | `object[]` | Setlisten aus dem Abo |
 
 #### `async importRecords(records)`
 

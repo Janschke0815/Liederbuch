@@ -12,7 +12,7 @@ Speicher-Backends. Alle haben dieselbe kleine Schnittstelle:
 
 Ein späterer Cloud-Sync setzt auf dieser Schnittstelle bzw. dem Repository auf.
 
-**Benutzt von:** [`ui/app-state.js`](../ui/app-state.md)
+**Benutzt von:** [`ui/abo.js`](../ui/abo.md), [`ui/app-state.js`](../ui/app-state.md)
 
 ## Exportiert
 

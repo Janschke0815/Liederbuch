@@ -34,6 +34,9 @@ export const PREFS = {
   playedAt: { key: 'playedAt', def: {} }, // Lied-ID -> zuletzt gespielt (ISO)
   playColumns: { key: 'playColumns', def: '1' }, // '1' | '2'
   playNight: { key: 'playNight', def: false },
+  // Abos
+  aboState: { key: 'aboState', def: {} }, // Liederbuch-ID -> { etag, checkedAt, publishedAt, count }
+  aboPublished: { key: 'aboPublished', def: {} }, // Liederbuch-ID -> was zuletzt veröffentlicht wurde (inkl. Schlüssel)
   // Einstellungsdialog
   settingsCollapsed: { key: 'settingsCollapsed', def: [] }, // eingeklappte Bereiche
   settingsSampleHidden: { key: 'settingsSampleHidden', def: false },

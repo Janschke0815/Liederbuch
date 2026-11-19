@@ -5,7 +5,7 @@
 Hilfen für „eine Datei pro Lied“ auf einem WebDAV-Server: Dateinamen aus Titel und Interpret, Prüfsummen zum Erkennen von Änderungen, Ordnerliste (PROPFIND) lesen. Reine Funktionen.
 
 **Benutzt:** [`core/text.js`](../core/text.md)  
-**Benutzt von:** [`formats/backup.js`](backup.md), [`formats/chordpro-files.js`](chordpro-files.md), [`sync/webdav-client.js`](../sync/webdav-client.md), [`sync/webdav.js`](../sync/webdav.md)
+**Benutzt von:** [`formats/backup.js`](backup.md), [`formats/chordpro-files.js`](chordpro-files.md), [`sync/webdav-client.js`](../sync/webdav-client.md), [`sync/webdav.js`](../sync/webdav.md), [`ui/publish.js`](../ui/publish.md)
 
 ## Exportiert
 

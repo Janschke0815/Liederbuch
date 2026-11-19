@@ -3,8 +3,8 @@
 
 import { findDuplicates } from '../core/song-list.js';
 import { deriveSummary } from '../storage/repository.js';
-import { repo } from './app-state.js';
-import { $, el, ask } from './dom.js';
+import { readOnly, repo } from './app-state.js';
+import { $, el, ask, toast } from './dom.js';
 import { clearSearch } from './list.js';
 import { flushSave, openSong } from './song.js';
 
@@ -33,6 +33,10 @@ function askDuplicates(dups) {
  * @returns {Promise<null | {firstId, created, replaced, skipped, message}>} null = abgebrochen
  */
 export async function addSongs(items) {
+  if (readOnly) {
+    toast('Ein abonniertes Liederbuch ist nur zum Lesen – zum Anlegen oben zu „Mein Liederbuch“ wechseln');
+    return null;
+  }
   await flushSave();
   const existing = await repo.list();
   // nur gegen das vorhandene Liederbuch prüfen, nicht innerhalb des Imports

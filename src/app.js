@@ -12,6 +12,7 @@
 //   ui/paste.js         Text einfügen, Lesezeichen „Ins Liederbuch“
 //   ui/add-songs.js     Anlegen mit Nachfrage bei doppelten Liedern
 //   ui/files.js         Dateien öffnen, ZIP-Sicherung
+//   ui/abo.js, ui/publish.js   Liederbuch abonnieren bzw. für eine Gruppe veröffentlichen
 //   ui/trash.js, share.js, capo-help.js, context-menus.js
 //   ui/app-keys.js, ui/shortcuts.js   Tastenkürzel
 //   play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js, sync-ui.js   größere Bereiche
@@ -31,6 +32,8 @@ import { flushSave, openSong, preview } from './ui/song.js';
 import { listedSongs, refreshList } from './ui/list.js';
 import { setView } from './ui/view.js';
 import { checkBookmarkHash } from './ui/paste.js';
+import { startAbo } from './ui/abo.js';
+import './ui/publish.js';
 import './ui/song-actions.js';
 import './ui/snippets.js';
 import './ui/preview-tools.js';
@@ -118,3 +121,4 @@ async function start() {
 
 services.started = start();
 checkBookmarkHash();
+startAbo();

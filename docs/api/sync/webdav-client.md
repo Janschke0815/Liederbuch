@@ -5,7 +5,7 @@
 WebDAV über HTTP: Anmeldung, Ordnerliste (PROPFIND), Dateien lesen, schreiben, löschen. Weiß nichts von Liedern – das macht webdav.js. Fehler werden in verständliche Meldungen übersetzt.
 
 **Benutzt:** [`core/text.js`](../core/text.md), [`formats/song-files.js`](../formats/song-files.md), [`sync/sync-engine.js`](sync-engine.md)  
-**Benutzt von:** [`sync/webdav.js`](webdav.md)
+**Benutzt von:** [`sync/abo-client.js`](abo-client.md), [`sync/webdav.js`](webdav.md), [`ui/publish.js`](../ui/publish.md)
 
 ## Exportiert
 

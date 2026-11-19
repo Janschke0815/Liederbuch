@@ -3,7 +3,8 @@
 
 import { attachContextMenu } from '../context-menu.js';
 import { loadSettings, saveSettings } from '../settings/settings.js';
-import { repo, state, services } from './app-state.js';
+import { readOnly, repo, state, services } from './app-state.js';
+import { copyToPersonal } from './abo.js';
 import { $, isMobile } from './dom.js';
 import { listEl } from './list.js';
 import { getViewZoom, setViewZoom } from './preview-tools.js';
@@ -15,6 +16,15 @@ attachContextMenu(listEl, '.song-item', async (btn) => {
   const id = btn.dataset.id;
   const song = await repo.get(id);
   if (!song) return null;
+  if (readOnly) {
+    return [
+      { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
+      { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: async () => { await openSong(id); services.play.open(id); } },
+      '-',
+      { label: 'In „Mein Liederbuch“ kopieren', icon: 'paste', action: () => copyToPersonal([song]) },
+      { label: 'Drucken / PDF', icon: 'print', action: () => printSong(song) },
+    ];
+  }
   return [
     { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
     { label: 'Bearbeiten', icon: 'edit', action: async () => { await openSong(id); editSong(); } },
@@ -69,7 +79,7 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
     { label: 'Capo-Hilfe …', action: () => $('#btn-capo-help').click() },
     '-',
     { label: 'Spielen', icon: 'stage', hint: 'F', action: () => $('#btn-play').click() },
-    { label: 'Bearbeiten', icon: 'edit', action: editSong },
+    ...(readOnly ? [] : [{ label: 'Bearbeiten', icon: 'edit', action: editSong }]),
     {
       label: 'Anzeigen',
       items: [
@@ -95,6 +105,7 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
     },
     '-',
     await setlistMenu(current.id),
+    ...(readOnly ? [{ label: 'In „Mein Liederbuch“ kopieren', icon: 'paste', action: () => copyToPersonal([current]) }] : []),
     { label: 'Teilen …', icon: 'share', action: () => $('#btn-share').click() },
     { label: 'Drucken / PDF', icon: 'print', action: () => printSong({ ...current, chordpro: editor.value }) },
   ];

@@ -53,3 +53,13 @@
 .list-tools { display: flex; align-items: center; gap: .4em; justify-content: space-between; }
 .sort-box { display: inline-flex; align-items: center; gap: .25em; font-size: .85em; color: var(--muted); }
 .sort-box select { font-size: .95em; min-height: 1.8rem; padding: 0 .3em; border-color: transparent; background: transparent; color: var(--text); max-width: 10em; }
+
+/* Abonniertes Liederbuch: Leiste über der Liste */
+.abo-bar {
+  display: flex; align-items: center; gap: .5em; padding: .5em .6em .5em .8em;
+  background: var(--accent-soft); border-bottom: 1px solid var(--border); font-size: .88em;
+}
+.abo-bar-text { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.25; }
+.abo-bar-text .hint { font-size: .9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.abo-bar.warn .hint { color: #a3600b; }
+.abo-bar .link-btn { font-size: .95em; padding-inline: .3em; }
