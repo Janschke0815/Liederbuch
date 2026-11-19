@@ -7,6 +7,13 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.26.2 – 19.11.2026 · Abo-Datei heißt wie das Abo
+
+- **Dateiname beim Herunterladen:** Die Abo-Datei heißt jetzt wie der eingetragene Name (z. B.
+  „Die-Gedanken-sind-frei-….json“) statt immer „Mein-Liederbuch-…“. Die vorgeschlagene Adresse ändert sich
+  beim Tippen mit – außer man hat sie selbst angepasst oder schon unter ihr veröffentlicht (dann bleibt
+  der Einladungslink gleich).
+
 ## 1.26.1 – 19.11.2026 · Abo automatisch veröffentlichen, keine alten Serveradressen
 
 - **Automatisch aktualisieren** (beim Veröffentlichen ankreuzen): Ändern sich Lieder oder Setlisten des Abos,

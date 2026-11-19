@@ -25,6 +25,7 @@ Nicht exportiert – nur innerhalb des Moduls benutzt.
 - `async selectionOf(scope, value)` – Lieder und Setlisten einer Auswahl.
 - `formScope()` – Auswahl, wie sie gerade im Dialog steht.
 - `async putToWebdav(name, text)` – Abo-Datei in den Sync-Ordner (Unterordner „Abo“) schreiben. Liefert die Adresse der Datei.
+- `suggestedUrl()` – Adresse aus dem Namen vorschlagen: …/abo/<Name>-<Zufall>.json
 - `async update()`
 - `showResult(s)`
 - `async open()`

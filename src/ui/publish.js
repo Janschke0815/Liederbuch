@@ -69,6 +69,17 @@ async function putToWebdav(name, text) {
 
 // ---------- Dialog ----------
 
+// Vorgeschlagene Adresse (und damit der Dateiname beim Herunterladen) folgt dem eingetragenen Namen –
+// bis man die Adresse selbst ändert oder schon unter einer Adresse veröffentlicht hat (Link bleibt gleich).
+let urlFollowsName = true;
+let filePart = '';
+
+/** Adresse aus dem Namen vorschlagen: …/abo/<Name>-<Zufall>.json */
+function suggestedUrl() {
+  const slug = cleanFileName($('#pub-name').value).replace(/\s+/g, '-') || 'Liederbuch';
+  return `${appUrl()}abo/${slug}-${filePart}.json`;
+}
+
 async function update() {
   const target = radio('pub-target');
   $('#pub-url-row').hidden = target !== 'file';
@@ -113,7 +124,9 @@ async function open() {
   $('#pub-target-webdav-row').hidden = !dav.url;
   const target = dav.url && s.target !== 'file' ? 'webdav' : 'file';
   for (const r of $$('input[name="pub-target"]')) r.checked = r.value === target;
-  $('#pub-url').value = s.target === 'file' && s.url ? s.url : `${appUrl()}abo/${cleanFileName($('#pub-name').value).replace(/\s+/g, '-')}-${randomFilePart()}.json`;
+  filePart = randomFilePart();
+  urlFollowsName = !(s.target === 'file' && s.url);
+  $('#pub-url').value = urlFollowsName ? suggestedUrl() : s.url;
   $('#pub-auto').checked = Boolean(s.auto);
   $('#pub-private').checked = false;
   $('#pub-result').hidden = !s.url;
@@ -140,6 +153,7 @@ async function publishFromDialog() {
       download(decodeURIComponent(url.split('/').pop()) || 'liederbuch-abo.json', text, 'application/json');
       toast('Datei heruntergeladen – jetzt an die angegebene Adresse legen (geschützter Ordner)');
     }
+    if (target === 'file') urlFollowsName = false; // ab jetzt gilt diese Adresse (Einladungslink)
     const s = { ...meta, scope, value, target, url, auto: target === 'webdav' && $('#pub-auto').checked, publishedAt: new Date().toISOString() };
     prefs.setIn('aboPublished', book.id, s);
     showResult(s);
@@ -151,7 +165,11 @@ async function publishFromDialog() {
   }
 }
 
-dialog.addEventListener('input', () => update());
+dialog.addEventListener('input', (e) => {
+  if (e.target.id === 'pub-url') urlFollowsName = false;
+  if (e.target.id === 'pub-name' && urlFollowsName) $('#pub-url').value = suggestedUrl();
+  update();
+});
 dialog.addEventListener('change', () => update());
 $('#pub-ok').onclick = publishFromDialog;
 $('#pub-copy').onclick = async () => {
