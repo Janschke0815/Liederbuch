@@ -712,6 +712,7 @@
             </label>
           </div>
           <p class="hint">Die App legt dort für jedes Lied eine ChordPro-Datei (Ordner <code>Lieder</code>) und für jede Setliste eine Textdatei (Ordner <code>Setlisten</code>) an – lesbar und bearbeitbar auch ohne die App. Nimm ein eigenes <b>App-Passwort</b> (Nextcloud: Einstellungen → Sicherheit), nicht dein Hauptpasswort – es wird auf diesem Gerät gespeichert. Mehrere Personen: den Ordner in der Nextcloud teilen und alle tragen dieselbe Adresse ein. Der Server muss Zugriffe von <code id="webdav-origin"></code> erlauben (CORS, siehe README).</p>
+          <button type="button" id="webdav-forget" class="link-btn danger" hidden>Gespeicherte Adresse und Zugangsdaten löschen</button>
         </section>
 
         <section class="sync-section" id="books-section">
@@ -905,7 +906,7 @@
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
         <h2>Für eine Gruppe veröffentlichen</h2>
-        <p class="hint">Andere können das Liederbuch dann abonnieren – nur lesen, mit automatischen Aktualisierungen. Die Datei ist nicht verschlüsselt: Leg sie dorthin, wo nur eure Gruppe hinkommt (z. B. in den WebDAV-Ordner mit Anmeldung).</p>
+        <p class="hint">Andere können das Liederbuch dann abonnieren – nur lesen, mit automatischen Aktualisierungen. Die Datei ist nicht verschlüsselt: Leg sie dorthin, wo nur eure Gruppe hinkommt (z. B. in euren Sync-Ordner mit Anmeldung).</p>
       </header>
       <div class="dialog-body publish-body">
         <div class="field-row">
@@ -922,12 +923,13 @@
         </fieldset>
         <fieldset class="pub-choice">
           <legend>Wohin?</legend>
-          <label class="check" id="pub-target-webdav-row"><input type="radio" name="pub-target" value="webdav"> in den WebDAV-Ordner (<span id="pub-webdav-host"></span>) – Abonnenten brauchen dort eine Anmeldung</label>
+          <label class="check" id="pub-target-webdav-row"><input type="radio" name="pub-target" value="webdav"> in euren Sync-Ordner (WebDAV, Unterordner „Abo“) – Abonnenten melden sich dort an</label>
           <label class="check"><input type="radio" name="pub-target" value="file" checked> Datei herunterladen – du legst sie selbst in einen <b>geschützten</b> Ordner (Name mit Zufallsteil)</label>
           <label class="field" id="pub-url-row">Adresse, unter der die Datei liegen wird
             <input id="pub-url" type="url" autocomplete="off" spellcheck="false">
           </label>
         </fieldset>
+        <label class="check pub-confirm"><input type="checkbox" id="pub-auto"> <b>Automatisch aktualisieren:</b> Änderungen an diesen Liedern kurz danach selbst veröffentlichen (nur Sync-Ordner)</label>
         <label class="check pub-confirm"><input type="checkbox" id="pub-private"> Ich gebe dieses Liederbuch nur an einen <b>privaten Kreis</b> weiter (Band, Familie, Freunde) – nicht öffentlich. Liedtexte und Melodien sind meist urheberrechtlich geschützt.</label>
         <div id="pub-result" class="pub-result" hidden>
           <strong>Einladungslink</strong>
@@ -936,7 +938,8 @@
             <button type="button" id="pub-copy">Kopieren</button>
             <button type="button" id="pub-share" hidden>Teilen …</button>
           </div>
-          <p class="hint">Nur an die Gruppe schicken. Änderst du später Lieder, einfach erneut veröffentlichen – der Link bleibt gleich.</p>
+          <p id="pub-when" class="hint"></p>
+          <p class="hint">Nur an die Gruppe schicken. Erneut veröffentlichen ersetzt die Datei – der Link bleibt gleich.</p>
         </div>
       </div>
       <footer class="dialog-foot">

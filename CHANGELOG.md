@@ -7,6 +7,18 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.26.1 – 19.11.2026 · Abo automatisch veröffentlichen, keine alten Serveradressen
+
+- **Automatisch aktualisieren** (beim Veröffentlichen ankreuzen): Ändern sich Lieder oder Setlisten des Abos,
+  veröffentlicht die App etwa 20 Sekunden später von selbst neu – auch bei Änderungen, die über den
+  Sync-Ordner von anderen Geräten kommen. Läuft, solange die App beim Herausgeber geöffnet ist; Fehler
+  werden einmal gemeldet.
+- **Keine fremde Serveradresse mehr:** „Für eine Gruppe veröffentlichen“ bot bisher jede irgendwann
+  gespeicherte WebDAV-Adresse als Ziel an und zeigte deren Servernamen. Jetzt nur noch den Sync-Ordner, über
+  den die App gerade abgleicht – und ohne Servernamen („in euren Sync-Ordner“).
+- **Gespeicherte Adresse und Zugangsdaten löschen:** neuer Knopf im Cloud-Dialog unter WebDAV (solange
+  nicht verbunden), um eine alte Adresse loszuwerden.
+
 ## 1.26.0 – 19.11.2026 · Liederbücher abonnieren (private Gruppen)
 
 - **Für eine Gruppe veröffentlichen** (Cloud → Liederbücher): alle Lieder, Lieder mit einem Tag oder eine

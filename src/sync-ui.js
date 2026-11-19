@@ -130,6 +130,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#book-new-from').textContent = book.name;
     for (const id of ['#sync-client-id', '#sync-api-key', '#sync-app-id']) $(id).disabled = usable;
     for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).disabled = usable;
+    // alte Adresse wieder loswerden (nur, solange nicht verbunden)
+    $('#webdav-forget').hidden = connected || !webdav().url;
 
     // Speicherort: nur fürs persönliche Liederbuch und nur, solange nicht verbunden
     $('#sync-provider-row').hidden = book.shared;
@@ -328,6 +330,15 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   $('#sync-connect').onclick = () => connect({ silent: engine?.state === 'auth' });
   $('#sync-now').onclick = () => engine.sync();
+  $('#webdav-forget').onclick = () => {
+    if (!confirm(`Gespeicherte WebDAV-Adresse und Zugangsdaten auf diesem Gerät löschen?\n${webdav().url}`)) return;
+    for (const k of Object.keys(localStorage)) if (/^webdav\./.test(k)) localStorage.removeItem(k);
+    for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).value = '';
+    build();
+    render();
+    toast('WebDAV-Zugangsdaten gelöscht');
+  };
+
   $('#sync-disconnect').onclick = () => {
     provider.signOut();
     engine.stop();

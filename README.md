@@ -352,12 +352,15 @@ Liederbuch, **nur zum Lesen**, und bekommen Änderungen automatisch (beim Öffne
 30 Minuten). Gedacht für einen **privaten Kreis** – Band, Familie, Freunde.
 
 **Veröffentlichen** (Cloud → Liederbücher → *Für eine Gruppe veröffentlichen …*):
-alle Lieder, Lieder mit einem Tag oder eine Setliste. Die App legt die Abo-Datei in den
-**WebDAV-Ordner** (Unterordner `Abo/`) – Abonnenten melden sich dort mit ihrem eigenen Benutzer an –
+alle Lieder, Lieder mit einem Tag oder eine Setliste. Die App legt die Abo-Datei in euren
+**Sync-Ordner** (WebDAV, Unterordner `Abo/`; nur, wenn die App gerade darüber abgleicht) – Abonnenten
+melden sich dort mit ihrem eigenen Benutzer an –
 oder bietet sie zum **Herunterladen** an (dann selbst in einen geschützten Ordner legen; der
 vorgeschlagene Name enthält einen Zufallsteil). Danach gibt es einen **Einladungslink** zum
 Weitergeben. Erneut veröffentlichen ersetzt die Datei, der Link bleibt gleich. Notizen und eigene
-Transpositionen gehen nicht mit.
+Transpositionen gehen nicht mit. Mit **„Automatisch aktualisieren“** veröffentlicht die App Änderungen
+an diesen Liedern (auch solche, die über den Sync-Ordner von anderen Geräten kommen) etwa 20 Sekunden
+später von selbst – solange sie auf deinem Gerät geöffnet ist.
 
 **Abonnieren:** Einladungslink öffnen – oder Cloud → *Abo hinzufügen …* und den Link einfügen.
 Verlangt der Ordner eine Anmeldung, fragt die App nach Benutzername und Passwort (bleiben auf

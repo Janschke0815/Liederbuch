@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-72 Module, 261 exportierte Funktionen, Konstanten und Klassen.
+72 Module, 262 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -40,7 +40,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/list.js`](ui/list.md) | Liederliste links: Suche, Tag-Filter, „Was kann ich spielen?“, Sortierung. |
 | [`ui/paste.js`](ui/paste.md) | Text einfügen: Akkorde-über-Text (z. |
 | [`ui/preview-tools.js`](ui/preview-tools.md) | Werkzeuge an der Vorschau: Vergrößern/Verkleinern und Metronom (Klick auf Takt/Tempo). |
-| [`ui/publish.js`](ui/publish.md) | „Für eine Gruppe veröffentlichen“: Lieder (alle, nach Tag oder aus einer Setliste) als Abo-Datei in den WebDAV-Ordner legen oder herunterladen, und den Einladungslink zum Weitergeben zeigen. |
+| [`ui/publish.js`](ui/publish.md) | „Für eine Gruppe veröffentlichen“: Lieder (alle, nach Tag oder aus einer Setliste) als Abo-Datei in den Sync-Ordner (WebDAV) legen oder herunterladen, und den Einladungslink zum Weitergeben zeigen. |
 | [`ui/share.js`](ui/share.md) | Lied teilen: über das Teilen-Menü des Geräts, als ChordPro-Datei, als Text oder als PDF – jeweils in der aktuellen Transposition. |
 | [`ui/shortcuts.js`](ui/shortcuts.md) | Alle Tastenkürzel an einer Stelle: Daraus entstehen die Tasten-Abfrage (app-keys.js, play-mode.js) und die Übersicht im Dialog „Tastenkürzel“. |
 | [`ui/snippets.js`](ui/snippets.md) | Bausteine über dem Editor: Akkord, Strophe, Refrain, Bridge, Tab, Wiederholung, Hinweis – und die Übersicht der ChordPro-Syntax („?“). |

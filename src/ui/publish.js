@@ -1,7 +1,10 @@
 // „Für eine Gruppe veröffentlichen“: Lieder (alle, nach Tag oder aus einer Setliste) als Abo-Datei in
-// den WebDAV-Ordner legen oder herunterladen, und den Einladungslink zum Weitergeben zeigen.
+// den Sync-Ordner (WebDAV) legen oder herunterladen, und den Einladungslink zum Weitergeben zeigen.
 // Was zuletzt veröffentlicht wurde, merkt sich die App (prefs: aboPublished) – erneut veröffentlichen
 // ersetzt die Datei, der Link bleibt gleich.
+//
+// Automatisch veröffentlichen (nur Sync-Ordner): Ändern sich Lieder oder Setlisten, wird kurz danach
+// von selbst neu veröffentlicht – mit derselben Auswahl wie beim letzten Mal.
 
 import { aboLink, aboToText, buildAboPayload, randomFilePart } from '../formats/abo.js';
 import { cleanFileName } from '../formats/song-files.js';
@@ -12,26 +15,34 @@ import { book, readOnly, repo, sets } from './app-state.js';
 import { $, $$, download, toast } from './dom.js';
 import { flushSave } from './song.js';
 
+const AUTO_DELAY_MS = 20 * 1000; // nach der letzten Änderung so lange warten, dann veröffentlichen
+
 const dialog = $('#publish-dialog');
 const appUrl = () => location.origin + location.pathname.replace(/index\.html$/, '');
 const radio = (name) => $(`input[name="${name}"]:checked`).value;
-const webdav = () => ({
-  url: localStorage.getItem('webdav.url') || '',
-  user: localStorage.getItem('webdav.user') || '',
-  password: localStorage.getItem('webdav.pass') || '',
-});
+/** WebDAV-Zugang – nur, wenn die App gerade darüber abgleicht (keine alte, irgendwann gespeicherte Adresse). */
+const webdav = () => {
+  const active = localStorage.getItem('sync.provider') === 'webdav' && localStorage.getItem('sync.kind') === 'webdav';
+  return {
+    url: active ? localStorage.getItem('webdav.url') || '' : '',
+    user: localStorage.getItem('webdav.user') || '',
+    password: localStorage.getItem('webdav.pass') || '',
+  };
+};
 const saved = () => prefs.get('aboPublished')[book.id] || {};
+const plural = (n) => `${n} ${n === 1 ? 'Lied' : 'Lieder'}`;
+const fmtTime = (iso) => new Date(iso).toLocaleString('de', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-/** Lieder und Setlisten, die nach der aktuellen Auswahl mitgehen. */
-async function selection() {
-  const scope = radio('pub-scope');
+/**
+ * Lieder und Setlisten einer Auswahl.
+ * @param {'all'|'tag'|'setlist'} scope
+ * @param {string} value  Tag bzw. Setlisten-ID
+ */
+async function selectionOf(scope, value) {
   const allSets = await sets.list();
-  if (scope === 'tag') {
-    const tag = $('#pub-tag').value;
-    return { songs: tag ? await repo.list({ tag }) : [], setlists: allSets };
-  }
+  if (scope === 'tag') return { songs: value ? await repo.list({ tag: value }) : [], setlists: allSets };
   if (scope === 'setlist') {
-    const set = allSets.find((s) => s.id === $('#pub-setlist').value);
+    const set = allSets.find((s) => s.id === value);
     if (!set) return { songs: [], setlists: [] };
     const songs = (await Promise.all(set.items.map((i) => repo.get(i.songId)))).filter(Boolean);
     return { songs, setlists: [set] };
@@ -39,19 +50,44 @@ async function selection() {
   return { songs: await repo.list(), setlists: allSets };
 }
 
+/** Auswahl, wie sie gerade im Dialog steht. */
+function formScope() {
+  const scope = radio('pub-scope');
+  return { scope, value: scope === 'tag' ? $('#pub-tag').value : scope === 'setlist' ? $('#pub-setlist').value : '' };
+}
+
+/** Abo-Datei in den Sync-Ordner (Unterordner „Abo“) schreiben. Liefert die Adresse der Datei. */
+async function putToWebdav(name, text) {
+  const dav = webdav();
+  if (!dav.url) throw new Error('Die App gleicht gerade nicht über einen WebDAV-Ordner ab');
+  const base = webdavFileUrl(dav.url).replace(/[^/]*$/, '');
+  const fileUrl = `${base}Abo/${encodeURIComponent(cleanFileName(name))}.json`;
+  const client = new WebdavClient({ ...dav, fetch: (...a) => globalThis.fetch(...a), host: new URL(base).host });
+  await client.put(fileUrl, text, {}, [base, `${base}Abo/`]);
+  return fileUrl;
+}
+
+// ---------- Dialog ----------
+
 async function update() {
   const target = radio('pub-target');
   $('#pub-url-row').hidden = target !== 'file';
-  const { songs } = await selection();
-  $('#pub-count').textContent = `${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'}`;
+  // automatisch geht nur in den Sync-Ordner – eine heruntergeladene Datei legt man selbst ab
+  $('#pub-auto').disabled = target !== 'webdav';
+  if (target !== 'webdav') $('#pub-auto').checked = false;
+  const { scope, value } = formScope();
+  const { songs } = await selectionOf(scope, value);
+  $('#pub-count').textContent = plural(songs.length);
   const urlOk = target !== 'file' || /^https?:\/\/\S+$/.test($('#pub-url').value.trim());
   $('#pub-ok').disabled = !songs.length || !$('#pub-private').checked || !urlOk || !$('#pub-name').value.trim();
 }
 
-function showLink(fileUrl) {
-  const link = aboLink(appUrl(), fileUrl);
-  $('#pub-link').value = link;
+function showResult(s) {
+  $('#pub-link').value = aboLink(appUrl(), s.url);
   $('#pub-share').hidden = !navigator.share;
+  $('#pub-when').textContent = s.publishedAt
+    ? `Zuletzt veröffentlicht: ${fmtTime(s.publishedAt)}${s.auto ? ' · wird automatisch aktualisiert' : ''}`
+    : '';
   $('#pub-result').hidden = false;
 }
 
@@ -73,48 +109,41 @@ async function open() {
   }
   if (s.scope === 'tag') $('#pub-tag').value = s.value;
   if (s.scope === 'setlist') $('#pub-setlist').value = s.value;
-  // Ziel: WebDAV (mit Anmeldung geschützt), wenn eingerichtet – sonst Datei
+  // Ziel: Sync-Ordner (mit Anmeldung geschützt), wenn die App darüber abgleicht – sonst Datei
   $('#pub-target-webdav-row').hidden = !dav.url;
-  try {
-    $('#pub-webdav-host').textContent = dav.url ? new URL(dav.url).host : '';
-  } catch {
-    $('#pub-webdav-host').textContent = '';
-  }
-  const target = s.target || (dav.url ? 'webdav' : 'file');
+  const target = dav.url && s.target !== 'file' ? 'webdav' : 'file';
   for (const r of $$('input[name="pub-target"]')) r.checked = r.value === target;
   $('#pub-url').value = s.target === 'file' && s.url ? s.url : `${appUrl()}abo/${cleanFileName($('#pub-name').value).replace(/\s+/g, '-')}-${randomFilePart()}.json`;
+  $('#pub-auto').checked = Boolean(s.auto);
   $('#pub-private').checked = false;
   $('#pub-result').hidden = !s.url;
-  if (s.url) showLink(s.url);
+  if (s.url) showResult(s);
   await update();
   dialog.showModal();
 }
 
-async function publish() {
+async function publishFromDialog() {
   $('#pub-ok').disabled = true;
   try {
     const name = $('#pub-name').value.trim();
     const meta = { name, publisher: $('#pub-publisher').value, description: $('#pub-desc').value };
-    const { songs, setlists } = await selection();
+    const { scope, value } = formScope();
+    const { songs, setlists } = await selectionOf(scope, value);
     const text = aboToText(buildAboPayload(songs, setlists, meta));
     const target = radio('pub-target');
-    let fileUrl;
+    let url;
     if (target === 'webdav') {
-      const dav = webdav();
-      const base = webdavFileUrl(dav.url).replace(/[^/]*$/, '');
-      fileUrl = `${base}Abo/${encodeURIComponent(cleanFileName(name))}.json`;
-      const client = new WebdavClient({ ...dav, fetch: globalThis.fetch.bind(globalThis), host: new URL(base).host });
-      await client.put(fileUrl, text, {}, [base, `${base}Abo/`]);
-      toast(`Veröffentlicht: ${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'} im WebDAV-Ordner „Abo“`);
+      url = await putToWebdav(name, text);
+      toast(`Veröffentlicht: ${plural(songs.length)} im Sync-Ordner „Abo“`);
     } else {
-      fileUrl = $('#pub-url').value.trim();
-      download(decodeURIComponent(fileUrl.split('/').pop()) || 'liederbuch-abo.json', text, 'application/json');
+      url = $('#pub-url').value.trim();
+      download(decodeURIComponent(url.split('/').pop()) || 'liederbuch-abo.json', text, 'application/json');
       toast('Datei heruntergeladen – jetzt an die angegebene Adresse legen (geschützter Ordner)');
     }
-    const scope = radio('pub-scope');
-    const value = scope === 'tag' ? $('#pub-tag').value : scope === 'setlist' ? $('#pub-setlist').value : '';
-    prefs.setIn('aboPublished', book.id, { ...meta, scope, value, target, url: fileUrl, publishedAt: new Date().toISOString() });
-    showLink(fileUrl);
+    const s = { ...meta, scope, value, target, url, auto: target === 'webdav' && $('#pub-auto').checked, publishedAt: new Date().toISOString() };
+    prefs.setIn('aboPublished', book.id, s);
+    showResult(s);
+    setupAuto();
   } catch (err) {
     toast(`Veröffentlichen fehlgeschlagen: ${err.message}`);
   } finally {
@@ -124,7 +153,7 @@ async function publish() {
 
 dialog.addEventListener('input', () => update());
 dialog.addEventListener('change', () => update());
-$('#pub-ok').onclick = publish;
+$('#pub-ok').onclick = publishFromDialog;
 $('#pub-copy').onclick = async () => {
   try {
     await navigator.clipboard.writeText($('#pub-link').value);
@@ -138,3 +167,52 @@ $('#btn-publish').onclick = () => {
   $('#sync-dialog').close();
   open();
 };
+
+// ---------- Automatisch veröffentlichen ----------
+
+let autoTimer = 0;
+let autoOn = false;
+let lastError = '';
+
+/**
+ * Mit der gemerkten Auswahl neu veröffentlichen (ohne Dialog). Fehler werden einmal gemeldet,
+ * nicht bei jedem Versuch.
+ * @returns {Promise<boolean>} hat es geklappt?
+ */
+export async function republish() {
+  const s = saved();
+  if (!s.auto || s.target !== 'webdav') return false;
+  try {
+    const { songs, setlists } = await selectionOf(s.scope, s.value);
+    const url = await putToWebdav(s.name, aboToText(buildAboPayload(songs, setlists, s)));
+    prefs.setIn('aboPublished', book.id, { ...s, url, publishedAt: new Date().toISOString() });
+    lastError = '';
+    return true;
+  } catch (err) {
+    if (err.message !== lastError) toast(`Abo „${s.name}“ konnte nicht automatisch veröffentlicht werden: ${err.message}`);
+    lastError = err.message;
+    return false;
+  }
+}
+
+/** Nach einer Änderung etwas warten (es wird oft mehrmals hintereinander gespeichert), dann veröffentlichen. */
+function scheduleRepublish() {
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(republish, AUTO_DELAY_MS);
+}
+
+/** Beobachten einschalten, wenn für dieses Liederbuch „automatisch“ gewählt ist. */
+function setupAuto() {
+  if (autoOn || readOnly || !saved().auto) return;
+  autoOn = true;
+  repo.addEventListener('change', scheduleRepublish);
+  sets.addEventListener('change', scheduleRepublish);
+  // auch Änderungen von anderen Geräten (z. B. ein Bandmitglied ändert über den Sync-Ordner)
+  repo.addEventListener('remote-change', scheduleRepublish);
+  sets.addEventListener('remote-change', scheduleRepublish);
+  // Seite wird geschlossen: Ausstehendes noch schnell veröffentlichen
+  addEventListener('pagehide', () => {
+    if (autoTimer) republish();
+  });
+}
+setupAuto();
