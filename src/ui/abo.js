@@ -93,6 +93,7 @@ $('#abo-ok').onclick = async () => {
     await storeAbo(new SongRepository(await openIdbStore(b.dbName)), new SetlistRepository(await openIdbStore(b.dbName, 'setlists')), data);
     prefs.setIn('aboState', b.id, { checkedAt: new Date().toISOString(), publishedAt: data.publishedAt, count: data.songs.length });
     dialog.close('ok');
+    sessionStorage.setItem('aboJustAdded', '1'); // nach dem Neuladen einmal zeigen, wie man zurückkommt
     setActiveBook(b.id);
     location.reload();
   } catch (err) {
@@ -171,6 +172,14 @@ if (readOnly) {
   $('#abo-bar').hidden = false;
   $('#abo-refresh').onclick = () => refreshAbo({ quiet: false });
   $('#abo-leave').onclick = leaveAbo;
+  $('#abo-home').onclick = () => {
+    setActiveBook(PERSONAL.id);
+    location.reload();
+  };
+  if (sessionStorage.getItem('aboJustAdded')) {
+    sessionStorage.removeItem('aboJustAdded');
+    toast(`Abo „${book.name}“ geöffnet. Deine eigenen Lieder: oben auf den Namen tippen oder „Mein Liederbuch“`, { ms: 8000 });
+  }
   $('#btn-publish').hidden = true; // ein Abo veröffentlicht man nicht weiter
   renderBar();
   // erstes Nachsehen startet app.js nach dem Öffnen des ersten Liedes (startAbo)

@@ -7,6 +7,13 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.26.3 – 19.11.2026 · Vom Abo zurück zu den eigenen Liedern
+
+- **„Mein Liederbuch“** in der Abo-Leiste über der Liste: ein Tipp, und du bist wieder bei deinen eigenen
+  Liedern. (Wechseln geht weiterhin auch oben über den Namen des Liederbuchs.)
+- Nach dem Abonnieren erklärt ein Hinweis, wie man zwischen Abo und eigenen Liedern wechselt. Die eigenen
+  Lieder waren nie weg – das Abo ist ein eigenes Liederbuch.
+
 ## 1.26.2 – 19.11.2026 · Abo-Datei heißt wie das Abo
 
 - **Dateiname beim Herunterladen:** Die Abo-Datei heißt jetzt wie der eingetragene Name (z. B.

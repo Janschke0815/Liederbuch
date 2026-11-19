@@ -366,7 +366,8 @@ später von selbst – solange sie auf deinem Gerät geöffnet ist.
 Verlangt der Ordner eine Anmeldung, fragt die App nach Benutzername und Passwort (bleiben auf
 diesem Gerät). Im Abo kann man transponieren, eigene Notizen schreiben, spielen und drucken;
 **Rechtsklick → In „Mein Liederbuch“ kopieren** macht aus einem Lied eine eigene, bearbeitbare
-Fassung. Die Leiste über der Liste zeigt den Stand, aktualisiert auf Knopfdruck und beendet das Abo.
+Fassung. Die Leiste über der Liste zeigt den Stand, führt zurück zu **„Mein Liederbuch“**, aktualisiert auf
+Knopfdruck und beendet das Abo. Zwischen den Liederbüchern wechselt man auch oben über den Namen.
 
 **Urheberrecht:** Liedtexte und Melodien (auch Harp-Tabs) sind meist geschützt (bis 70 Jahre nach
 dem Tod der Urheber). Weitergeben an einen privaten Kreis ist erlaubt, öffentlich bereitstellen
