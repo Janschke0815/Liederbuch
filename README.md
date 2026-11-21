@@ -419,8 +419,30 @@ Keiner dieser Werte ist geheim (sie stehen bei jeder Web-App sichtbar im Code); 
 nur von den eingetragenen Adressen an. Das *Client-Secret* wird nicht gebraucht – nicht weitergeben.
 
 Google meldet Browser-Apps nach etwa einer Stunde ab; dann zeigt der Cloud-Knopf „Anmelden“,
-ein Tipp darauf genügt (bis dahin wird lokal weitergespeichert). Weitere Anbieter (z. B.
-Dropbox) lassen sich in `src/sync/` mit `read`/`write` ergänzen.
+ein Tipp darauf genügt (bis dahin wird lokal weitergespeichert). Weitere Anbieter lassen sich
+in `src/sync/` mit `read`/`write` ergänzen.
+
+### Dropbox
+
+Das persönliche Liederbuch kann auch in Dropbox liegen: **Cloud → Abgleich → Speicherort „Dropbox“**,
+dann **Verbinden**. Die Seite führt kurz zu Dropbox (dort anmelden und erlauben) und kommt zurück.
+Danach bleibt die Verbindung bestehen – anders als bei Google ist kein erneutes Anmelden nötig.
+Die Daten liegen als `Liederbuch.json` im App-Ordner (*Dropbox → Apps → <Name der App>*); die App
+sieht nur diesen Ordner. Gemeinsame Liederbücher mit Einladung gibt es weiterhin über Google Drive.
+
+Einmalig einrichten (kostenlos):
+
+1. <https://www.dropbox.com/developers/apps> → **Create app** → *Scoped access* → **App folder** →
+   Namen vergeben (muss bei Dropbox einmalig sein, z. B. „Liederbuch-Janosch“).
+2. Reiter *Permissions*: **files.content.read** und **files.content.write** ankreuzen → *Submit*.
+3. Reiter *Settings* → *OAuth 2 Redirect URIs*: genau die Adresse der App eintragen, z. B.
+   `https://janschke0815.github.io/Liederbuch/` und `http://localhost:5173/` (die App zeigt die
+   passende Adresse unter „Dropbox-Einrichtung“ an). *Allow public clients (PKCE)* muss erlaubt sein.
+4. Den **App key** in `src/sync/config.js` (`DROPBOX_APP_KEY`) eintragen oder in der App unter
+   **Cloud → Abgleich → Dropbox-Einrichtung**. Das *App secret* wird nicht gebraucht – nicht weitergeben.
+
+Eine Dropbox-App im Entwicklungsstatus können auch andere (z. B. Bandmitglieder) mit ihrem eigenen
+Dropbox-Konto nutzen; jeder hat dann seine eigene Datei im eigenen App-Ordner.
 
 ### WebDAV (Nextcloud, ownCloud, Synology …)
 
@@ -506,7 +528,7 @@ Kein Build-Schritt: Der Browser lädt die ES-Module direkt. Abhängigkeiten zeig
     src/print/      Seitenumbruch, Deckblatt, Inhaltsverzeichnis, Druck-CSS, Druckschriften
     src/settings/   Darstellungs-Einstellungen (prüfen, speichern, als CSS-Variablen anwenden)
     src/storage/    IndexedDB hinter einer Schnittstelle: Lieder, Setlisten
-    src/sync/       Abgleich (sync-engine.js), Google Drive, WebDAV (webdav.js: Lieder <-> Dateien,
+    src/sync/       Abgleich (sync-engine.js), Google Drive, Dropbox, WebDAV (webdav.js: Lieder <-> Dateien,
                     webdav-client.js: HTTP)
     src/ui/         Hauptansicht, ein Modul pro Aufgabe:
                       app-state.js   Liederbuch, Datenbanken, geöffnetes Lied
@@ -566,3 +588,6 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     per Einladungslink abonnieren, nur lesen, automatisch aktualisieren, Lieder ins eigene Buch kopieren
 19. ✅ Cloud-Dialog übersichtlicher (1.27): Bereiche „Liederbücher auf diesem Gerät“, „Abgleich zwischen
     Geräten“, „Mitglieder“, „Für eine Gruppe veröffentlichen“; Abo-Adresse und „Abo beenden“ dort
+20. ✅ Dropbox als Speicherort (1.28): Anmeldung per PKCE ohne eigenen Server, bleibt verbunden,
+    Datei im App-Ordner
+21. Live-Modus fürs Lagerfeuer: ein Gerät wählt das Lied, alle anderen sehen es sofort (Peer-to-Peer)

@@ -51,6 +51,9 @@
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6em; }
 @media (max-width: 520px) {
   .field-row { grid-template-columns: 1fr; }
+  /* drei Speicherorte: ganze Breite, Beschriftung darf umbrechen */
+  .sync-provider-row .segmented { display: flex; width: 100%; }
+  .sync-provider-row .segmented button { flex: 1; padding-inline: .4em; white-space: normal; line-height: 1.2; }
 }
 .sync-status-main { flex: 1; min-width: 0; }
 .book-list, .member-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }

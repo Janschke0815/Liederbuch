@@ -4,7 +4,7 @@
 
 Dateien, die Menschen zu sehen bekommen (NAS, Drive, Sicherung, geteilte Lieder), so schreiben, dass sie auch in Windows-Programmen wie dem Editor sauber aussehen: eingerückt und mit Windows-Zeilenumbrüchen (CR LF). Lesen geht weiterhin mit beiden Zeilenenden.
 
-**Benutzt von:** [`formats/abo.js`](abo.md), [`formats/backup.js`](backup.md), [`formats/chordpro-files.js`](chordpro-files.md), [`sync/google-drive.js`](../sync/google-drive.md), [`sync/webdav.js`](../sync/webdav.md), [`ui/share.js`](../ui/share.md)
+**Benutzt von:** [`formats/abo.js`](abo.md), [`formats/backup.js`](backup.md), [`formats/chordpro-files.js`](chordpro-files.md), [`sync/dropbox.js`](../sync/dropbox.md), [`sync/google-drive.js`](../sync/google-drive.md), [`sync/webdav.js`](../sync/webdav.md), [`ui/share.js`](../ui/share.md)
 
 ## Exportiert
 

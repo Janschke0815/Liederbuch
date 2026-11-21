@@ -723,6 +723,7 @@
                 <span class="hint">Speicherort</span>
                 <div class="segmented" role="radiogroup" aria-label="Speicherort" id="sync-provider">
                   <button type="button" role="radio" data-value="gdrive">Google Drive</button>
+                  <button type="button" role="radio" data-value="dropbox">Dropbox</button>
                   <button type="button" role="radio" data-value="webdav">WebDAV / Nextcloud</button>
                 </div>
               </div>
@@ -744,6 +745,14 @@
                   <p class="hint">Die App legt dort für jedes Lied eine ChordPro-Datei (Ordner <code>Lieder</code>) und für jede Setliste eine Textdatei (Ordner <code>Setlisten</code>) an – lesbar und bearbeitbar auch ohne die App. Nimm ein eigenes <b>App-Passwort</b> (Nextcloud: Einstellungen → Sicherheit), nicht dein Hauptpasswort – es wird auf diesem Gerät gespeichert. Mehrere Personen: den Ordner teilen, alle tragen dieselbe Adresse ein. Der Server muss Zugriffe von <code id="webdav-origin"></code> erlauben (CORS, siehe README).</p>
                 </details>
               </div>
+
+              <details id="dropbox-setup" class="sync-setup" hidden>
+                <summary>Dropbox-Einrichtung (einmalig)</summary>
+                <label class="field">App-Schlüssel <small>(App key der Dropbox-App)</small>
+                  <input id="dropbox-app-key" placeholder="z. B. a1b2c3d4e5f6g7h" autocomplete="off" spellcheck="false">
+                </label>
+                <p class="hint">Anleitung im README („Dropbox einrichten“). Bei der Dropbox-App als Redirect-URI eintragen: <code id="dropbox-redirect"></code>. „Verbinden“ führt kurz zu Dropbox und wieder zurück.</p>
+              </details>
 
               <details id="sync-setup" class="sync-setup">
                 <summary>Google-Einrichtung (einmalig)</summary>

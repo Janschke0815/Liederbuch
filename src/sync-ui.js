@@ -3,7 +3,8 @@
 import { SyncEngine, SYNC_FORMAT, SYNC_VERSION } from './sync/sync-engine.js';
 import { GoogleDriveProvider } from './sync/google-drive.js';
 import { WebDavProvider, webdavUrlProblem } from './sync/webdav.js';
-import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID } from './sync/config.js';
+import { DropboxProvider, dropboxRedirectUri } from './sync/dropbox.js';
+import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID, DROPBOX_APP_KEY } from './sync/config.js';
 import {
   listBooks, setActiveBook, addSharedBook, removeBook, bookNameFromFile, fileNameForBook,
 } from './books.js';
@@ -38,7 +39,7 @@ const button = (text, onclick, className = '') =>
   Object.assign(document.createElement('button'), { type: 'button', textContent: text, onclick, className });
 
 /**
- * Cloud-Dialog und Abgleich einrichten (Google Drive oder WebDAV, gemeinsame Liederbücher).
+ * Cloud-Dialog und Abgleich einrichten (Google Drive, Dropbox oder WebDAV, gemeinsame Liederbücher).
  * @param {{repo, book, beforeSync: () => Promise<void>, beforeConnect?: () => Promise<void>,
  *          beforeSwitch: () => Promise<void>, toast: Function,
  *          leaveAbo?: (entry: object) => boolean, refreshAbo?: (o: {quiet: boolean}) => Promise<void>}} opts
@@ -49,20 +50,26 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   const btn = $('#btn-cloud');
   $('#sync-origin').textContent = location.origin;
   $('#webdav-origin').textContent = location.origin;
+  $('#dropbox-redirect').textContent = dropboxRedirectUri();
 
   const cfg = (key, fallback) => localStorage.getItem(key) || fallback;
   const clientId = () => cfg('gdrive.clientId', GOOGLE_CLIENT_ID);
   const apiKey = () => cfg('gdrive.apiKey', GOOGLE_API_KEY);
   const appId = () => cfg('gdrive.appId', GOOGLE_APP_ID);
-  // Gemeinsame Liederbücher laufen immer über Google Drive; das persönliche wahlweise über WebDAV
-  const kind = () => (book.shared ? 'gdrive' : localStorage.getItem('sync.kind') === 'webdav' ? 'webdav' : 'gdrive');
+  const appKey = () => cfg('dropbox.appKey', DROPBOX_APP_KEY);
+  // Gemeinsame Liederbücher laufen immer über Google Drive; das persönliche wahlweise über
+  // Dropbox oder WebDAV
+  const kind = () => {
+    const k = localStorage.getItem('sync.kind');
+    return book.shared || !['webdav', 'dropbox'].includes(k) ? 'gdrive' : k;
+  };
   const connectedFlag = () => localStorage.getItem('sync.provider') === kind();
   const webdav = () => ({
     url: localStorage.getItem('webdav.url') || '',
     user: localStorage.getItem('webdav.user') || '',
     password: localStorage.getItem('webdav.pass') || '',
   });
-  const configured = () => (kind() === 'webdav' ? Boolean(webdav().url) : Boolean(clientId()));
+  const configured = () => ({ webdav: Boolean(webdav().url), dropbox: Boolean(appKey()) })[kind()] ?? Boolean(clientId());
 
   let provider = null;
   let engine = null;
@@ -70,9 +77,12 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   function build() {
     engine?.stop();
-    provider = kind() === 'webdav'
+    const k = kind();
+    provider = k === 'webdav'
       ? new WebDavProvider(webdav())
-      : new GoogleDriveProvider({ clientId: clientId(), apiKey: apiKey(), appId: appId(), book });
+      : k === 'dropbox'
+        ? new DropboxProvider({ appKey: appKey() })
+        : new GoogleDriveProvider({ clientId: clientId(), apiKey: apiKey(), appId: appId(), book });
     engine = new SyncEngine(repo, provider, { beforeSync, extra });
     engine.addEventListener('status', render);
   }
@@ -100,7 +110,9 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   function render() {
     const state = engine?.state || 'off';
     const dav = kind() === 'webdav';
-    const where = dav ? `WebDAV (${provider.host})` : 'Google Drive';
+    const dbx = kind() === 'dropbox';
+    const gd = !dav && !dbx;
+    const where = dav ? `WebDAV (${provider.host})` : dbx ? 'Dropbox' : 'Google Drive';
     let text = '';
     if (state === 'idle') text = `${where} · zuletzt abgeglichen ${fmtTime(engine.lastSync)}`;
     else if (state === 'syncing') text = where;
@@ -108,11 +120,12 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     else if (state === 'auth') {
       text = dav
         ? `${engine.error?.message || 'Anmeldung fehlgeschlagen'}. Zugangsdaten prüfen und „Neu anmelden“ tippen – deine Lieder bleiben erhalten.`
-        : 'Die Google-Anmeldung ist abgelaufen. „Neu anmelden“ tippen – deine Lieder bleiben erhalten.';
+        : `Die ${dbx ? 'Dropbox' : 'Google'}-Anmeldung ist abgelaufen. „Neu anmelden“ tippen – deine Lieder bleiben erhalten.`;
     } else if (state === 'error') text = engine.error?.message || '';
     else if (book.abo) text = 'Abonniertes Liederbuch – wird über das Abo aktualisiert, nicht über die Cloud.';
     else if (book.shared) text = 'Dieses gemeinsame Liederbuch braucht die Verbindung zu Google Drive.';
     else if (dav) text = 'Adresse und Zugangsdaten eintragen, dann „Verbinden“.';
+    else if (dbx) text = appKey() ? 'Mit Dropbox verbinden, um alle Geräte abzugleichen.' : 'Zuerst die Dropbox-Einrichtung unten erledigen.';
     else text = clientId() ? 'Mit Google Drive verbinden, um alle Geräte abzugleichen.' : 'Zuerst die Einrichtung unten erledigen.';
 
     btn.dataset.state = state;
@@ -128,17 +141,21 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#sync-now').hidden = !usable;
     $('#sync-connect').hidden = usable;
     $('#sync-connect').textContent = state === 'auth' ? 'Neu anmelden' : 'Verbinden';
-    $('#book-actions').hidden = !usable || dav;
-    $('#book-new').hidden = !usable || dav;
+    $('#book-actions').hidden = !usable || !gd;
+    $('#book-new').hidden = !usable || !gd;
     // Abo: wird nie mit der Cloud abgeglichen – keine Einstellungen zum Abgleich zeigen
     $('#sync-config').hidden = Boolean(book.abo);
     $('#sync-card').classList.toggle('muted', Boolean(book.abo));
     $('#publish-from').textContent = book.name;
-    $('#book-offline-hint').hidden = usable || dav || Boolean(book.abo);
-    $('#book-webdav-hint').hidden = !dav || Boolean(book.abo);
+    $('#book-offline-hint').hidden = usable || !gd || Boolean(book.abo);
+    $('#book-webdav-hint').hidden = gd || Boolean(book.abo);
+    $('#book-webdav-hint').textContent = dav
+      ? 'Gemeinsame Liederbücher mit Einladung gibt es über Google Drive. Mit WebDAV teilt ihr einfach den Ordner.'
+      : 'Gemeinsame Liederbücher mit Einladung gibt es über Google Drive.';
     $('#book-new-from').textContent = book.name;
     for (const id of ['#sync-client-id', '#sync-api-key', '#sync-app-id']) $(id).disabled = usable;
     for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).disabled = usable;
+    $('#dropbox-app-key').disabled = usable;
     // alte Adresse wieder loswerden (nur, solange nicht verbunden)
     $('#webdav-forget').hidden = connected || !webdav().url;
 
@@ -149,10 +166,13 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       b.disabled = connected && b.dataset.value !== kind();
     }
     $('#webdav-setup').hidden = !dav;
-    $('#sync-setup').hidden = dav;
+    $('#sync-setup').hidden = !gd;
+    $('#dropbox-setup').hidden = !dbx;
     $('#sync-foot-hint').textContent = dav
       ? 'Schrift- und Druckeinstellungen bleiben pro Gerät.'
-      : 'Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.';
+      : dbx
+        ? 'Die App sieht in deiner Dropbox nur ihren eigenen Ordner (unter „Apps“). Schrift- und Druckeinstellungen bleiben pro Gerät.'
+        : 'Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.';
   }
 
   /** Angaben zu einem Abo: Adresse (zum Kopieren), Stand, Aktualisieren und Beenden. */
@@ -284,6 +304,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       return false;
     }
     if (kind() === 'webdav') return connectWebdav();
+    if (kind() === 'dropbox') return connectDropbox();
     saveSetup();
     if (!clientId()) {
       $('#sync-setup').open = true;
@@ -365,6 +386,61 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     else await engine.sync();
     if (first) toast(`Mit ${provider.host} verbunden`);
     return true;
+  }
+
+  /** Dropbox-App-Schlüssel übernehmen (neu bauen, wenn er sich geändert hat). */
+  function saveDropbox() {
+    const v = $('#dropbox-app-key').value.trim();
+    if (v === (localStorage.getItem('dropbox.appKey') || '')) return;
+    if (v) localStorage.setItem('dropbox.appKey', v);
+    else localStorage.removeItem('dropbox.appKey');
+    build();
+  }
+
+  /** Verbunden (nach der Anmeldung oder mit noch gültigem Langzeit-Token): Abgleich starten. */
+  async function startDropbox() {
+    const first = !connectedFlag();
+    localStorage.setItem('sync.provider', 'dropbox');
+    if (first) await beforeConnect?.();
+    if (engine.state === 'off') engine.start();
+    else await engine.sync();
+    if (first) toast('Mit Dropbox verbunden');
+    return true;
+  }
+
+  /** Zu Dropbox weiterleiten; die Seite kommt danach mit ?code=… zurück (siehe finishDropbox). */
+  async function connectDropbox() {
+    saveDropbox();
+    if (!appKey()) {
+      $('#dropbox-setup').open = true;
+      $('#dropbox-app-key').focus();
+      toast('Bitte zuerst den Dropbox-App-Schlüssel eintragen');
+      return false;
+    }
+    if (provider.signedIn) return startDropbox();
+    try {
+      await beforeSwitch?.(); // Ungespeichertes sichern, die Seite wird gleich verlassen
+      location.assign(await provider.loginUrl({ bookId: book.id }));
+    } catch (err) {
+      toast(`Verbinden fehlgeschlagen: ${err.message}`);
+    }
+    return false;
+  }
+
+  /** Rückkehr von der Dropbox-Anmeldung (?code=…&state=… in der Adresse) auswerten. */
+  async function finishDropbox() {
+    const query = new URLSearchParams(location.search);
+    if (!query.has('state') || !(query.has('code') || query.has('error'))) return;
+    // Code nicht in der Adresse (und im Verlauf) lassen
+    history.replaceState(null, '', location.pathname + location.hash);
+    if (kind() !== 'dropbox') return;
+    try {
+      const saved = await provider.finishLogin(query);
+      if (saved && saved.bookId === book.id) await startDropbox();
+    } catch (err) {
+      toast(`Verbinden fehlgeschlagen: ${err.message}`);
+      render();
+    }
   }
 
   // Speicherort wählen (nur solange nicht verbunden)
@@ -489,6 +565,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#sync-api-key').value = apiKey();
     $('#sync-app-id').value = appId();
     $('#sync-setup').open = !clientId();
+    $('#dropbox-app-key').value = appKey();
+    $('#dropbox-setup').open = !appKey();
     const w = webdav();
     $('#webdav-url').value = w.url;
     $('#webdav-user').value = w.user;
@@ -511,6 +589,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   renderBookSelect();
   // Abo: wird über das Abo aktualisiert, nie mit der eigenen Cloud abgeglichen
   if (!book.abo && connectedFlag() && configured()) engine.start();
+  finishDropbox();
   if (localStorage.getItem('openSyncDialog')) {
     localStorage.removeItem('openSyncDialog');
     openDialog();

@@ -7,6 +7,17 @@ Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich
 
 ---
 
+## 1.28.0 – 21.11.2026 · Dropbox als Speicherort
+
+- **Neuer Speicherort Dropbox** (Cloud → Abgleich → Speicherort): Das persönliche Liederbuch wird über
+  deine Dropbox zwischen allen Geräten abgeglichen. „Verbinden“ führt kurz zu Dropbox und wieder zurück.
+- **Bleibt verbunden:** Anders als bei Google muss man sich nicht nach einer Stunde neu anmelden.
+- Die App sieht in deiner Dropbox nur ihren eigenen Ordner (*Apps → Name der App*), dort liegt
+  `Liederbuch.json`.
+- Einmalig nötig: eine kostenlose Dropbox-App anlegen und deren App-Schlüssel eintragen
+  (Anleitung im README, „Dropbox“).
+- Auf dem Handy passen die drei Speicherorte nebeneinander (Beschriftung bricht um).
+
 ## 1.27.0 – 19.11.2026 · Cloud-Dialog übersichtlicher
 
 - Der Cloud-Dialog ist in klar getrennte Bereiche gegliedert (wie die Einstellungen):

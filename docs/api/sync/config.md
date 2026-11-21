@@ -27,3 +27,10 @@ API-Schlüssel, nur für die Dateiauswahl (Einladung öffnen)
 `= ''`
 
 Projektnummer des Google-Cloud-Projekts
+
+### `DROPBOX_APP_KEY`
+
+`= ''`
+
+Dropbox (siehe README, „Dropbox einrichten“): App-Schlüssel einer Dropbox-App mit Zugriff „App folder“.
+Ebenfalls nicht geheim; alternativ im Cloud-Dialog unter „Dropbox-Einrichtung“ pro Gerät eintragen.
