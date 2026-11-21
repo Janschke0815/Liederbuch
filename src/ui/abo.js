@@ -177,7 +177,7 @@ export function leaveAbo(entry = book) {
   return true;
 }
 
-if (readOnly) {
+if (book.abo) {
   document.body.dataset.readonly = 'abo';
   $('#abo-bar').hidden = false;
   $('#abo-refresh').onclick = () => refreshAbo({ quiet: false });
@@ -203,7 +203,7 @@ if (readOnly) {
 /** Beim Start: Einladungslink prüfen und – in einem Abo – den neuesten Stand holen. */
 export function startAbo() {
   checkAboHash();
-  if (readOnly) refreshAbo();
+  if (book.abo) refreshAbo();
 }
 
 // ---------- Lieder ins eigene Liederbuch kopieren ----------

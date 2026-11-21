@@ -1,12 +1,18 @@
 // Cloud-Knopf, Liederbuch-Auswahl und Dialog (verbinden, gemeinsame Liederbücher, Mitglieder).
+//
+// Google Drive: Anmeldung mit google-auth.js (Fenster, auf iPhone/iPad per Weiterleitung), Speichern mit
+// google-drive.js. Einladung per E-Mail mit Link <App>#drive=<Datei-ID>: Wer ihn öffnet, meldet sich
+// an, bestätigt die Datei in der Google-Dateiauswahl und hat das Liederbuch – mit Leserechten nur
+// zum Lesen (Google verweigert dann das Schreiben, die App sperrt das Bearbeiten).
 
-import { SyncEngine, SYNC_FORMAT, SYNC_VERSION } from './sync/sync-engine.js';
+import { SyncEngine, SYNC_FORMAT, SYNC_VERSION, ReadOnlyError } from './sync/sync-engine.js';
+import { GoogleAuth, googleRedirectUri, prefersRedirect } from './sync/google-auth.js';
 import { GoogleDriveProvider } from './sync/google-drive.js';
 import { WebDavProvider, webdavUrlProblem } from './sync/webdav.js';
 import { DropboxProvider, dropboxRedirectUri } from './sync/dropbox.js';
 import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID, DROPBOX_APP_KEY } from './sync/config.js';
 import {
-  listBooks, setActiveBook, addSharedBook, removeBook, bookNameFromFile, fileNameForBook,
+  listBooks, setActiveBook, addSharedBook, removeBook, driveBookName, fileNameForBook,
 } from './books.js';
 import { prefs } from './prefs.js';
 import { slimRecord } from './storage/repository.js';
@@ -49,13 +55,16 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   const dlg = $('#sync-dialog');
   const btn = $('#btn-cloud');
   $('#sync-origin').textContent = location.origin;
+  $('#sync-redirect').textContent = googleRedirectUri();
   $('#webdav-origin').textContent = location.origin;
   $('#dropbox-redirect').textContent = dropboxRedirectUri();
 
   const cfg = (key, fallback) => localStorage.getItem(key) || fallback;
-  const clientId = () => cfg('gdrive.clientId', GOOGLE_CLIENT_ID);
-  const apiKey = () => cfg('gdrive.apiKey', GOOGLE_API_KEY);
-  const appId = () => cfg('gdrive.appId', GOOGLE_APP_ID);
+  // Google: fest in config.js eingetragen (Normalfall) – nur ohne diese Werte pro Gerät eintragbar
+  const googleBuiltIn = Boolean(GOOGLE_CLIENT_ID);
+  const clientId = () => GOOGLE_CLIENT_ID || cfg('gdrive.clientId', '');
+  const apiKey = () => (googleBuiltIn ? GOOGLE_API_KEY : cfg('gdrive.apiKey', GOOGLE_API_KEY));
+  const appId = () => (googleBuiltIn ? GOOGLE_APP_ID : cfg('gdrive.appId', GOOGLE_APP_ID));
   const appKey = () => cfg('dropbox.appKey', DROPBOX_APP_KEY);
   // Gemeinsame Liederbücher laufen immer über Google Drive; das persönliche wahlweise über
   // Dropbox oder WebDAV
@@ -73,18 +82,51 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   let provider = null;
   let engine = null;
+  let auth = null; // Google-Anmeldung
   let info = null; // Name/Rechte der Drive-Datei des aktiven Liederbuchs
+
+  const googleAuth = () => new GoogleAuth({ clientId: clientId() });
+  const driveFor = (b) => new GoogleDriveProvider({ auth, apiKey: apiKey(), appId: appId(), book: b });
 
   function build() {
     engine?.stop();
     const k = kind();
+    auth = googleAuth();
     provider = k === 'webdav'
       ? new WebDavProvider(webdav())
       : k === 'dropbox'
         ? new DropboxProvider({ appKey: appKey() })
-        : new GoogleDriveProvider({ clientId: clientId(), apiKey: apiKey(), appId: appId(), book });
-    engine = new SyncEngine(repo, provider, { beforeSync, extra });
+        : driveFor(book);
+    engine = new SyncEngine(repo, provider, { beforeSync, extra, readOnly: Boolean(book.readOnly) });
     engine.addEventListener('status', render);
+    engine.addEventListener('status', () => {
+      if (engine.state === 'error' && engine.error instanceof ReadOnlyError) markRole('reader');
+      if (engine.state === 'idle' && book.shared && !roleChecked) checkRole();
+    });
+  }
+
+  // ---------- Rechte eines geteilten Liederbuchs ----------
+
+  let roleChecked = false;
+
+  /** Rechte haben sich geändert (z. B. vom Editor auf „nur lesen“ gesetzt): merken und neu laden. */
+  function markRole(role) {
+    const ro = role === 'reader';
+    if (!book.shared || ro === Boolean(book.readOnly)) return;
+    addSharedBook({ fileId: book.fileId, name: book.name, readOnly: ro });
+    toast(ro ? `„${book.name}“: Du hast hier nur Leserechte – das Liederbuch ist jetzt schreibgeschützt`
+      : `„${book.name}“: Du darfst jetzt bearbeiten`, { ms: 6000 });
+    setTimeout(() => location.reload(), 1500);
+  }
+
+  async function checkRole() {
+    roleChecked = true;
+    try {
+      const role = await provider.role();
+      if (role) markRole(role);
+    } catch (err) {
+      console.warn(err);
+    }
   }
 
   // ---------- Liederbuch-Auswahl in der Kopfleiste ----------
@@ -98,7 +140,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   function renderBookSelect() {
     const books = listBooks();
     const sel = $('#book-select');
-    sel.replaceChildren(...books.map((b) => new Option(b.abo ? `${b.name} (Abo)` : b.shared ? `${b.name} 👥` : b.name, b.id, false, b.id === book.id)));
+    sel.replaceChildren(...books.map((b) => new Option(b.abo || b.readOnly ? `${b.name} (nur lesen)` : b.shared ? `${b.name} 👥` : b.name, b.id, false, b.id === book.id)));
     const several = books.length > 1;
     sel.hidden = !several;
     $('#app-name').hidden = several;
@@ -123,10 +165,12 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         : `Die ${dbx ? 'Dropbox' : 'Google'}-Anmeldung ist abgelaufen. „Neu anmelden“ tippen – deine Lieder bleiben erhalten.`;
     } else if (state === 'error') text = engine.error?.message || '';
     else if (book.abo) text = 'Abonniertes Liederbuch – wird über das Abo aktualisiert, nicht über die Cloud.';
+    else if (book.readOnly) text = 'Geteiltes Liederbuch, nur lesen – mit Google anmelden, um den neuesten Stand zu holen.';
     else if (book.shared) text = 'Dieses gemeinsame Liederbuch braucht die Verbindung zu Google Drive.';
     else if (dav) text = 'Adresse und Zugangsdaten eintragen, dann „Verbinden“.';
     else if (dbx) text = appKey() ? 'Mit Dropbox verbinden, um alle Geräte abzugleichen.' : 'Zuerst die Dropbox-Einrichtung unten erledigen.';
-    else text = clientId() ? 'Mit Google Drive verbinden, um alle Geräte abzugleichen.' : 'Zuerst die Einrichtung unten erledigen.';
+    else text = clientId() ? 'Mit Google anmelden, um alle Geräte über Google Drive abzugleichen.' : 'Zuerst die Google-Einrichtung unten erledigen.';
+    if (state === 'idle' && book.readOnly) text += ' · nur lesen';
 
     btn.dataset.state = state;
     btn.title = `Cloud-Sync: ${TITLES[state]}${text ? ' – ' + text : ''}`;
@@ -140,7 +184,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#sync-disconnect').hidden = !connected;
     $('#sync-now').hidden = !usable;
     $('#sync-connect').hidden = usable;
-    $('#sync-connect').textContent = state === 'auth' ? 'Neu anmelden' : 'Verbinden';
+    $('#sync-connect').textContent = state === 'auth' ? 'Neu anmelden' : gd ? 'Mit Google anmelden' : 'Verbinden';
     $('#book-actions').hidden = !usable || !gd;
     $('#book-new').hidden = !usable || !gd;
     // Abo: wird nie mit der Cloud abgeglichen – keine Einstellungen zum Abgleich zeigen
@@ -153,6 +197,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       ? 'Gemeinsame Liederbücher mit Einladung gibt es über Google Drive. Mit WebDAV teilt ihr einfach den Ordner.'
       : 'Gemeinsame Liederbücher mit Einladung gibt es über Google Drive.';
     $('#book-new-from').textContent = book.name;
+    $('#drive-invite').hidden = !pendingJoin;
     for (const id of ['#sync-client-id', '#sync-api-key', '#sync-app-id']) $(id).disabled = usable;
     for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).disabled = usable;
     $('#dropbox-app-key').disabled = usable;
@@ -166,7 +211,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       b.disabled = connected && b.dataset.value !== kind();
     }
     $('#webdav-setup').hidden = !dav;
-    $('#sync-setup').hidden = !gd;
+    $('#sync-setup').hidden = !gd || googleBuiltIn;
     $('#dropbox-setup').hidden = !dbx;
     $('#sync-foot-hint').textContent = dav
       ? 'Schrift- und Druckeinstellungen bleiben pro Gerät.'
@@ -217,7 +262,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   function renderBooks() {
     const items = listBooks().map((b) => {
       const isActive = b.id === book.id;
-      const row = li(span('book-name', b.name, b.abo ? 'abonniert · nur lesen' : b.shared ? 'gemeinsam' : 'persönlich'));
+      const row = li(span('book-name', b.name, b.abo ? 'abonniert · nur lesen' : b.readOnly ? 'geteilt · nur lesen' : b.shared ? 'gemeinsam' : 'persönlich'));
       if (isActive) {
         row.classList.add('active');
         row.append(span('hint', 'geöffnet'));
@@ -244,6 +289,20 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         const owner = m.role === 'owner';
         const row = li(span('member-name', m.displayName || m.emailAddress, owner ? 'Besitzer' : m.emailAddress));
         if (!owner) {
+          const role = document.createElement('select');
+          role.title = 'Rechte';
+          role.append(new Option('liest', 'reader'), new Option('bearbeitet', 'writer'));
+          role.value = m.role === 'reader' || m.role === 'commenter' ? 'reader' : 'writer';
+          role.onchange = async () => {
+            try {
+              await provider.setMemberRole(m.id, role.value);
+              toast(role.value === 'reader' ? 'Darf jetzt nur noch lesen' : 'Darf jetzt bearbeiten');
+            } catch (err) {
+              toast(err.message);
+            }
+            renderMembers();
+          };
+          row.append(role);
           row.append(button('Entfernen', async () => {
             if (!confirm(`${m.displayName || m.emailAddress} aus „${book.name}“ entfernen?`)) return;
             try {
@@ -312,17 +371,26 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       toast('Bitte zuerst die Google-Client-ID eintragen');
       return false;
     }
-    try {
+    if (!provider.signedIn) {
+      // installierte App auf iPhone/iPad: Weiterleitung statt Fenster (siehe finishGoogle)
+      if (prefersRedirect()) return redirectToGoogle({ silent: auth.known });
       try {
-        await provider.signIn({ silent });
+        try {
+          await provider.signIn({ silent: silent || auth.known });
+        } catch (err) {
+          if (!(silent || auth.known)) throw err;
+          await provider.signIn();
+        }
       } catch (err) {
-        if (!silent) throw err;
-        await provider.signIn();
+        toast(`Anmelden fehlgeschlagen: ${err.message}`);
+        return false;
       }
-    } catch (err) {
-      toast(`Verbinden fehlgeschlagen: ${err.message}`);
-      return false;
     }
+    return startGoogle();
+  }
+
+  /** Angemeldet: Abgleich starten (beim ersten Mal wandern die Lieder des Geräts nach Drive). */
+  async function startGoogle() {
     const first = !connectedFlag();
     localStorage.setItem('sync.provider', 'gdrive');
     if (first && !book.shared) await beforeConnect?.();
@@ -331,6 +399,86 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     if (first) toast('Mit Google Drive verbunden');
     if (dlg.open) renderMembers();
     return true;
+  }
+
+  /** Zur Google-Anmeldung weiterleiten; extra wird bis zur Rückkehr aufbewahrt. */
+  async function redirectToGoogle({ silent = false, extra = {} } = {}) {
+    try {
+      await beforeSwitch?.(); // Ungespeichertes sichern, die Seite wird gleich verlassen
+      location.assign(auth.loginUrl({ silent, extra: { bookId: book.id, ...extra } }));
+    } catch (err) {
+      toast(`Anmelden fehlgeschlagen: ${err.message}`);
+    }
+    return false;
+  }
+
+  /** Rückkehr von der Google-Anmeldung (#access_token=… in der Adresse) auswerten. */
+  async function finishGoogle() {
+    let saved = null;
+    try {
+      saved = auth.finishLogin(location.hash);
+      if (!saved) return;
+    } catch (err) {
+      history.replaceState(null, '', location.pathname + location.search);
+      if (err.retry) return redirectToGoogle({ extra: err.saved }); // still ging nicht: mit Rückfrage
+      toast(`Anmelden fehlgeschlagen: ${err.message}`);
+      render();
+      return;
+    }
+    // Token nicht in der Adresse (und im Verlauf) lassen
+    history.replaceState(null, '', location.pathname + location.search);
+    if (saved.join) return joinDrive(saved.join);
+    if (saved.bookId === book.id && kind() === 'gdrive') await startGoogle();
+  }
+
+  // ---------- Einladung per Link öffnen (#drive=<Datei-ID>) ----------
+
+  /** Link aus der Einladungs-Mail: <App>#drive=<Datei-ID> */
+  const inviteLink = (fileId) => `${location.origin}${location.pathname}#drive=${encodeURIComponent(fileId)}`;
+
+  function checkDriveHash() {
+    const m = /^#drive=([^&]+)/.exec(location.hash);
+    if (!m) return;
+    history.replaceState(null, '', location.pathname + location.search);
+    const fileId = decodeURIComponent(m[1]);
+    const known = listBooks().find((b) => b.fileId === fileId);
+    if (known) {
+      if (known.id !== book.id) switchTo(known.id);
+      return;
+    }
+    pendingJoin = fileId;
+    openDialog();
+  }
+  let pendingJoin = null;
+
+  /**
+   * Geteiltes Liederbuch öffnen: anmelden (falls nötig), Datei in der Google-Dateiauswahl bestätigen
+   * (erst dann darf die App sie lesen), Rechte abfragen, als Liederbuch eintragen.
+   */
+  async function joinDrive(fileId = '') {
+    if (!auth.signedIn) {
+      if (prefersRedirect()) return redirectToGoogle({ silent: auth.known, extra: { join: fileId } });
+      try {
+        await auth.signIn({ silent: auth.known }).catch((err) => (auth.known ? auth.signIn() : Promise.reject(err)));
+      } catch (err) {
+        toast(`Anmelden fehlgeschlagen: ${err.message}`);
+        return;
+      }
+    }
+    try {
+      const picker = driveFor({ shared: true, fileId });
+      const file = await picker.pickShared({ fileId });
+      if (!file) return;
+      pendingJoin = null;
+      const meta = await driveFor({ shared: true, fileId: file.id }).info();
+      const readOnly = !meta?.capabilities?.canEdit;
+      const joined = addSharedBook({ fileId: file.id, name: driveBookName(file.name, meta?.owners?.[0]?.displayName), readOnly });
+      toast(`„${joined.name}“ geöffnet${readOnly ? ' – nur lesen' : ''}`);
+      await switchTo(joined.id);
+    } catch (err) {
+      if (/API-Schlüssel/.test(err.message)) $('#sync-setup').open = true;
+      toast(`Öffnen fehlgeschlagen: ${err.message}`);
+    }
   }
 
   /**
@@ -507,23 +655,14 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     }
   };
 
-  $('#book-join').onclick = async () => {
+  $('#book-join').onclick = () => {
     saveSetup();
-    try {
-      const file = await provider.pickShared();
-      if (!file) return;
-      const existing = listBooks().find((b) => b.fileId === file.id);
-      const joined = existing || addSharedBook({ fileId: file.id, name: bookNameFromFile(file.name) });
-      toast(`„${joined.name}“ geöffnet`);
-      await switchTo(joined.id);
-    } catch (err) {
-      if (/API-Schlüssel/.test(err.message)) $('#sync-setup').open = true;
-      toast(err.message);
-    }
+    joinDrive();
   };
+  $('#drive-invite-ok').onclick = () => joinDrive(pendingJoin);
 
   async function leaveBook() {
-    const owner = info?.ownedByMe;
+    const owner = info?.ownedByMe || (await provider.info().catch(() => null))?.ownedByMe;
     const msg = owner
       ? `„${book.name}“ auf diesem Gerät entfernen? Die Datei bleibt in deinem Drive, die Mitglieder behalten Zugriff.`
       : `„${book.name}“ auf diesem Gerät entfernen? Die anderen Mitglieder behalten das Liederbuch.`;
@@ -540,10 +679,11 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       toast('Bitte eine gültige E-Mail-Adresse eingeben');
       return;
     }
-    const appUrl = location.origin + location.pathname;
-    const message = `Du bist zum Liederbuch „${book.name}“ eingeladen. Öffne ${appUrl} → Cloud → Verbinden → „Einladung öffnen …“ und wähle diese Datei.`;
+    const role = $('#invite-role').value;
+    const message = `Du bist zum Liederbuch „${book.name}“ eingeladen${role === 'reader' ? ' (nur lesen)' : ''}. `
+      + `Öffne diesen Link, melde dich mit diesem Google-Konto an und bestätige die Datei: ${inviteLink(provider.fileId)}`;
     try {
-      await provider.invite(email, message);
+      await provider.invite(email, message, role);
       $('#invite-email').value = '';
       toast(`Einladung an ${email} verschickt`);
       renderMembers();
@@ -557,6 +697,26 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       $('#invite-ok').click();
     }
   });
+
+  // ---------- Leiste „nur lesen“ (geteiltes Liederbuch mit Leserechten) ----------
+
+  function setupReadOnlyBar() {
+    document.body.dataset.readonly = 'drive';
+    $('#abo-bar').hidden = false;
+    $('#publish-card').hidden = true;
+    $('#abo-bar-title').textContent = 'Nur lesen';
+    const status = () => {
+      const st = engine.state;
+      $('#abo-bar-status').textContent = st === 'idle'
+        ? `Google Drive · Stand ${fmtTime(engine.lastSync)}`
+        : st === 'auth' ? 'Google Drive · Anmeldung nötig' : `Google Drive · ${TITLES[st]}`;
+    };
+    engine.addEventListener('status', status);
+    status();
+    $('#abo-refresh').onclick = () => (engine.state === 'auth' || engine.state === 'off' ? connect({ silent: true }) : engine.sync());
+    $('#abo-leave').onclick = () => leaveBook();
+    $('#abo-home').onclick = () => switchTo('personal');
+  }
 
   // ---------- Dialog ----------
 
@@ -587,9 +747,15 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   build();
   render();
   renderBookSelect();
-  // Abo: wird über das Abo aktualisiert, nie mit der eigenen Cloud abgeglichen
-  if (!book.abo && connectedFlag() && configured()) engine.start();
+  if (book.readOnly) setupReadOnlyBar();
+  // Abo: wird über das Abo aktualisiert, nie mit der eigenen Cloud abgeglichen.
+  // Geteilte Liederbücher gehören immer zu Google Drive: abgleichen, sobald einmal angemeldet.
+  const autoStart = book.shared ? auth.known : connectedFlag();
+  if (!book.abo && autoStart && configured()) engine.start();
   finishDropbox();
+  finishGoogle();
+  checkDriveHash();
+  addEventListener('hashchange', checkDriveHash);
   if (localStorage.getItem('openSyncDialog')) {
     localStorage.removeItem('openSyncDialog');
     openDialog();

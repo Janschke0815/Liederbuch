@@ -25,6 +25,14 @@ export class ConflictError extends Error {
   }
 }
 
+/** Fehler: Nur Leserechte – dieses Liederbuch darf hier nicht geändert werden. */
+export class ReadOnlyError extends Error {
+  constructor(msg = 'Nur lesen: Für dieses Liederbuch hast du keine Schreibrechte') {
+    super(msg);
+    this.name = 'ReadOnlyError';
+  }
+}
+
 /** Fehler: Anmeldung nötig oder abgelaufen (die Oberfläche zeigt dann „Neu anmelden“). */
 export class AuthError extends Error {
   constructor(msg = 'Anmeldung nötig') {
@@ -66,8 +74,9 @@ export class SyncEngine extends EventTarget {
    * @param repo      Lieder (SongRepository)
    * @param provider  Cloud-Anbieter
    * @param opts.extra weitere Sammlungen, z. B. [{ key: 'setlists', repo, slim }]
+   * @param opts.readOnly nur holen, nie schreiben (Liederbuch mit Leserechten)
    */
-  constructor(repo, provider, { pollMs = 15000, debounceMs = 1500, beforeSync, extra = [] } = {}) {
+  constructor(repo, provider, { pollMs = 15000, debounceMs = 1500, beforeSync, extra = [], readOnly = false } = {}) {
     super();
     this.repo = repo;
     this.collections = [{ key: 'songs', repo, slim: slimRecord }, ...extra];
@@ -75,6 +84,7 @@ export class SyncEngine extends EventTarget {
     this.pollMs = pollMs;
     this.debounceMs = debounceMs;
     this.beforeSync = beforeSync;
+    this.readOnly = readOnly;
     this.state = 'off';
     this.error = null;
     this.lastSync = null;
@@ -209,6 +219,11 @@ export class SyncEngine extends EventTarget {
       if (r.toLocal.length) await c.repo.applyRemote(r.toLocal);
       data[c.key] = r.merged;
       if (r.remoteChanged) remoteChanged = true;
+    }
+    // Nur lesen: holen, aber nie zurückschreiben (Google würde es ohnehin ablehnen)
+    if (this.readOnly) {
+      this.knownVersion = remote?.version ?? null;
+      return;
     }
     // rewrite: der Anbieter möchte neu schreiben (z. B. altes Dateiformat umstellen oder
     // Änderungen übernehmen, die direkt auf dem Server gemacht wurden)

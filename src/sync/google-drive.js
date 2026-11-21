@@ -1,41 +1,28 @@
-// Cloud-Anbieter Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive.
+// Speicherschicht Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive (Format liederbuch-sync).
 //   persönlich:  "Liederbuch.json" im eigenen Drive (wird gesucht bzw. angelegt)
 //   gemeinsam:   "Liederbuch – <Name>.json", per Drive mit anderen geteilt
 //
-// Anmeldung über Google Identity Services (nur im Browser, kein eigener Server nötig).
-// Berechtigung "drive.file": die App sieht ausschließlich Dateien, die sie selbst angelegt
-// hat oder die man ihr über die Google-Dateiauswahl (Picker) gibt – nicht den Rest des Drives.
+// Hier stehen nur die Drive-Zugriffe. Die Anmeldung kommt von außen (auth, siehe google-auth.js) –
+// so lässt sich die Speicherung austauschen und mit einer Attrappe testen.
+//
+// Rechte: Wer eine Datei nur lesen darf (Drive-Freigabe „Betrachter“), dem verweigert Google das
+// Schreiben – unabhängig davon, was die App anzeigt. role() fragt die eigenen Rechte ab, die App
+// schaltet das Liederbuch dann auf „nur lesen“.
+//
+// Berechtigung "drive.file": Die App sieht ausschließlich Dateien, die sie selbst angelegt hat oder
+// die man ihr über die Google-Dateiauswahl (Picker) gibt – nicht den Rest des Drives.
 
-import { AuthError, ConflictError } from './sync-engine.js';
+import { AuthError, ConflictError, ReadOnlyError } from './sync-engine.js';
+import { loadScript } from './google-auth.js';
 import { toFileJson } from '../formats/file-format.js';
 
-const GIS_URL = 'https://accounts.google.com/gsi/client';
 const GAPI_URL = 'https://apis.google.com/js/api.js';
-const SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const API = 'https://www.googleapis.com/drive/v3/files';
 const UPLOAD = 'https://www.googleapis.com/upload/drive/v3/files';
-const PERSONAL_FILE = 'Liederbuch.json';
+export const PERSONAL_FILE = 'Liederbuch.json';
 const MARK_KEY = 'liederbuch';
 const MARK_PERSONAL = 'sync';
 const MARK_SHARED = 'shared';
-
-const scripts = new Map();
-function loadScript(src) {
-  if (!scripts.has(src)) {
-    scripts.set(src, new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = src;
-      s.async = true;
-      s.onload = () => resolve();
-      s.onerror = () => {
-        scripts.delete(src);
-        reject(new Error('Google-Dienst konnte nicht geladen werden (offline?)'));
-      };
-      document.head.append(s);
-    }));
-  }
-  return scripts.get(src);
-}
 
 /** Fehler: Auf ein gemeinsames Liederbuch gibt es keinen Zugriff mehr (gelöscht oder Freigabe entfernt). */
 export class NoAccessError extends Error {
@@ -45,72 +32,56 @@ export class NoAccessError extends Error {
   }
 }
 
-/** Cloud-Anbieter Google Drive: eine JSON-Datei pro Liederbuch, gemeinsame Liederbücher über Freigaben. */
+/** Grund eines Drive-Fehlers (z. B. insufficientFilePermissions) und Meldung. */
+async function driveError(res) {
+  try {
+    const e = (await res.clone().json()).error || {};
+    return { reason: e.errors?.[0]?.reason || e.status || '', message: e.message || '' };
+  } catch {
+    return { reason: '', message: '' };
+  }
+}
+
+/** Speicherschicht Google Drive: eine JSON-Datei pro Liederbuch, Teilen über Drive-Freigaben. */
 export class GoogleDriveProvider {
   id = 'gdrive';
   name = 'Google Drive';
 
   /**
-   * @param {{clientId: string, apiKey?: string, appId?: string,
-   *          book?: {shared: boolean, fileId: string|null}, storage?: Storage}} opts
+   * @param {{auth: import('./google-auth.js').GoogleAuth, apiKey?: string, appId?: string,
+   *          book?: {shared?: boolean, fileId?: string|null, readOnly?: boolean},
+   *          storage?: Storage, fetch?: typeof fetch}} opts
+   *   apiKey/appId: nur für die Google-Dateiauswahl (Einladung öffnen); nicht geheim
    */
-  constructor({ clientId, apiKey = '', appId = '', book = { shared: false, fileId: null }, storage = localStorage } = {}) {
-    this.clientId = clientId;
+  constructor({
+    auth, apiKey = '', appId = '', book = { shared: false, fileId: null },
+    storage = globalThis.localStorage, fetch: f = globalThis.fetch?.bind(globalThis),
+  } = {}) {
+    this.auth = auth;
     this.apiKey = apiKey;
     this.appId = appId;
     this.shared = Boolean(book.shared);
+    this.readOnly = Boolean(book.readOnly);
     this.storage = storage;
+    this.fetch = f;
     this.fileId = this.shared ? book.fileId : storage.getItem('gdrive.fileId') || null;
   }
 
-  // ---------- Anmeldung ----------
-
-  /** Gespeichertes Zugangstoken, solange es gültig ist, sonst null. */
-  token() {
-    try {
-      const t = JSON.parse(this.storage.getItem('gdrive.token') || 'null');
-      if (t && t.expiresAt - 60_000 > Date.now()) return t.accessToken;
-    } catch {
-      /* ungültig */
-    }
-    return null;
-  }
+  // ---------- Anmeldung (weitergereicht) ----------
 
   /** Gibt es ein gültiges Zugangstoken? */
   get signedIn() {
-    return Boolean(this.token());
+    return this.auth.signedIn;
   }
 
-  /**
-   * Holt einen Zugangsschlüssel. Muss aus einem Klick heraus aufgerufen werden, weil Google
-   * dafür ein kleines Fenster öffnet. silent: ohne Rückfrage, wenn schon einmal erlaubt.
-   */
-  async signIn({ silent = false } = {}) {
-    if (!this.clientId) throw new Error('Keine Google-Client-ID eingetragen');
-    await loadScript(GIS_URL);
-    const resp = await new Promise((resolve, reject) => {
-      const client = google.accounts.oauth2.initTokenClient({
-        client_id: this.clientId,
-        scope: SCOPE,
-        callback: (r) => (r.error ? reject(new AuthError(r.error_description || r.error)) : resolve(r)),
-        error_callback: (e) => reject(new AuthError(e.type === 'popup_closed' ? 'Anmeldung abgebrochen' : e.message || e.type)),
-      });
-      client.requestAccessToken({ prompt: silent ? 'none' : '' });
-    });
-    if (!google.accounts.oauth2.hasGrantedAllScopes(resp, SCOPE)) {
-      throw new AuthError('Zugriff auf Google Drive wurde nicht erlaubt');
-    }
-    this.storage.setItem('gdrive.token', JSON.stringify({
-      accessToken: resp.access_token,
-      expiresAt: Date.now() + Number(resp.expires_in || 3600) * 1000,
-    }));
+  /** Anmelden (kleines Google-Fenster, siehe GoogleAuth.signIn). */
+  signIn(opts) {
+    return this.auth.signIn(opts);
   }
 
   /** Abmelden; die Dateien in Drive bleiben erhalten. */
   signOut() {
-    const token = this.token();
-    if (token && globalThis.google?.accounts?.oauth2) google.accounts.oauth2.revoke(token, () => {});
-    this.storage.removeItem('gdrive.token');
+    this.auth.signOut();
     this.storage.removeItem('gdrive.fileId');
     if (!this.shared) this.fileId = null;
   }
@@ -118,27 +89,34 @@ export class GoogleDriveProvider {
   // ---------- Drive-Zugriffe ----------
 
   async #api(url, opts = {}) {
-    const token = this.token();
-    if (!token) throw new AuthError('Google-Anmeldung abgelaufen');
-    const res = await fetch(url, { ...opts, headers: { Authorization: `Bearer ${token}`, ...opts.headers } });
+    const token = this.auth.token();
+    if (!token) throw new AuthError('Die Google-Anmeldung ist abgelaufen – bitte neu anmelden');
+    let res;
+    try {
+      res = await this.fetch(url, { ...opts, headers: { Authorization: `Bearer ${token}`, ...opts.headers } });
+    } catch {
+      throw new Error('Google Drive nicht erreichbar (offline?)');
+    }
     if (res.status === 401) {
-      this.storage.removeItem('gdrive.token');
-      throw new AuthError('Google-Anmeldung abgelaufen');
+      this.auth.expire();
+      throw new AuthError('Die Google-Anmeldung ist abgelaufen oder wurde widerrufen – bitte neu anmelden');
     }
     return res;
   }
 
+  async #fail(res) {
+    const { reason, message } = await driveError(res);
+    if (res.status === 403 && /insufficientFilePermissions|forbidden/i.test(reason)) throw new ReadOnlyError();
+    if (/storageQuotaExceeded/.test(reason)) throw new Error('Dein Google-Speicher ist voll');
+    if (res.status === 429 || /rateLimitExceeded|userRateLimitExceeded/.test(reason)) {
+      throw new Error('Google Drive: zu viele Anfragen, gleich noch einmal');
+    }
+    throw new Error(`Google Drive meldet Fehler ${res.status}${message ? `: ${message}` : ''}`);
+  }
+
   async #json(url, opts) {
     const res = await this.#api(url, opts);
-    if (!res.ok) {
-      let msg = '';
-      try {
-        msg = (await res.json()).error?.message || '';
-      } catch {
-        /* kein JSON */
-      }
-      throw new Error(`Google Drive meldet Fehler ${res.status}${msg ? `: ${msg}` : ''}`);
-    }
+    if (!res.ok) await this.#fail(res);
     return res.status === 204 ? null : res.json();
   }
 
@@ -151,11 +129,11 @@ export class GoogleDriveProvider {
     return this.fileId;
   }
 
-  /** Version der Datei oder null, wenn sie fehlt/im Papierkorb ist. */
+  /** Version der Datei oder null, wenn sie fehlt/im Papierkorb ist/kein Zugriff besteht. */
   async #version() {
     const res = await this.#api(`${API}/${this.fileId}?fields=version,trashed`);
     if (res.status === 404 || res.status === 403) return null;
-    if (!res.ok) throw new Error(`Google Drive meldet Fehler ${res.status}`);
+    if (!res.ok) await this.#fail(res);
     const meta = await res.json();
     return meta.trashed ? null : meta.version;
   }
@@ -192,10 +170,13 @@ export class GoogleDriveProvider {
   }
 
   /**
-   * Liederbuch nach Drive schreiben (nur, wenn die Datei noch die erwartete Version hat).
+   * Liederbuch nach Drive schreiben – nur, wenn die Datei noch die erwartete Version hat
+   * (sonst ConflictError: neu lesen und zusammenführen; ein veralteter Stand überschreibt nie
+   * einen neueren). Mit Leserechten: ReadOnlyError.
    * @returns {Promise<string>} neue Version
    */
   async write(data, expectedVersion) {
+    if (this.readOnly) throw new ReadOnlyError();
     if (!(await this.#findFile())) {
       if (this.shared) throw new NoAccessError();
       if (expectedVersion) throw new ConflictError();
@@ -218,7 +199,7 @@ export class GoogleDriveProvider {
     return r.version;
   }
 
-  // ---------- Gemeinsame Liederbücher ----------
+  // ---------- Rechte und Teilen ----------
 
   /** Neue gemeinsame Datei anlegen. @returns {Promise<{id, name}>} */
   async createShared(fileName, data) {
@@ -226,15 +207,26 @@ export class GoogleDriveProvider {
     return { id: r.id, name: r.name };
   }
 
-  /** Name, eigene Rechte und Besitzer der aktuellen Datei. */
+  /** Name, eigene Rechte und Besitzer der aktuellen Datei (null, wenn es noch keine gibt). */
   async info() {
     if (!(await this.#findFile())) return null;
-    return this.#json(`${API}/${this.fileId}?fields=name,ownedByMe,owners(displayName,emailAddress),capabilities(canShare,canEdit)`);
+    return this.#json(`${API}/${this.fileId}?fields=id,name,ownedByMe,owners(displayName,emailAddress),capabilities(canShare,canEdit)`);
   }
 
   /**
-   * Wer Zugriff auf das gemeinsame Liederbuch hat.
-   * @returns {Promise<{id: string, email: string, name: string, role: string}[]>}
+   * Eigene Rolle für die aktuelle Datei: 'owner' | 'writer' | 'reader' | null (keine Datei).
+   * Google setzt sie beim Schreiben selbst durch; die App richtet danach nur die Anzeige.
+   */
+  async role() {
+    const i = await this.info();
+    if (!i) return null;
+    if (i.ownedByMe) return 'owner';
+    return i.capabilities?.canEdit ? 'writer' : 'reader';
+  }
+
+  /**
+   * Wer Zugriff auf das Liederbuch hat.
+   * @returns {Promise<{id: string, emailAddress: string, displayName: string, role: string}[]>}
    */
   async members() {
     if (!(await this.#findFile())) return [];
@@ -242,14 +234,28 @@ export class GoogleDriveProvider {
     return (r.permissions || []).filter((p) => p.type === 'user');
   }
 
-  /** Person einladen (darf bearbeiten); Google verschickt die Einladungs-Mail. */
-  async invite(email, message) {
+  /**
+   * Person per E-Mail einladen; Google verschickt die Einladung (mit message und dem Link zur Datei).
+   * @param {string} email
+   * @param {string} message
+   * @param {'reader'|'writer'} [role='reader']  reader: nur lesen (Abonnent), writer: darf bearbeiten
+   */
+  async invite(email, message, role = 'reader') {
     if (!(await this.#findFile())) throw new Error('Das Liederbuch wurde noch nicht in Drive gespeichert');
     const params = new URLSearchParams({ sendNotificationEmail: 'true', emailMessage: message, fields: 'id' });
     return this.#json(`${API}/${this.fileId}/permissions?${params}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'user', role: 'writer', emailAddress: email }),
+      body: JSON.stringify({ type: 'user', role: role === 'writer' ? 'writer' : 'reader', emailAddress: email }),
+    });
+  }
+
+  /** Rechte einer Person ändern ('reader' oder 'writer'). */
+  async setMemberRole(permissionId, role) {
+    await this.#json(`${API}/${this.fileId}/permissions/${permissionId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: role === 'writer' ? 'writer' : 'reader' }),
     });
   }
 
@@ -261,28 +267,30 @@ export class GoogleDriveProvider {
   /**
    * Google-Dateiauswahl für Liederbücher, die mit mir geteilt wurden.
    * Erst durch die Auswahl darf die App (Berechtigung drive.file) die Datei öffnen.
+   * @param {{fileId?: string}} [opts]  fileId: genau diese Datei vorauswählen (aus dem Einladungslink)
    * @returns {Promise<{id, name} | null>}
    */
-  async pickShared() {
+  async pickShared({ fileId = '' } = {}) {
     if (!this.apiKey || !this.appId) {
-      throw new Error('Für „Gemeinsames Liederbuch öffnen“ fehlen API-Schlüssel und Projektnummer (Einrichtung)');
+      throw new Error('Für „Einladung öffnen“ fehlen API-Schlüssel und Projektnummer (Einrichtung)');
     }
-    const token = this.token();
-    if (!token) throw new AuthError('Bitte zuerst mit Google verbinden');
+    const token = this.auth.token();
+    if (!token) throw new AuthError('Bitte zuerst bei Google anmelden');
     await loadScript(GAPI_URL);
     await new Promise((resolve, reject) => gapi.load('picker', { callback: resolve, onerror: reject }));
     return new Promise((resolve) => {
       const view = new google.picker.DocsView(google.picker.ViewId.DOCS)
         .setMimeTypes('application/json')
-        .setOwnedByMe(false)
         .setMode(google.picker.DocsViewMode.LIST);
+      if (fileId) view.setFileIds(fileId);
+      else view.setOwnedByMe(false);
       const picker = new google.picker.PickerBuilder()
         .addView(view)
         .setOAuthToken(token)
         .setDeveloperKey(this.apiKey)
         .setAppId(this.appId)
         .setLocale('de')
-        .setTitle('Gemeinsames Liederbuch wählen')
+        .setTitle(fileId ? 'Liederbuch bestätigen' : 'Gemeinsames Liederbuch wählen')
         .setCallback((d) => {
           if (d.action === google.picker.Action.PICKED) {
             const f = d.docs[0];

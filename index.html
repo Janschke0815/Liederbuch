@@ -116,7 +116,7 @@
   <main class="workspace" data-view="preview">
     <aside class="pane pane-list" aria-label="Lieder">
       <div id="abo-bar" class="abo-bar" hidden>
-        <div class="abo-bar-text"><strong>Abo – nur lesen</strong><span id="abo-bar-status" class="hint"></span></div>
+        <div class="abo-bar-text"><strong id="abo-bar-title">Abo – nur lesen</strong><span id="abo-bar-status" class="hint"></span></div>
         <button type="button" id="abo-home" class="link-btn" title="Zurück zu deinen eigenen Liedern">Mein Liederbuch</button>
         <button type="button" id="abo-refresh" class="icon-btn" title="Jetzt aktualisieren"><svg class="icon"><use href="#i-sync"/></svg></button>
         <button type="button" id="abo-leave" class="link-btn danger" title="Abo auf diesem Gerät beenden">Beenden</button>
@@ -687,6 +687,11 @@
         <section class="cloud-card" id="books-section">
           <h3><svg class="icon"><use href="#i-note"/></svg>Liederbücher auf diesem Gerät</h3>
           <div class="cloud-card-body">
+            <div id="drive-invite" class="drive-invite" hidden>
+              <strong>Einladung zu einem geteilten Liederbuch</strong>
+              <p class="hint">Mit dem Google-Konto anmelden, an das die Einladung ging, und die Datei in der Google-Auswahl bestätigen.</p>
+              <div class="row-end"><button type="button" id="drive-invite-ok" class="primary">Mit Google anmelden und öffnen</button></div>
+            </div>
             <ul id="book-list" class="book-list"></ul>
             <p class="hint">Wechseln geht auch oben über den Namen des Liederbuchs.</p>
             <div class="cloud-actions">
@@ -701,7 +706,7 @@
               <label class="check"><input type="checkbox" id="book-new-copy"> Lieder aus „<span id="book-new-from"></span>“ übernehmen</label>
               <div class="row-end"><button type="button" id="book-new-ok" class="primary">Anlegen</button></div>
             </details>
-            <p id="book-offline-hint" class="hint">Gemeinsame Liederbücher anlegen und Einladungen öffnen: zuerst unten mit Google Drive verbinden.</p>
+            <p id="book-offline-hint" class="hint">Gemeinsame Liederbücher anlegen und Einladungen öffnen: zuerst unten mit Google anmelden.</p>
             <p id="book-webdav-hint" class="hint" hidden>Gemeinsame Liederbücher mit Einladung gibt es über Google Drive. Mit WebDAV teilt ihr einfach den Ordner.</p>
           </div>
         </section>
@@ -755,7 +760,7 @@
               </details>
 
               <details id="sync-setup" class="sync-setup">
-                <summary>Google-Einrichtung (einmalig)</summary>
+                <summary>Google-Einrichtung (nur nötig, wenn die App keine eigenen Google-Zugangsdaten hat)</summary>
                 <label class="field">Google-Client-ID
                   <input id="sync-client-id" placeholder="….apps.googleusercontent.com" autocomplete="off" spellcheck="false">
                 </label>
@@ -765,7 +770,7 @@
                 <label class="field">Projektnummer <small>(nur für „Einladung öffnen“)</small>
                   <input id="sync-app-id" placeholder="z. B. 123456789012" autocomplete="off" spellcheck="false" inputmode="numeric">
                 </label>
-                <p class="hint">Anleitung im README („Cloud-Sync einrichten“). JavaScript-Quelle für diese Seite: <code id="sync-origin"></code></p>
+                <p class="hint">Anleitung: <code>docs/google-einrichtung.md</code>. JavaScript-Quelle für diese Seite: <code id="sync-origin"></code>, Weiterleitungs-URI: <code id="sync-redirect"></code></p>
               </details>
 
               <div class="cloud-buttons">
@@ -786,9 +791,13 @@
             <ul id="member-list" class="member-list"></ul>
             <div class="invite-row">
               <input id="invite-email" type="email" placeholder="E-Mail-Adresse (Google-Konto)" autocomplete="off">
+              <select id="invite-role" title="Rechte">
+                <option value="reader" selected>nur lesen</option>
+                <option value="writer">darf bearbeiten</option>
+              </select>
               <button type="button" id="invite-ok" class="primary">Einladen</button>
             </div>
-            <p class="hint">Google schickt eine Einladung. Die Person öffnet dann die App, verbindet sich und tippt auf „Einladung öffnen …“. Alle Mitglieder können Lieder bearbeiten.</p>
+            <p class="hint">Google schickt eine Einladung mit einem Link zur App. Wer ihn öffnet, meldet sich mit Google an, bestätigt die Datei und hat das Liederbuch. „Nur lesen“ setzt Google selbst durch – ändern kann dann nur, wer bearbeiten darf.</p>
           </div>
         </section>
 

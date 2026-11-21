@@ -1,7 +1,7 @@
 // Mehrere Liederbücher auf einem Gerät: das persönliche und beliebig viele gemeinsame.
 // Jedes hat eine eigene lokale Datenbank; gemeinsame sind an eine geteilte Drive-Datei gebunden.
 //
-// Buch: { id, name, dbName, shared, fileId }
+// Buch: { id, name, dbName, shared, fileId, readOnly? }  readOnly: nur Leserechte in Drive
 //   abonniertes Liederbuch (nur lesen): { id: 'abo-…', name, dbName, abo: { url, publisher, user, password } }
 
 export const PERSONAL = Object.freeze({
@@ -44,11 +44,15 @@ export function setActiveBook(id, storage = localStorage) {
   if (getBook(id, storage)) storage.setItem(ACTIVE, id);
 }
 
-/** Gemeinsames Liederbuch eintragen (oder Namen aktualisieren). */
-export function addSharedBook({ fileId, name }, storage = localStorage) {
+/**
+ * Gemeinsames Liederbuch eintragen (oder Namen/Rechte aktualisieren).
+ * @param {{fileId: string, name?: string, readOnly?: boolean}} entry  readOnly: nur Leserechte
+ */
+export function addSharedBook({ fileId, name, readOnly = false }, storage = localStorage) {
   const list = read(storage);
   const id = `shared-${fileId}`;
   const book = { id, name: name || 'Gemeinsames Liederbuch', dbName: `liederbuch-${fileId}`, shared: true, fileId };
+  if (readOnly) book.readOnly = true;
   const i = list.findIndex((b) => b.id === id);
   if (i >= 0) list[i] = book;
   else list.push(book);
@@ -91,6 +95,17 @@ export function bookNameFromFile(fileName) {
   const base = String(fileName || '').replace(/\.json$/i, '').trim();
   const m = /^Liederbuch\s*[–—-]\s*(.+)$/i.exec(base);
   return (m ? m[1] : base).trim() || 'Gemeinsames Liederbuch';
+}
+
+/**
+ * Anzeigename für ein in Drive geteiltes Liederbuch: das persönliche „Liederbuch.json“ einer anderen
+ * Person heißt „Liederbuch von <Name>“, sonst wie bookNameFromFile.
+ */
+export function driveBookName(fileName, ownerName = '') {
+  if (/^Liederbuch\.json$/i.test(String(fileName || '').trim())) {
+    return ownerName ? `Liederbuch von ${ownerName}` : 'Geteiltes Liederbuch';
+  }
+  return bookNameFromFile(fileName);
 }
 
 /** Dateiname der Drive-Datei für ein gemeinsames Liederbuch: „Liederbuch – Name.json“. */

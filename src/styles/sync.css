@@ -76,6 +76,14 @@
 .sync-setup label.check { display: flex; gap: .5em; align-items: center; font-size: .9em; }
 .invite-row { display: flex; gap: .5em; }
 .invite-row input { flex: 1; min-width: 0; }
+.invite-row select, .member-list select { font-size: .85em; min-height: 1.9rem; }
+@media (max-width: 520px) {
+  .invite-row { flex-wrap: wrap; }
+  .invite-row input { flex-basis: 100%; }
+}
+/* Einladungslink (#drive=…) geöffnet: Hinweis über der Liste */
+.drive-invite { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: .6em .8em; margin-bottom: .6em; }
+.drive-invite p { margin: .3em 0 .5em; }
 .field small { font-weight: 400; }
 /* Cloud: fehlerhaftes Feld markieren */
 .sync-dialog input.invalid { border-color: #d18f1c; box-shadow: 0 0 0 2px rgba(209, 143, 28, .25); }
