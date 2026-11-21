@@ -4,8 +4,19 @@ Alle Versionen des Liederbuchs, die neueste zuerst. Versionsnummern: **Hauptvers
 (siehe „Fahrplan“ im README). Welche Version läuft, steht in der App unter Einstellungen → Version.
 
 Die Versionsanzeige gibt es seit 1.13.0 – die Nummern davor sind nachträglich nach den Fahrplan-Punkten vergeben.
+Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2.0: Punkt 22 wird 2.1, Punkt 23 wird 2.2 usw.
 
 ---
+
+## 2.0.0 – 21.11.2026 · Umstellung auf Vite (neue Hauptversion)
+
+- **Für Nutzer ändert sich nichts** – die App sieht gleich aus und funktioniert wie vorher, auch offline.
+- **Schneller beim ersten Laden:** Alle Programmteile und Stile werden zu je einer Datei zusammengefasst
+  statt rund 90 einzelner Dateien.
+- **Neue Version auf GitHub Pages:** wird nach jedem Push automatisch gebaut und veröffentlicht.
+- **Für die eigene NAS:** Statt der Quelldateien wird jetzt der Inhalt des Ordners `dist/` kopiert
+  (erzeugt mit `npm run build`).
+- Grundlage für die nächsten Schritte: einfachere Google-Anmeldung und Live-Modus mit fertigen Bibliotheken.
 
 ## 1.28.0 – 21.11.2026 · Dropbox als Speicherort
 

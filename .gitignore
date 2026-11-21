@@ -14,3 +14,7 @@ praesentation/
 
 # Eigene Zugangsdaten/Adressen (z. B. fertige Caddy-Dateien für die eigene NAS)
 privat/
+
+# Node / Vite
+node_modules/
+dist/

@@ -5,6 +5,11 @@ import { $ } from './ui/dom.js';
 
 async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
+  // Beim Entwickeln (npm run dev) keinen Cache: sonst sieht man nach Änderungen alte Dateien
+  if (import.meta.env?.DEV) {
+    for (const reg of await navigator.serviceWorker.getRegistrations()) await reg.unregister();
+    return;
+  }
   try {
     await navigator.serviceWorker.register('./sw.js');
     const reg = await navigator.serviceWorker.ready;

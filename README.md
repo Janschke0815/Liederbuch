@@ -7,9 +7,10 @@ Wie die App aufgebaut ist: [docs/architektur.md](docs/architektur.md), alle Modu
 
 ## Starten
 
-Kein Build-Schritt nötig, nur ein einfacher Webserver:
+Einmalig [Node.js](https://nodejs.org) (LTS) installieren, dann im Projektordner:
 
-    python tools/serve.py
+    npm install        # einmalig: holt Vite
+    npm run dev        # Entwicklungsserver, lädt bei Änderungen automatisch neu
 
 - App: http://localhost:5173/
 - Tests: http://localhost:5173/tests/
@@ -26,9 +27,11 @@ Lieder liegen lokal im Browser (IndexedDB), App-Dateien im Cache des Service Wor
 - **iPhone/iPad (Safari):** Teilen → „Zum Home-Bildschirm“.
 
 Für Handy und Tablet muss die App über **HTTPS** erreichbar sein (localhost geht nur am
-selben Rechner). Da es keinen Build-Schritt gibt, reicht es, diesen Ordner auf einen
-beliebigen statischen Webspace zu legen, z. B. GitHub Pages oder Netlify (Ordner per
-Drag & Drop hochladen). Der Ordner `tests/` und `tools/` werden dafür nicht gebraucht.
+selben Rechner). `npm run build` legt die fertige App in den Ordner `dist/` – dessen Inhalt
+passt auf jeden statischen Webspace (NAS, Netlify per Drag & Drop …), die Adresse ist egal.
+Ausprobieren vor dem Hochladen: `npm run preview` (http://localhost:4173/).
+**GitHub Pages** baut und veröffentlicht nach jedem Push auf `main` von selbst
+(`.github/workflows/deploy.yml`; einmalig unter *Settings → Pages → Source* „GitHub Actions“ wählen).
 
 Jedes Gerät hat sein eigenes Liederbuch. Übertragen: auf Gerät A „Sichern“, auf Gerät B
 „Datei öffnen …“ (wird zusammengeführt, neuere Fassung gewinnt).
@@ -516,7 +519,8 @@ Caddyfile dort passt mit anderen Adressen auch für andere NAS oder Server.
 
 ## Aufbau
 
-Kein Build-Schritt: Der Browser lädt die ES-Module direkt. Abhängigkeiten zeigen nur nach unten –
+Reines JavaScript (ES-Module) ohne Framework. [Vite](https://vite.dev) dient als Entwicklungsserver
+und fasst beim Bauen alles zu wenigen Dateien in `dist/` zusammen. Abhängigkeiten zeigen nur nach unten –
 `core` kennt nichts, `formats` kennt `core`, `storage`/`sync` kennen beide, die Oberfläche kennt alles.
 
     src/core/       reine Musik- und Textlogik ohne Bildschirm: ChordPro-Parser, Akkorde, Capo,
@@ -547,10 +551,12 @@ Kein Build-Schritt: Der Browser lädt die ES-Module direkt. Abhängigkeiten zeig
     src/types.js    Beschreibung der Datensätze (nur für den Editor)
     src/play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js, sync-ui.js   größere Bereiche
     src/pwa.js      Service Worker anmelden, Offline-Hinweis, Installieren
-    sw.js           Service Worker (Cache „Netz zuerst“)
-    icons/          App-Icons (icon.svg ist die Vorlage)
+    public/         wird unverändert nach dist/ kopiert:
+                      sw.js                 Service Worker (Cache „Netz zuerst“)
+                      manifest.webmanifest  App-Name, Icons, Dateitypen
+                      icons/                App-Icons (icon.svg ist die Vorlage)
     tests/          Browser-Tests (tests/index.html öffnen)
-    tools/          serve.py (lokaler Server), make-docs.py (API-Dokumentation erzeugen),
+    tools/          make-docs.py (API-Dokumentation erzeugen),
                     css-snapshot.js (CSS-Umbauten vorher/nachher vergleichen)
     docs/           architektur.md, api/ (erzeugt), Anleitung QNAP
 
@@ -590,4 +596,6 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     Geräten“, „Mitglieder“, „Für eine Gruppe veröffentlichen“; Abo-Adresse und „Abo beenden“ dort
 20. ✅ Dropbox als Speicherort (1.28): Anmeldung per PKCE ohne eigenen Server, bleibt verbunden,
     Datei im App-Ordner
-21. Live-Modus fürs Lagerfeuer: ein Gerät wählt das Lied, alle anderen sehen es sofort (Peer-to-Peer)
+21. ✅ Umstellung auf Vite (2.0): Entwicklungsserver mit automatischem Neuladen, gebaute App in `dist/`,
+    GitHub Pages baut selbst; Grundlage für fertige Bibliotheken (z. B. Google-Anmeldung, Live-Modus)
+22. Live-Modus fürs Lagerfeuer: ein Gerät wählt das Lied, alle anderen sehen es sofort (Peer-to-Peer)

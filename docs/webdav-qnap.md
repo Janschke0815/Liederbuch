@@ -1,6 +1,7 @@
 # Liederbuch auf der eigenen QNAP-NAS abgleichen (WebDAV)
 
-> **Einfacher Weg zuerst:** Die App-Dateien in den Web-Ordner der NAS kopieren (QNAP *Web Server*)
+> **Einfacher Weg zuerst:** Die App bauen (`npm run build`) und den Inhalt des Ordners `dist/` in den
+> Web-Ordner der NAS kopieren (QNAP *Web Server*)
 > und die App von dort öffnen, z. B. `https://DEIN-NAS.myqnapcloud.com:8081/`. Laufen App und
 > WebDAV unter **derselben Adresse und demselben Port**, braucht es kein CORS und keinen Caddy:
 > In der App unter *Cloud → WebDAV* einfach `https://DEIN-NAS.myqnapcloud.com:8081/Liederbuch/`

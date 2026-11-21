@@ -44,6 +44,13 @@ self.addEventListener('message', (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE);
+      // Gebaute Dateien tragen eine Prüfsumme im Namen (assets/index-ab12.js): alte Fassungen,
+      // die die Seite nicht mehr lädt, aus dem Cache werfen
+      const wanted = new Set(event.data.urls.map((u) => new URL(u, self.location.href).pathname));
+      for (const req of await cache.keys()) {
+        const path = new URL(req.url).pathname;
+        if (path.includes('/assets/') && !wanted.has(path)) await cache.delete(req);
+      }
       for (const u of event.data.urls) {
         const url = new URL(u, self.location.href);
         if (!cacheable(url)) continue;

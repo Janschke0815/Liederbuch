@@ -1,5 +1,5 @@
 {
-  "//": "Nur für Editoren (VS Code): versteht die ES-Module ohne Build-Schritt. checkJs auf true stellen, um Typfehler anhand der JSDoc-Kommentare angezeigt zu bekommen.",
+  "//": "Nur für Editoren (VS Code). checkJs auf true stellen, um Typfehler anhand der JSDoc-Kommentare angezeigt zu bekommen.",
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
@@ -7,5 +7,5 @@
     "checkJs": false,
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/**/*.js", "tests/**/*.js", "sw.js"]
+  "include": ["src/**/*.js", "tests/**/*.js", "public/sw.js"]
 }

@@ -5,8 +5,9 @@ Funktion steht in der [API-Dokumentation](api/README.md), die aus den Kommentare
 
 ## Grundsätze
 
-- **Kein Build-Schritt.** Der Browser lädt die ES-Module so, wie sie in `src/` liegen. Keine Bibliotheken,
-  kein npm. Zum Entwickeln reicht ein einfacher Webserver (`python tools/serve.py`).
+- **Einfacher Aufbau.** Reines JavaScript (ES-Module) ohne Framework. [Vite](https://vite.dev) ist
+  Entwicklungsserver (`npm run dev`) und baut die App für die Veröffentlichung (`npm run build` → `dist/`).
+  Bibliotheken nur, wo sie echte Arbeit sparen.
 - **Offline zuerst.** Alle Lieder liegen im Browser (IndexedDB). Die Cloud ist ein Abgleich, kein Muss.
 - **Lesbare Dateien.** Lieder sind ChordPro-Text – in der App, auf dem WebDAV-Server und in der Sicherung.
 - **Logik ohne Bildschirm.** Alles, was rechnet (Parser, Transponieren, Dateiformate, Abgleich), kommt ohne
@@ -127,14 +128,15 @@ Vor und nach CSS-Umbauten mit [`tools/css-snapshot.js`](../tools/css-snapshot.js
 
 ## Offline und Installation
 
-`src/pwa.js` meldet den Service Worker (`sw.js`) an. Strategie „Netz zuerst, sonst Cache“: Mit Verbindung
+`src/pwa.js` meldet den Service Worker (`public/sw.js`) an – nur in der gebauten App; beim Entwickeln
+wird er abgemeldet, damit keine alten Dateien aus dem Cache kommen. Strategie „Netz zuerst, sonst Cache“: Mit Verbindung
 kommt immer die neueste Version, ohne Verbindung die zuletzt geladene. Es gibt keine Dateiliste zu pflegen.
 
 ## Tests und Dokumentation
 
 | Was | Wie |
 |---|---|
-| Tests | `tests/index.html` im Browser öffnen (über den lokalen Server) |
+| Tests | `npm run dev`, dann http://localhost:5173/tests/ öffnen |
 | API-Dokumentation | `python tools/make-docs.py` erzeugt `docs/api/` aus den Kommentaren |
 | Fehlende Kommentare finden | `python tools/make-docs.py --check` |
 
