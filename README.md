@@ -1,5 +1,8 @@
 # Liederbuch (PWA)
 
+> **Achtung: vorerst letzte Version 1.x (1.28.0).** Dieser Zweig `v1` bleibt als Stand vor der
+> Umstellung auf Vite erhalten (läuft ohne Build-Schritt). Weiterentwickelt wird auf `main` ab Version 2.0.
+
 Persönliches Gitarren-Liederbuch. Lieder werden als ChordPro gespeichert.
 
 Was sich in welcher Version geändert hat: [CHANGELOG.md](CHANGELOG.md).
