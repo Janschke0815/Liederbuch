@@ -4,7 +4,7 @@
 
 Mehrere Liederbücher auf einem Gerät: das persönliche und beliebig viele gemeinsame. Jedes hat eine eigene lokale Datenbank; gemeinsame sind an eine geteilte Drive-Datei gebunden.
 
-Buch: { id, name, dbName, shared, fileId }
+Buch: { id, name, dbName, shared, fileId, readOnly? }  readOnly: nur Leserechte in Drive
 
 ```text
   abonniertes Liederbuch (nur lesen): { id: 'abo-…', name, dbName, abo: { url, publisher, user, password } }
@@ -34,9 +34,13 @@ Das Liederbuch, das gerade geöffnet ist (sonst das persönliche).
 
 Liederbuch für den nächsten Start merken (nur bekannte IDs).
 
-### `addSharedBook({ fileId, name }, storage = localStorage)`
+### `addSharedBook({ fileId, name, readOnly = false }, storage = localStorage)`
 
-Gemeinsames Liederbuch eintragen (oder Namen aktualisieren).
+Gemeinsames Liederbuch eintragen (oder Namen/Rechte aktualisieren).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `entry` | `{fileId: string, name?: string, readOnly?: boolean}` | readOnly: nur Leserechte |
 
 ### `addAboBook({ url, name, publisher = '', user = '', password = '' }, storage = localStorage)`
 
@@ -53,6 +57,11 @@ Aus der Liste entfernen; die lokale Datenbank löscht der Aufrufer.
 ### `bookNameFromFile(fileName)`
 
 Dateiname in Drive -> Anzeigename ("Liederbuch – Band.json" -> "Band").
+
+### `driveBookName(fileName, ownerName = '')`
+
+Anzeigename für ein in Drive geteiltes Liederbuch: das persönliche „Liederbuch.json“ einer anderen
+Person heißt „Liederbuch von <Name>“, sonst wie bookNameFromFile.
 
 ### `fileNameForBook(name)`
 

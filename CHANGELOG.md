@@ -8,6 +8,25 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.1.0 – 21.11.2026 · Google Drive: nur noch „Mit Google anmelden“
+
+- **Einfachere Anmeldung:** Für Google Drive genügt jetzt „Mit Google anmelden“ – Client-ID und
+  Schlüssel trägt niemand mehr ein, sie sind fest in der App hinterlegt (Einrichtung einmalig, siehe
+  `docs/google-einrichtung.md`).
+- **iPhone/iPad:** In der installierten App öffnet sich kein Anmeldefenster mehr, die Seite wechselt
+  kurz zu Google und zurück.
+- **Teilen per E-Mail mit Rechten:** Unter *Cloud → Mitglieder* einladen und wählen, ob die Person
+  **nur lesen** oder **bearbeiten** darf; Rechte lassen sich jederzeit ändern. Auch „Mein Liederbuch“
+  lässt sich so teilen.
+- **Einladung mit einem Klick:** Die Mail enthält einen Link zur App. Öffnen, mit Google anmelden,
+  die vorgewählte Datei bestätigen – fertig.
+- **Nur lesen:** Wer nur Leserechte hat, sieht das Liederbuch schreibgeschützt (Leiste „Nur lesen“),
+  bekommt Änderungen automatisch und kann einzelne Lieder ins eigene Liederbuch kopieren. Google lässt
+  ohne Schreibrecht ohnehin keine Änderung zu.
+- **Klarere Meldungen**, wenn die Anmeldung abgelaufen, widerrufen oder bei Google falsch eingerichtet ist.
+- **Abo über den Webserver:** Transposition und ♯/♭-Schreibweise gehen jetzt mit. Abonnenten können
+  selbst umstellen, bis der Herausgeber sie ändert. Ältere Abo-Dateien funktionieren weiter.
+
 ## 2.0.1 – 21.11.2026 · Fertige App als Download, NAS aktualisiert sich selbst
 
 - **Fertige App zum Herunterladen:** Jede neue Version steht auf GitHub unter *Releases* als

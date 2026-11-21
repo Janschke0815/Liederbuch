@@ -12,7 +12,10 @@ Datei (JSON, lesbar):
 
 ```text
   { format: 'liederbuch-abo', version: 1, name, publisher, description, rights: 'privat',
-    publishedAt, songs: [{ id, chordpro, createdAt, updatedAt }], setlists: [{ id, name, items, … }] }
+    publishedAt, songs: [{ id, chordpro, transpose, accidentals, createdAt, updatedAt }],
+    setlists: [{ id, name, items, … }] }
+  transpose/accidentals (seit 2.1): Transposition und ♯/♭-Schreibweise des Herausgebers. Ältere
+  Abo-Dateien haben sie nicht; ältere App-Fassungen lesen neue Dateien weiter (Felder werden übergangen).
 ```
 
 Reine Funktionen, kein DOM.
@@ -36,7 +39,8 @@ Reine Funktionen, kein DOM.
 
 ### `buildAboPayload(songs, setlists, meta, now = new Date()`
 
-Inhalt eines Abos zusammenstellen (nur, was Abonnenten brauchen: keine Notizen, keine Transposition).
+Inhalt eines Abos zusammenstellen (was Abonnenten brauchen: Lieder mit Transposition und
+Schreibweise – aber keine Notizen).
 
 | Parameter | Typ | Bedeutung |
 |---|---|---|

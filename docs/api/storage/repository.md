@@ -136,11 +136,13 @@ Alle Datensätze einschließlich gelöschter (Grabsteine) – für den Sync.
 #### `replaceFromAbo(records)`
 
 Stand eines Abos übernehmen: Was im Abo steht, gilt; was fehlt, wird entfernt (endgültig – ein
-Abo hat keinen Papierkorb). Eigene Ansicht bleibt: Transposition, Schreibweise, Notiz.
+Abo hat keinen Papierkorb). Die eigene Notiz bleibt. Transposition und Schreibweise kommen vom
+Herausgeber, sobald er sie ändert (bzw. beim ersten Mal); bis dahin bleibt, was man selbst
+eingestellt hat. Abo-Dateien ohne diese Angaben (vor 2.1) lassen die eigene Einstellung stehen.
 
 | Parameter | Typ | Bedeutung |
 |---|---|---|
-| `records` | `{id: string, chordpro: string, createdAt?: string, updatedAt?: string}[]` |  |
+| `{{id: string, chordpro: string, transpose?: number, accidentals?: string,` |  | createdAt?: string, updatedAt?: string}[]} records |
 
 **Rückgabe:** `Promise<{added: number, changed: number, removed: number}>`
 

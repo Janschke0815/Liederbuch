@@ -397,42 +397,32 @@ Die Datei ist lesbares JSON (`format: "liederbuch-abo"`, siehe `src/formats/abo.
 Jedes Liederbuch ist eine Datei in Google Drive; jedes Gerät hat zusätzlich eine vollständige
 lokale Kopie (offline nutzbar). Pro Lied gewinnt die zuletzt geänderte Fassung, Löschungen
 werden mit abgeglichen. Eigene Änderungen werden nach ~1,5 s hochgeladen, fremde alle ~15 s
-und beim Zurückwechseln in die App geholt.
+und beim Zurückwechseln in die App geholt. Ein veralteter Stand überschreibt nie einen neueren:
+Geschrieben wird nur, wenn die Datei noch die zuletzt gelesene Fassung ist, sonst wird erst
+zusammengeführt.
+
+Anmelden: **Cloud → Mit Google anmelden** – mehr ist auf keinem Gerät einzutragen (OAuth 2 im
+Browser, ohne eigenen Server; auf iPhone/iPad per Weiterleitung). Google meldet nach etwa einer
+Stunde ab; dann zeigt der Cloud-Knopf „Anmelden“, ein Tipp genügt (bis dahin wird lokal
+weitergespeichert).
 
 - **Mein Liederbuch** – `Liederbuch.json` im eigenen Drive, für alle eigenen Geräte.
-- **Gemeinsame Liederbücher** (z. B. „Band“) – `Liederbuch – Band.json`, per Drive geteilt.
-  Unter **Cloud** anlegen (optional mit den eigenen Liedern), dann Mitglieder per E-Mail
-  einladen. Eingeladene öffnen die App, verbinden sich und tippen auf **„Einladung öffnen …“**.
-  Alle Mitglieder können bearbeiten; der Besitzer kann Mitglieder entfernen. Gewechselt wird
-  oben links in der Kopfleiste.
+- **Teilen per E-Mail-Einladung** – unter **Cloud → Mitglieder** E-Mail-Adresse eintragen und Rechte
+  wählen: **nur lesen** (Abonnenten) oder **darf bearbeiten**. Google schickt eine Mail mit einem
+  Link zur App (`#drive=<Datei-ID>`); wer ihn öffnet, meldet sich an, bestätigt die vorgewählte Datei
+  in der Google-Auswahl und hat das Liederbuch. Leserechte setzt Google selbst durch; die App sperrt
+  dann das Bearbeiten und holt nur ab. Rechte lassen sich jederzeit ändern oder entziehen.
+- **Gemeinsame Liederbücher** (z. B. „Band“) – `Liederbuch – Band.json`, eine eigene Datei, die
+  mehrere bearbeiten dürfen. Unter **Cloud** anlegen (optional mit den eigenen Liedern), dann
+  Mitglieder einladen. Gewechselt wird oben links in der Kopfleiste.
 
 Sicherheit: Die App ist öffentlich, die Lieder nicht. Zugriff auf ein Drive gibt es nur über
 die Google-Anmeldung des jeweiligen Kontos, und die App bekommt nur die Berechtigung
 `drive.file` (ausschließlich ihre eigenen bzw. ausdrücklich ausgewählten Dateien).
 
-### Einmalig einrichten (kostenlos)
-
-1. <https://console.cloud.google.com/> → neues Projekt → **Google Drive API** und
-   **Google Picker API** aktivieren.
-2. „Google Auth Platform“ (früher „OAuth-Zustimmungsbildschirm“): Typ *Extern*, App-Name eintragen.
-   Unter *Zielgruppe* entweder alle Nutzer (dich und alle Mitglieder) als **Testnutzer** eintragen
-   (max. 100), oder die App **veröffentlichen** – mit der Berechtigung `drive.file` ist dafür
-   keine Google-Prüfung nötig, und jeder erreicht trotzdem nur sein eigenes Drive bzw. die mit
-   ihm geteilten Liederbücher.
-3. *Clients* → **Client erstellen** → Typ *Webanwendung*, *Autorisierte JavaScript-Quellen*:
-   `https://janschke0815.github.io` und `http://localhost:5173`.
-4. *APIs & Dienste → Anmeldedaten* → **API-Schlüssel erstellen**; einschränken auf
-   *Websites* (`https://janschke0815.github.io/*`, `http://localhost:5173/*`) und die *Google Picker API*.
-5. **Projektnummer** steht im Dashboard des Projekts (nur Ziffern).
-6. Client-ID, API-Schlüssel und Projektnummer in `src/sync/config.js` eintragen (gilt dann für
-   alle Geräte und Mitglieder) oder in der App unter **Cloud → Abgleich → Google-Einrichtung**.
-
-Keiner dieser Werte ist geheim (sie stehen bei jeder Web-App sichtbar im Code); Google nimmt sie
-nur von den eingetragenen Adressen an. Das *Client-Secret* wird nicht gebraucht – nicht weitergeben.
-
-Google meldet Browser-Apps nach etwa einer Stunde ab; dann zeigt der Cloud-Knopf „Anmelden“,
-ein Tipp darauf genügt (bis dahin wird lokal weitergespeichert). Weitere Anbieter lassen sich
-in `src/sync/` mit `read`/`write` ergänzen.
+**Einrichtung** (einmalig, Google-Cloud-Projekt, OAuth-Client, API-Schlüssel):
+[docs/google-einrichtung.md](docs/google-einrichtung.md). Die Werte kommen fest in
+`src/sync/config.js` und gelten dann für alle.
 
 ### Dropbox
 
@@ -607,4 +597,7 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     Datei im App-Ordner
 21. ✅ Umstellung auf Vite (2.0): Entwicklungsserver mit automatischem Neuladen, gebaute App in `dist/`,
     GitHub Pages baut selbst; Grundlage für fertige Bibliotheken (z. B. Google-Anmeldung, Live-Modus)
-22. Live-Modus fürs Lagerfeuer: ein Gerät wählt das Lied, alle anderen sehen es sofort (Peer-to-Peer)
+22. ✅ Google Drive neu (2.1): nur noch „Mit Google anmelden“ (OAuth 2 im Browser, iPhone per Weiterleitung),
+    Einladung per E-Mail als Leser oder Bearbeiter mit Link, Leserechte setzt Google durch;
+    Abo liefert Transposition mit
+23. Live-Modus fürs Lagerfeuer: ein Gerät wählt das Lied, alle anderen sehen es sofort (Peer-to-Peer)

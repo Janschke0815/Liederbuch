@@ -2,19 +2,27 @@
 
 [← Übersicht](../README.md)
 
-Cloud-Anbieter Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive.
+Speicherschicht Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive (Format liederbuch-sync).
 
 ```text
   persönlich:  "Liederbuch.json" im eigenen Drive (wird gesucht bzw. angelegt)
   gemeinsam:   "Liederbuch – <Name>.json", per Drive mit anderen geteilt
 ```
 
-Anmeldung über Google Identity Services (nur im Browser, kein eigener Server nötig). Berechtigung "drive.file": die App sieht ausschließlich Dateien, die sie selbst angelegt hat oder die man ihr über die Google-Dateiauswahl (Picker) gibt – nicht den Rest des Drives.
+Hier stehen nur die Drive-Zugriffe. Die Anmeldung kommt von außen (auth, siehe google-auth.js) – so lässt sich die Speicherung austauschen und mit einer Attrappe testen.
 
-**Benutzt:** [`formats/file-format.js`](../formats/file-format.md), [`sync/sync-engine.js`](sync-engine.md)  
+Rechte: Wer eine Datei nur lesen darf (Drive-Freigabe „Betrachter“), dem verweigert Google das Schreiben – unabhängig davon, was die App anzeigt. role() fragt die eigenen Rechte ab, die App schaltet das Liederbuch dann auf „nur lesen“.
+
+Berechtigung "drive.file": Die App sieht ausschließlich Dateien, die sie selbst angelegt hat oder die man ihr über die Google-Dateiauswahl (Picker) gibt – nicht den Rest des Drives.
+
+**Benutzt:** [`formats/file-format.js`](../formats/file-format.md), [`sync/google-auth.js`](google-auth.md), [`sync/sync-engine.js`](sync-engine.md)  
 **Benutzt von:** [`sync-ui.js`](../sync-ui.md)
 
 ## Exportiert
+
+### `PERSONAL_FILE`
+
+`= 'Liederbuch.json'`
 
 ### `class NoAccessError extends Error`
 
@@ -24,26 +32,21 @@ Fehler: Auf ein gemeinsames Liederbuch gibt es keinen Zugriff mehr (gelöscht od
 
 ### `class GoogleDriveProvider`
 
-Cloud-Anbieter Google Drive: eine JSON-Datei pro Liederbuch, gemeinsame Liederbücher über Freigaben.
+Speicherschicht Google Drive: eine JSON-Datei pro Liederbuch, Teilen über Drive-Freigaben.
 
-#### `new GoogleDriveProvider({ clientId, apiKey = '', appId = '', book = { shared: false, fileId: null }, storage = localStorage } = {})`
+#### `new GoogleDriveProvider({)`
 
 | Parameter | Typ | Bedeutung |
 |---|---|---|
-| `{{clientId: string, apiKey?: string, appId?: string,` |  | book?: {shared: boolean, fileId: string\|null}, storage?: Storage}} opts |
-
-#### `token()`
-
-Gespeichertes Zugangstoken, solange es gültig ist, sonst null.
+| `{{auth: import('./google-auth.js').GoogleAuth, apiKey?: string, appId?: string,` |  | book?: {shared?: boolean, fileId?: string\|null, readOnly?: boolean}, storage?: Storage, fetch?: typeof fetch}} opts apiKey/appId: nur für die Google-Dateiauswahl (Einladung öffnen); nicht geheim |
 
 #### `get signedIn`
 
 Gibt es ein gültiges Zugangstoken?
 
-#### `async signIn({ silent = false } = {})`
+#### `signIn(opts)`
 
-Holt einen Zugangsschlüssel. Muss aus einem Klick heraus aufgerufen werden, weil Google
-dafür ein kleines Fenster öffnet. silent: ohne Rückfrage, wenn schon einmal erlaubt.
+Anmelden (kleines Google-Fenster, siehe GoogleAuth.signIn).
 
 #### `signOut()`
 
@@ -61,7 +64,9 @@ Liederbuch aus Drive lesen.
 
 #### `async write(data, expectedVersion)`
 
-Liederbuch nach Drive schreiben (nur, wenn die Datei noch die erwartete Version hat).
+Liederbuch nach Drive schreiben – nur, wenn die Datei noch die erwartete Version hat
+(sonst ConflictError: neu lesen und zusammenführen; ein veralteter Stand überschreibt nie
+einen neueren). Mit Leserechten: ReadOnlyError.
 
 **Rückgabe:** `Promise<string>` neue Version
 
@@ -71,26 +76,45 @@ Neue gemeinsame Datei anlegen. @returns {Promise<{id, name}>}
 
 #### `async info()`
 
-Name, eigene Rechte und Besitzer der aktuellen Datei.
+Name, eigene Rechte und Besitzer der aktuellen Datei (null, wenn es noch keine gibt).
+
+#### `async role()`
+
+Eigene Rolle für die aktuelle Datei: 'owner' | 'writer' | 'reader' | null (keine Datei).
+Google setzt sie beim Schreiben selbst durch; die App richtet danach nur die Anzeige.
 
 #### `async members()`
 
-Wer Zugriff auf das gemeinsame Liederbuch hat.
+Wer Zugriff auf das Liederbuch hat.
 
-**Rückgabe:** `Promise<{id: string, email: string, name: string, role: string}[]>`
+**Rückgabe:** `Promise<{id: string, emailAddress: string, displayName: string, role: string}[]>`
 
-#### `async invite(email, message)`
+#### `async invite(email, message, role = 'reader')`
 
-Person einladen (darf bearbeiten); Google verschickt die Einladungs-Mail.
+Person per E-Mail einladen; Google verschickt die Einladung (mit message und dem Link zur Datei).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `email` | `string` |  |
+| `message` | `string` |  |
+| `[role='reader']` | `'reader'\|'writer'` | reader: nur lesen (Abonnent), writer: darf bearbeiten |
+
+#### `async setMemberRole(permissionId, role)`
+
+Rechte einer Person ändern ('reader' oder 'writer').
 
 #### `async removeMember(permissionId)`
 
 Zugriff einer Person entfernen.
 
-#### `async pickShared()`
+#### `async pickShared({ fileId = '' } = {})`
 
 Google-Dateiauswahl für Liederbücher, die mit mir geteilt wurden.
 Erst durch die Auswahl darf die App (Berechtigung drive.file) die Datei öffnen.
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `[opts]` | `{fileId?: string}` | fileId: genau diese Datei vorauswählen (aus dem Einladungslink) |
 
 **Rückgabe:** `Promise<{id, name} | null>`
 
@@ -98,4 +122,4 @@ Erst durch die Auswahl darf die App (Berechtigung drive.file) die Datei öffnen.
 
 Nicht exportiert – nur innerhalb des Moduls benutzt.
 
-- `loadScript(src)`
+- `async driveError(res)` – Grund eines Drive-Fehlers (z. B. insufficientFilePermissions) und Meldung.

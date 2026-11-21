@@ -32,9 +32,10 @@ Persönliches oder gemeinsames Liederbuch.
 
 ### `readOnly`
 
-`= Boolean(book.abo)`
+`= Boolean(book.abo \|\| book.readOnly)`
 
-Abonniertes Liederbuch: nur lesen (Text ändern, anlegen, löschen gesperrt).
+Nur lesen (Text ändern, anlegen, löschen gesperrt): abonniertes Liederbuch oder ein in Google Drive
+geteiltes Liederbuch, für das man nur Leserechte hat.
 
 ### `state`
 

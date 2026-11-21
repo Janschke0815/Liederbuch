@@ -15,7 +15,7 @@ Ein Anbieter (Provider) braucht nur:
 ```
 
 **Benutzt:** [`storage/repository.js`](../storage/repository.md)  
-**Benutzt von:** [`sync-ui.js`](../sync-ui.md), [`sync/abo-client.js`](abo-client.md), [`sync/dropbox.js`](dropbox.md), [`sync/google-drive.js`](google-drive.md), [`sync/webdav-client.js`](webdav-client.md), [`sync/webdav.js`](webdav.md)
+**Benutzt von:** [`sync-ui.js`](../sync-ui.md), [`sync/abo-client.js`](abo-client.md), [`sync/dropbox.js`](dropbox.md), [`sync/google-auth.js`](google-auth.md), [`sync/google-drive.js`](google-drive.md), [`sync/webdav-client.js`](webdav-client.md), [`sync/webdav.js`](webdav.md)
 
 ## Exportiert
 
@@ -35,6 +35,12 @@ Fehler: Die Datei in der Cloud wurde inzwischen geändert – neu lesen und zusa
 
 #### `new ConflictError()`
 
+### `class ReadOnlyError extends Error`
+
+Fehler: Nur Leserechte – dieses Liederbuch darf hier nicht geändert werden.
+
+#### `new ReadOnlyError(msg = 'Nur lesen: Für dieses Liederbuch hast du keine Schreibrechte')`
+
 ### `class AuthError extends Error`
 
 Fehler: Anmeldung nötig oder abgelaufen (die Oberfläche zeigt dann „Neu anmelden“).
@@ -52,13 +58,14 @@ Führt lokale und entfernte Datensätze zusammen.
 Status: 'off' | 'idle' | 'syncing' | 'offline' | 'auth' | 'error'
 Ereignisse: "status" (bei jeder Änderung von state/lastSync/error)
 
-#### `new SyncEngine(repo, provider, { pollMs = 15000, debounceMs = 1500, beforeSync, extra = [] } = {})`
+#### `new SyncEngine(repo, provider, { pollMs = 15000, debounceMs = 1500, beforeSync, extra = [], readOnly = false } = {})`
 
 | Parameter | Typ | Bedeutung |
 |---|---|---|
 | `repo` |  | Lieder (SongRepository) |
 | `provider` |  | Cloud-Anbieter |
 | `opts.extra` |  | weitere Sammlungen, z. B. [{ key: 'setlists', repo, slim }] |
+| `opts.readOnly` |  | nur holen, nie schreiben (Liederbuch mit Leserechten) |
 
 #### `start()`
 

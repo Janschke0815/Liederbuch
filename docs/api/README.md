@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-73 Module, 270 exportierte Funktionen, Konstanten und Klassen.
+74 Module, 279 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -117,9 +117,10 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | Modul | Inhalt |
 |---|---|
 | [`sync/abo-client.js`](sync/abo-client.md) | Abo-Datei vom Server laden – mit Anmeldung, falls der Ordner geschützt ist, und nur, wenn sie sich seit dem letzten Mal geändert hat (ETag). |
-| [`sync/config.js`](sync/config.md) | Google-Zugangsdaten für den Drive-Sync (siehe README, Abschnitt "Cloud-Sync einrichten"). |
+| [`sync/config.js`](sync/config.md) | Google-Zugangsdaten für Google Drive (Einrichtung: docs/google-einrichtung.md). |
 | [`sync/dropbox.js`](sync/dropbox.md) | Cloud-Anbieter Dropbox: das persönliche Liederbuch ist eine JSON-Datei im App-Ordner (Dropbox → Apps → <Name der Dropbox-App> → Liederbuch.json). |
-| [`sync/google-drive.js`](sync/google-drive.md) | Cloud-Anbieter Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive. |
+| [`sync/google-auth.js`](sync/google-auth.md) | Anmeldung bei Google (OAuth 2) – ganz im Browser, ohne eigenen Server. |
+| [`sync/google-drive.js`](sync/google-drive.md) | Speicherschicht Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive (Format liederbuch-sync). |
 | [`sync/sync-engine.js`](sync/sync-engine.md) | Abgleich der lokalen Datenbank mit einer gemeinsamen Datei in der Cloud. |
 | [`sync/webdav-client.js`](sync/webdav-client.md) | WebDAV über HTTP: Anmeldung, Ordnerliste (PROPFIND), Dateien lesen, schreiben, löschen. |
 | [`sync/webdav.js`](sync/webdav.md) | Cloud-Anbieter WebDAV (z. |

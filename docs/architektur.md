@@ -37,7 +37,7 @@ flowchart TD
 | Logik | `src/core/` | ChordPro lesen, Akkorde transponieren, Capo, Harp-Tabs, Wiederholungen, Liedinfo im Text ändern, Sortieren, Spielmodus-Rechnungen, Textfunktionen |
 | Dateiformate | `src/formats/` | `.cho`-Dateien und Dateinamen, ZIP, Sicherung, Import von Text und Ultimate Guitar, Export als Text |
 | Speicher | `src/storage/` | Lieder und Setlisten in IndexedDB; weiches Löschen (Papierkorb), Export/Import |
-| Abgleich | `src/sync/` | Sync-Engine (zusammenführen), Anbieter Google Drive und WebDAV |
+| Abgleich | `src/sync/` | Sync-Engine (zusammenführen), Anbieter Google Drive, Dropbox und WebDAV, Google-Anmeldung |
 | Darstellung | `src/render/`, `src/print/`, `src/settings/` | Lied -> HTML, Griffbilder, Seitenumbruch für den Druck, Darstellungs-Einstellungen |
 | Oberfläche | `src/app.js`, `src/ui/`, `src/*-ui.js`, `src/play-mode.js` | alles, was man sieht und anklickt |
 
@@ -86,7 +86,7 @@ geändert (`ConflictError`), liest sie neu und versucht es noch einmal.
 
 | Anbieter | Ablage | Besonderheit |
 |---|---|---|
-| Google Drive (`google-drive.js`) | eine JSON-Datei pro Liederbuch | gemeinsame Liederbücher über Drive-Freigaben |
+| Google Drive (`google-drive.js`, Anmeldung `google-auth.js`) | eine JSON-Datei pro Liederbuch | Teilen über Drive-Freigaben (lesen/bearbeiten); Google setzt die Rechte durch, mit Leserechten gleicht die Engine nur ab (`readOnly`) |
 | WebDAV (`webdav.js`, `webdav-client.js`) | `Lieder/*.cho`, `Setlisten/*.txt`, `Liederbuch.json` nur als Hinweis | Dateien auch direkt auf dem Server bearbeitbar; jedes Gerät merkt sich, welche Dateien es gesehen hat, und erkennt so Umbenennen und Löschen |
 
 ## Abos (private Gruppen)
