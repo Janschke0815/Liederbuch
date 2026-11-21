@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.0.1 – 21.11.2026 · Fertige App als Download, NAS aktualisiert sich selbst
+
+- **Fertige App zum Herunterladen:** Jede neue Version steht auf GitHub unter *Releases* als
+  `liederbuch.zip` bereit – entpacken und auf einen beliebigen Webspace legen, fertig.
+- **Die NAS kann sich selbst aktuell halten:** Ein kleines Skript (`tools/nas-update.sh`) holt jede neue
+  Fassung automatisch und legt sie in den Web-Ordner. Einrichtung in der QNAP-Anleitung.
+
 ## 2.0.0 – 21.11.2026 · Umstellung auf Vite (neue Hauptversion)
 
 - **Für Nutzer ändert sich nichts** – die App sieht gleich aus und funktioniert wie vorher, auch offline.

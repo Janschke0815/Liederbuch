@@ -33,6 +33,15 @@ Ausprobieren vor dem Hochladen: `npm run preview` (http://localhost:4173/).
 **GitHub Pages** baut und veröffentlicht nach jedem Push auf `main` von selbst
 (`.github/workflows/deploy.yml`; einmalig unter *Settings → Pages → Source* „GitHub Actions“ wählen).
 
+**Fertige App zum Herunterladen:** Jeder Push auf `main` legt die gebaute App als `liederbuch.zip`
+in ein [Release](https://github.com/Janschke0815/Liederbuch/releases) (`v<Version>`, Beschreibung
+aus dem Changelog). Die neueste liegt immer unter
+
+    https://github.com/Janschke0815/Liederbuch/releases/latest/download/liederbuch.zip
+
+Eine NAS kann sich damit selbst aktuell halten: `tools/nas-update.sh` holt die ZIP regelmäßig und
+entpackt sie in den Web-Ordner (Einrichtung: [docs/webdav-qnap.md](docs/webdav-qnap.md#app-automatisch-aktuell-halten)).
+
 Jedes Gerät hat sein eigenes Liederbuch. Übertragen: auf Gerät A „Sichern“, auf Gerät B
 „Datei öffnen …“ (wird zusammengeführt, neuere Fassung gewinnt).
 
@@ -556,7 +565,7 @@ und fasst beim Bauen alles zu wenigen Dateien in `dist/` zusammen. Abhängigkeit
                       manifest.webmanifest  App-Name, Icons, Dateitypen
                       icons/                App-Icons (icon.svg ist die Vorlage)
     tests/          Browser-Tests (tests/index.html öffnen)
-    tools/          make-docs.py (API-Dokumentation erzeugen),
+    tools/          make-docs.py (API-Dokumentation erzeugen), nas-update.sh (NAS holt neue Fassung),
                     css-snapshot.js (CSS-Umbauten vorher/nachher vergleichen)
     docs/           architektur.md, api/ (erzeugt), Anleitung QNAP
 

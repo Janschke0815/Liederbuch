@@ -1,5 +1,7 @@
 # Baut die App bei jedem Push (jeder Zweig – zeigt, ob der Bau klappt).
-# Veröffentlicht wird dist/ auf GitHub Pages nur von main.
+# Nur von main: dist/ auf GitHub Pages veröffentlichen und als liederbuch.zip ins Release der
+# aktuellen Version (v<APP_VERSION>) legen – feste Adresse für die NAS (tools/nas-update.sh):
+#   https://github.com/<Besitzer>/<Repo>/releases/latest/download/liederbuch.zip
 # Einmalig nötig: Repository → Settings → Pages → Source: „GitHub Actions“.
 name: Veröffentlichen
 
@@ -30,6 +32,35 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
+  release:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: ZIP und Release
+        run: |
+          V=$(sed -n "s/.*APP_VERSION = '\(.*\)'.*/\1/p" src/version.js)
+          (cd dist && zip -qr ../liederbuch.zip .)
+          # Abschnitt dieser Version aus dem Changelog als Beschreibung
+          awk -v v="## $V " 'index($0, v) == 1 {on = 1; print; next} on && /^## / {exit} on' CHANGELOG.md > notes.md
+          TITLE=$(head -1 notes.md | sed 's/^## //')
+          if gh release view "v$V" > /dev/null 2>&1; then
+            gh release upload "v$V" liederbuch.zip --clobber
+          else
+            gh release create "v$V" liederbuch.zip --target "$GITHUB_SHA" --title "${TITLE:-$V}" --notes-file notes.md --latest
+          fi
 
   deploy:
     if: github.ref == 'refs/heads/main'

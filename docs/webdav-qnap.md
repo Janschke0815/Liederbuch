@@ -1,7 +1,8 @@
 # Liederbuch auf der eigenen QNAP-NAS abgleichen (WebDAV)
 
-> **Einfacher Weg zuerst:** Die App bauen (`npm run build`) und den Inhalt des Ordners `dist/` in den
-> Web-Ordner der NAS kopieren (QNAP *Web Server*)
+> **Einfacher Weg zuerst:** Die fertige App ([liederbuch.zip](https://github.com/Janschke0815/Liederbuch/releases/latest/download/liederbuch.zip)
+> oder selbst gebaut mit `npm run build` → `dist/`) in den Web-Ordner der NAS entpacken (QNAP *Web Server*;
+> automatisch aktuell halten: [siehe unten](#app-automatisch-aktuell-halten))
 > und die App von dort öffnen, z. B. `https://DEIN-NAS.myqnapcloud.com:8081/`. Laufen App und
 > WebDAV unter **derselben Adresse und demselben Port**, braucht es kein CORS und keinen Caddy:
 > In der App unter *Cloud → WebDAV* einfach `https://DEIN-NAS.myqnapcloud.com:8081/Liederbuch/`
@@ -151,6 +152,29 @@ Die **myQNAPcloud**-Adresse muss auf deinen Anschluss zeigen (*myQNAPcloud → D
 **Verbinden** – die App legt die Ordner `Lieder` (eine `.cho`-Datei pro Lied) und `Setlisten` an.
 Mehrere Personen tragen dieselbe
 Adresse ein (eigene NAS-Benutzer mit Zugriff auf den Ordner).
+
+## App automatisch aktuell halten
+
+Liegt die App selbst auf der NAS, holt `tools/nas-update.sh` jede neue Fassung von GitHub
+(Release „latest“, `liederbuch.zip`) und entpackt sie in den Web-Ordner. Die NAS braucht dafür
+keinen offenen Port, und auf GitHub liegen keine NAS-Zugangsdaten. Andere Dateien im Ordner
+(z. B. der WebDAV-Ordner `Liederbuch/` mit den Liedern) bleiben unberührt.
+
+1. *Systemsteuerung → Netzwerk- & Dateidienste → Telnet/SSH*: SSH einschalten.
+2. `nas-update.sh` auf die NAS kopieren, z. B. nach `/share/Public/nas-update.sh`.
+3. Per SSH anmelden (`ssh admin@DEINE-NAS`) und einmal von Hand ausprobieren
+   (Ordner anpassen – dort, wo die `index.html` der App liegt):
+
+       sh /share/Public/nas-update.sh /share/Web
+
+   Ausgabe „Liederbuch aktualisiert …“ – beim zweiten Aufruf kommt nichts (unverändert).
+4. Alle 15 Minuten automatisch – Zeile an die Cron-Tabelle der QNAP anhängen und neu laden
+   (die QNAP vergisst Einträge, die nur mit `crontab -e` gemacht werden):
+
+       echo '*/15 * * * * sh /share/Public/nas-update.sh /share/Web >/dev/null 2>&1' >> /etc/config/crontab
+       crontab /etc/config/crontab && /etc/init.d/crond.sh restart
+
+Geräte, die die App schon geöffnet haben, holen sich die neue Fassung beim nächsten Öffnen.
 
 ## Prüfen, ob alles stimmt
 
