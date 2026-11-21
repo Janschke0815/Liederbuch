@@ -369,8 +369,8 @@ alle Lieder, Lieder mit einem Tag oder eine Setliste. Die App legt die Abo-Datei
 melden sich dort mit ihrem eigenen Benutzer an –
 oder bietet sie zum **Herunterladen** an (dann selbst in einen geschützten Ordner legen; der
 vorgeschlagene Name enthält einen Zufallsteil). Danach gibt es einen **Einladungslink** zum
-Weitergeben. Erneut veröffentlichen ersetzt die Datei, der Link bleibt gleich. Notizen und eigene
-Transpositionen gehen nicht mit. Mit **„Automatisch aktualisieren“** veröffentlicht die App Änderungen
+Weitergeben. Erneut veröffentlichen ersetzt die Datei, der Link bleibt gleich. Transposition und
+♯/♭-Schreibweise gehen mit (Abonnenten können selbst umstellen, bis du sie änderst), Notizen nicht. Mit **„Automatisch aktualisieren“** veröffentlicht die App Änderungen
 an diesen Liedern (auch solche, die über den Sync-Ordner von anderen Geräten kommen) etwa 20 Sekunden
 später von selbst – solange sie auf deinem Gerät geöffnet ist.
 

@@ -278,8 +278,11 @@ export class SongRepository extends EventTarget {
 
   /**
    * Stand eines Abos übernehmen: Was im Abo steht, gilt; was fehlt, wird entfernt (endgültig – ein
-   * Abo hat keinen Papierkorb). Eigene Ansicht bleibt: Transposition, Schreibweise, Notiz.
-   * @param {{id: string, chordpro: string, createdAt?: string, updatedAt?: string}[]} records
+   * Abo hat keinen Papierkorb). Die eigene Notiz bleibt. Transposition und Schreibweise kommen vom
+   * Herausgeber, sobald er sie ändert (bzw. beim ersten Mal); bis dahin bleibt, was man selbst
+   * eingestellt hat. Abo-Dateien ohne diese Angaben (vor 2.1) lassen die eigene Einstellung stehen.
+   * @param {{id: string, chordpro: string, transpose?: number, accidentals?: string,
+   *          createdAt?: string, updatedAt?: string}[]} records
    * @returns {Promise<{added: number, changed: number, removed: number}>}
    */
   replaceFromAbo(records) {
@@ -292,7 +295,12 @@ export class SongRepository extends EventTarget {
       for (const r of records) {
         const old = local.get(r.id);
         local.delete(r.id);
-        if (old && !old.deletedAt && old.chordpro === r.chordpro) continue;
+        // Herausgeber-Werte; aboTranspose/aboAccidentals: zuletzt vom Abo übernommen
+        const hasT = Number.isInteger(r.transpose);
+        const hasA = ['auto', 'sharp', 'flat'].includes(r.accidentals);
+        const newT = hasT && (!old || old.deletedAt || r.transpose !== old.aboTranspose);
+        const newA = hasA && (!old || old.deletedAt || r.accidentals !== old.aboAccidentals);
+        if (old && !old.deletedAt && old.chordpro === r.chordpro && !newT && !newA) continue;
         if (old && !old.deletedAt) changed++;
         else added++;
         toPut.push({
@@ -300,8 +308,10 @@ export class SongRepository extends EventTarget {
           id: r.id,
           chordpro: r.chordpro,
           ...deriveSummary(r.chordpro),
-          transpose: old?.transpose ?? 0,
-          accidentals: old?.accidentals ?? 'auto',
+          transpose: newT ? r.transpose : old?.transpose ?? 0,
+          accidentals: newA ? r.accidentals : old?.accidentals ?? 'auto',
+          aboTranspose: hasT ? r.transpose : old?.aboTranspose,
+          aboAccidentals: hasA ? r.accidentals : old?.aboAccidentals,
           note: old?.note ?? '',
           createdAt: r.createdAt || old?.createdAt || now,
           updatedAt: r.updatedAt || now,

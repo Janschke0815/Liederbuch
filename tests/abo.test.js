@@ -18,13 +18,14 @@ function memoryStorage() {
 }
 
 describe('Abo-Datei', () => {
-  it('enthält nur, was Abonnenten brauchen', () => {
+  it('enthält, was Abonnenten brauchen – mit Transposition, ohne Notizen', () => {
     const p = buildAboPayload(SONGS, [{ id: 's', name: 'Gig', items: [{ songId: 'a', transpose: 1, note: 'geheim' }, { songId: 'zz' }] }],
       { name: ' Band ', publisher: 'Jan' }, '2026-11-19T10:00:00Z');
     expect(p.name).toBe('Band');
     expect(p.rights).toBe('privat');
     expect(p.songs.map((s) => s.id)).toEqual(['a', 'b']); // gelöschte nicht
-    expect('note' in p.songs[0] || 'transpose' in p.songs[0]).toBe(false); // keine Notizen, keine Transposition
+    expect('note' in p.songs[0]).toBe(false); // keine Notizen
+    expect([p.songs[0].transpose, p.songs[0].accidentals, p.songs[1].transpose]).toEqual([2, 'auto', 0]);
     expect(p.setlists[0].items).toEqual([{ songId: 'a', transpose: 1, note: '' }]); // fremde Lieder raus, Notiz raus
   });
   it('ist lesbares JSON und lässt sich wieder lesen', () => {
@@ -68,6 +69,27 @@ describe('Abo übernehmen', () => {
     expect([a.title, a.transpose, a.note]).toEqual(['Eins (neu)', 3, 'meins']);
     expect(await repo.get('b')).toBe(undefined);
     expect((await repo.list()).map((s) => s.title)).toEqual(['Drei', 'Eins (neu)']);
+  });
+  it('Transposition und Schreibweise des Herausgebers kommen mit', async () => {
+    const repo = new SongRepository(createMemoryStore());
+    await repo.replaceFromAbo([{ id: 'a', chordpro: 'x', transpose: 2, accidentals: 'flat' }]);
+    let a = await repo.get('a');
+    expect([a.transpose, a.accidentals]).toEqual([2, 'flat']);
+    // selbst umgestellt: bleibt, solange der Herausgeber nichts ändert
+    await repo.update('a', { transpose: -1 });
+    expect(await repo.replaceFromAbo([{ id: 'a', chordpro: 'x', transpose: 2, accidentals: 'flat' }])).toEqual({ added: 0, changed: 0, removed: 0 });
+    expect((await repo.get('a')).transpose).toBe(-1);
+    // Herausgeber ändert die Transposition: kommt an
+    expect(await repo.replaceFromAbo([{ id: 'a', chordpro: 'x', transpose: 5, accidentals: 'flat' }])).toEqual({ added: 0, changed: 1, removed: 0 });
+    a = await repo.get('a');
+    expect([a.transpose, a.accidentals]).toEqual([5, 'flat']);
+  });
+  it('Abo-Datei ohne Transposition (älter): eigene Einstellung bleibt', async () => {
+    const repo = new SongRepository(createMemoryStore());
+    await repo.replaceFromAbo([{ id: 'a', chordpro: 'x' }]);
+    await repo.update('a', { transpose: 4 });
+    await repo.replaceFromAbo([{ id: 'a', chordpro: 'y' }]);
+    expect((await repo.get('a')).transpose).toBe(4);
   });
   it('unverändert: nichts zu tun', async () => {
     const repo = new SongRepository(createMemoryStore());

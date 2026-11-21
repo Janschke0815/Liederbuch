@@ -10,7 +10,10 @@
 //
 // Datei (JSON, lesbar):
 //   { format: 'liederbuch-abo', version: 1, name, publisher, description, rights: 'privat',
-//     publishedAt, songs: [{ id, chordpro, createdAt, updatedAt }], setlists: [{ id, name, items, … }] }
+//     publishedAt, songs: [{ id, chordpro, transpose, accidentals, createdAt, updatedAt }],
+//     setlists: [{ id, name, items, … }] }
+//   transpose/accidentals (seit 2.1): Transposition und ♯/♭-Schreibweise des Herausgebers. Ältere
+//   Abo-Dateien haben sie nicht; ältere App-Fassungen lesen neue Dateien weiter (Felder werden übergangen).
 //
 // Reine Funktionen, kein DOM.
 
@@ -21,14 +24,22 @@ export const ABO_VERSION = 1;
 export const ABO_EXT = '.json';
 
 /**
- * Inhalt eines Abos zusammenstellen (nur, was Abonnenten brauchen: keine Notizen, keine Transposition).
+ * Inhalt eines Abos zusammenstellen (was Abonnenten brauchen: Lieder mit Transposition und
+ * Schreibweise – aber keine Notizen).
  * @param {object[]} songs     Lieder (Datensätze aus dem Repository)
  * @param {object[]} setlists  Setlisten, die mitgehen (Einträge auf nicht enthaltene Lieder fallen weg)
  * @param {{name: string, publisher?: string, description?: string}} meta
  * @param {string} [now]
  */
 export function buildAboPayload(songs, setlists, meta, now = new Date().toISOString()) {
-  const list = songs.filter((s) => !s.deletedAt).map(({ id, chordpro, createdAt, updatedAt }) => ({ id, chordpro, createdAt, updatedAt }));
+  const list = songs.filter((s) => !s.deletedAt).map(({ id, chordpro, transpose, accidentals, createdAt, updatedAt }) => ({
+    id,
+    chordpro,
+    transpose: Number.isInteger(transpose) ? transpose : 0,
+    accidentals: ['auto', 'sharp', 'flat'].includes(accidentals) ? accidentals : 'auto',
+    createdAt,
+    updatedAt,
+  }));
   const ids = new Set(list.map((s) => s.id));
   return {
     format: ABO_FORMAT,
