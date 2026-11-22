@@ -151,14 +151,34 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     location.reload();
   }
 
+  // Einträge unter den Liederbüchern: anlegen und verwalten, ohne den Cloud-Dialog zu suchen
+  const NEW_BOOK = '__new';
+  const MANAGE_BOOKS = '__manage';
+
   function renderBookSelect() {
     const books = listBooks();
     const sel = $('#book-select');
-    sel.replaceChildren(...books.map((b) => new Option(b.abo || b.readOnly ? `${b.name} (nur lesen)` : b.shared ? `${b.name} 👥` : b.name, b.id, false, b.id === book.id)));
-    const several = books.length > 1;
-    sel.hidden = !several;
-    $('#app-name').hidden = several;
-    sel.onchange = () => switchTo(sel.value);
+    const line = new Option('──────────', '');
+    line.disabled = true;
+    sel.replaceChildren(
+      ...books.map((b) => new Option(b.abo || b.readOnly ? `${b.name} (nur lesen)` : b.shared ? `${b.name} 👥` : b.name, b.id, false, b.id === book.id)),
+      line,
+      new Option('＋ Neues Liederbuch …', NEW_BOOK),
+      new Option('Liederbücher verwalten …', MANAGE_BOOKS),
+    );
+    sel.hidden = false;
+    $('#app-name').hidden = true;
+    sel.onchange = () => {
+      const v = sel.value;
+      if (v !== NEW_BOOK && v !== MANAGE_BOOKS) return switchTo(v);
+      sel.value = book.id; // Auswahl bleibt beim geöffneten Buch
+      openDialog();
+      if (v === NEW_BOOK) {
+        $('#book-new').open = true;
+        $('#book-new-name').focus();
+      }
+      $(v === NEW_BOOK ? '#book-new' : '#books-section').scrollIntoView({ block: v === NEW_BOOK ? 'center' : 'start' });
+    };
   }
 
   // ---------- Status ----------

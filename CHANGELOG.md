@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.1 – 22.11.2026 · Neues Liederbuch direkt oben in der Auswahl
+
+- Die Liederbuch-Auswahl oben links ist jetzt immer da und hat zwei neue Einträge:
+  **＋ Neues Liederbuch …** (öffnet gleich das Formular zum Anlegen) und **Liederbücher verwalten …**.
+  Man muss dafür nicht mehr im Cloud-Dialog suchen.
+
 ## 2.2.0 – 22.11.2026 · Mehrere Liederbücher mit eigenem Speicherort
 
 - **Neues Liederbuch** (Cloud → Liederbücher auf diesem Gerät): beliebig viele eigene Liederbücher,

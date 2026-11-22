@@ -394,7 +394,8 @@ Die Datei ist lesbares JSON (`format: "liederbuch-abo"`, siehe `src/formats/abo.
 
 ## Mehrere Liederbücher
 
-Unter **Cloud → Liederbücher auf diesem Gerät → Neues Liederbuch** legt man beliebig viele eigene
+Oben links in der Liederbuch-Auswahl **＋ Neues Liederbuch …** (oder unter **Cloud → Liederbücher auf
+diesem Gerät → Neues Liederbuch**) legt man beliebig viele eigene
 Liederbücher an – jedes mit eigener Datenbank auf dem Gerät und **eigenem Speicherort**: nur auf diesem
 Gerät, Google Drive, Dropbox oder WebDAV. Auch das **Konto** ist pro Buch frei: Das Band-Liederbuch
 kann im Drive des Band-Kontos liegen, das private in der eigenen Dropbox. Bei der ersten Anmeldung
