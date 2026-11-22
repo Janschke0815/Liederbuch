@@ -4,7 +4,7 @@
 
 Neue Lieder anlegen – mit Nachfrage, wenn es Titel und Interpret schon gibt (eingefügter Text, Lesezeichen von Ultimate Guitar, ChordPro-/Textdateien).
 
-**Benutzt:** [`core/song-list.js`](../core/song-list.md), [`storage/repository.js`](../storage/repository.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md), [`ui/list.js`](list.md), [`ui/song.js`](song.md)  
+**Benutzt:** [`books.js`](../books.md), [`core/song-list.js`](../core/song-list.md), [`storage/repository.js`](../storage/repository.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md), [`ui/list.js`](list.md), [`ui/song.js`](song.md)  
 **Benutzt von:** [`app.js`](../app.md), [`ui/files.js`](files.md), [`ui/paste.js`](paste.md)
 
 ## Exportiert

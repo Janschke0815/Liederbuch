@@ -18,6 +18,7 @@ export const PERSONAL = Object.freeze({
 
 const KEY = 'books';
 const ACTIVE = 'activeBook';
+const PERSONAL_NAME = 'personalName'; // eigener Name für das persönliche Liederbuch (ab 2.2.4)
 
 function read(storage) {
   try {
@@ -28,9 +29,18 @@ function read(storage) {
   }
 }
 
+/** Das persönliche Liederbuch, mit eigenem Namen, falls umbenannt. */
+function personal(storage) {
+  const name = storage.getItem(PERSONAL_NAME);
+  return name ? { ...PERSONAL, name } : { ...PERSONAL }; // Kopie: die Vorlage bleibt unveränderlich
+}
+
+/** Name des persönlichen Liederbuchs (Standard „Mein Liederbuch“, umbenennbar). */
+export const personalBookName = (storage = localStorage) => personal(storage).name;
+
 /** Alle Liederbücher, das persönliche zuerst. */
 export function listBooks(storage = localStorage) {
-  return [PERSONAL, ...read(storage)];
+  return [personal(storage), ...read(storage)];
 }
 
 /** Liederbuch mit dieser ID oder null. */
@@ -40,7 +50,7 @@ export function getBook(id, storage = localStorage) {
 
 /** Das Liederbuch, das gerade geöffnet ist (sonst das persönliche). */
 export function activeBook(storage = localStorage) {
-  return getBook(storage.getItem(ACTIVE), storage) || PERSONAL;
+  return getBook(storage.getItem(ACTIVE), storage) || personal(storage);
 }
 
 /** Liederbuch für den nächsten Start merken (nur bekannte IDs). */
@@ -108,11 +118,17 @@ export function addBook({ name }, storage = localStorage) {
 
 /**
  * Liederbuch umbenennen (nur der Name in der App; Dateien in der Cloud behalten ihren Namen).
- * Das persönliche Liederbuch und Abos lassen sich nicht umbenennen.
+ * Abos lassen sich nicht umbenennen (der Name kommt vom Herausgeber).
  * @returns {boolean} umbenannt
  */
 export function renameBook(id, name, storage = localStorage) {
   const clean = String(name || '').trim();
+  if (id === PERSONAL.id) {
+    if (!clean) return false;
+    if (clean === PERSONAL.name) storage.removeItem(PERSONAL_NAME);
+    else storage.setItem(PERSONAL_NAME, clean);
+    return true;
+  }
   const list = read(storage);
   const b = list.find((x) => x.id === id);
   if (!b || !clean || b.abo) return false;

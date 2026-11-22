@@ -679,46 +679,10 @@
   <dialog id="sync-dialog" class="sync-dialog">
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
-        <h2>Cloud &amp; Liederbücher</h2>
+        <h2>Cloud: Abgleich &amp; Teilen</h2>
       </header>
       <div class="dialog-body sync-body">
-
-        <!-- 1. Welche Liederbücher es auf diesem Gerät gibt (eigenes, gemeinsame, Abos) -->
-        <section class="cloud-card" id="books-section">
-          <h3><svg class="icon"><use href="#i-note"/></svg>Liederbücher auf diesem Gerät</h3>
-          <div class="cloud-card-body">
-            <div id="drive-invite" class="drive-invite" hidden>
-              <strong>Einladung zu einem geteilten Liederbuch</strong>
-              <p class="hint">Mit dem Google-Konto anmelden, an das die Einladung ging, und die Datei in der Google-Auswahl bestätigen.</p>
-              <div class="row-end"><button type="button" id="drive-invite-ok" class="primary">Mit Google anmelden und öffnen</button></div>
-            </div>
-            <ul id="book-list" class="book-list"></ul>
-            <p class="hint">Wechseln geht auch oben über den Namen des Liederbuchs.</p>
-            <div class="cloud-actions">
-              <button type="button" id="btn-subscribe"><svg class="icon"><use href="#i-plus"/></svg>Abo hinzufügen …</button>
-              <div id="book-actions" class="cloud-actions">
-                <button type="button" id="book-join"><svg class="icon"><use href="#i-open"/></svg>Einladung öffnen …</button>
-              </div>
-            </div>
-            <details id="book-new" class="sync-setup">
-              <summary>Neues Liederbuch</summary>
-              <label class="field">Name <input id="book-new-name" placeholder="z. B. Band, Lagerfeuer" autocomplete="off"></label>
-              <label class="field">Speicherort
-                <select id="book-new-kind">
-                  <option value="local">Nur auf diesem Gerät (später wählbar)</option>
-                  <option value="gdrive">Google Drive</option>
-                  <option value="dropbox">Dropbox</option>
-                  <option value="webdav">WebDAV / Nextcloud</option>
-                </select>
-              </label>
-              <label class="check"><input type="checkbox" id="book-new-copy"> Lieder aus „<span id="book-new-from"></span>“ übernehmen</label>
-              <p class="hint">Jedes Liederbuch hat seinen eigenen Speicherort und sein eigenes Konto – nach dem Anlegen unten unter „Abgleich“ verbinden. Teilen mit Einladung gibt es bei Google Drive.</p>
-              <div class="row-end"><button type="button" id="book-new-ok" class="primary">Anlegen</button></div>
-            </details>
-          </div>
-        </section>
-
-        <!-- 2. Abgleich des geöffneten Liederbuchs zwischen Geräten -->
+        <!-- 1. Abgleich des geöffneten Liederbuchs zwischen Geräten -->
         <section class="cloud-card" id="sync-card">
           <h3><svg class="icon"><use href="#i-cloud"/></svg>Abgleich zwischen Geräten</h3>
           <div class="cloud-card-body">
@@ -791,7 +755,7 @@
           </div>
         </section>
 
-        <!-- 3. Mitglieder (nur gemeinsame Liederbücher über Google Drive) -->
+        <!-- 2. Mitglieder (nur gemeinsame Liederbücher über Google Drive) -->
         <section id="members" class="cloud-card" hidden>
           <h3><svg class="icon"><use href="#i-share"/></svg>Mitglieder von „<span id="members-book"></span>“</h3>
           <div class="cloud-card-body">
@@ -808,7 +772,7 @@
           </div>
         </section>
 
-        <!-- 4. Für eine Gruppe veröffentlichen (Abo anbieten) -->
+        <!-- 3. Für eine Gruppe veröffentlichen (Abo anbieten) -->
         <section id="publish-card" class="cloud-card">
           <h3><svg class="icon"><use href="#i-share"/></svg>Für eine Gruppe veröffentlichen</h3>
           <div class="cloud-card-body">
@@ -820,6 +784,56 @@
         </section>
       </div>
       <footer class="dialog-foot">
+        <button type="button" id="btn-books"><svg class="icon"><use href="#i-note"/></svg>Liederbücher …</button>
+        <span class="spacer"></span>
+        <button value="close" formnovalidate>Schließen</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="books-dialog" class="sync-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Liederbücher</h2>
+      </header>
+      <div class="dialog-body sync-body">
+        <!-- Welche Liederbücher es auf diesem Gerät gibt (eigene, geteilte, Abos) -->
+        <section class="cloud-card" id="books-section">
+          <h3><svg class="icon"><use href="#i-note"/></svg>Liederbücher auf diesem Gerät</h3>
+          <div class="cloud-card-body">
+            <div id="drive-invite" class="drive-invite" hidden>
+              <strong>Einladung zu einem geteilten Liederbuch</strong>
+              <p class="hint">Mit dem Google-Konto anmelden, an das die Einladung ging, und die Datei in der Google-Auswahl bestätigen.</p>
+              <div class="row-end"><button type="button" id="drive-invite-ok" class="primary">Mit Google anmelden und öffnen</button></div>
+            </div>
+            <ul id="book-list" class="book-list"></ul>
+            <p class="hint">Wechseln geht auch oben über den Namen des Liederbuchs. Abgleich, Mitglieder und Veröffentlichen des geöffneten Buchs stehen unter <b>Cloud</b>.</p>
+            <div class="cloud-actions">
+              <button type="button" id="btn-subscribe"><svg class="icon"><use href="#i-plus"/></svg>Abo hinzufügen …</button>
+              <div id="book-actions" class="cloud-actions">
+                <button type="button" id="book-join"><svg class="icon"><use href="#i-open"/></svg>Einladung öffnen …</button>
+              </div>
+            </div>
+            <details id="book-new" class="sync-setup">
+              <summary>Neues Liederbuch</summary>
+              <label class="field">Name <input id="book-new-name" placeholder="z. B. Band, Lagerfeuer" autocomplete="off"></label>
+              <label class="field">Speicherort
+                <select id="book-new-kind">
+                  <option value="local">Nur auf diesem Gerät (später wählbar)</option>
+                  <option value="gdrive">Google Drive</option>
+                  <option value="dropbox">Dropbox</option>
+                  <option value="webdav">WebDAV / Nextcloud</option>
+                </select>
+              </label>
+              <label class="check"><input type="checkbox" id="book-new-copy"> Lieder aus „<span id="book-new-from"></span>“ übernehmen</label>
+              <p class="hint">Jedes Liederbuch hat seinen eigenen Speicherort und sein eigenes Konto – nach dem Anlegen öffnet sich der Cloud-Dialog zum Verbinden. Teilen mit Einladung gibt es bei Google Drive.</p>
+              <div class="row-end"><button type="button" id="book-new-ok" class="primary">Anlegen</button></div>
+            </details>
+          </div>
+        </section>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" id="btn-books-cloud"><svg class="icon"><use href="#i-cloud"/></svg>Cloud …</button>
         <span class="spacer"></span>
         <button value="close" formnovalidate>Schließen</button>
       </footer>

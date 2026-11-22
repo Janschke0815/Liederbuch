@@ -3,6 +3,7 @@
 
 import { attachContextMenu } from '../context-menu.js';
 import { loadSettings, saveSettings } from '../settings/settings.js';
+import { personalBookName } from '../books.js';
 import { readOnly, repo, state, services } from './app-state.js';
 import { copyToPersonal } from './abo.js';
 import { $, isMobile } from './dom.js';
@@ -21,7 +22,7 @@ attachContextMenu(listEl, '.song-item', async (btn) => {
       { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
       { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: async () => { await openSong(id); services.play.open(id); } },
       '-',
-      { label: 'In „Mein Liederbuch“ kopieren', icon: 'paste', action: () => copyToPersonal([song]) },
+      { label: `In „${personalBookName()}“ kopieren`, icon: 'paste', action: () => copyToPersonal([song]) },
       { label: 'Drucken / PDF', icon: 'print', action: () => printSong(song) },
     ];
   }
@@ -105,7 +106,7 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
     },
     '-',
     await setlistMenu(current.id),
-    ...(readOnly ? [{ label: 'In „Mein Liederbuch“ kopieren', icon: 'paste', action: () => copyToPersonal([current]) }] : []),
+    ...(readOnly ? [{ label: `In „${personalBookName()}“ kopieren`, icon: 'paste', action: () => copyToPersonal([current]) }] : []),
     { label: 'Teilen …', icon: 'share', action: () => $('#btn-share').click() },
     { label: 'Drucken / PDF', icon: 'print', action: () => printSong({ ...current, chordpro: editor.value }) },
   ];

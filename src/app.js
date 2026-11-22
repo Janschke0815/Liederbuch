@@ -17,7 +17,7 @@
 //   ui/app-keys.js, ui/shortcuts.js   Tastenkürzel
 //   play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js, sync-ui.js   größere Bereiche
 
-import { bookKey } from './books.js';
+import { bookKey, PERSONAL } from './books.js';
 import { prefs } from './prefs.js';
 import { SAMPLE_SONG } from './sample.js';
 import { slimSetlist } from './storage/setlists.js';
@@ -111,7 +111,8 @@ setupSync({
 
 async function start() {
   let songs = await repo.list();
-  if (!songs.length && !book.shared && !localStorage.getItem(bookKey(book, 'sync.provider'))) {
+  // Beispiellied nur im persönlichen Liederbuch beim allerersten Start – weitere Bücher bleiben leer
+  if (!songs.length && book.id === PERSONAL.id && !localStorage.getItem(bookKey(book, 'sync.provider'))) {
     // Entwurf aus der allerersten Version (localStorage) übernehmen, sonst Beispiel anlegen
     const draft = prefs.get('draft');
     await repo.create(draft.trim() ? draft : SAMPLE_SONG);

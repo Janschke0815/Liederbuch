@@ -8,6 +8,17 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.4 – 22.11.2026 · Eigener Dialog „Liederbücher“, Mein Liederbuch umbenennen
+
+- **Liederbücher** haben einen eigenen, kleinen Dialog (oben in der Auswahl „Liederbücher verwalten …“):
+  Liste mit Speicherort, Neues Liederbuch, Einladung öffnen, Abo hinzufügen. Der **Cloud**-Dialog zeigt
+  nur noch Abgleich, Mitglieder und Veröffentlichen des geöffneten Buchs; unten führt „Liederbücher …“
+  hinüber und zurück.
+- **„Mein Liederbuch“ lässt sich umbenennen**; Meldungen wie „In … kopieren“ nennen den neuen Namen.
+- Neue Liederbücher starten leer – das Beispiellied gibt es nur noch beim allerersten Start.
+- README: wie man ein Buch zu einem anderen Speicherort umzieht (Trennen, anderen Speicherort wählen,
+  Verbinden); Dropbox-Abschnitt gilt jetzt für jedes Buch.
+
 ## 2.2.3 – 22.11.2026 · Kopfleiste am Handy passt wieder
 
 - Seit 2.2.1 war die Liederbuch-Auswahl oben so breit wie ihr längster Eintrag („Liederbücher

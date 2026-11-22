@@ -64,7 +64,7 @@ describe('Liederbücher: mehrere eigene (2.2)', () => {
     expect(activeBook(st).id).toBe(b.id);
   });
 
-  it('umbenennen: nur der Name, die Datei bleibt; Abos und das persönliche nicht', () => {
+  it('umbenennen: nur der Name, die Datei bleibt; Abos nicht', () => {
     const st = memoryStorage();
     const a = addBook({ name: 'Band' }, st);
     expect(renameBook(a.id, ' Die Band ', st)).toBe(true);
@@ -72,7 +72,13 @@ describe('Liederbücher: mehrere eigene (2.2)', () => {
     expect(now.name).toBe('Die Band');
     expect(now.file).toBe('Liederbuch – Band.json');
     expect(renameBook(a.id, '   ', st)).toBe(false);
-    expect(renameBook('personal', 'Anders', st)).toBe(false);
+    expect(renameBook('personal', 'Meine Lieder', st)).toBe(true);
+    expect(listBooks(st)[0].name).toBe('Meine Lieder');
+    expect(activeBook(st).name).toBe('Meine Lieder');
+    expect(activeBook(st).dbName).toBe(PERSONAL.dbName);
+    expect(renameBook('personal', 'Mein Liederbuch', st)).toBe(true); // zurück zum Standard
+    expect(st.getItem('personalName')).toBe(null);
+    expect(PERSONAL.name).toBe('Mein Liederbuch'); // die Vorlage bleibt unverändert
     const abo = addAboBook({ url: 'https://x.de/a.json', name: 'Abo' }, st);
     expect(renameBook(abo.id, 'Neu', st)).toBe(false);
     const shared = addSharedBook({ fileId: 'f1', name: 'Geteilt' }, st);

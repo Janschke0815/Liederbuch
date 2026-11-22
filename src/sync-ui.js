@@ -16,7 +16,7 @@ import { WebDavProvider, webdavUrlProblem } from './sync/webdav.js';
 import { DropboxProvider, dropboxRedirectUri } from './sync/dropbox.js';
 import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID, DROPBOX_APP_KEY } from './sync/config.js';
 import {
-  listBooks, setActiveBook, addSharedBook, addBook, renameBook, removeBook, driveBookName, bookKey,
+  listBooks, setActiveBook, addSharedBook, addBook, renameBook, removeBook, driveBookName, bookKey, personalBookName,
 } from './books.js';
 import { prefs } from './prefs.js';
 import { SongRepository } from './storage/repository.js';
@@ -57,7 +57,8 @@ const button = (text, onclick, className = '') =>
  *   leaveAbo/refreshAbo: Abo beenden bzw. aktualisieren (aus ui/abo.js)
  */
 export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, beforeSwitch, toast, leaveAbo, refreshAbo }) {
-  const dlg = $('#sync-dialog');
+  const dlg = $('#sync-dialog'); // Cloud: Abgleich, Mitglieder, Veröffentlichen des geöffneten Buchs
+  const booksDlg = $('#books-dialog'); // Liederbücher: Liste, neu, Einladung, Abo
   const btn = $('#btn-cloud');
   $('#sync-origin').textContent = location.origin;
   $('#sync-redirect').textContent = googleRedirectUri();
@@ -190,12 +191,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       const v = sel.value;
       if (v !== NEW_BOOK && v !== MANAGE_BOOKS) return switchTo(v);
       sel.value = book.id; // Auswahl bleibt beim geöffneten Buch
-      openDialog();
-      if (v === NEW_BOOK) {
-        $('#book-new').open = true;
-        $('#book-new-name').focus();
-      }
-      $(v === NEW_BOOK ? '#book-new' : '#books-section').scrollIntoView({ block: v === NEW_BOOK ? 'center' : 'start' });
+      openBooks({ create: v === NEW_BOOK });
     };
   }
 
@@ -334,7 +330,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       } else {
         row.append(button('Öffnen', () => switchTo(b.id)));
       }
-      if (b.own || b.shared) row.append(button('Umbenennen', () => rename(b)));
+      if (!b.abo) row.append(button('Umbenennen', () => rename(b)));
       if (b.own) row.append(button('Entfernen', () => removeOwnBook(b), 'danger'));
       if (b.shared && isActive) row.append(button('Verlassen', leaveBook, 'danger'));
       if (b.abo) row.append(aboDetails(b, isActive));
@@ -460,7 +456,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   async function connect({ silent = false } = {}) {
     if (book.abo) {
-      if (!silent) toast('Ein Abo wird nicht mit der Cloud abgeglichen – oben zu „Mein Liederbuch“ wechseln');
+      if (!silent) toast(`Ein Abo wird nicht mit der Cloud abgeglichen – oben zu „${personalBookName()}“ wechseln`);
       return false;
     }
     if (kind() === 'webdav') return connectWebdav();
@@ -550,7 +546,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       return;
     }
     pendingJoin = fileId;
-    openDialog();
+    openBooks();
   }
   let pendingJoin = null;
 
@@ -572,13 +568,13 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     }
     // Der Cloud-Dialog liegt als modaler Dialog immer obenauf – die Google-Dateiauswahl käme nicht
     // davor. Also vorher schließen; bei Abbruch oder Fehler wieder öffnen.
-    const reopen = dlg.open;
-    if (reopen) dlg.close();
+    const reopen = [dlg, booksDlg].find((d) => d.open);
+    reopen?.close();
     try {
       const picker = driveFor({ shared: true, fileId }, ja);
       const file = await picker.pickShared({ fileId });
       if (!file) {
-        if (reopen) openDialog();
+        if (reopen) reopenDialog(reopen);
         return;
       }
       pendingJoin = null;
@@ -594,7 +590,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       toast(`„${joined.name}“ geöffnet${readOnly ? ' – nur lesen' : ''}`);
       await switchTo(joined.id);
     } catch (err) {
-      if (reopen && !dlg.open) openDialog();
+      if (reopen && !reopen.open) reopenDialog(reopen);
       if (/API-Schlüssel/.test(err.message)) $('#sync-setup').open = true;
       toast(`Öffnen fehlgeschlagen: ${err.message}`);
     }
@@ -869,17 +865,39 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#webdav-user').value = w.user;
     $('#webdav-pass').value = w.password;
     render();
-    renderBooks();
     renderMembers();
     dlg.showModal();
   }
+
+  /** Liederbücher-Dialog öffnen; create: gleich das Formular „Neues Liederbuch“. */
+  function openBooks({ create = false } = {}) {
+    render();
+    renderBooks();
+    $('#book-new').open = create || $('#book-new').open;
+    booksDlg.showModal();
+    if (create) {
+      $('#book-new-name').focus();
+      $('#book-new').scrollIntoView({ block: 'center' });
+    }
+  }
+
+  const reopenDialog = (d) => (d === booksDlg ? openBooks() : openDialog());
+
+  $('#btn-books').onclick = () => {
+    dlg.close();
+    openBooks();
+  };
+  $('#btn-books-cloud').onclick = () => {
+    booksDlg.close();
+    openDialog();
+  };
 
   // Abgelaufene Anmeldung: Klick auf den Cloud-Knopf erneuert sie direkt
   btn.onclick = async () => {
     if (engine?.state === 'auth' && kind() === 'gdrive' && (await connect({ silent: true }))) return;
     openDialog();
   };
-  dlg.addEventListener('click', (e) => e.target === dlg && dlg.close());
+  for (const d of [dlg, booksDlg]) d.addEventListener('click', (e) => e.target === d && d.close());
 
   build();
   render();

@@ -7,6 +7,7 @@ import { parseImportFile } from '../formats/file-import.js';
 import { createZip, readZip, isZip } from '../formats/zip.js';
 import { EXPORT_FORMAT, EXPORT_VERSION, deriveSummary } from '../storage/repository.js';
 import { slimSetlist } from '../storage/setlists.js';
+import { personalBookName } from '../books.js';
 import { readOnly, repo, sets, state, services } from './app-state.js';
 import { $, el, download, toast } from './dom.js';
 import { addSongs } from './add-songs.js';
@@ -87,7 +88,7 @@ function showImportReport(summary, report) {
 /** Importiert Dateien (Sicherung, ZIP, ChordPro, Text). */
 export async function importFiles(files) {
   if (readOnly) {
-    toast('Ein abonniertes Liederbuch ist nur zum Lesen – zum Öffnen von Dateien oben zu „Mein Liederbuch“ wechseln');
+    toast(`Ein abonniertes Liederbuch ist nur zum Lesen – zum Öffnen von Dateien oben zu „${personalBookName()}“ wechseln`);
     return;
   }
   await flushSave();

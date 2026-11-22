@@ -2,7 +2,7 @@
 // einzelne Lieder ins eigene Liederbuch kopieren. Ein Abo ist ein eigenes Liederbuch (eigene
 // Datenbank), nur zum Lesen (siehe readOnly in app-state.js).
 
-import { addAboBook, listBooks, removeBook, setActiveBook, PERSONAL } from '../books.js';
+import { addAboBook, listBooks, removeBook, setActiveBook, PERSONAL, personalBookName } from '../books.js';
 import { findDuplicates } from '../core/song-list.js';
 import { parseAboLink } from '../formats/abo.js';
 import { prefs } from '../prefs.js';
@@ -102,7 +102,7 @@ $('#abo-ok').onclick = async () => {
   }
 };
 $('#btn-subscribe').onclick = () => {
-  $('#sync-dialog').close();
+  $('#books-dialog').close();
   openSubscribe();
 };
 
@@ -188,7 +188,7 @@ if (book.abo) {
   };
   if (sessionStorage.getItem('aboJustAdded')) {
     sessionStorage.removeItem('aboJustAdded');
-    toast(`Abo „${book.name}“ geöffnet. Deine eigenen Lieder: oben auf den Namen tippen oder „Mein Liederbuch“`, { ms: 8000 });
+    toast(`Abo „${book.name}“ geöffnet. Deine eigenen Lieder: oben auf den Namen tippen oder „${personalBookName()}“`, { ms: 8000 });
   }
   $('#publish-card').hidden = true; // ein Abo veröffentlicht man nicht weiter
   renderBar();
@@ -226,6 +226,6 @@ export async function copyToPersonal(songs) {
     existing.push(await mine.create(s.chordpro, { transpose: s.transpose || 0, accidentals: s.accidentals || 'auto' }));
     copied++;
   }
-  toast([copied && `${copied} ${copied === 1 ? 'Lied' : 'Lieder'} nach „Mein Liederbuch“ kopiert`,
+  toast([copied && `${copied} ${copied === 1 ? 'Lied' : 'Lieder'} nach „${personalBookName()}“ kopiert`,
     skipped && `${skipped} gab es dort schon`].filter(Boolean).join(' · ') || 'Nichts kopiert');
 }

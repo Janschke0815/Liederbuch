@@ -93,7 +93,9 @@ geändert (`ConflictError`), liest sie neu und versucht es noch einmal.
 
 `books.js` führt die Liederbücher eines Geräts: das persönliche (`PERSONAL`), eigene (`own`, ab 2.2),
 geteilte (`shared`, Drive-Datei eines anderen) und Abos. Jedes hat eine eigene IndexedDB (`dbName`);
-`ui/app-state.js` öffnet nur die des aktiven Buchs, ein Wechsel lädt die Seite neu. Speicherort,
+`ui/app-state.js` öffnet nur die des aktiven Buchs, ein Wechsel lädt die Seite neu. Das persönliche
+lässt sich umbenennen (`personalName`, `personalBookName()`). Oberfläche: Dialog `#books-dialog`
+(Liste, anlegen, Einladung, Abo) und `#sync-dialog` (Abgleich des geöffneten Buchs), beide in `sync-ui.js`. Speicherort,
 Zugangsdaten und Anmeldung liegen je Buch unter `bookKey(book, 'webdav.url')` usw. – für das
 persönliche und vor 2.2 geteilte Bücher sind das die alten, globalen Schlüssel (keine Umstellung),
 sonst `…:<Buch-ID>`. `GoogleAuth` (`tokenKey`, `accountKey`, `login_hint`), `DropboxProvider`

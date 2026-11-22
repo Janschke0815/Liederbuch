@@ -380,8 +380,8 @@ diesem Gerät). Im Abo kann man transponieren, eigene Notizen schreiben, spielen
 **Rechtsklick → In „Mein Liederbuch“ kopieren** macht aus einem Lied eine eigene, bearbeitbare
 Fassung. Die Leiste über der Liste zeigt den Stand, führt zurück zu **„Mein Liederbuch“**, aktualisiert auf
 Knopfdruck und beendet das Abo. Zwischen den Liederbüchern wechselt man auch oben über den Namen.
-Unter **Cloud → Liederbücher auf diesem Gerät** steht bei jedem Abo die Adresse (zum Kopieren), der Stand
-und „Abo beenden“.
+Unter **Liederbücher** (oben links in der Liederbuch-Auswahl → *Liederbücher verwalten …*) steht bei
+jedem Abo die Adresse (zum Kopieren), der Stand und „Abo beenden“.
 
 **Urheberrecht:** Liedtexte und Melodien (auch Harp-Tabs) sind meist geschützt (bis 70 Jahre nach
 dem Tod der Urheber). Weitergeben an einen privaten Kreis ist erlaubt, öffentlich bereitstellen
@@ -394,8 +394,7 @@ Die Datei ist lesbares JSON (`format: "liederbuch-abo"`, siehe `src/formats/abo.
 
 ## Mehrere Liederbücher
 
-Oben links in der Liederbuch-Auswahl **＋ Neues Liederbuch …** (oder unter **Cloud → Liederbücher auf
-diesem Gerät → Neues Liederbuch**) legt man beliebig viele eigene
+Oben links in der Liederbuch-Auswahl **＋ Neues Liederbuch …** legt man beliebig viele eigene
 Liederbücher an – jedes mit eigener Datenbank auf dem Gerät und **eigenem Speicherort**: nur auf diesem
 Gerät, Google Drive, Dropbox oder WebDAV. Auch das **Konto** ist pro Buch frei: Das Band-Liederbuch
 kann im Drive des Band-Kontos liegen, das private in der eigenen Dropbox. Bei der ersten Anmeldung
@@ -405,10 +404,16 @@ fragt Google bzw. Dropbox nach dem Konto. Optional werden die Lieder des geöffn
   anderen beim Öffnen).
 - **Google Drive / Dropbox:** Datei `Liederbuch – <Name>.json` (im Drive bzw. App-Ordner).
   **WebDAV:** eigener Ordner, vorbelegt neben dem Ordner des geöffneten Buchs.
-- **Umbenennen** ändert nur den Namen in der App, die Datei behält ihren Namen. **Entfernen** löscht
-  das Buch auf diesem Gerät; was in der Cloud liegt, bleibt.
+- **Liederbücher verwalten …** (ebenfalls in der Auswahl oben, oder im Cloud-Dialog unten
+  *Liederbücher …*) zeigt alle Bücher mit ihrem Speicherort; dort auch Abos und Einladungen.
+  Abgleich, Mitglieder und Veröffentlichen des geöffneten Buchs stehen unter **Cloud**.
+- **Umbenennen** (auch „Mein Liederbuch“) ändert nur den Namen in der App, die Datei behält ihren
+  Namen. **Entfernen** löscht das Buch auf diesem Gerät; was in der Cloud liegt, bleibt.
+- **Umziehen** zu einem anderen Speicherort: unter **Cloud** *Trennen*, anderen Speicherort wählen,
+  *Verbinden* – das Gerät hat alle Lieder und lädt sie dort hoch (liegen dort schon welche, wird
+  zusammengeführt). Die alte Datei bleibt, wo sie war.
 - „Mein Liederbuch“ behält seine Einstellungen (`Liederbuch.json`); geteilte Bücher (Einladung)
-  laufen immer über Google Drive.
+  laufen immer über Google Drive. Neue Bücher starten leer (ohne Beispiellied).
 
 ## Cloud-Sync und gemeinsame Liederbücher (Google Drive)
 
@@ -443,11 +448,12 @@ die Google-Anmeldung des jeweiligen Kontos, und die App bekommt nur die Berechti
 
 ### Dropbox
 
-Das persönliche Liederbuch kann auch in Dropbox liegen: **Cloud → Abgleich → Speicherort „Dropbox“**,
-dann **Verbinden**. Die Seite führt kurz zu Dropbox (dort anmelden und erlauben) und kommt zurück.
+Jedes Liederbuch kann in Dropbox liegen: **Cloud → Abgleich → Speicherort „Dropbox“**, dann
+**Verbinden**. Die Seite führt kurz zu Dropbox (dort anmelden und erlauben) und kommt zurück.
 Danach bleibt die Verbindung bestehen – anders als bei Google ist kein erneutes Anmelden nötig.
-Die Daten liegen als `Liederbuch.json` im App-Ordner (*Dropbox → Apps → <Name der App>*); die App
-sieht nur diesen Ordner. Gemeinsame Liederbücher mit Einladung gibt es weiterhin über Google Drive.
+Die Daten liegen als `Liederbuch.json` (weitere Bücher `Liederbuch – <Name>.json`) im App-Ordner
+(*Dropbox → Apps → <Name der App>*); die App sieht nur diesen Ordner. Jedes Buch kann ein eigenes
+Dropbox-Konto haben. Gemeinsame Liederbücher mit Einladung gibt es weiterhin über Google Drive.
 
 Einmalig einrichten (kostenlos):
 

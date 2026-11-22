@@ -14,13 +14,17 @@ Mehrere Liederbücher auf einem Gerät. Jedes hat eine eigene lokale Datenbank.
   abonniert (nur lesen):   { id: 'abo-…', name, dbName, abo: { url, publisher, user, password } }
 ```
 
-**Benutzt von:** [`app.js`](app.md), [`sync-ui.js`](sync-ui.md), [`ui/abo.js`](ui/abo.md), [`ui/app-state.js`](ui/app-state.md), [`ui/publish.js`](ui/publish.md)
+**Benutzt von:** [`app.js`](app.md), [`sync-ui.js`](sync-ui.md), [`ui/abo.js`](ui/abo.md), [`ui/add-songs.js`](ui/add-songs.md), [`ui/app-state.js`](ui/app-state.md), [`ui/context-menus.js`](ui/context-menus.md), [`ui/files.js`](ui/files.md), [`ui/publish.js`](ui/publish.md)
 
 ## Exportiert
 
 ### `PERSONAL`
 
 `= Object.freeze({`
+
+### `personalBookName(storage = localStorage)`
+
+Name des persönlichen Liederbuchs (Standard „Mein Liederbuch“, umbenennbar).
 
 ### `listBooks(storage = localStorage)`
 
@@ -67,7 +71,7 @@ Eigenes Liederbuch anlegen (lokal; Speicherort und Konto wählt man danach im Cl
 ### `renameBook(id, name, storage = localStorage)`
 
 Liederbuch umbenennen (nur der Name in der App; Dateien in der Cloud behalten ihren Namen).
-Das persönliche Liederbuch und Abos lassen sich nicht umbenennen.
+Abos lassen sich nicht umbenennen (der Name kommt vom Herausgeber).
 
 **Rückgabe:** `boolean` umbenannt
 
@@ -106,4 +110,5 @@ Dateiname der Drive-Datei für ein gemeinsames Liederbuch: „Liederbuch – Nam
 Nicht exportiert – nur innerhalb des Moduls benutzt.
 
 - `read(storage)`
+- `personal(storage)` – Das persönliche Liederbuch, mit eigenem Namen, falls umbenannt.
 - `shortHash(text)` – Kurze, feste Kennung aus einem Text (für IDs und Datenbanknamen).
