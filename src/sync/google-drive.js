@@ -285,12 +285,26 @@ export class GoogleDriveProvider {
     await loadScript(GAPI_URL);
     await new Promise((resolve, reject) => gapi.load('picker', { callback: resolve, onerror: reject }));
     return new Promise((resolve) => {
+      let picker = null;
+      let closeBtn = null;
+      const finish = (result) => {
+        closeBtn?.remove();
+        removeEventListener('keydown', onKey, true);
+        try {
+          picker?.setVisible(false);
+          picker?.dispose();
+        } catch {
+          /* schon zu */
+        }
+        resolve(result);
+      };
+      const onKey = (e) => e.key === 'Escape' && finish(null);
       const view = new google.picker.DocsView(google.picker.ViewId.DOCS)
         .setMimeTypes('application/json')
         .setMode(google.picker.DocsViewMode.LIST);
       if (fileId) view.setFileIds(fileId);
       else view.setOwnedByMe(false);
-      const picker = new google.picker.PickerBuilder()
+      picker = new google.picker.PickerBuilder()
         .addView(view)
         .setOAuthToken(token)
         .setDeveloperKey(this.apiKey)
@@ -300,13 +314,21 @@ export class GoogleDriveProvider {
         .setCallback((d) => {
           if (d.action === google.picker.Action.PICKED) {
             const f = d.docs[0];
-            resolve({ id: f.id, name: f.name });
+            finish({ id: f.id, name: f.name });
           } else if (d.action === google.picker.Action.CANCEL) {
-            resolve(null);
+            finish(null);
           }
         })
         .build();
       picker.setVisible(true);
+      // Zeigt die Google-Auswahl einen Fehler (z. B. „API-Entwicklerschlüssel ist ungültig“), hat sie
+      // keinen eigenen Knopf zum Schließen – daher ein eigener, der immer darüber liegt (auch Esc).
+      closeBtn = Object.assign(document.createElement('button'), {
+        type: 'button', className: 'picker-close', textContent: '✕ Schließen', title: 'Google-Dateiauswahl schließen (Esc)',
+      });
+      closeBtn.onclick = () => finish(null);
+      document.body.append(closeBtn);
+      addEventListener('keydown', onKey, true);
     });
   }
 }

@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.2 – 22.11.2026 · Google-Dateiauswahl lässt sich immer schließen
+
+- Über der Google-Dateiauswahl (Einladung öffnen) liegt jetzt ein eigener Knopf **✕ Schließen**;
+  auch die Esc-Taste schließt sie. Zeigt Google dort einen Fehler (z. B. „Der API-Entwicklerschlüssel
+  ist ungültig“), hat die Auswahl selbst keinen Knopf zum Schließen. Danach geht der Cloud-Dialog wieder auf.
+
 ## 2.2.1 – 22.11.2026 · Neues Liederbuch direkt oben in der Auswahl
 
 - Die Liederbuch-Auswahl oben links ist jetzt immer da und hat zwei neue Einträge:

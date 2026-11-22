@@ -124,7 +124,7 @@ eintragen kann (praktisch zum Ausprobieren, z. B. mit einem eigenen Projekt für
 | `origin_mismatch` / „Zugriff blockiert“ | Adresse fehlt unter *JavaScript-Quellen* (Schritt 3) |
 | „Zugriff auf Google Drive wurde nicht erlaubt“ | Bei Google das Häkchen für Drive nicht gesetzt – noch einmal anmelden |
 | `access_denied` in der Testphase | Konto ist nicht als Testnutzer eingetragen (Schritt 2) |
-| „Der API-Entwicklerschlüssel ist ungültig“ (in der Dateiauswahl) | Beim API-Schlüssel fehlt unter *API-Einschränkungen* die Drive API oder Picker API, die Picker API ist nicht aktiviert (Schritt 1) oder unter *Websites* fehlt `https://docs.google.com/*` (Schritt 4) |
+| „Der API-Entwicklerschlüssel ist ungültig“ (in der Dateiauswahl; schließen mit „✕ Schließen“ oben rechts oder Esc) | Beim API-Schlüssel fehlt unter *API-Einschränkungen* die Drive API oder Picker API, die Picker API ist nicht aktiviert (Schritt 1) oder unter *Websites* fehlt `https://docs.google.com/*` (Schritt 4) |
 | „Für ‚Einladung öffnen‘ fehlen API-Schlüssel …“ | API-Schlüssel oder Projektnummer fehlen (Schritte 4–6) |
 | „Die Google-Anmeldung ist abgelaufen oder wurde widerrufen“ | normal nach etwa einer Stunde oder nach Entzug unter <https://myaccount.google.com/permissions> – neu anmelden |
 | „Nur lesen: … keine Schreibrechte“ | Der Besitzer hat dir nur Leserechte gegeben |
