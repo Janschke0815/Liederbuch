@@ -74,7 +74,6 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   const appKey = () => cfg('dropbox.appKey', DROPBOX_APP_KEY);
   // Einstellung des geöffneten Liederbuchs (eigene Schlüssel je Buch, siehe bookKey)
   const K = (base) => bookKey(book, base);
-  const ownKeys = K('gdrive.token') !== 'gdrive.token'; // eigenes Konto (nicht das des persönlichen Buchs)
   // Geteilte Liederbücher laufen immer über Google Drive; alle anderen wahlweise über Dropbox oder WebDAV
   const kindOf = (b) => {
     const k = localStorage.getItem(bookKey(b, 'sync.kind'));
@@ -202,7 +201,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     const dav = kind() === 'webdav';
     const dbx = kind() === 'dropbox';
     const gd = !dav && !dbx;
-    const where = dav ? `WebDAV (${provider.host})` : dbx ? 'Dropbox' : 'Google Drive';
+    const account = gd ? auth?.account : '';
+    const where = dav ? `WebDAV (${provider.host})` : dbx ? 'Dropbox' : `Google Drive${account ? ` · ${account}` : ''}`;
     let text = '';
     if (state === 'idle') text = `${where} · zuletzt abgeglichen ${fmtTime(engine.lastSync)}`;
     else if (state === 'syncing') text = where;
@@ -210,7 +210,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     else if (state === 'auth') {
       text = dav
         ? `${engine.error?.message || 'Anmeldung fehlgeschlagen'}. Zugangsdaten prüfen und „Neu anmelden“ tippen – deine Lieder bleiben erhalten.`
-        : `Die ${dbx ? 'Dropbox' : 'Google'}-Anmeldung ist abgelaufen. „Neu anmelden“ tippen – deine Lieder bleiben erhalten.`;
+        : `Die ${dbx ? 'Dropbox' : 'Google'}-Anmeldung${account ? ` (${account})` : ''} ist abgelaufen. „Neu anmelden“ tippen – deine Lieder bleiben erhalten.`;
     } else if (state === 'error') text = engine.error?.message || '';
     else if (book.abo) text = 'Abonniertes Liederbuch – wird über das Abo aktualisiert, nicht über die Cloud.';
     else if (book.readOnly) text = 'Geteiltes Liederbuch, nur lesen – mit Google anmelden, um den neuesten Stand zu holen.';
@@ -469,8 +469,9 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       return false;
     }
     if (!provider.signedIn) {
-      // Erste Anmeldung eines weiteren Liederbuchs: Google zeigt die Kontoauswahl
-      const choose = ownKeys && !auth.known;
+      // Erste Anmeldung eines Liederbuchs (auch des persönlichen): Google zeigt die Kontoauswahl –
+      // jedes Buch kann ein anderes Google-Konto nutzen
+      const choose = !auth.known;
       // installierte App auf iPhone/iPad: Weiterleitung statt Fenster (siehe finishGoogle)
       if (prefersRedirect()) return redirectToGoogle({ silent: auth.known, choose });
       try {
@@ -495,7 +496,9 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     if (first && !book.shared) await beforeConnect?.();
     if (engine.state === 'off') engine.start();
     else await engine.sync();
-    if (first) toast('Mit Google Drive verbunden');
+    if (first) toast(`Mit Google Drive verbunden${auth.account ? ` (${auth.account})` : ''}`);
+    // Konto nachtragen (Anmeldungen von vor 2.2 kennen es noch nicht) und anzeigen
+    if (!auth.account) auth.ensureAccount().then(() => render()).catch(() => {});
     if (dlg.open) renderMembers();
     return true;
   }
@@ -683,7 +686,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     if (provider.signedIn) return startDropbox();
     try {
       await beforeSwitch?.(); // Ungespeichertes sichern, die Seite wird gleich verlassen
-      location.assign(await provider.loginUrl({ bookId: book.id }, { choose: ownKeys }));
+      location.assign(await provider.loginUrl({ bookId: book.id }, { choose: !connectedFlag() }));
     } catch (err) {
       toast(`Verbinden fehlgeschlagen: ${err.message}`);
     }
@@ -907,6 +910,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   // Geteilte Liederbücher gehören immer zu Google Drive: abgleichen, sobald einmal angemeldet.
   const autoStart = book.shared ? auth.known : connectedFlag();
   if (!book.abo && autoStart && configured()) engine.start();
+  // Konto des Buchs nachtragen, falls die Anmeldung von vor 2.2 stammt (für die Anzeige im Dialog)
+  if (kind() === 'gdrive' && auth.signedIn && !auth.account) auth.ensureAccount().then(() => render()).catch(() => {});
   finishDropbox();
   finishGoogle();
   checkDriveHash();

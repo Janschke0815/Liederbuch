@@ -411,6 +411,19 @@ describe('Google: mehrere Liederbücher mit eigenem Konto (2.2)', () => {
     expect(gisB.hints).toEqual(['', 'ben@x.de']);
   });
 
+  it('Konto nachtragen für ältere Anmeldungen (Anzeige im Cloud-Dialog)', async () => {
+    const drive = fakeDrive();
+    const { auth } = person(drive, 'tok-b');
+    expect(auth.account).toBe('');
+    expect(await auth.ensureAccount()).toBe('ben@x.de');
+    expect(auth.account).toBe('ben@x.de');
+    const calls = drive.calls.length;
+    await auth.ensureAccount(); // schon bekannt: keine weitere Anfrage
+    expect(drive.calls.length).toBe(calls);
+    const out = new GoogleAuth({ clientId: 'cid', storage: memory(), session: memory(), fetch: drive.fetch });
+    expect(await out.ensureAccount()).toBe(''); // nicht angemeldet: nichts nachzutragen
+  });
+
   it('Weiterleitung: Token landet beim Buch, das die Anmeldung begonnen hat', () => {
     const storage = memory();
     const session = memory();

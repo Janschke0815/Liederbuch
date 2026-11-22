@@ -15,6 +15,10 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
   nur noch Abgleich, Mitglieder und Veröffentlichen des geöffneten Buchs; unten führt „Liederbücher …“
   hinüber und zurück.
 - **„Mein Liederbuch“ lässt sich umbenennen**; Meldungen wie „In … kopieren“ nennen den neuen Namen.
+- **Welches Google-Konto?** Der Cloud-Dialog zeigt beim Abgleich über Google Drive das Konto des
+  geöffneten Buchs (z. B. „Google Drive · name@gmail.com“), auch in der Meldung „Anmeldung abgelaufen“.
+- **Kontoauswahl für jedes Buch:** Auch „Mein Liederbuch“ fragt bei der ersten Anmeldung (oder nach dem
+  Trennen) nach dem Google- bzw. Dropbox-Konto – bisher nur die weiteren Bücher.
 - Neue Liederbücher starten leer – das Beispiellied gibt es nur noch beim allerersten Start.
 - README: wie man ein Buch zu einem anderen Speicherort umzieht (Trennen, anderen Speicherort wählen,
   Verbinden); Dropbox-Abschnitt gilt jetzt für jedes Buch.

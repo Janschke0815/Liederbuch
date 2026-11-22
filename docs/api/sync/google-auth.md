@@ -71,6 +71,13 @@ War dieses Gerät schon einmal angemeldet (dann fragt Google meist nicht erneut)
 
 Google-Konto (E-Mail), mit dem dieses Liederbuch zuletzt angemeldet war, sonst ''.
 
+#### `async ensureAccount()`
+
+Konto (E-Mail) nachtragen, falls noch keins gemerkt ist – z. B. bei Anmeldungen von vor 2.2,
+damit der Cloud-Dialog zeigen kann, welches Konto ein Liederbuch nutzt.
+
+**Rückgabe:** `Promise<string>` das Konto oder ''
+
 #### `expire()`
 
 Token ist abgelaufen oder widerrufen (Google antwortet 401): vergessen, neu anmelden.

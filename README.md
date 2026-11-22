@@ -399,7 +399,9 @@ Oben links in der Liederbuch-Auswahl **＋ Neues Liederbuch …** legt man belie
 Liederbücher an – jedes mit eigener Datenbank auf dem Gerät und **eigenem Speicherort**: nur auf diesem
 Gerät, Google Drive, Dropbox oder WebDAV. Auch das **Konto** ist pro Buch frei: Das Band-Liederbuch
 kann im Drive des Band-Kontos liegen, das private in der eigenen Dropbox. Bei der ersten Anmeldung
-fragt Google bzw. Dropbox nach dem Konto. Optional werden die Lieder des geöffneten Buchs übernommen.
+fragt Google bzw. Dropbox nach dem Konto (auch bei „Mein Liederbuch“); der Cloud-Dialog zeigt, welches
+Google-Konto das geöffnete Buch nutzt. Ein anderes Konto: *Trennen*, dann neu verbinden. Optional werden
+die Lieder des geöffneten Buchs übernommen.
 
 - Gewechselt wird oben links in der Kopfleiste; abgeglichen wird immer das **geöffnete** Buch (die
   anderen beim Öffnen).

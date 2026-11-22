@@ -130,6 +130,17 @@ export class GoogleAuth {
     return this.storage.getItem(this.accountKey) || '';
   }
 
+  /**
+   * Konto (E-Mail) nachtragen, falls noch keins gemerkt ist – z. B. bei Anmeldungen von vor 2.2,
+   * damit der Cloud-Dialog zeigen kann, welches Konto ein Liederbuch nutzt.
+   * @returns {Promise<string>} das Konto oder ''
+   */
+  async ensureAccount() {
+    const token = this.token();
+    if (token && !this.account) await this.#rememberAccount(token);
+    return this.account;
+  }
+
   /** Konto zum Token nachfragen und merken (für login_hint); Fehler sind egal. */
   async #rememberAccount(accessToken, accountKey = this.accountKey) {
     try {
