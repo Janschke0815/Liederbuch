@@ -32,10 +32,19 @@ describe('Vorschau', () => {
       if (Math.abs(c.left - l.left) > 0.5) throw new Error(`Akkord ${chord.textContent} nicht linksbündig über Text`);
       if (!(c.bottom <= l.top + 1)) throw new Error(`Akkord ${chord.textContent} nicht über dem Text`);
     }
-    // Text ohne Akkord und Text mit Akkord teilen eine Grundlinie
-    const plain = host.querySelector('.line > .lyric').getBoundingClientRect();
-    const lyr = host.querySelector('.seg > .lyric').getBoundingClientRect();
-    if (Math.abs(plain.bottom - lyr.bottom) > 1) throw new Error('Grundlinien weichen ab');
+    // Text ohne Akkord und Text mit Akkord teilen eine Grundlinie. Gemessen wird die echte Grundlinie
+    // (Markierung ohne Höhe, auf der Grundlinie ausgerichtet) – nicht die Unterkante der Kästen, deren
+    // Höhe je nach Schrift schwankt (auf Linux ohne Georgia sonst ein Fehlalarm).
+    const baseline = (el) => {
+      const mark = Object.assign(document.createElement('span'), { style: 'display:inline-block;width:0;height:0;vertical-align:baseline' });
+      el.append(mark);
+      const y = mark.getBoundingClientRect().bottom;
+      mark.remove();
+      return y;
+    };
+    const plain = baseline(host.querySelector('.line > .lyric'));
+    const lyr = baseline(host.querySelector('.seg > .lyric'));
+    if (Math.abs(plain - lyr) > 0.5) throw new Error(`Grundlinien weichen ab (${(plain - lyr).toFixed(1)} px)`);
   });
 
   it('transponiert Akkorde und Tonart', () => {
