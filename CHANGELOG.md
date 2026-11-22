@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.3 – 22.11.2026 · Kopfleiste am Handy passt wieder
+
+- Seit 2.2.1 war die Liederbuch-Auswahl oben so breit wie ihr längster Eintrag („Liederbücher
+  verwalten …“) – am Handy rutschten Cloud und Menü (⋯) über den Rand, man musste nach links wischen.
+  Jetzt ist sie nur so breit wie der Name des geöffneten Buchs, lange Namen werden mit „…“ gekürzt.
+
 ## 2.2.2 – 22.11.2026 · Google-Dateiauswahl lässt sich immer schließen
 
 - Über der Google-Dateiauswahl (Einladung öffnen) liegt jetzt ein eigener Knopf **✕ Schließen**;

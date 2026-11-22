@@ -23,8 +23,8 @@ body {
   position: relative;
   z-index: 5;
 }
-.brand { display: flex; align-items: center; gap: .55em; margin-right: .6em; }
-.brand img { border-radius: 6px; }
+.brand { display: flex; align-items: center; gap: .55em; margin-right: .6em; min-width: 0; }
+.brand img { border-radius: 6px; flex-shrink: 0; }
 .app-name { font-size: 1.12em; letter-spacing: .01em; }
 .actions { display: flex; align-items: center; gap: .35em; }
 .actions button { border-color: transparent; background: transparent; }

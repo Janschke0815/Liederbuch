@@ -151,6 +151,22 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     location.reload();
   }
 
+  /**
+   * Auswahlfeld nur so breit wie der Name des geöffneten Buchs – von selbst wäre es so breit wie der
+   * längste Eintrag („Liederbücher verwalten …“) und schöbe am Handy die Kopfleiste über den Rand.
+   */
+  function fitSelect(sel) {
+    const probe = sel.cloneNode(false);
+    probe.removeAttribute('id');
+    probe.hidden = false;
+    probe.append(new Option(sel.selectedOptions[0]?.textContent || ''));
+    Object.assign(probe.style, { position: 'absolute', visibility: 'hidden', width: 'auto' });
+    sel.after(probe);
+    const w = probe.getBoundingClientRect().width;
+    probe.remove();
+    if (w) sel.style.width = `${Math.ceil(w) + 2}px`;
+  }
+
   // Einträge unter den Liederbüchern: anlegen und verwalten, ohne den Cloud-Dialog zu suchen
   const NEW_BOOK = '__new';
   const MANAGE_BOOKS = '__manage';
@@ -168,6 +184,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     );
     sel.hidden = false;
     $('#app-name').hidden = true;
+    fitSelect(sel);
+    document.fonts?.ready.then(() => fitSelect(sel)); // Schrift geladen: neu messen
     sel.onchange = () => {
       const v = sel.value;
       if (v !== NEW_BOOK && v !== MANAGE_BOOKS) return switchTo(v);

@@ -49,10 +49,15 @@
 }
 /* Liederbücher */
 .book-select {
-  font-weight: 700; font-size: 1.05em; max-width: 14em;
+  font-weight: 700; font-size: 1.05em; max-width: min(14em, 45vw); min-width: 4em; text-overflow: ellipsis;
   border-color: transparent; background-color: transparent; padding-inline: .4em;
 }
 .book-select:hover { background-color: var(--hover); }
+/* Handy: Name des Liederbuchs passt neben Neu, Cloud und Menü in die Kopfleiste */
+@media (max-width: 520px) {
+  .brand { margin-right: 0; }
+  .book-select { font-size: 1em; padding-inline: .15em; }
+}
 .sync-provider-row { display: flex; align-items: center; gap: .7em; flex-wrap: wrap; }
 .sync-provider-row .segmented button { padding-inline: .9em; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6em; }
