@@ -45,7 +45,6 @@
 .play-view.night #pl-speed { background: #2a2826; color: #eee; }
 .play-view.night .play-group { border-color: #444; }
 @media (max-width: 760px) {
-  .play-btn .label { display: none; }
   .play-view { --play-zoom: 1.05; }
   .play-bar { flex-wrap: wrap; gap: .35em; }
   .play-bar .spacer { display: none; }

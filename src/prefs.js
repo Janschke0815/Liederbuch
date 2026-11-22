@@ -19,6 +19,7 @@ export const PREFS = {
   chordFilterOpen: { key: 'cfOpen', def: false }, // „Was kann ich spielen?“
   chordFilterChords: { key: 'cfChords', def: '' },
   chordFilterCapo: { key: 'cfCapo', def: false },
+  welcomeHidden: { key: 'welcomeHidden', def: false }, // „So geht's los“ ausgeblendet
   listTab: { key: 'listTab', def: 'songs' }, // songs | sets
   openSetlist: { key: 'openSetlist', def: '' },
   // Editor und Vorschau

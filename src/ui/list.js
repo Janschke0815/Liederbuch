@@ -153,7 +153,19 @@ async function render() {
   listEl.replaceChildren(...items);
   const filtered = search.value || activeTag || chordFilterActive();
   $('#song-count').textContent = filtered ? `${songs.length} Treffer` : `${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'}`;
+  // Erste Schritte, solange das Buch fast leer ist (nur das Beispiellied) – nicht in Abos
+  $('#welcome').hidden = Boolean(filtered || songs.length > 1 || document.body.dataset.readonly || prefs.get('welcomeHidden'));
 }
+
+$('#welcome').addEventListener('click', (e) => {
+  const what = e.target.closest('[data-welcome]')?.dataset.welcome;
+  const target = { new: '#btn-new', import: '#btn-import', open: '#btn-open', cloud: '#btn-cloud' }[what];
+  if (target) $(target).click();
+  else if (what === 'hide') {
+    prefs.set('welcomeHidden', true);
+    $('#welcome').hidden = true;
+  }
+});
 
 // Neu zeichnen: mehrere Anlässe kurz hintereinander ergeben nur einen Durchlauf
 let pending = null;

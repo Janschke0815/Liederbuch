@@ -155,9 +155,20 @@ export function setupSettings({ targets }) {
   // Bereichs-Navigation: springen und beim Scrollen mitführen
   const fields = $('#st-fields');
   const navLinks = [...dlg.querySelectorAll('.st-nav a')];
+  // Am Handy: Bereiche als Knöpfe oben, immer nur einer sichtbar (CSS: .st-card.current)
+  const phone = matchMedia('(max-width: 760px)');
+  let section = navLinks[0].getAttribute('href');
+  function showSection(href) {
+    section = href;
+    for (const card of dlg.querySelectorAll('.st-card')) card.classList.toggle('current', `#${card.id}` === href);
+    for (const a of navLinks) a.classList.toggle('active', a.getAttribute('href') === href);
+    if (phone.matches) fields.scrollTop = 0;
+  }
   for (const a of navLinks) {
     a.onclick = (e) => {
       e.preventDefault();
+      showSection(a.getAttribute('href'));
+      if (phone.matches) return;
       const target = $(a.getAttribute('href'));
       setCollapsed(target, false); // eingeklappten Bereich beim Anspringen öffnen
       fields.scrollTo({ top: target.offsetTop - fields.offsetTop - 8, behavior: 'smooth' });
@@ -165,6 +176,7 @@ export function setupSettings({ targets }) {
     };
   }
   fields.addEventListener('scroll', () => {
+    if (phone.matches) return; // dort zeigt der Knopf den gewählten Bereich
     const y = fields.scrollTop + fields.offsetTop + 40;
     let current = navLinks[0];
     for (const a of navLinks) if ($(a.getAttribute('href')).offsetTop <= y) current = a;
@@ -231,6 +243,7 @@ export function setupSettings({ targets }) {
     applyAll(saved);
     dlg.returnValue = '';
     dlg.showModal();
+    showSection(section); // am Handy: zuletzt gewählter Bereich
     fields.scrollTop = 0;
     fields.dispatchEvent(new Event('scroll'));
   };

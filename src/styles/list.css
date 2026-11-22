@@ -27,6 +27,19 @@
 .song-item-artist:empty { display: none; }
 .song-count { margin: 0; padding: .5em 1em; font-size: .8em; color: var(--muted); border-top: 1px solid var(--border); }
 .list-empty { padding: 1.5em 1em; color: var(--muted); text-align: center; font-size: .92em; }
+/* Erste Schritte (fast leeres Liederbuch) */
+.song-list:has(+ .welcome:not([hidden])) { flex: 0 1 auto; }
+.welcome { display: flex; flex-direction: column; gap: .4em; margin: .6em .8em 1em; padding: .8em; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); overflow: hidden auto; flex-shrink: 0; }
+.welcome h3 { margin: 0 0 .2em; font-size: .95em; }
+.welcome button:not(.link-btn) {
+  display: flex; align-items: center; gap: .7em; width: 100%; padding: .55em .7em; text-align: left; justify-content: flex-start;
+  border-color: var(--border); background: var(--surface-2); white-space: normal; min-height: 0; height: auto;
+}
+.welcome button .icon { flex-shrink: 0; color: var(--accent); }
+.welcome button span { display: flex; flex-direction: column; min-width: 0; }
+.welcome button strong { font-size: .92em; }
+.welcome button small { font-size: .78em; color: var(--muted); font-weight: 400; }
+.welcome-hide { align-self: flex-end; font-size: .82em; }
 @media (max-width: 760px) {
   .song-item { padding: .7em .8em; }
 }

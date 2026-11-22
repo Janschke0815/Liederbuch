@@ -65,6 +65,8 @@ export function updateControls() {
   $('#tr-reset').hidden = t === 0;
   const acc = current?.accidentals || 'auto';
   for (const b of $$('#accidentals button')) b.setAttribute('aria-checked', String(b.dataset.value === acc));
+  // Am Handy erst zeigen, wenn transponiert wird (beim ersten Blick sonst nur verwirrend)
+  $('.view-bar').toggleAttribute('data-plain', t === 0 && acc === 'auto');
 }
 
 // ---------- Öffnen und Speichern ----------

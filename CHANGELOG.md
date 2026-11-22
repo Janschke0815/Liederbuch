@@ -8,6 +8,17 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.7 – 22.11.2026 · Übersichtlicher am Handy, leichter Einstieg
+
+- **So geht's los:** Solange ein Liederbuch höchstens ein Lied hat, zeigt die Liste vier Wege zum Start –
+  Lied schreiben, Lied aus dem Netz einfügen, Datei öffnen, mit anderen Geräten abgleichen. „Ausblenden“ blendet sie dauerhaft aus.
+- **Einstellungen am Handy:** Oben stehen die Bereiche als Knöpfe (Anzeigen, Liedtext, Akkorde & Harp, Titel & Interpret,
+  Druck, App); darunter erscheint immer nur der gewählte Bereich statt einer langen Liste. Schalter stehen neben ihrem Text,
+  der Kopf ist kürzer, „Zurücksetzen“ und „Speichern“ passen in eine Zeile.
+- **Leiste über dem Lied (Handy):** „Spielen“ ist beschriftet; ♯/♭ erscheint erst beim Transponieren – sonst passt alles in eine Zeile.
+- **Editor am Handy:** Die Einfüge-Knöpfe brauchen zwei statt vier Zeilen.
+- **Tastenkürzel** fehlen im Menü auf reinen Touch-Geräten (dort gibt es keine Tastatur).
+
 ## 2.2.6 – 22.11.2026 · Installieren-Hilfe fürs iPhone
 
 - **⋯ → Installieren** gibt es jetzt auch auf dem iPhone/iPad (und auf Android, wenn der Browser die

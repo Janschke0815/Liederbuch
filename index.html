@@ -142,6 +142,15 @@
         </div>
         <div id="tag-filter" class="tag-filter" hidden></div>
         <ul id="song-list" class="song-list"></ul>
+        <!-- Erste Schritte: solange das Buch höchstens ein Lied hat (list.js) -->
+        <div id="welcome" class="welcome" hidden>
+          <h3>So geht's los</h3>
+          <button type="button" data-welcome="new"><svg class="icon"><use href="#i-plus"/></svg><span><strong>Lied schreiben</strong><small>Text tippen, Akkorde in [eckige Klammern]</small></span></button>
+          <button type="button" data-welcome="import"><svg class="icon"><use href="#i-paste"/></svg><span><strong>Lied aus dem Netz einfügen</strong><small>Akkorde über dem Text, z. B. von Ultimate Guitar</small></span></button>
+          <button type="button" data-welcome="open"><svg class="icon"><use href="#i-open"/></svg><span><strong>Datei oder Sicherung öffnen</strong><small>ChordPro, Text oder eine Liederbuch-Sicherung</small></span></button>
+          <button type="button" data-welcome="cloud"><svg class="icon"><use href="#i-cloud"/></svg><span><strong>Mit anderen Geräten abgleichen</strong><small>Google Drive, Dropbox oder WebDAV</small></span></button>
+          <button type="button" class="link-btn welcome-hide" data-welcome="hide">Ausblenden</button>
+        </div>
         <p id="song-count" class="song-count"></p>
       </div>
       <div id="tab-sets" class="list-tab" hidden>
@@ -563,7 +572,7 @@
         </aside>
       </div>
       <footer class="dialog-foot">
-        <button type="button" id="st-reset" class="link-btn">Auf Standard zurücksetzen</button>
+        <button type="button" id="st-reset" class="link-btn" title="Alle Einstellungen auf Standard zurücksetzen">Zurücksetzen</button>
         <span class="spacer"></span>
         <button value="cancel" formnovalidate>Abbrechen</button>
         <button value="ok" class="primary">Speichern</button>

@@ -118,6 +118,10 @@ kbd { display: inline-block; min-width: 1.4em; padding: .05em .4em; border: 1px 
 @media (max-width: 760px) {
   .actions .keys-btn .label { display: inline; }
 }
+/* Reine Touch-Geräte (Handy, Tablet ohne Tastatur): Tastenkürzel nützen dort nichts */
+@media (hover: none) and (pointer: coarse) {
+  .actions .keys-btn { display: none; }
+}
 .keys-dialog { width: min(760px, 95vw); }
 
 /* Abonnieren / Veröffentlichen */

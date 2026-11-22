@@ -78,4 +78,6 @@
   .view-bar { flex-wrap: wrap; row-gap: .3em; }
   .view-bar .segmented button { min-width: 2.75rem; min-height: 2.6rem; }
   .view-bar .stepper button { min-width: 2.6rem; min-height: 2.6rem; }
+  /* Schreibweise ♯/♭ erst, wenn transponiert wird – so passt alles in eine Zeile */
+  .view-bar[data-plain] #accidentals { display: none; }
 }
