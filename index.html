@@ -701,13 +701,20 @@
               </div>
             </div>
             <details id="book-new" class="sync-setup">
-              <summary>Neues gemeinsames Liederbuch (Google Drive)</summary>
+              <summary>Neues Liederbuch</summary>
               <label class="field">Name <input id="book-new-name" placeholder="z. B. Band, Lagerfeuer" autocomplete="off"></label>
+              <label class="field">Speicherort
+                <select id="book-new-kind">
+                  <option value="local">Nur auf diesem Gerät (später wählbar)</option>
+                  <option value="gdrive">Google Drive</option>
+                  <option value="dropbox">Dropbox</option>
+                  <option value="webdav">WebDAV / Nextcloud</option>
+                </select>
+              </label>
               <label class="check"><input type="checkbox" id="book-new-copy"> Lieder aus „<span id="book-new-from"></span>“ übernehmen</label>
+              <p class="hint">Jedes Liederbuch hat seinen eigenen Speicherort und sein eigenes Konto – nach dem Anlegen unten unter „Abgleich“ verbinden. Teilen mit Einladung gibt es bei Google Drive.</p>
               <div class="row-end"><button type="button" id="book-new-ok" class="primary">Anlegen</button></div>
             </details>
-            <p id="book-offline-hint" class="hint">Gemeinsame Liederbücher brauchen die Google-Einrichtung (unten unter „Google Drive“).</p>
-            <p id="book-webdav-hint" class="hint" hidden>Gemeinsame Liederbücher mit Einladung gibt es über Google Drive. Mit WebDAV teilt ihr einfach den Ordner.</p>
           </div>
         </section>
 

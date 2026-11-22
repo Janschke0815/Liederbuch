@@ -8,6 +8,7 @@
 
 import { aboLink, aboToText, buildAboPayload, randomFilePart } from '../formats/abo.js';
 import { cleanFileName } from '../formats/song-files.js';
+import { bookKey } from '../books.js';
 import { prefs } from '../prefs.js';
 import { webdavFileUrl } from '../sync/webdav.js';
 import { WebdavClient } from '../sync/webdav-client.js';
@@ -20,14 +21,14 @@ const AUTO_DELAY_MS = 20 * 1000; // nach der letzten Änderung so lange warten, 
 const dialog = $('#publish-dialog');
 const appUrl = () => location.origin + location.pathname.replace(/index\.html$/, '');
 const radio = (name) => $(`input[name="${name}"]:checked`).value;
-/** WebDAV-Zugang – nur, wenn die App gerade darüber abgleicht (keine alte, irgendwann gespeicherte Adresse). */
+/**
+ * WebDAV-Zugang des geöffneten Liederbuchs – nur, wenn es gerade darüber abgleicht (keine alte,
+ * irgendwann gespeicherte Adresse).
+ */
 const webdav = () => {
-  const active = localStorage.getItem('sync.provider') === 'webdav' && localStorage.getItem('sync.kind') === 'webdav';
-  return {
-    url: active ? localStorage.getItem('webdav.url') || '' : '',
-    user: localStorage.getItem('webdav.user') || '',
-    password: localStorage.getItem('webdav.pass') || '',
-  };
+  const k = (base) => localStorage.getItem(bookKey(book, base));
+  const active = k('sync.provider') === 'webdav' && k('sync.kind') === 'webdav';
+  return { url: active ? k('webdav.url') || '' : '', user: k('webdav.user') || '', password: k('webdav.pass') || '' };
 };
 const saved = () => prefs.get('aboPublished')[book.id] || {};
 const plural = (n) => `${n} ${n === 1 ? 'Lied' : 'Lieder'}`;
