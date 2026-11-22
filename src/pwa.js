@@ -1,7 +1,8 @@
 // PWA: Service Worker anmelden, Offline-Hinweis, "App installieren".
 // Eigenständig, damit ein Fehler hier die eigentliche App nicht blockiert.
 
-import { $ } from './ui/dom.js';
+import { $, closeOnBackdrop } from './ui/dom.js';
+import { detectPlatform, installSteps } from './ui/install-help.js';
 
 async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
@@ -33,23 +34,69 @@ function setupOfflineBadge() {
   update();
 }
 
+/**
+ * „Installieren“: Bietet der Browser die Installation an (Chrome/Edge auf Android und PC), startet
+ * der Knopf sie direkt. Sonst – immer auf iPhone/iPad, auf Android wenn der Browser gerade nicht
+ * anbietet – zeigt er die passenden Schritte (siehe ui/install-help.js). Als installierte App: weg.
+ */
 function setupInstallButton() {
   const btn = $('#btn-install');
+  const dlg = $('#install-dialog');
   if (!btn) return;
+  const platform = detectPlatform({
+    userAgent: navigator.userAgent,
+    maxTouchPoints: navigator.maxTouchPoints,
+    standalone: navigator.standalone === true,
+    displayStandalone: matchMedia?.('(display-mode: standalone)').matches,
+  });
   let deferred = null;
+  const mobile = platform.os !== 'desktop';
+  const update = () => (btn.hidden = platform.installed || !(deferred || mobile));
   addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferred = e;
-    btn.hidden = false;
+    update();
   });
   btn.onclick = async () => {
-    if (!deferred) return;
-    deferred.prompt();
-    await deferred.userChoice;
-    deferred = null;
-    btn.hidden = true;
+    if (deferred) {
+      deferred.prompt();
+      await deferred.userChoice;
+      deferred = null;
+      update();
+      return;
+    }
+    showInstallHelp(platform, dlg);
   };
-  addEventListener('appinstalled', () => (btn.hidden = true));
+  addEventListener('appinstalled', () => {
+    platform.installed = true;
+    update();
+  });
+  update();
+}
+
+/** Anleitung zum Installieren für dieses Gerät anzeigen. */
+function showInstallHelp(platform, dlg) {
+  if (!dlg) return;
+  const help = installSteps(platform);
+  $('#install-title').textContent = help.title;
+  $('#install-intro').textContent = help.intro;
+  $('#install-steps').replaceChildren(...help.steps.map((t) => Object.assign(document.createElement('li'), { textContent: t })));
+  $('#install-steps').hidden = !help.steps.length;
+  $('#install-note').textContent = help.note || '';
+  $('#install-note').hidden = !help.note;
+  const copy = $('#install-copy');
+  copy.hidden = !help.copyLink;
+  copy.textContent = 'Adresse kopieren';
+  copy.onclick = async () => {
+    const url = location.href.split('#')[0];
+    try {
+      await navigator.clipboard.writeText(url);
+      copy.textContent = 'Kopiert ✓';
+    } catch {
+      prompt('Adresse zum Kopieren:', url);
+    }
+  };
+  dlg.showModal();
 }
 
 // Dauerhafter Speicher: Ohne ihn darf der Browser die Lieder (IndexedDB) bei knappem
@@ -112,4 +159,5 @@ if (document.readyState === 'complete') registerServiceWorker();
 else addEventListener('load', registerServiceWorker);
 setupOfflineBadge();
 setupInstallButton();
+if ($('#install-dialog')) closeOnBackdrop('#install-dialog');
 setupPersistentStorage();

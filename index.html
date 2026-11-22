@@ -96,7 +96,7 @@
       <button id="btn-print" type="button" title="Liederbuch drucken oder als PDF speichern (Strg+P)">
         <svg class="icon"><use href="#i-print"/></svg><span class="label">Drucken</span>
       </button>
-      <button id="btn-install" type="button" hidden title="Als App auf diesem Gerät installieren">
+      <button id="btn-install" type="button" hidden title="Als App auf diesem Gerät installieren (Home-Bildschirm)">
         <svg class="icon"><use href="#i-install"/></svg><span class="label">Installieren</span>
       </button>
       <button id="btn-trash" type="button" title="Gelöschte Lieder wiederherstellen">
@@ -875,6 +875,25 @@
         <button type="button" id="share-pdf"><svg class="icon"><use href="#i-print"/></svg>Als PDF / drucken</button>
       </div>
       <footer class="dialog-foot">
+        <button value="cancel" formnovalidate>Schließen</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="install-dialog" class="capo-dialog install-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2 id="install-title">App installieren</h2>
+        <p class="hint" id="install-intro"></p>
+      </header>
+      <div class="dialog-body">
+        <ol id="install-steps" class="install-steps"></ol>
+        <p class="hint" id="install-note" hidden></p>
+        <p class="hint">Installiert startet das Liederbuch wie eine App vom Home-Bildschirm, ohne Adressleiste, und funktioniert auch offline.</p>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" id="install-copy" hidden>Adresse kopieren</button>
+        <span class="spacer"></span>
         <button value="cancel" formnovalidate>Schließen</button>
       </footer>
     </form>

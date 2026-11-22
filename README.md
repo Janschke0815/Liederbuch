@@ -25,7 +25,11 @@ Lieder liegen lokal im Browser (IndexedDB), App-Dateien im Cache des Service Wor
 - **Windows/Mac (Chrome, Edge):** Knopf „App installieren“ in der Werkzeugleiste
   oder das Installieren-Symbol in der Adressleiste.
 - **Android (Chrome):** Menü ⋮ → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“.
-- **iPhone/iPad (Safari):** Teilen → „Zum Home-Bildschirm“.
+- **iPhone/iPad (Safari):** unten ••• → „Teilen“ (ältere iOS: gleich das Teilen-Symbol) → nach unten
+  wischen → „Zum Home-Bildschirm“. Fehlt der Eintrag: „Aktionen bearbeiten …“. Nur in Safari bzw. Chrome,
+  nicht im eingebauten Browser anderer Apps (Link aus WhatsApp, Mail …).
+- In der App zeigt **⋯ → Installieren** die passenden Schritte für das Gerät, wenn der Browser die
+  Installation nicht selbst anbietet (immer auf iPhone/iPad).
 
 Für Handy und Tablet muss die App über **HTTPS** erreichbar sein (localhost geht nur am
 selben Rechner). `npm run build` legt die fertige App in den Ordner `dist/` – dessen Inhalt

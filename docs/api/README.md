@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-74 Module, 284 exportierte Funktionen, Konstanten und Klassen.
+75 Module, 286 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -37,6 +37,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/context-menus.js`](ui/context-menus.md) | Kontextmenüs (Rechtsklick / langes Drücken) für Lieder in der Liste und für die Vorschau, außerdem Doppelklick (spielen) und Entf (löschen) in der Liste. |
 | [`ui/dom.js`](ui/dom.md) | Kleine Hilfen für die Oberfläche – von allen ui-Modulen gemeinsam genutzt. |
 | [`ui/files.js`](ui/files.md) | Dateien öffnen (Sicherung als ZIP oder JSON, ChordPro- und Textdateien) und Sichern als ZIP. |
+| [`ui/install-help.js`](ui/install-help.md) | Installieren-Hilfe: Welche Schritte passen zu diesem Gerät und Browser? |
 | [`ui/list.js`](ui/list.md) | Liederliste links: Suche, Tag-Filter, „Was kann ich spielen?“, Sortierung. |
 | [`ui/paste.js`](ui/paste.md) | Text einfügen: Akkorde-über-Text (z. |
 | [`ui/preview-tools.js`](ui/preview-tools.md) | Werkzeuge an der Vorschau: Vergrößern/Verkleinern und Metronom (Klick auf Takt/Tempo). |

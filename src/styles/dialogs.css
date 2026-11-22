@@ -138,3 +138,6 @@ kbd { display: inline-block; min-width: 1.4em; padding: .05em .4em; border: 1px 
 .pub-result .invite-row { display: flex; gap: .4em; }
 .pub-result input { flex: 1; min-width: 0; font-size: .85em; }
 .publish-dialog { width: min(620px, 96vw); }
+/* Installieren-Hilfe */
+.install-steps { margin: .2em 0 .8em; padding-left: 1.4em; display: flex; flex-direction: column; gap: .55em; }
+.install-dialog .dialog-body > .hint { margin: .5em 0 0; }

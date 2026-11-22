@@ -8,6 +8,15 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.6 – 22.11.2026 · Installieren-Hilfe fürs iPhone
+
+- **⋯ → Installieren** gibt es jetzt auch auf dem iPhone/iPad (und auf Android, wenn der Browser die
+  Installation gerade nicht selbst anbietet). Statt der Installation öffnet sich dort eine kurze Anleitung
+  passend zu Gerät und Browser – auf dem iPhone: ••• → Teilen → „Zum Home-Bildschirm“.
+- Läuft die Seite im eingebauten Browser einer anderen App (z. B. nach einem Link aus WhatsApp oder Mail),
+  sagt die Hilfe, dass man sie erst in Safari bzw. Chrome öffnen muss, und bietet „Adresse kopieren“ an.
+- Als installierte App ist der Eintrag weg.
+
 ## 2.2.5 – 22.11.2026 · Datenschutzerklärung
 
 - Neue **Datenschutzerklärung** (`datenschutz.html`), verlinkt in den Einstellungen und im Cloud-Dialog:
