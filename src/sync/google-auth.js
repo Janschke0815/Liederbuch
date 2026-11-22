@@ -11,6 +11,10 @@
 //   loginUrl()/finishLogin() Weiterleitung zu Google und zurück (#access_token=… in der Adresse) –
 //                          für die installierte App auf iPhone/iPad, wo Fenster nicht zuverlässig gehen
 //
+// Jedes Liederbuch kann ein eigenes Google-Konto haben: tokenKey/accountKey trennen die Anmeldungen
+// (siehe bookKey in books.js). Das Konto (E-Mail) wird gemerkt, damit die erneute Anmeldung ohne
+// Rückfrage beim richtigen Konto landet (login_hint).
+//
 // Kein Bildschirm, keine Drive-Zugriffe; die Speicherschicht (google-drive.js) holt sich hier nur
 // das Token.
 
@@ -20,7 +24,9 @@ export const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const GIS_URL = 'https://accounts.google.com/gsi/client';
 const AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 const REVOKE_URL = 'https://oauth2.googleapis.com/revoke';
+const ABOUT_URL = 'https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)';
 const TOKEN_KEY = 'gdrive.token';
+const ACCOUNT_KEY = 'gdrive.account';
 const PENDING_KEY = 'gdrive.login';
 
 const scripts = new Map();
@@ -76,14 +82,18 @@ const randomState = () => [...crypto.getRandomValues(new Uint8Array(12))].map((b
 export class GoogleAuth {
   /**
    * @param {{clientId: string, storage?: Storage, session?: Storage, fetch?: typeof fetch,
-   *          gis?: () => Promise<object>, redirectUri?: string}} opts
+   *          gis?: () => Promise<object>, redirectUri?: string, tokenKey?: string, accountKey?: string}} opts
    *   gis: liefert das google-Objekt der Google Identity Services (für Tests austauschbar)
+   *   tokenKey/accountKey: wo Token und Konto liegen (je Liederbuch eigene, siehe bookKey)
    */
   constructor({
     clientId, storage = globalThis.localStorage, session = globalThis.sessionStorage,
     fetch: f = globalThis.fetch?.bind(globalThis), gis, redirectUri,
+    tokenKey = TOKEN_KEY, accountKey = ACCOUNT_KEY,
   } = {}) {
     this.clientId = clientId;
+    this.tokenKey = tokenKey;
+    this.accountKey = accountKey;
     this.storage = storage;
     this.session = session;
     this.fetch = f;
@@ -97,7 +107,7 @@ export class GoogleAuth {
   /** Gespeichertes Zugangstoken, solange es noch mindestens eine Minute gilt, sonst null. */
   token() {
     try {
-      const t = JSON.parse(this.storage.getItem(TOKEN_KEY) || 'null');
+      const t = JSON.parse(this.storage.getItem(this.tokenKey) || 'null');
       if (t?.accessToken && t.expiresAt - 60_000 > Date.now()) return t.accessToken;
     } catch {
       /* ungültig */
@@ -112,11 +122,27 @@ export class GoogleAuth {
 
   /** War dieses Gerät schon einmal angemeldet (dann fragt Google meist nicht erneut)? */
   get known() {
-    return Boolean(this.storage.getItem(TOKEN_KEY));
+    return Boolean(this.storage.getItem(this.tokenKey));
   }
 
-  #save(accessToken, expiresIn) {
-    this.storage.setItem(TOKEN_KEY, JSON.stringify({
+  /** Google-Konto (E-Mail), mit dem dieses Liederbuch zuletzt angemeldet war, sonst ''. */
+  get account() {
+    return this.storage.getItem(this.accountKey) || '';
+  }
+
+  /** Konto zum Token nachfragen und merken (für login_hint); Fehler sind egal. */
+  async #rememberAccount(accessToken, accountKey = this.accountKey) {
+    try {
+      const res = await this.fetch(ABOUT_URL, { headers: { Authorization: `Bearer ${accessToken}` } });
+      const email = res.ok ? (await res.json())?.user?.emailAddress : '';
+      if (email) this.storage.setItem(accountKey, email);
+    } catch {
+      /* ohne Konto geht es auch, Google fragt dann eben nach */
+    }
+  }
+
+  #save(accessToken, expiresIn, key = this.tokenKey) {
+    this.storage.setItem(key, JSON.stringify({
       accessToken,
       expiresAt: Date.now() + Number(expiresIn || 3600) * 1000,
     }));
@@ -125,10 +151,10 @@ export class GoogleAuth {
   /** Token ist abgelaufen oder widerrufen (Google antwortet 401): vergessen, neu anmelden. */
   expire() {
     try {
-      const t = JSON.parse(this.storage.getItem(TOKEN_KEY) || 'null');
-      if (t) this.storage.setItem(TOKEN_KEY, JSON.stringify({ ...t, expiresAt: 0 }));
+      const t = JSON.parse(this.storage.getItem(this.tokenKey) || 'null');
+      if (t) this.storage.setItem(this.tokenKey, JSON.stringify({ ...t, expiresAt: 0 }));
     } catch {
-      this.storage.removeItem(TOKEN_KEY);
+      this.storage.removeItem(this.tokenKey);
     }
   }
 
@@ -139,8 +165,9 @@ export class GoogleAuth {
   /**
    * Anmelden mit kleinem Google-Fenster. Muss direkt aus einem Klick heraus aufgerufen werden.
    * silent: ohne Rückfrage, wenn schon einmal zugestimmt (das Fenster schließt sich gleich wieder).
+   * choose: Google zeigt die Kontoauswahl (erste Anmeldung eines Liederbuchs, Einladung öffnen).
    */
-  async signIn({ silent = false } = {}) {
+  async signIn({ silent = false, choose = false } = {}) {
     this.#checkClient();
     const google = await this.gis();
     const resp = await new Promise((resolve, reject) => {
@@ -148,26 +175,30 @@ export class GoogleAuth {
         client_id: this.clientId,
         scope: DRIVE_SCOPE,
         include_granted_scopes: true,
+        ...(this.account && !choose ? { login_hint: this.account } : {}),
         callback: (r) => (r.error ? reject(new AuthError(authMessage(r.error, r.error_description))) : resolve(r)),
         error_callback: (e) => reject(new AuthError(authMessage(e.type, e.message))),
       });
-      client.requestAccessToken({ prompt: silent ? 'none' : '' });
+      client.requestAccessToken({ prompt: silent ? 'none' : choose ? 'select_account' : '' });
     });
     if (!google.accounts.oauth2.hasGrantedAllScopes(resp, DRIVE_SCOPE)) {
       throw new AuthError(authMessage('access_denied'));
     }
     this.#save(resp.access_token, resp.expires_in);
+    await this.#rememberAccount(resp.access_token);
   }
 
   /**
    * Anmelden per Weiterleitung: Adresse der Google-Anmeldeseite. Die Seite kommt mit
    * #access_token=… zurück (siehe finishLogin).
-   * @param {{silent?: boolean, extra?: object}} [opts] extra wird bis zur Rückkehr aufbewahrt
+   * @param {{silent?: boolean, choose?: boolean, extra?: object}} [opts] extra wird bis zur Rückkehr aufbewahrt
    */
-  loginUrl({ silent = false, extra = {} } = {}) {
+  loginUrl({ silent = false, choose = false, extra = {} } = {}) {
     this.#checkClient();
     const state = randomState();
-    this.session.setItem(PENDING_KEY, JSON.stringify({ state, silent, ...extra }));
+    this.session.setItem(PENDING_KEY, JSON.stringify({
+      state, silent, tokenKey: this.tokenKey, accountKey: this.accountKey, ...extra,
+    }));
     const params = new URLSearchParams({
       client_id: this.clientId,
       redirect_uri: this.redirectUri,
@@ -177,11 +208,15 @@ export class GoogleAuth {
       state,
     });
     if (silent) params.set('prompt', 'none');
+    else if (choose) params.set('prompt', 'select_account');
+    if (this.account && !choose) params.set('login_hint', this.account);
     return `${AUTH_URL}?${params}`;
   }
 
   /**
    * Rückkehr von Google auswerten (Anker der Adresse: #access_token=…&state=… oder #error=…).
+   * Das Token landet unter dem Schlüssel, für den die Anmeldung gestartet wurde (saved.tokenKey) –
+   * auch wenn inzwischen ein anderes Liederbuch geöffnet ist.
    * @param {string} hash  location.hash
    * @returns {null | object}  null, wenn der Anker keine Rückkehr von unserer Anmeldung ist;
    *   sonst die bei loginUrl() aufbewahrten Angaben (mit silent). Wirft AuthError bei Fehlern;
@@ -207,7 +242,9 @@ export class GoogleAuth {
     }
     const scopes = (q.get('scope') || DRIVE_SCOPE).split(/\s+/);
     if (!scopes.includes(DRIVE_SCOPE)) throw new AuthError(authMessage('access_denied'));
-    this.#save(q.get('access_token'), q.get('expires_in'));
+    const key = saved.tokenKey || this.tokenKey;
+    this.#save(q.get('access_token'), q.get('expires_in'), key);
+    this.#rememberAccount(q.get('access_token'), saved.accountKey || this.accountKey); // im Hintergrund
     return saved;
   }
 
@@ -215,11 +252,11 @@ export class GoogleAuth {
   signOut() {
     let token = null;
     try {
-      token = JSON.parse(this.storage.getItem(TOKEN_KEY) || 'null')?.accessToken;
+      token = JSON.parse(this.storage.getItem(this.tokenKey) || 'null')?.accessToken;
     } catch {
       /* egal */
     }
-    this.storage.removeItem(TOKEN_KEY);
+    this.storage.removeItem(this.tokenKey);
     if (token && this.fetch) {
       this.fetch(`${REVOKE_URL}?token=${encodeURIComponent(token)}`, {
         method: 'POST',

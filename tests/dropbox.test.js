@@ -13,7 +13,7 @@ const json = (body, status = 200, headers = {}) =>
 
 /** Dropbox-Attrappe: eine Datei mit rev, Tokens, Aufrufprotokoll. */
 function fakeDropbox() {
-  const box = { file: null, rev: 0, calls: [], validToken: 'tok1', refreshes: 0 };
+  const box = { file: null, rev: 0, calls: [], validToken: 'tok1', refreshes: 0, paths: new Set() };
   box.fetch = async (url, opts = {}) => {
     const path = new URL(url).pathname;
     box.calls.push(path);
@@ -31,6 +31,7 @@ function fakeDropbox() {
     }
     if (opts.headers?.Authorization !== `Bearer ${box.validToken}`) return json({ error_summary: 'expired_access_token/' }, 401);
     const arg = JSON.parse(opts.headers['Dropbox-API-Arg'] || opts.body || '{}');
+    if (arg.path) box.paths.add(arg.path);
     const rev = () => `r${box.rev}`;
     if (path === '/2/files/get_metadata') {
       return box.file === null ? json({ error_summary: 'path/not_found/..' }, 409) : json({ rev: rev() });
@@ -166,5 +167,22 @@ describe('Dropbox: Datei', () => {
     expect(await titles(A)).toEqual(['Alpha', 'Beta']);
     expect(await titles(B)).toEqual(['Alpha', 'Beta']);
     expect(eA.state).toBe('idle');
+  });
+});
+
+describe('Dropbox: mehrere Liederbücher (2.2)', () => {
+  it('eigene Datei und eigene Anmeldung je Buch; Kontoauswahl bei der ersten Anmeldung', async () => {
+    const box = fakeDropbox();
+    const storage = memory();
+    storage.setItem('dropbox.token:book-1', JSON.stringify({ accessToken: box.validToken, expiresAt: Date.now() + 3600_000, refreshToken: 'langzeit' }));
+    const band = new DropboxProvider({ appKey: 'key', fetch: box.fetch, storage, path: 'Liederbuch – Band.json', tokenKey: 'dropbox.token:book-1' });
+    const mine = new DropboxProvider({ appKey: 'key', fetch: box.fetch, storage, redirectUri: 'https://x.de/' });
+    expect(band.signedIn).toBe(true);
+    expect(mine.signedIn).toBe(false);
+    await band.write({ songs: [] }, null);
+    expect([...box.paths]).toEqual(['/Liederbuch – Band.json']);
+    const url = new URL(await mine.loginUrl({ bookId: 'book-2' }, { choose: true }));
+    expect(url.searchParams.get('force_reauthentication')).toBe('true');
+    expect(new URL(await mine.loginUrl()).searchParams.has('force_reauthentication')).toBe(false);
   });
 });

@@ -1,5 +1,6 @@
-// Cloud-Anbieter Dropbox: das persönliche Liederbuch ist eine JSON-Datei im App-Ordner
-// (Dropbox → Apps → <Name der Dropbox-App> → Liederbuch.json). Die App sieht nur diesen Ordner.
+// Cloud-Anbieter Dropbox: jedes Liederbuch ist eine JSON-Datei im App-Ordner (Dropbox → Apps →
+// <Name der Dropbox-App> → Liederbuch.json, weitere Bücher „Liederbuch – Name.json“). Die App sieht
+// nur diesen Ordner. Jedes Liederbuch kann ein eigenes Dropbox-Konto haben (tokenKey, siehe bookKey).
 //
 // Anmeldung ohne eigenen Server: OAuth mit PKCE. Die Seite leitet zu Dropbox weiter und kommt mit
 // ?code=… zurück (startLogin / finishLogin). Dropbox gibt ein Langzeit-Token (refresh_token) –
@@ -47,12 +48,17 @@ export class DropboxProvider {
   name = 'Dropbox';
 
   /**
-   * @param {{appKey: string, fetch?: typeof fetch, storage?: Storage, redirectUri?: string}} opts
+   * @param {{appKey: string, fetch?: typeof fetch, storage?: Storage, redirectUri?: string,
+   *          path?: string, tokenKey?: string}} opts
+   *   path: Datei im App-Ordner (Standard /Liederbuch.json); tokenKey: wo die Anmeldung liegt
    */
   constructor({
     appKey, fetch: f = globalThis.fetch?.bind(globalThis), storage = globalThis.localStorage, redirectUri,
+    path = DROPBOX_FILE, tokenKey = TOKEN_KEY,
   } = {}) {
     this.appKey = appKey;
+    this.path = path.startsWith('/') ? path : `/${path}`;
+    this.tokenKey = tokenKey;
     this.fetch = f;
     this.storage = storage;
     this.redirectUri = redirectUri || (typeof location !== 'undefined' ? dropboxRedirectUri() : '');
@@ -62,14 +68,14 @@ export class DropboxProvider {
 
   #tokens() {
     try {
-      return JSON.parse(this.storage.getItem(TOKEN_KEY) || 'null');
+      return JSON.parse(this.storage.getItem(this.tokenKey) || 'null');
     } catch {
       return null;
     }
   }
 
   #saveTokens(resp, old = {}) {
-    this.storage.setItem(TOKEN_KEY, JSON.stringify({
+    this.storage.setItem(this.tokenKey, JSON.stringify({
       accessToken: resp.access_token,
       expiresAt: Date.now() + Number(resp.expires_in || 14400) * 1000,
       refreshToken: resp.refresh_token || old.refreshToken || '',
@@ -85,9 +91,10 @@ export class DropboxProvider {
   /**
    * Anmeldung beginnen: Prüfschlüssel merken und zu Dropbox weiterleiten.
    * @param {object} [extra] wird bis zur Rückkehr aufbewahrt (z. B. welches Liederbuch)
+   * @param {{choose?: boolean}} [opts] choose: Dropbox fragt nach dem Konto (anderes Konto möglich)
    * @returns {Promise<string>} Adresse der Dropbox-Anmeldeseite
    */
-  async loginUrl(extra = {}) {
+  async loginUrl(extra = {}, { choose = false } = {}) {
     if (!this.appKey) throw new Error('Kein Dropbox-App-Schlüssel eingetragen');
     const verifier = randomVerifier();
     const state = randomVerifier().slice(0, 16);
@@ -101,6 +108,7 @@ export class DropboxProvider {
       token_access_type: 'offline',
       state,
     });
+    if (choose) params.set('force_reauthentication', 'true');
     return `${AUTH_URL}?${params}`;
   }
 
@@ -157,7 +165,7 @@ export class DropboxProvider {
       this.#saveTokens(resp, t);
       return resp.access_token;
     } catch (err) {
-      if (err instanceof AuthError) this.storage.removeItem(TOKEN_KEY);
+      if (err instanceof AuthError) this.storage.removeItem(this.tokenKey);
       throw err;
     }
   }
@@ -165,7 +173,7 @@ export class DropboxProvider {
   /** Abmelden (Zugang bei Dropbox widerrufen); die Datei in Dropbox bleibt erhalten. */
   signOut() {
     const t = this.#tokens();
-    this.storage.removeItem(TOKEN_KEY);
+    this.storage.removeItem(this.tokenKey);
     if (t?.accessToken) {
       this.fetch(`${API}/auth/token/revoke`, { method: 'POST', headers: { Authorization: `Bearer ${t.accessToken}` } }).catch(() => {});
     }
@@ -187,7 +195,7 @@ export class DropboxProvider {
         await this.#accessToken(true);
         return this.#call(url, opts, false);
       }
-      this.storage.removeItem(TOKEN_KEY);
+      this.storage.removeItem(this.tokenKey);
       throw new AuthError('Dropbox-Anmeldung abgelaufen');
     }
     return res;
@@ -213,7 +221,7 @@ export class DropboxProvider {
   async #rev() {
     const res = await this.#call(`${API}/files/get_metadata`, {
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: DROPBOX_FILE }),
+      body: JSON.stringify({ path: this.path }),
     });
     if (res.status === 409 && /not_found/.test(await DropboxProvider.#summary(res))) return null;
     if (!res.ok) await this.#fail(res);
@@ -229,7 +237,7 @@ export class DropboxProvider {
     const rev = await this.#rev();
     if (rev === null) return null;
     if (knownVersion && rev === knownVersion) return { unchanged: true };
-    const res = await this.#call(`${CONTENT}/files/download`, { headers: { 'Dropbox-API-Arg': headerJson({ path: DROPBOX_FILE }) } });
+    const res = await this.#call(`${CONTENT}/files/download`, { headers: { 'Dropbox-API-Arg': headerJson({ path: this.path }) } });
     if (res.status === 409) return null; // inzwischen gelöscht
     if (!res.ok) await this.#fail(res);
     let version = rev;
@@ -242,7 +250,7 @@ export class DropboxProvider {
     try {
       data = JSON.parse(await res.text());
     } catch {
-      throw new Error('Liederbuch.json in Dropbox ist beschädigt');
+      throw new Error(`${this.path.slice(1)} in Dropbox ist beschädigt`);
     }
     return { data, version };
   }
@@ -256,7 +264,7 @@ export class DropboxProvider {
     const res = await this.#call(`${CONTENT}/files/upload`, {
       headers: {
         'Content-Type': 'application/octet-stream',
-        'Dropbox-API-Arg': headerJson({ path: DROPBOX_FILE, mode, autorename: false, mute: true, strict_conflict: true }),
+        'Dropbox-API-Arg': headerJson({ path: this.path, mode, autorename: false, mute: true, strict_conflict: true }),
       },
       body: toFileJson(data),
     });

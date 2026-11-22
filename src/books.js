@@ -1,8 +1,12 @@
-// Mehrere Liederbücher auf einem Gerät: das persönliche und beliebig viele gemeinsame.
-// Jedes hat eine eigene lokale Datenbank; gemeinsame sind an eine geteilte Drive-Datei gebunden.
+// Mehrere Liederbücher auf einem Gerät. Jedes hat eine eigene lokale Datenbank.
 //
-// Buch: { id, name, dbName, shared, fileId, readOnly? }  readOnly: nur Leserechte in Drive
-//   abonniertes Liederbuch (nur lesen): { id: 'abo-…', name, dbName, abo: { url, publisher, user, password } }
+//   persönlich (immer da):  PERSONAL – Speicherort und Anmeldung wie vor 2.2 (globale Schlüssel)
+//   eigenes Liederbuch:      { id: 'book-…', name, dbName, own: true, file }
+//                            eigener Speicherort und eigenes Konto (Schlüssel mit „:<id>“, siehe bookKey);
+//                            file: Dateiname in Google Drive bzw. Dropbox („Liederbuch – Name.json“)
+//   geteilt (Drive):         { id: 'shared-…', name, dbName, shared, fileId, readOnly?, ownAuth? }
+//                            readOnly: nur Leserechte; ownAuth: eigene Google-Anmeldung (ab 2.2)
+//   abonniert (nur lesen):   { id: 'abo-…', name, dbName, abo: { url, publisher, user, password } }
 
 export const PERSONAL = Object.freeze({
   id: 'personal',
@@ -18,7 +22,7 @@ const ACTIVE = 'activeBook';
 function read(storage) {
   try {
     const list = JSON.parse(storage.getItem(KEY) || '[]');
-    return Array.isArray(list) ? list.filter((b) => b && typeof b.id === 'string' && (b.fileId || b.abo?.url)) : [];
+    return Array.isArray(list) ? list.filter((b) => b && typeof b.id === 'string' && (b.fileId || b.abo?.url || b.own)) : [];
   } catch {
     return [];
   }
@@ -48,11 +52,13 @@ export function setActiveBook(id, storage = localStorage) {
  * Gemeinsames Liederbuch eintragen (oder Namen/Rechte aktualisieren).
  * @param {{fileId: string, name?: string, readOnly?: boolean}} entry  readOnly: nur Leserechte
  */
-export function addSharedBook({ fileId, name, readOnly = false }, storage = localStorage) {
+export function addSharedBook({ fileId, name, readOnly = false, ownAuth }, storage = localStorage) {
   const list = read(storage);
   const id = `shared-${fileId}`;
   const book = { id, name: name || 'Gemeinsames Liederbuch', dbName: `liederbuch-${fileId}`, shared: true, fileId };
   if (readOnly) book.readOnly = true;
+  // eigene Anmeldung behalten, wenn das Buch schon eine hatte (Rechte ändern sich, Konto nicht)
+  if (ownAuth ?? list.find((b) => b.id === id)?.ownAuth) book.ownAuth = true;
   const i = list.findIndex((b) => b.id === id);
   if (i >= 0) list[i] = book;
   else list.push(book);
@@ -84,10 +90,59 @@ export function addAboBook({ url, name, publisher = '', user = '', password = ''
   return book;
 }
 
-/** Aus der Liste entfernen; die lokale Datenbank löscht der Aufrufer. */
+/**
+ * Eigenes Liederbuch anlegen (lokal; Speicherort und Konto wählt man danach im Cloud-Dialog).
+ * @param {{name: string}} entry
+ * @returns {object} das neue Buch
+ */
+export function addBook({ name }, storage = localStorage) {
+  const list = read(storage);
+  const clean = String(name || '').trim() || 'Liederbuch';
+  const rand = [...crypto.getRandomValues(new Uint8Array(5))].map((b) => b.toString(36).padStart(2, '0')).join('');
+  const id = `book-${rand}`;
+  const book = { id, name: clean, dbName: `liederbuch-${id}`, own: true, file: fileNameForBook(clean) };
+  list.push(book);
+  storage.setItem(KEY, JSON.stringify(list));
+  return book;
+}
+
+/**
+ * Liederbuch umbenennen (nur der Name in der App; Dateien in der Cloud behalten ihren Namen).
+ * Das persönliche Liederbuch und Abos lassen sich nicht umbenennen.
+ * @returns {boolean} umbenannt
+ */
+export function renameBook(id, name, storage = localStorage) {
+  const clean = String(name || '').trim();
+  const list = read(storage);
+  const b = list.find((x) => x.id === id);
+  if (!b || !clean || b.abo) return false;
+  b.name = clean;
+  storage.setItem(KEY, JSON.stringify(list));
+  return true;
+}
+
+/**
+ * Schlüssel für eine Einstellung eines Liederbuchs (Speicherort, Zugangsdaten, Anmeldung).
+ * Das persönliche Liederbuch und vor 2.2 geteilte Bücher nutzen die alten, globalen Schlüssel
+ * (keine Umstellung nötig); alle anderen bekommen eigene: „webdav.url:book-abc“.
+ */
+export function bookKey(book, base) {
+  const global = !book || book.id === PERSONAL.id || (book.shared && !book.ownAuth);
+  return global ? base : `${base}:${book.id}`;
+}
+
+/** Einstellungen, die bookKey pro Liederbuch trennt. */
+export const BOOK_KEYS = Object.freeze([
+  'sync.kind', 'sync.provider', 'webdav.url', 'webdav.user', 'webdav.pass',
+  'gdrive.token', 'gdrive.account', 'gdrive.fileId', 'dropbox.token',
+]);
+
+/** Aus der Liste entfernen (samt eigener Einstellungen); die lokale Datenbank löscht der Aufrufer. */
 export function removeBook(id, storage = localStorage) {
+  const book = read(storage).find((b) => b.id === id);
   storage.setItem(KEY, JSON.stringify(read(storage).filter((b) => b.id !== id)));
   if (storage.getItem(ACTIVE) === id) storage.removeItem(ACTIVE);
+  if (book && bookKey(book, 'x') !== 'x') for (const k of BOOK_KEYS) storage.removeItem(bookKey(book, k));
 }
 
 /** Dateiname in Drive -> Anzeigename ("Liederbuch – Band.json" -> "Band"). */
@@ -109,4 +164,4 @@ export function driveBookName(fileName, ownerName = '') {
 }
 
 /** Dateiname der Drive-Datei für ein gemeinsames Liederbuch: „Liederbuch – Name.json“. */
-export const fileNameForBook = (name) => `Liederbuch – ${String(name).trim()}.json`;
+export const fileNameForBook = (name) => `Liederbuch – ${String(name).trim().replace(/[\\/:*?"<>|]+/g, '-')}.json`;

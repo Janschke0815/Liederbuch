@@ -21,13 +21,14 @@ const fails = async (fn) => {
 
 /** Attrappe der Google-Anmeldung (Google Identity Services). */
 function fakeGis({ error = null, scope = DRIVE_SCOPE, token = 'tok-a' } = {}) {
-  const gis = { prompts: [] };
+  const gis = { prompts: [], hints: [] };
   gis.google = {
     accounts: {
       oauth2: {
         initTokenClient: (cfg) => ({
           requestAccessToken: ({ prompt }) => {
             gis.prompts.push(prompt);
+            gis.hints.push(cfg.login_hint || '');
             if (error) cfg.error_callback({ type: error });
             else cfg.callback({ access_token: token, expires_in: 3599, scope });
           },
@@ -54,6 +55,7 @@ function fakeDrive(tokens = { 'tok-a': 'anna', 'tok-b': 'ben' }) {
     if (u.hostname === 'oauth2.googleapis.com') return json({});
     const who = tokens[String(opts.headers?.Authorization || '').replace('Bearer ', '')];
     if (!who) return json({ error: { code: 401, message: 'Invalid Credentials' } }, 401);
+    if (u.pathname.endsWith('/about')) return json({ user: { emailAddress: `${who}@x.de` } });
     const m = /\/files(?:\/([^/]+))?(\/permissions(?:\/([^/]+))?)?$/.exec(u.pathname);
     const id = m?.[1];
     const f = id ? d.files.get(id) : null;
@@ -67,7 +69,8 @@ function fakeDrive(tokens = { 'tok-a': 'anna', 'tok-b': 'ben' }) {
     }
     // Suchen (nur eigene, von der App angelegte Dateien)
     if (method === 'GET' && !id) {
-      const files = [...d.files.values()].filter((x) => x.owner === who && x.appProperties?.liederbuch === 'sync');
+      const name = /name='((?:[^'\\]|\\.)*)'/.exec(u.searchParams.get('q') || '')?.[1];
+      const files = [...d.files.values()].filter((x) => x.owner === who && x.appProperties?.liederbuch === 'sync' && (!name || x.name === name));
       return json({ files: files.map((x) => ({ id: x.id })) });
     }
     const role = roleOf(f, who);
@@ -382,5 +385,67 @@ describe('Google: Umzug der vorhandenen Lieder', () => {
     const file = JSON.parse([...drive.files.values()][0].content);
     expect(file.songs.length).toBe(2);
     expect(drive.files.size).toBe(1);
+  });
+});
+
+describe('Google: mehrere Liederbücher mit eigenem Konto (2.2)', () => {
+  it('jedes Buch hat seine eigene Anmeldung; das Konto wird gemerkt und beim nächsten Mal vorgeschlagen', async () => {
+    const drive = fakeDrive();
+    const storage = memory();
+    const gisA = fakeGis({ token: 'tok-a' });
+    const gisB = fakeGis({ token: 'tok-b' });
+    const mine = new GoogleAuth({ clientId: 'cid', storage, session: memory(), fetch: drive.fetch, gis: async () => gisA.google });
+    const band = new GoogleAuth({
+      clientId: 'cid', storage, session: memory(), fetch: drive.fetch, gis: async () => gisB.google,
+      tokenKey: 'gdrive.token:book-1', accountKey: 'gdrive.account:book-1',
+    });
+    await mine.signIn();
+    expect(band.signedIn).toBe(false); // sieht die Anmeldung des persönlichen Buchs nicht
+    await band.signIn({ choose: true });
+    expect(gisB.prompts).toEqual(['select_account']);
+    expect(mine.token()).toBe('tok-a');
+    expect(band.token()).toBe('tok-b');
+    expect(mine.account).toBe('anna@x.de');
+    expect(band.account).toBe('ben@x.de');
+    await band.signIn({ silent: true });
+    expect(gisB.hints).toEqual(['', 'ben@x.de']);
+  });
+
+  it('Weiterleitung: Token landet beim Buch, das die Anmeldung begonnen hat', () => {
+    const storage = memory();
+    const session = memory();
+    const join = new GoogleAuth({ clientId: 'cid', storage, session, redirectUri: 'https://x.de/', tokenKey: 'gdrive.token:join', accountKey: 'gdrive.account:join' });
+    const url = new URL(join.loginUrl({ choose: true, extra: { join: 'f9' } }));
+    expect(url.searchParams.get('prompt')).toBe('select_account');
+    // zurück auf der Seite: dort ist ein anderes Buch geöffnet (eigene GoogleAuth)
+    const other = new GoogleAuth({ clientId: 'cid', storage, session, redirectUri: 'https://x.de/' });
+    const saved = other.finishLogin(`#access_token=tok-j&expires_in=3599&scope=${encodeURIComponent(DRIVE_SCOPE)}&state=${url.searchParams.get('state')}`);
+    expect(saved.join).toBe('f9');
+    expect(other.signedIn).toBe(false);
+    expect(join.token()).toBe('tok-j');
+  });
+
+  it('Weiterleitung mit gemerktem Konto: login_hint', () => {
+    const storage = memory();
+    storage.setItem('gdrive.account', 'anna@x.de');
+    const auth = new GoogleAuth({ clientId: 'cid', storage, session: memory(), redirectUri: 'https://x.de/' });
+    expect(new URL(auth.loginUrl({ silent: true })).searchParams.get('login_hint')).toBe('anna@x.de');
+    expect(new URL(auth.loginUrl({ choose: true })).searchParams.has('login_hint')).toBe(false);
+  });
+
+  it('weiteres eigenes Buch: eigene Datei neben Liederbuch.json, eigene gemerkte ID', async () => {
+    const drive = fakeDrive();
+    const { storage, auth } = person(drive, 'tok-a');
+    const personal = new GoogleDriveProvider({ auth, storage, fetch: drive.fetch });
+    const band = new GoogleDriveProvider({ auth, storage, fetch: drive.fetch, fileName: 'Liederbuch – Band.json', fileIdKey: 'gdrive.fileId:book-1' });
+    await personal.write({ songs: [{ id: 'p' }] }, null);
+    expect(await band.read()).toBe(null); // findet nicht die persönliche Datei
+    await band.write({ songs: [{ id: 'b' }] }, null);
+    expect([...drive.files.values()].map((f) => f.name).sort()).toEqual(['Liederbuch – Band.json', 'Liederbuch.json']);
+    expect(storage.getItem('gdrive.fileId:book-1') === storage.getItem('gdrive.fileId')).toBe(false);
+    // neues Gerät: findet die Datei über den Namen
+    const other = person(drive, 'tok-a');
+    const again = new GoogleDriveProvider({ auth: other.auth, storage: other.storage, fetch: drive.fetch, fileName: 'Liederbuch – Band.json', fileIdKey: 'gdrive.fileId:book-1' });
+    expect((await again.read()).data.songs[0].id).toBe('b');
   });
 });

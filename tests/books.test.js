@@ -1,6 +1,7 @@
 import { describe, it, expect } from './runner.js';
 import {
   PERSONAL, listBooks, activeBook, setActiveBook, addSharedBook, removeBook, bookNameFromFile, fileNameForBook,
+  addBook, renameBook, bookKey, BOOK_KEYS, addAboBook,
 } from '../src/books.js';
 
 function memoryStorage() {
@@ -44,5 +45,73 @@ describe('Liederbücher', () => {
     expect(bookNameFromFile('Liederbuch – Band.json')).toBe('Band');
     expect(bookNameFromFile('Liederbuch - Lagerfeuer.json')).toBe('Lagerfeuer');
     expect(bookNameFromFile('Liederbuch.json')).toBe('Liederbuch');
+  });
+});
+
+describe('Liederbücher: mehrere eigene (2.2)', () => {
+  it('eigenes Liederbuch anlegen: eigene Datenbank und Datei, bleibt nach dem Neuladen', () => {
+    const st = memoryStorage();
+    const a = addBook({ name: ' Band ' }, st);
+    const b = addBook({ name: 'Lagerfeuer' }, st);
+    expect(/^book-[0-9a-z]+$/.test(a.id)).toBe(true);
+    expect(a.id === b.id).toBe(false);
+    expect(a.name).toBe('Band');
+    expect(a.dbName).toBe(`liederbuch-${a.id}`);
+    expect(a.file).toBe('Liederbuch – Band.json');
+    expect(a.own).toBe(true);
+    expect(listBooks(st).map((x) => x.name)).toEqual(['Mein Liederbuch', 'Band', 'Lagerfeuer']);
+    setActiveBook(b.id, st);
+    expect(activeBook(st).id).toBe(b.id);
+  });
+
+  it('umbenennen: nur der Name, die Datei bleibt; Abos und das persönliche nicht', () => {
+    const st = memoryStorage();
+    const a = addBook({ name: 'Band' }, st);
+    expect(renameBook(a.id, ' Die Band ', st)).toBe(true);
+    const now = listBooks(st).find((x) => x.id === a.id);
+    expect(now.name).toBe('Die Band');
+    expect(now.file).toBe('Liederbuch – Band.json');
+    expect(renameBook(a.id, '   ', st)).toBe(false);
+    expect(renameBook('personal', 'Anders', st)).toBe(false);
+    const abo = addAboBook({ url: 'https://x.de/a.json', name: 'Abo' }, st);
+    expect(renameBook(abo.id, 'Neu', st)).toBe(false);
+    const shared = addSharedBook({ fileId: 'f1', name: 'Geteilt' }, st);
+    expect(renameBook(shared.id, 'Chor', st)).toBe(true);
+  });
+
+  it('eigene Einstellungen je Buch; das persönliche und alte geteilte behalten die alten Schlüssel', () => {
+    const st = memoryStorage();
+    const a = addBook({ name: 'Band' }, st);
+    expect(bookKey(PERSONAL, 'webdav.url')).toBe('webdav.url');
+    expect(bookKey(a, 'webdav.url')).toBe(`webdav.url:${a.id}`);
+    const old = addSharedBook({ fileId: 'f1', name: 'Alt' }, st);
+    expect(bookKey(old, 'gdrive.token')).toBe('gdrive.token');
+    const neu = addSharedBook({ fileId: 'f2', name: 'Neu', ownAuth: true }, st);
+    expect(bookKey(neu, 'gdrive.token')).toBe('gdrive.token:shared-f2');
+    // Rechte ändern sich (erneut eintragen), die eigene Anmeldung bleibt
+    expect(addSharedBook({ fileId: 'f2', name: 'Neu', readOnly: true }, st).ownAuth).toBe(true);
+  });
+
+  it('entfernen löscht die Einstellungen dieses Buchs, nicht die anderer', () => {
+    const st = memoryStorage();
+    const a = addBook({ name: 'Band' }, st);
+    for (const k of BOOK_KEYS) {
+      st.setItem(bookKey(a, k), 'x');
+      st.setItem(k, 'persönlich');
+    }
+    removeBook(a.id, st);
+    for (const k of BOOK_KEYS) {
+      expect(st.getItem(bookKey(a, k))).toBe(null);
+      expect(st.getItem(k)).toBe('persönlich');
+    }
+    // altes geteiltes Buch nutzt die globalen Schlüssel – die bleiben
+    addSharedBook({ fileId: 'f1', name: 'Alt' }, st);
+    removeBook('shared-f1', st);
+    expect(st.getItem('gdrive.token')).toBe('persönlich');
+  });
+
+  it('Dateiname ohne Zeichen, die Dropbox/Drive stören', () => {
+    expect(fileNameForBook('AC/DC: Best?')).toBe('Liederbuch – AC-DC- Best-.json');
+    expect(fileNameForBook('a\\b')).toBe('Liederbuch – a-b.json');
   });
 });

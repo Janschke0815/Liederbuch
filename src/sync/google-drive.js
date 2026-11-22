@@ -1,6 +1,7 @@
 // Speicherschicht Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive (Format liederbuch-sync).
-//   persönlich:  "Liederbuch.json" im eigenen Drive (wird gesucht bzw. angelegt)
-//   gemeinsam:   "Liederbuch – <Name>.json", per Drive mit anderen geteilt
+//   eigen:       "Liederbuch.json" (persönliches Liederbuch) bzw. "Liederbuch – <Name>.json" (weitere
+//                eigene Bücher) im eigenen Drive – wird gesucht bzw. angelegt; teilen geht trotzdem
+//   gemeinsam:   Datei eines anderen (oder vor 2.2 angelegt), fest über ihre ID verbunden
 //
 // Hier stehen nur die Drive-Zugriffe. Die Anmeldung kommt von außen (auth, siehe google-auth.js) –
 // so lässt sich die Speicherung austauschen und mit einer Attrappe testen.
@@ -50,13 +51,17 @@ export class GoogleDriveProvider {
   /**
    * @param {{auth: import('./google-auth.js').GoogleAuth, apiKey?: string, appId?: string,
    *          book?: {shared?: boolean, fileId?: string|null, readOnly?: boolean},
-   *          storage?: Storage, fetch?: typeof fetch}} opts
+   *          storage?: Storage, fetch?: typeof fetch, fileName?: string, fileIdKey?: string}} opts
    *   apiKey/appId: nur für die Google-Dateiauswahl (Einladung öffnen); nicht geheim
+   *   fileName/fileIdKey: eigene Datei dieses Liederbuchs und wo ihre ID gemerkt wird
    */
   constructor({
     auth, apiKey = '', appId = '', book = { shared: false, fileId: null },
     storage = globalThis.localStorage, fetch: f = globalThis.fetch?.bind(globalThis),
+    fileName = PERSONAL_FILE, fileIdKey = 'gdrive.fileId',
   } = {}) {
+    this.fileName = fileName;
+    this.fileIdKey = fileIdKey;
     this.auth = auth;
     this.apiKey = apiKey;
     this.appId = appId;
@@ -64,7 +69,7 @@ export class GoogleDriveProvider {
     this.readOnly = Boolean(book.readOnly);
     this.storage = storage;
     this.fetch = f;
-    this.fileId = this.shared ? book.fileId : storage.getItem('gdrive.fileId') || null;
+    this.fileId = this.shared ? book.fileId : storage.getItem(fileIdKey) || null;
   }
 
   // ---------- Anmeldung (weitergereicht) ----------
@@ -82,7 +87,7 @@ export class GoogleDriveProvider {
   /** Abmelden; die Dateien in Drive bleiben erhalten. */
   signOut() {
     this.auth.signOut();
-    this.storage.removeItem('gdrive.fileId');
+    this.storage.removeItem(this.fileIdKey);
     if (!this.shared) this.fileId = null;
   }
 
@@ -122,10 +127,11 @@ export class GoogleDriveProvider {
 
   async #findFile() {
     if (this.fileId || this.shared) return this.fileId;
-    const q = `name='${PERSONAL_FILE}' and 'me' in owners and trashed=false and appProperties has { key='${MARK_KEY}' and value='${MARK_PERSONAL}' }`;
+    const name = this.fileName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const q = `name='${name}' and 'me' in owners and trashed=false and appProperties has { key='${MARK_KEY}' and value='${MARK_PERSONAL}' }`;
     const r = await this.#json(`${API}?spaces=drive&orderBy=createdTime&fields=files(id)&q=${encodeURIComponent(q)}`);
     this.fileId = r.files?.[0]?.id || null;
-    if (this.fileId) this.storage.setItem('gdrive.fileId', this.fileId);
+    if (this.fileId) this.storage.setItem(this.fileIdKey, this.fileId);
     return this.fileId;
   }
 
@@ -141,7 +147,7 @@ export class GoogleDriveProvider {
   #forget() {
     if (this.shared) throw new NoAccessError();
     this.fileId = null;
-    this.storage.removeItem('gdrive.fileId');
+    this.storage.removeItem(this.fileIdKey);
   }
 
   /**
@@ -180,9 +186,9 @@ export class GoogleDriveProvider {
     if (!(await this.#findFile())) {
       if (this.shared) throw new NoAccessError();
       if (expectedVersion) throw new ConflictError();
-      const r = await this.#create(PERSONAL_FILE, MARK_PERSONAL, data);
+      const r = await this.#create(this.fileName, MARK_PERSONAL, data);
       this.fileId = r.id;
-      this.storage.setItem('gdrive.fileId', r.id);
+      this.storage.setItem(this.fileIdKey, r.id);
       return r.version;
     }
     const current = await this.#version();
