@@ -86,6 +86,8 @@ describe('Liederbücher: mehrere eigene (2.2)', () => {
     expect(bookKey(a, 'webdav.url')).toBe(`webdav.url:${a.id}`);
     const old = addSharedBook({ fileId: 'f1', name: 'Alt' }, st);
     expect(bookKey(old, 'gdrive.token')).toBe('gdrive.token');
+    // … aber nie den Speicherort des persönlichen (2.1.2)
+    expect(bookKey(old, 'sync.provider')).toBe('sync.provider:shared-f1');
     const neu = addSharedBook({ fileId: 'f2', name: 'Neu', ownAuth: true }, st);
     expect(bookKey(neu, 'gdrive.token')).toBe('gdrive.token:shared-f2');
     // Rechte ändern sich (erneut eintragen), die eigene Anmeldung bleibt

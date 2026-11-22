@@ -73,7 +73,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   const appKey = () => cfg('dropbox.appKey', DROPBOX_APP_KEY);
   // Einstellung des geöffneten Liederbuchs (eigene Schlüssel je Buch, siehe bookKey)
   const K = (base) => bookKey(book, base);
-  const ownKeys = K('x') !== 'x'; // eigenes Konto (nicht die Anmeldung des persönlichen Buchs)
+  const ownKeys = K('gdrive.token') !== 'gdrive.token'; // eigenes Konto (nicht das des persönlichen Buchs)
   // Geteilte Liederbücher laufen immer über Google Drive; alle anderen wahlweise über Dropbox oder WebDAV
   const kindOf = (b) => {
     const k = localStorage.getItem(bookKey(b, 'sync.kind'));
@@ -521,6 +521,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
    * (erst dann darf die App sie lesen), Rechte abfragen, als Liederbuch eintragen.
    */
   async function joinDrive(fileId = '') {
+    saveSetup();
     const ja = joinAuth();
     if (!ja.signedIn) {
       if (prefersRedirect()) return redirectToGoogle({ choose: true, via: ja, extra: { join: fileId } });

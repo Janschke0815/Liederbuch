@@ -123,11 +123,13 @@ export function renameBook(id, name, storage = localStorage) {
 
 /**
  * Schlüssel für eine Einstellung eines Liederbuchs (Speicherort, Zugangsdaten, Anmeldung).
- * Das persönliche Liederbuch und vor 2.2 geteilte Bücher nutzen die alten, globalen Schlüssel
- * (keine Umstellung nötig); alle anderen bekommen eigene: „webdav.url:book-abc“.
+ * Das persönliche Liederbuch nutzt die alten, globalen Schlüssel (keine Umstellung nötig), vor 2.2
+ * geteilte Bücher die globale Google-Anmeldung; alles andere ist je Buch getrennt: „webdav.url:book-abc“.
+ * (So überschreibt z. B. ein geteiltes Buch nie den Speicherort des persönlichen.)
  */
 export function bookKey(book, base) {
-  const global = !book || book.id === PERSONAL.id || (book.shared && !book.ownAuth);
+  const global = !book || book.id === PERSONAL.id
+    || (book.shared && !book.ownAuth && (base === 'gdrive.token' || base === 'gdrive.account'));
   return global ? base : `${base}:${book.id}`;
 }
 
@@ -142,7 +144,7 @@ export function removeBook(id, storage = localStorage) {
   const book = read(storage).find((b) => b.id === id);
   storage.setItem(KEY, JSON.stringify(read(storage).filter((b) => b.id !== id)));
   if (storage.getItem(ACTIVE) === id) storage.removeItem(ACTIVE);
-  if (book && bookKey(book, 'x') !== 'x') for (const k of BOOK_KEYS) storage.removeItem(bookKey(book, k));
+  if (book) for (const k of BOOK_KEYS) if (bookKey(book, k) !== k) storage.removeItem(bookKey(book, k));
 }
 
 /** Dateiname in Drive -> Anzeigename ("Liederbuch – Band.json" -> "Band"). */

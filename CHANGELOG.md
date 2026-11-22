@@ -23,6 +23,14 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
   Bücher behalten ihre Einstellungen und Anmeldungen.
 - Der Live-Modus rückt im Fahrplan auf Punkt 24.
 
+## 2.1.2 – 22.11.2026 · Gemeinsame Liederbücher auch neben WebDAV/Dropbox
+
+- Gleicht das persönliche Liederbuch über WebDAV/Nextcloud oder Dropbox ab, lassen sich trotzdem
+  gemeinsame Liederbücher über Google Drive anlegen und Einladungen öffnen. Die Google-Anmeldung
+  kommt dabei von selbst; das persönliche Liederbuch bleibt bei seinem Speicherort.
+- Die Google-Anmeldung in einem gemeinsamen Liederbuch schaltet den automatischen Abgleich des
+  persönlichen Liederbuchs (z. B. über WebDAV) nicht mehr ab.
+
 ## 2.1.1 – 22.11.2026 · Einladung öffnen: Dateiauswahl nicht mehr verdeckt
 
 - Beim Öffnen einer Einladung schließt sich der Cloud-Dialog jetzt von selbst, damit die

@@ -74,8 +74,9 @@ Das persönliche Liederbuch und Abos lassen sich nicht umbenennen.
 ### `bookKey(book, base)`
 
 Schlüssel für eine Einstellung eines Liederbuchs (Speicherort, Zugangsdaten, Anmeldung).
-Das persönliche Liederbuch und vor 2.2 geteilte Bücher nutzen die alten, globalen Schlüssel
-(keine Umstellung nötig); alle anderen bekommen eigene: „webdav.url:book-abc“.
+Das persönliche Liederbuch nutzt die alten, globalen Schlüssel (keine Umstellung nötig), vor 2.2
+geteilte Bücher die globale Google-Anmeldung; alles andere ist je Buch getrennt: „webdav.url:book-abc“.
+(So überschreibt z. B. ein geteiltes Buch nie den Speicherort des persönlichen.)
 
 ### `BOOK_KEYS`
 
