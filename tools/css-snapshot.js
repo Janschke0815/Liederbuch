@@ -3,8 +3,14 @@
 //   const { snapshot, compare } = await import('/tools/css-snapshot.js');
 //   const vorher = await snapshot();   … CSS ändern, Seite neu laden …
 //   compare(vorher, await snapshot()) // -> Liste der Unterschiede
+//
+// Wichtig: vor JEDER Aufnahme die Seite neu laden und dieselbe Fenstergröße nehmen. Zwei Aufnahmen
+// ohne Neuladen unterscheiden sich in tausenden Stellen (beim ersten Öffnen erzeugte Inhalte, offene
+// Zustände) – das ist dann kein CSS-Unterschied. Beides prüft das Werkzeug und warnt.
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const META = '__meta';
+let taken = false; // schon eine Aufnahme seit dem Laden der Seite?
 
 function hash(s) {
   let h = 2166136261;
@@ -41,7 +47,9 @@ function capture(label, out) {
 
 /** Mehrere Ansichten nacheinander öffnen und festhalten. */
 export async function snapshot() {
-  const out = {};
+  if (taken) console.warn('css-snapshot: schon eine Aufnahme seit dem Laden – Seite neu laden, sonst ist der Vergleich verrauscht');
+  taken = true;
+  const out = { [META]: `${innerWidth}x${innerHeight}@${devicePixelRatio}` };
   const $ = (s) => document.querySelector(s);
   // ohne Übergänge – sonst erwischt man Farben mitten im Wechsel
   const still = document.head.appendChild(document.createElement('style'));
@@ -74,6 +82,8 @@ export async function snapshot() {
 
 /** Unterschiede zweier Schnappschüsse. */
 export function compare(a, b) {
+  if (a[META] !== b[META]) console.warn(`css-snapshot: andere Fenstergröße (${a[META]} / ${b[META]}) – Vergleich nicht aussagekräftig`);
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  keys.delete(META);
   return [...keys].filter((k) => a[k] !== b[k]);
 }

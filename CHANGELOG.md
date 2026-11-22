@@ -18,6 +18,9 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 - Neue Liederbücher starten leer – das Beispiellied gibt es nur noch beim allerersten Start.
 - README: wie man ein Buch zu einem anderen Speicherort umzieht (Trennen, anderen Speicherort wählen,
   Verbinden); Dropbox-Abschnitt gilt jetzt für jedes Buch.
+- Im Hintergrund: Vor jeder Veröffentlichung laufen jetzt automatisch alle Tests (`npm test`, kopfloser
+  Browser) samt Prüfung, dass die Kopfleiste am Handy nicht über den Rand ragt – schlägt etwas fehl,
+  wird nichts veröffentlicht.
 
 ## 2.2.3 – 22.11.2026 · Kopfleiste am Handy passt wieder
 

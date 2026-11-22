@@ -11,7 +11,8 @@ Aufbau und Bedienung: siehe README.md („Aufbau“, „Fahrplan“).
    darunter Stichpunkte, was sich für Nutzer geändert hat (kurz erklärt, auf Deutsch).
    Ein Test (`tests/version.test.js`) schlägt fehl, wenn die aktuelle Version im Changelog fehlt.
 3. Bei neuen Fahrplan-Punkten den „Fahrplan“ im README ergänzen.
-4. Tests unter `tests/index.html` (mit `npm run dev`) müssen alle bestehen, `npm run build` muss durchlaufen.
+4. `npm test` muss bestehen (alle Tests aus `tests/index.html` plus Kopfleiste auf Handy-Breite, kopflos in
+   Chrome/Edge), `npm run build` muss durchlaufen. Die GitHub Action prüft beides vor jedem Release.
 5. API-Dokumentation neu erzeugen: `python tools/make-docs.py` (meldet auch fehlende Kommentare).
 6. Commit-Nachricht auf Deutsch mit Version in Klammern, z. B. „… (1.24.0)“.
 
@@ -21,4 +22,8 @@ Aufbau und Bedienung: siehe README.md („Aufbau“, „Fahrplan“).
 - Gepusht wird erst nach Freigabe.
 - Neue gespeicherte Werte gehören in `src/prefs.js`, neue Tastenkürzel in `src/ui/shortcuts.js`.
 - Jede exportierte Funktion, Klasse und öffentliche Methode bekommt einen JSDoc-Kommentar (siehe docs/architektur.md).
-- CSS-Umbauten mit `tools/css-snapshot.js` vorher/nachher vergleichen.
+- CSS-Umbauten mit `tools/css-snapshot.js` vorher/nachher vergleichen (vor jeder Aufnahme neu laden, gleiche Fenstergröße).
+- Dateien mit LF-Zeilenenden schreiben (`.gitattributes`, `.editorconfig`).
+- Arbeiten mehrere Sitzungen gleichzeitig am Projekt, bekommt jede einen eigenen Git-Worktree bzw. Zweig –
+  nie zwei Sitzungen im selben Arbeitsordner auf `main` (sonst überschreiben sich Commits gegenseitig).
+- Kleine Änderungen lokal sammeln; gepusht wird gebündelt, wenn der Nutzer es sagt.

@@ -1,4 +1,5 @@
-# Baut die App bei jedem Push (jeder Zweig – zeigt, ob der Bau klappt).
+# Testet und baut die App bei jedem Push (jeder Zweig – zeigt, ob Tests und Bau klappen).
+# Schlägt ein Test fehl (npm test: Einzeltests + Kopfleiste auf Handy-Breite), wird nichts veröffentlicht.
 # Nur von main: dist/ auf GitHub Pages veröffentlichen und als liederbuch.zip ins Release der
 # aktuellen Version (v<APP_VERSION>) legen – feste Adresse für die NAS (tools/nas-update.sh):
 #   https://github.com/<Besitzer>/<Repo>/releases/latest/download/liederbuch.zip
@@ -28,6 +29,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Tests (kopfloser Chrome, siehe tools/run-tests.mjs)
+        run: npm test
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -13,7 +13,8 @@ Einmalig [Node.js](https://nodejs.org) (LTS) installieren, dann im Projektordner
     npm run dev        # Entwicklungsserver, lädt bei Änderungen automatisch neu
 
 - App: http://localhost:5173/
-- Tests: http://localhost:5173/tests/
+- Tests: http://localhost:5173/tests/ – oder ohne Browserfenster `npm test` (braucht Chrome oder Edge;
+  prüft zusätzlich, dass die Kopfleiste auf Handy-Breite nicht über den Rand ragt)
 - Druck-Demo mit Beispielliedern: http://localhost:5173/tests/print-demo.html (`?columns=2&paper=A5&chorus=indent`)
 
 ## Installieren und offline nutzen
@@ -577,7 +578,7 @@ und fasst beim Bauen alles zu wenigen Dateien in `dist/` zusammen. Abhängigkeit
                       sw.js                 Service Worker (Cache „Netz zuerst“)
                       manifest.webmanifest  App-Name, Icons, Dateitypen
                       icons/                App-Icons (icon.svg ist die Vorlage)
-    tests/          Browser-Tests (tests/index.html öffnen)
+    tests/          Browser-Tests (tests/index.html öffnen oder `npm test`, siehe tools/run-tests.mjs)
     tools/          make-docs.py (API-Dokumentation erzeugen), nas-update.sh (NAS holt neue Fassung),
                     css-snapshot.js (CSS-Umbauten vorher/nachher vergleichen)
     docs/           architektur.md, api/ (erzeugt), Anleitung QNAP
