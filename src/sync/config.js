@@ -3,9 +3,9 @@
 // nur „Mit Google anmelden“. Keiner dieser Werte ist geheim (stehen bei jeder Web-App im Code);
 // ein Client-Secret wird nicht gebraucht und gehört nicht hierher. Leer: im Cloud-Dialog unter
 // „Google-Einrichtung“ pro Gerät eintragbar.
-export const GOOGLE_CLIENT_ID = ''; // OAuth-Client-ID (Webanwendung)
-export const GOOGLE_API_KEY = ''; // API-Schlüssel, nur für die Dateiauswahl (Einladung öffnen)
-export const GOOGLE_APP_ID = ''; // Projektnummer des Google-Cloud-Projekts
+export const GOOGLE_CLIENT_ID = '307242381251-2k2ifpsp04aiomdtd51v922ljdseo8hi.apps.googleusercontent.com'; // OAuth-Client-ID (Webanwendung)
+export const GOOGLE_API_KEY = 'AIzaSyAvJSJFxzI0AGxhkVWzhhk7wbCYeTcFQiw'; // API-Schlüssel, nur für die Dateiauswahl (Einladung öffnen)
+export const GOOGLE_APP_ID = '307242381251'; // Projektnummer des Google-Cloud-Projekts
 
 // Dropbox (siehe README, „Dropbox einrichten“): App-Schlüssel einer Dropbox-App mit Zugriff „App folder“.
 // Ebenfalls nicht geheim; alternativ im Cloud-Dialog unter „Dropbox-Einrichtung“ pro Gerät eintragen.

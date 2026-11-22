@@ -68,9 +68,15 @@ nur von den Adressen an, die du unten einträgst.
 
 **APIs & Dienste → Anmeldedaten → Anmeldedaten erstellen → API-Schlüssel**, dann **Schlüssel bearbeiten**:
 
-- **Anwendungseinschränkungen:** *Websites* mit `https://janschke0815.github.io/*`,
-  `http://localhost:5173/*`, `http://localhost:4173/*` (und ggf. die NAS-Adresse mit `/*`).
-- **API-Einschränkungen:** nur **Google Picker API**.
+- **Anwendungseinschränkungen:** *Websites* mit nur **`https://docs.google.com/*`**. Die App selbst
+  benutzt den Schlüssel nicht, nur die Dateiauswahl – und die läuft in einem Google-Rahmen auf
+  docs.google.com und fragt von dort aus an. Die Adressen der App (GitHub Pages, localhost, NAS) sind
+  hier daher nicht nötig; fehlt docs.google.com, meldet die Dateiauswahl „API-Entwicklerschlüssel ist ungültig“.
+- **API-Einschränkungen:** **Google Picker API** und **Google Drive API** (die Dateiauswahl fragt
+  Drive mit dem Schlüssel ab; fehlt die Drive API hier, meldet sie „API-Entwicklerschlüssel ist
+  ungültig“). Der Schlüssel allein gibt keinen Zugriff auf Dateien – dafür braucht es immer die Anmeldung.
+
+Änderungen am Schlüssel brauchen ebenfalls ein paar Minuten.
 
 ## 5. Projektnummer
 
@@ -118,6 +124,7 @@ eintragen kann (praktisch zum Ausprobieren, z. B. mit einem eigenen Projekt für
 | `origin_mismatch` / „Zugriff blockiert“ | Adresse fehlt unter *JavaScript-Quellen* (Schritt 3) |
 | „Zugriff auf Google Drive wurde nicht erlaubt“ | Bei Google das Häkchen für Drive nicht gesetzt – noch einmal anmelden |
 | `access_denied` in der Testphase | Konto ist nicht als Testnutzer eingetragen (Schritt 2) |
+| „Der API-Entwicklerschlüssel ist ungültig“ (in der Dateiauswahl) | Beim API-Schlüssel fehlt unter *API-Einschränkungen* die Drive API oder Picker API, die Picker API ist nicht aktiviert (Schritt 1) oder unter *Websites* fehlt `https://docs.google.com/*` (Schritt 4) |
 | „Für ‚Einladung öffnen‘ fehlen API-Schlüssel …“ | API-Schlüssel oder Projektnummer fehlen (Schritte 4–6) |
 | „Die Google-Anmeldung ist abgelaufen oder wurde widerrufen“ | normal nach etwa einer Stunde oder nach Entzug unter <https://myaccount.google.com/permissions> – neu anmelden |
 | „Nur lesen: … keine Schreibrechte“ | Der Besitzer hat dir nur Leserechte gegeben |
