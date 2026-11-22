@@ -15,6 +15,14 @@ import { join } from 'node:path';
 import { createServer } from 'vite';
 
 const TIMEOUT_MS = 120_000;
+const CI = Boolean(process.env.GITHUB_ACTIONS);
+
+/** In der GitHub Action: Fehler als Anmerkung (steht dann direkt am Lauf, ohne Log zu öffnen). */
+function annotate(title, message) {
+  if (!CI) return;
+  const esc = (t) => String(t).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+  console.log(`::error title=${esc(title).replace(/[:,]/g, ' ')}::${esc(message).slice(0, 4000)}`);
+}
 
 /** Pfad zu einem Chromium-Browser auf diesem Rechner. */
 function findBrowser() {
@@ -115,7 +123,10 @@ async function openPage(cdp) {
 async function unitTests(page, base) {
   await page.s('Page.navigate', { url: `${base}tests/` });
   const r = await page.waitFor('window.__testResults');
-  for (const f of r.failures) console.log(`  ✘ ${f.suite} › ${f.test}\n      ${String(f.error).split('\n').join('\n      ')}`);
+  for (const f of r.failures) {
+    console.log(`  ✘ ${f.suite} › ${f.test}\n      ${String(f.error).split('\n').join('\n      ')}`);
+    annotate(`Test: ${f.suite} › ${f.test}`, f.error);
+  }
   console.log(`Tests: ${r.passed} bestanden, ${r.failed} fehlgeschlagen`);
   return r.failed === 0;
 }
@@ -140,7 +151,10 @@ async function layoutCheck(page, base) {
     })()`);
     const fits = m.doc <= m.vw && m.menu <= m.vw && m.cloud <= m.vw;
     console.log(`  ${fits ? '✔' : '✘'} Kopfleiste ${width} px${name ? ' (langer Name)' : ''}: Seite ${m.doc} px, Menü-Knopf endet bei ${Math.round(m.menu)} px`);
-    if (!fits) ok = false;
+    if (!fits) {
+      ok = false;
+      annotate(`Kopfleiste ${width} px`, `Seite ${m.doc} px breit, Menü-Knopf endet bei ${Math.round(m.menu)} px (Fenster ${m.vw} px)`);
+    }
   }
   await page.evaluate("localStorage.removeItem('personalName')");
   console.log(`Layout: ${ok ? 'passt' : 'ragt über den Rand'}`);
@@ -178,5 +192,6 @@ async function main() {
 
 main().catch((err) => {
   console.error(err.message || err);
+  annotate('npm test abgebrochen', err.stack || err.message || err);
   process.exit(1);
 });
