@@ -185,17 +185,18 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#sync-now').hidden = !usable;
     $('#sync-connect').hidden = usable;
     $('#sync-connect').textContent = state === 'auth' ? 'Neu anmelden' : gd ? 'Mit Google anmelden' : 'Verbinden';
-    $('#book-actions').hidden = !usable || !gd;
-    $('#book-new').hidden = !usable || !gd;
+    // Gemeinsame Liederbücher laufen immer über Google Drive – egal, wo das persönliche abgleicht;
+    // Anlegen und Öffnen melden bei Bedarf selbst bei Google an
+    const canShare = !book.abo && Boolean(clientId());
+    $('#book-actions').hidden = !canShare;
+    $('#book-new').hidden = !canShare;
     // Abo: wird nie mit der Cloud abgeglichen – keine Einstellungen zum Abgleich zeigen
     $('#sync-config').hidden = Boolean(book.abo);
     $('#sync-card').classList.toggle('muted', Boolean(book.abo));
     $('#publish-from').textContent = book.name;
-    $('#book-offline-hint').hidden = usable || !gd || Boolean(book.abo);
+    $('#book-offline-hint').hidden = canShare || Boolean(book.abo);
     $('#book-webdav-hint').hidden = gd || Boolean(book.abo);
-    $('#book-webdav-hint').textContent = dav
-      ? 'Gemeinsame Liederbücher mit Einladung gibt es über Google Drive. Mit WebDAV teilt ihr einfach den Ordner.'
-      : 'Gemeinsame Liederbücher mit Einladung gibt es über Google Drive.';
+    $('#book-webdav-hint').textContent = `Gemeinsame Liederbücher laufen über Google Drive (Anmeldung beim Anlegen oder Öffnen) – „${book.name}“ gleicht weiter über ${dav ? 'WebDAV' : 'Dropbox'} ab.`;
     $('#book-new-from').textContent = book.name;
     $('#drive-invite').hidden = !pendingJoin;
     for (const id of ['#sync-client-id', '#sync-api-key', '#sync-app-id']) $(id).disabled = usable;
@@ -391,8 +392,10 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   /** Angemeldet: Abgleich starten (beim ersten Mal wandern die Lieder des Geräts nach Drive). */
   async function startGoogle() {
-    const first = !connectedFlag();
-    localStorage.setItem('sync.provider', 'gdrive');
+    // sync.provider merkt nur den Speicherort des persönlichen Liederbuchs – ein gemeinsames darf
+    // ihn nicht überschreiben (sonst verbindet sich z. B. WebDAV dort nicht mehr von selbst)
+    const first = !book.shared && !connectedFlag();
+    if (!book.shared) localStorage.setItem('sync.provider', 'gdrive');
     if (first && !book.shared) await beforeConnect?.();
     if (engine.state === 'off') engine.start();
     else await engine.sync();
@@ -452,19 +455,37 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   let pendingJoin = null;
 
   /**
+   * Bei Google angemeldet sein – unabhängig davon, wo das persönliche Liederbuch abgleicht
+   * (gemeinsame Liederbücher laufen immer über Google Drive, auch wenn das persönliche auf WebDAV
+   * oder Dropbox liegt). true: angemeldet; false: abgebrochen oder zur Anmeldung weitergeleitet.
+   */
+  async function ensureGoogle(extra = {}) {
+    if (auth.signedIn) return true;
+    saveSetup();
+    if (!clientId()) {
+      toast('Für gemeinsame Liederbücher fehlt die Google-Einrichtung');
+      return false;
+    }
+    if (!auth.clientId) auth = googleAuth(); // Client-ID erst eben eingetragen
+    if (prefersRedirect()) {
+      await redirectToGoogle({ silent: auth.known, extra });
+      return false;
+    }
+    try {
+      await auth.signIn({ silent: auth.known }).catch((err) => (auth.known ? auth.signIn() : Promise.reject(err)));
+      return true;
+    } catch (err) {
+      toast(`Anmelden fehlgeschlagen: ${err.message}`);
+      return false;
+    }
+  }
+
+  /**
    * Geteiltes Liederbuch öffnen: anmelden (falls nötig), Datei in der Google-Dateiauswahl bestätigen
    * (erst dann darf die App sie lesen), Rechte abfragen, als Liederbuch eintragen.
    */
   async function joinDrive(fileId = '') {
-    if (!auth.signedIn) {
-      if (prefersRedirect()) return redirectToGoogle({ silent: auth.known, extra: { join: fileId } });
-      try {
-        await auth.signIn({ silent: auth.known }).catch((err) => (auth.known ? auth.signIn() : Promise.reject(err)));
-      } catch (err) {
-        toast(`Anmelden fehlgeschlagen: ${err.message}`);
-        return;
-      }
-    }
+    if (!(await ensureGoogle({ join: fileId }))) return;
     // Der Cloud-Dialog liegt als modaler Dialog immer obenauf – die Google-Dateiauswahl käme nicht
     // davor. Also vorher schließen; bei Abbruch oder Fehler wieder öffnen.
     const reopen = dlg.open;
@@ -623,7 +644,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   $('#sync-disconnect').onclick = () => {
     provider.signOut();
     engine.stop();
-    localStorage.removeItem('sync.provider');
+    if (!book.shared) localStorage.removeItem('sync.provider');
     if (kind() === 'webdav') {
       // Passwort nicht auf dem Gerät liegen lassen; Adresse und Name bleiben für später
       localStorage.removeItem('webdav.pass');
@@ -647,13 +668,14 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       toast('Ein Liederbuch mit diesem Namen gibt es schon');
       return;
     }
+    if (!(await ensureGoogle())) return;
     try {
       await beforeSync?.();
       const songs = $('#book-new-copy').checked
         ? (await repo.allRecords()).filter((r) => !r.deletedAt).map(slimRecord)
         : [];
       const data = { format: SYNC_FORMAT, version: SYNC_VERSION, updatedAt: new Date().toISOString(), songs };
-      const file = await provider.createShared(fileNameForBook(name), data);
+      const file = await driveFor({ shared: false }).createShared(fileNameForBook(name), data);
       const created = addSharedBook({ fileId: file.id, name });
       toast(`„${name}“ angelegt – jetzt Mitglieder einladen`);
       localStorage.setItem('openSyncDialog', '1');
