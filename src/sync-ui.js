@@ -465,10 +465,17 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         return;
       }
     }
+    // Der Cloud-Dialog liegt als modaler Dialog immer obenauf – die Google-Dateiauswahl käme nicht
+    // davor. Also vorher schließen; bei Abbruch oder Fehler wieder öffnen.
+    const reopen = dlg.open;
+    if (reopen) dlg.close();
     try {
       const picker = driveFor({ shared: true, fileId });
       const file = await picker.pickShared({ fileId });
-      if (!file) return;
+      if (!file) {
+        if (reopen) openDialog();
+        return;
+      }
       pendingJoin = null;
       const meta = await driveFor({ shared: true, fileId: file.id }).info();
       const readOnly = !meta?.capabilities?.canEdit;
@@ -476,6 +483,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       toast(`„${joined.name}“ geöffnet${readOnly ? ' – nur lesen' : ''}`);
       await switchTo(joined.id);
     } catch (err) {
+      if (reopen && !dlg.open) openDialog();
       if (/API-Schlüssel/.test(err.message)) $('#sync-setup').open = true;
       toast(`Öffnen fehlgeschlagen: ${err.message}`);
     }

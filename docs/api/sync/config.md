@@ -10,7 +10,7 @@ Google-Zugangsdaten für Google Drive (Einrichtung: docs/google-einrichtung.md).
 
 ### `GOOGLE_CLIENT_ID`
 
-`= ''`
+`= '307242381251-2k2ifpsp04aiomdtd51v922ljdseo8hi.apps.googleusercontent.com'`
 
 Google-Zugangsdaten für Google Drive (Einrichtung: docs/google-einrichtung.md).
 Hier eingetragen gelten sie für alle Geräte und alle Mitglieder – niemand muss etwas eintragen,
@@ -20,13 +20,13 @@ ein Client-Secret wird nicht gebraucht und gehört nicht hierher. Leer: im Cloud
 
 ### `GOOGLE_API_KEY`
 
-`= ''`
+`= 'AIzaSyAvJSJFxzI0AGxhkVWzhhk7wbCYeTcFQiw'`
 
 API-Schlüssel, nur für die Dateiauswahl (Einladung öffnen)
 
 ### `GOOGLE_APP_ID`
 
-`= ''`
+`= '307242381251'`
 
 Projektnummer des Google-Cloud-Projekts
 

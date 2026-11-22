@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.1.1 – 22.11.2026 · Einladung öffnen: Dateiauswahl nicht mehr verdeckt
+
+- Beim Öffnen einer Einladung schließt sich der Cloud-Dialog jetzt von selbst, damit die
+  Google-Dateiauswahl sichtbar ist. Bricht man dort ab, geht der Cloud-Dialog wieder auf.
+- Anleitung zur Google-Einrichtung: Der API-Schlüssel braucht als Website `https://docs.google.com/*`
+  und als APIs Picker und Drive – sonst meldet die Dateiauswahl „API-Entwicklerschlüssel ist ungültig“.
+
 ## 2.1.0 – 21.11.2026 · Google Drive: nur noch „Mit Google anmelden“
 
 - **Einfachere Anmeldung:** Für Google Drive genügt jetzt „Mit Google anmelden“ – Client-ID und
