@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.5 – 22.11.2026 · Datenschutzerklärung
+
+- Neue **Datenschutzerklärung** (`datenschutz.html`), verlinkt in den Einstellungen und im Cloud-Dialog:
+  kein eigener Server, keine Tracker; was die App auf dem Gerät speichert und was sie mit Google Drive,
+  Dropbox und WebDAV macht. Google verlangt sie, damit die App für alle Google-Konten freigegeben
+  („veröffentlicht“) werden kann.
+
 ## 2.2.4 – 22.11.2026 · Eigener Dialog „Liederbücher“, Mein Liederbuch umbenennen
 
 - **Liederbücher** haben einen eigenen, kleinen Dialog (oben in der Auswahl „Liederbücher verwalten …“):

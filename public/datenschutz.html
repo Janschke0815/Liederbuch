@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Datenschutz – Liederbuch</title>
+  <link rel="icon" href="icons/favicon-32.png">
+  <style>
+    body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; line-height: 1.55; color: #22201c; background: #f3f1ec; margin: 0; }
+    main { max-width: 46em; margin: 0 auto; padding: 1.5em 1.2em 3em; background: #fff; min-height: 100vh; box-sizing: border-box; }
+    h1 { font-size: 1.6em; margin: .2em 0 .1em; }
+    h2 { font-size: 1.15em; margin: 1.6em 0 .4em; }
+    p, li { margin: .4em 0; }
+    a { color: #b3261e; }
+    .meta { color: #77716a; font-size: .9em; }
+    .box { background: #faf8f4; border-left: 4px solid #b3261e; padding: .6em 1em; margin: 1em 0; }
+    code { background: #efebe4; padding: 0 .3em; border-radius: 4px; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="./">← zurück zur App</a></p>
+  <h1>Datenschutzerklärung</h1>
+  <p class="meta">Liederbuch – Gitarren-Liederbuch im Browser · Stand: 22.11.2026</p>
+
+  <div class="box">
+    <strong>Kurz gesagt:</strong> Das Liederbuch hat keinen eigenen Server, keine Werbung, keine Tracker und
+    keine Statistik. Deine Lieder liegen auf deinem Gerät – und, wenn du es einschaltest, in deinem eigenen
+    Speicher bei Google Drive, Dropbox oder auf deinem WebDAV-Server. Der Betreiber der App bekommt deine
+    Daten nie zu sehen.
+  </div>
+
+  <h2>1. Verantwortlich</h2>
+  <p>Janosch Wolfer (privates, nicht kommerzielles Projekt).<br>
+    Kontakt: über die Projektseite auf GitHub –
+    <a href="https://github.com/Janschke0815/Liederbuch/issues">github.com/Janschke0815/Liederbuch/issues</a>.</p>
+
+  <h2>2. Was auf deinem Gerät gespeichert wird</h2>
+  <p>Lieder, Setlisten, Notizen und Einstellungen speichert die App im Speicher deines Browsers
+    (IndexedDB und localStorage) auf deinem Gerät. Dort liegen auch Anmeldedaten für den Abgleich
+    (Zugangs-Token von Google oder Dropbox, WebDAV-Adresse, Benutzername und Passwort, falls du sie
+    einträgst) und die E-Mail-Adresse deines Google-Kontos, damit die App anzeigen kann, mit welchem Konto
+    ein Liederbuch verbunden ist. Nichts davon wird an den Betreiber übertragen. Löschen kannst du alles,
+    indem du die Websitedaten der App in deinem Browser löschst.</p>
+
+  <h2>3. Abgleich mit Google Drive (freiwillig)</h2>
+  <p>Wenn du dich in der App mit Google anmeldest, erhält die App über die Google-Anmeldung (OAuth 2) die
+    Berechtigung <code>drive.file</code>. Damit kann sie <strong>nur Dateien sehen und bearbeiten, die sie selbst
+    angelegt hat oder die du ihr in der Google-Dateiauswahl ausdrücklich gibst</strong> – nicht den Rest
+    deines Drives.</p>
+  <ul>
+    <li><strong>Welche Google-Daten:</strong> die Liederbuch-Dateien (z. B. <code>Liederbuch.json</code>), deren
+      Name, Version und Freigaben, sowie die E-Mail-Adresse deines Kontos.</li>
+    <li><strong>Wofür:</strong> ausschließlich, um deine Liederbücher zwischen deinen Geräten abzugleichen,
+      die Rechte an einem geteilten Liederbuch anzuzeigen und – nur wenn du es auslöst – andere zu einem
+      Liederbuch einzuladen. Beim Einladen wird die E-Mail-Adresse der eingeladenen Person an Google
+      übermittelt; Google verschickt die Einladung.</li>
+    <li><strong>Wie:</strong> Die Daten gehen direkt zwischen deinem Browser und Google hin und her. Es gibt keinen
+      Server des Betreibers dazwischen; der Betreiber kann weder auf deine Dateien noch auf dein Konto
+      zugreifen.</li>
+    <li><strong>Weitergabe:</strong> keine. Google-Daten werden nicht verkauft, nicht für Werbung genutzt, nicht an
+      Dritte weitergegeben und nicht zum Trainieren von KI-Modellen verwendet.</li>
+    <li><strong>Speicherdauer:</strong> Das Zugangs-Token gilt etwa eine Stunde und liegt nur auf deinem Gerät.
+      Die Dateien bleiben in deinem Drive, bis du sie dort löschst.</li>
+    <li><strong>Widerrufen:</strong> in der App unter <em>Cloud → Trennen</em> oder jederzeit unter
+      <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+  </ul>
+  <p>Die Nutzung von Daten, die die App über Google-APIs erhält, entspricht der
+    <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
+    einschließlich der Anforderungen zur eingeschränkten Nutzung (Limited Use).</p>
+  <p>Für die Anmeldung und die Dateiauswahl lädt die App Skripte von Google (<code>accounts.google.com</code>,
+    <code>apis.google.com</code>) – nur dann, wenn du Google Drive nutzt. Es gilt die
+    <a href="https://policies.google.com/privacy">Datenschutzerklärung von Google</a>.</p>
+
+  <h2>4. Abgleich mit Dropbox oder WebDAV (freiwillig)</h2>
+  <p><strong>Dropbox:</strong> Die App erhält Zugriff nur auf ihren eigenen Ordner in deiner Dropbox
+    (<em>Apps → Name der App</em>) und speichert dort deine Liederbücher. Widerrufen kannst du das unter
+    <em>Cloud → Trennen</em> oder in den Dropbox-Einstellungen (verbundene Apps). Es gilt die
+    <a href="https://www.dropbox.com/privacy">Datenschutzerklärung von Dropbox</a>.</p>
+  <p><strong>WebDAV / Nextcloud:</strong> Die App speichert die Lieder auf dem Server, den du selbst
+    einträgst. Dessen Betreiber ist für die Daten dort verantwortlich.</p>
+  <p><strong>Abos:</strong> Abonnierst du ein Liederbuch, lädt die App die Abo-Datei von der Adresse, die du
+    angibst.</p>
+
+  <h2>5. Hosting</h2>
+  <p>Die App wird über GitHub Pages ausgeliefert. Beim Aufruf verarbeitet GitHub technisch notwendige
+    Zugriffsdaten (z. B. IP-Adresse, Zeitpunkt), um die Seite auszuliefern; siehe
+    <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement">Datenschutzerklärung von GitHub</a>.
+    Der Betreiber der App erhält diese Daten nicht. Wird die App auf einem eigenen Server (z. B. einer NAS)
+    betrieben, ist dessen Betreiber dafür verantwortlich.</p>
+
+  <h2>6. Deine Rechte</h2>
+  <p>Weil der Betreiber keine personenbezogenen Daten von dir speichert, gibt es bei ihm nichts
+    auszukunften oder zu löschen. Deine Daten liegen bei dir und bei den Diensten, die du selbst wählst;
+    dort kannst du sie einsehen, ändern und löschen. Bei Fragen: siehe Kontakt unter 1.</p>
+
+  <h2 lang="en">Summary in English</h2>
+  <p lang="en">Liederbuch is a browser app without its own server, ads, trackers or analytics. Songs are stored
+    on your device and, if you choose, in your own Google Drive, Dropbox or WebDAV storage. With Google Drive
+    the app uses the <code>drive.file</code> scope only, to sync your songbook files between your devices and to
+    share a songbook when you invite someone. Data flows directly between your browser and Google; the
+    developer never receives it. Liederbuch's use and transfer of information received from Google APIs
+    adheres to the
+    <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
+    including the Limited Use requirements. Revoke access at any time at
+    <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.
+    Contact: <a href="https://github.com/Janschke0815/Liederbuch/issues">GitHub issues</a>.</p>
+</main>
+</body>
+</html>

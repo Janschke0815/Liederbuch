@@ -42,7 +42,9 @@ nur von den Adressen an, die du unten einträgst.
    - **Testphase:** Alle, die die App nutzen (du und alle Mitglieder), als **Testnutzer** eintragen
      (höchstens 100). Nachteil: Bei Testnutzern verlangt Google ungefähr wöchentlich eine neue Zustimmung.
    - **Veröffentlichen** („App veröffentlichen“): Mit `drive.file` ist dafür keine Prüfung durch Google
-     nötig. Jeder mit Google-Konto kann sich anmelden, sieht aber trotzdem nur sein eigenes Drive bzw.
+     nötig. Voraussetzung: Unter **Branding** sind App-Startseite und Datenschutzerklärung eingetragen
+     (z. B. `https://janschke0815.github.io/Liederbuch/` und `…/Liederbuch/datenschutz.html`) und die Domain
+     (`janschke0815.github.io`) steht unter *Autorisierte Domains* – sonst bleibt der Knopf grau. Jeder mit Google-Konto kann sich anmelden, sieht aber trotzdem nur sein eigenes Drive bzw.
      die mit ihm geteilten Liederbücher. Empfohlen, sobald es läuft.
 
 ## 3. OAuth-Client (Webanwendung)
