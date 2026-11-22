@@ -89,6 +89,17 @@ geändert (`ConflictError`), liest sie neu und versucht es noch einmal.
 | Google Drive (`google-drive.js`, Anmeldung `google-auth.js`) | eine JSON-Datei pro Liederbuch | Teilen über Drive-Freigaben (lesen/bearbeiten); Google setzt die Rechte durch, mit Leserechten gleicht die Engine nur ab (`readOnly`) |
 | WebDAV (`webdav.js`, `webdav-client.js`) | `Lieder/*.cho`, `Setlisten/*.txt`, `Liederbuch.json` nur als Hinweis | Dateien auch direkt auf dem Server bearbeitbar; jedes Gerät merkt sich, welche Dateien es gesehen hat, und erkennt so Umbenennen und Löschen |
 
+## Mehrere Liederbücher
+
+`books.js` führt die Liederbücher eines Geräts: das persönliche (`PERSONAL`), eigene (`own`, ab 2.2),
+geteilte (`shared`, Drive-Datei eines anderen) und Abos. Jedes hat eine eigene IndexedDB (`dbName`);
+`ui/app-state.js` öffnet nur die des aktiven Buchs, ein Wechsel lädt die Seite neu. Speicherort,
+Zugangsdaten und Anmeldung liegen je Buch unter `bookKey(book, 'webdav.url')` usw. – für das
+persönliche und vor 2.2 geteilte Bücher sind das die alten, globalen Schlüssel (keine Umstellung),
+sonst `…:<Buch-ID>`. `GoogleAuth` (`tokenKey`, `accountKey`, `login_hint`), `DropboxProvider`
+(`tokenKey`, `path`) und `GoogleDriveProvider` (`fileName`, `fileIdKey`) bekommen diese Schlüssel von
+`sync-ui.js`; so hat jedes Buch sein eigenes Konto.
+
 ## Abos (private Gruppen)
 
 Ein abonniertes Liederbuch ist ein eigenes Liederbuch (`books.js`: `abo: { url, … }`, eigene Datenbank)

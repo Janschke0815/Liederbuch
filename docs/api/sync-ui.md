@@ -6,7 +6,9 @@ Cloud-Knopf, Liederbuch-Auswahl und Dialog (verbinden, gemeinsame Liederbücher,
 
 Google Drive: Anmeldung mit google-auth.js (Fenster, auf iPhone/iPad per Weiterleitung), Speichern mit google-drive.js. Einladung per E-Mail mit Link <App>#drive=<Datei-ID>: Wer ihn öffnet, meldet sich an, bestätigt die Datei in der Google-Dateiauswahl und hat das Liederbuch – mit Leserechten nur zum Lesen (Google verweigert dann das Schreiben, die App sperrt das Bearbeiten).
 
-**Benutzt:** [`books.js`](books.md), [`prefs.js`](prefs.md), [`storage/repository.js`](storage/repository.md), [`sync/config.js`](sync/config.md), [`sync/dropbox.js`](sync/dropbox.md), [`sync/google-auth.js`](sync/google-auth.md), [`sync/google-drive.js`](sync/google-drive.md), [`sync/sync-engine.js`](sync/sync-engine.md), [`sync/webdav.js`](sync/webdav.md), [`ui/dom.js`](ui/dom.md)  
+Mehrere Liederbücher (ab 2.2): Jedes hat seinen eigenen Speicherort und sein eigenes Konto. Alle Einstellungen und Anmeldungen des geöffneten Buchs liegen unter bookKey(book, …); abgeglichen wird nur das geöffnete Liederbuch.
+
+**Benutzt:** [`books.js`](books.md), [`prefs.js`](prefs.md), [`storage/repository.js`](storage/repository.md), [`storage/stores.js`](storage/stores.md), [`sync/config.js`](sync/config.md), [`sync/dropbox.js`](sync/dropbox.md), [`sync/google-auth.js`](sync/google-auth.md), [`sync/google-drive.js`](sync/google-drive.md), [`sync/sync-engine.js`](sync/sync-engine.md), [`sync/webdav.js`](sync/webdav.md), [`ui/dom.js`](ui/dom.md)  
 **Benutzt von:** [`app.js`](app.md)
 
 ## Exportiert

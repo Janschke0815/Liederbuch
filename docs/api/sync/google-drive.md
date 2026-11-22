@@ -5,8 +5,9 @@
 Speicherschicht Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive (Format liederbuch-sync).
 
 ```text
-  persönlich:  "Liederbuch.json" im eigenen Drive (wird gesucht bzw. angelegt)
-  gemeinsam:   "Liederbuch – <Name>.json", per Drive mit anderen geteilt
+  eigen:       "Liederbuch.json" (persönliches Liederbuch) bzw. "Liederbuch – <Name>.json" (weitere
+               eigene Bücher) im eigenen Drive – wird gesucht bzw. angelegt; teilen geht trotzdem
+  gemeinsam:   Datei eines anderen (oder vor 2.2 angelegt), fest über ihre ID verbunden
 ```
 
 Hier stehen nur die Drive-Zugriffe. Die Anmeldung kommt von außen (auth, siehe google-auth.js) – so lässt sich die Speicherung austauschen und mit einer Attrappe testen.
@@ -38,7 +39,7 @@ Speicherschicht Google Drive: eine JSON-Datei pro Liederbuch, Teilen über Drive
 
 | Parameter | Typ | Bedeutung |
 |---|---|---|
-| `{{auth: import('./google-auth.js').GoogleAuth, apiKey?: string, appId?: string,` |  | book?: {shared?: boolean, fileId?: string\|null, readOnly?: boolean}, storage?: Storage, fetch?: typeof fetch}} opts apiKey/appId: nur für die Google-Dateiauswahl (Einladung öffnen); nicht geheim |
+| `{{auth: import('./google-auth.js').GoogleAuth, apiKey?: string, appId?: string,` |  | book?: {shared?: boolean, fileId?: string\|null, readOnly?: boolean}, storage?: Storage, fetch?: typeof fetch, fileName?: string, fileIdKey?: string}} opts apiKey/appId: nur für die Google-Dateiauswahl (Einladung öffnen); nicht geheim fileName/fileIdKey: eigene Datei dieses Liederbuchs und wo ihre ID gemerkt wird |
 
 #### `get signedIn`
 

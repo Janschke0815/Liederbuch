@@ -392,6 +392,23 @@ freier Lizenz. (Keine Rechtsberatung.)
 
 Die Datei ist lesbares JSON (`format: "liederbuch-abo"`, siehe `src/formats/abo.js`).
 
+## Mehrere Liederbücher
+
+Unter **Cloud → Liederbücher auf diesem Gerät → Neues Liederbuch** legt man beliebig viele eigene
+Liederbücher an – jedes mit eigener Datenbank auf dem Gerät und **eigenem Speicherort**: nur auf diesem
+Gerät, Google Drive, Dropbox oder WebDAV. Auch das **Konto** ist pro Buch frei: Das Band-Liederbuch
+kann im Drive des Band-Kontos liegen, das private in der eigenen Dropbox. Bei der ersten Anmeldung
+fragt Google bzw. Dropbox nach dem Konto. Optional werden die Lieder des geöffneten Buchs übernommen.
+
+- Gewechselt wird oben links in der Kopfleiste; abgeglichen wird immer das **geöffnete** Buch (die
+  anderen beim Öffnen).
+- **Google Drive / Dropbox:** Datei `Liederbuch – <Name>.json` (im Drive bzw. App-Ordner).
+  **WebDAV:** eigener Ordner, vorbelegt neben dem Ordner des geöffneten Buchs.
+- **Umbenennen** ändert nur den Namen in der App, die Datei behält ihren Namen. **Entfernen** löscht
+  das Buch auf diesem Gerät; was in der Cloud liegt, bleibt.
+- „Mein Liederbuch“ behält seine Einstellungen (`Liederbuch.json`); geteilte Bücher (Einladung)
+  laufen immer über Google Drive.
+
 ## Cloud-Sync und gemeinsame Liederbücher (Google Drive)
 
 Jedes Liederbuch ist eine Datei in Google Drive; jedes Gerät hat zusätzlich eine vollständige
@@ -412,9 +429,8 @@ weitergespeichert).
   Link zur App (`#drive=<Datei-ID>`); wer ihn öffnet, meldet sich an, bestätigt die vorgewählte Datei
   in der Google-Auswahl und hat das Liederbuch. Leserechte setzt Google selbst durch; die App sperrt
   dann das Bearbeiten und holt nur ab. Rechte lassen sich jederzeit ändern oder entziehen.
-- **Gemeinsame Liederbücher** (z. B. „Band“) – `Liederbuch – Band.json`, eine eigene Datei, die
-  mehrere bearbeiten dürfen. Unter **Cloud** anlegen (optional mit den eigenen Liedern), dann
-  Mitglieder einladen. Gewechselt wird oben links in der Kopfleiste.
+- **Weitere Liederbücher** (z. B. „Band“) – siehe „Mehrere Liederbücher“: Mit Speicherort Google Drive
+  wird daraus `Liederbuch – Band.json`, eine eigene Datei, die sich ebenso teilen lässt.
 
 Sicherheit: Die App ist öffentlich, die Lieder nicht. Zugriff auf ein Drive gibt es nur über
 die Google-Anmeldung des jeweiligen Kontos, und die App bekommt nur die Berechtigung
@@ -600,4 +616,6 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
 22. ✅ Google Drive neu (2.1): nur noch „Mit Google anmelden“ (OAuth 2 im Browser, iPhone per Weiterleitung),
     Einladung per E-Mail als Leser oder Bearbeiter mit Link, Leserechte setzt Google durch;
     Abo liefert Transposition mit
-23. Live-Modus fürs Lagerfeuer: ein Gerät wählt das Lied, alle anderen sehen es sofort (Peer-to-Peer)
+23. ✅ Mehrere Liederbücher (2.2): beliebig viele eigene Liederbücher, jedes mit eigenem Speicherort
+    (Gerät, Google Drive, Dropbox, WebDAV) und eigenem Konto; umbenennen, entfernen
+24. Live-Modus fürs Lagerfeuer: ein Gerät wählt das Lied, alle anderen sehen es sofort (Peer-to-Peer)

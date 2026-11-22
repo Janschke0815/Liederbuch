@@ -2,7 +2,7 @@
 
 [← Übersicht](../README.md)
 
-Cloud-Anbieter Dropbox: das persönliche Liederbuch ist eine JSON-Datei im App-Ordner (Dropbox → Apps → <Name der Dropbox-App> → Liederbuch.json). Die App sieht nur diesen Ordner.
+Cloud-Anbieter Dropbox: jedes Liederbuch ist eine JSON-Datei im App-Ordner (Dropbox → Apps → <Name der Dropbox-App> → Liederbuch.json, weitere Bücher „Liederbuch – Name.json“). Die App sieht nur diesen Ordner. Jedes Liederbuch kann ein eigenes Dropbox-Konto haben (tokenKey, siehe bookKey).
 
 Anmeldung ohne eigenen Server: OAuth mit PKCE. Die Seite leitet zu Dropbox weiter und kommt mit ?code=… zurück (startLogin / finishLogin). Dropbox gibt ein Langzeit-Token (refresh_token) – danach muss man sich nicht mehr anmelden; das kurzlebige Zugangstoken wird still erneuert.
 
@@ -41,19 +41,20 @@ Cloud-Anbieter Dropbox: eine JSON-Datei im App-Ordner, Anmeldung per PKCE.
 
 | Parameter | Typ | Bedeutung |
 |---|---|---|
-| `opts` | `{appKey: string, fetch?: typeof fetch, storage?: Storage, redirectUri?: string}` |  |
+| `{{appKey: string, fetch?: typeof fetch, storage?: Storage, redirectUri?: string,` |  | path?: string, tokenKey?: string}} opts path: Datei im App-Ordner (Standard /Liederbuch.json); tokenKey: wo die Anmeldung liegt |
 
 #### `get signedIn`
 
 Ist die App mit Dropbox verbunden (Langzeit-Token vorhanden)?
 
-#### `async loginUrl(extra = {})`
+#### `async loginUrl(extra = {}, { choose = false } = {})`
 
 Anmeldung beginnen: Prüfschlüssel merken und zu Dropbox weiterleiten.
 
 | Parameter | Typ | Bedeutung |
 |---|---|---|
 | `[extra]` | `object` | wird bis zur Rückkehr aufbewahrt (z. B. welches Liederbuch) |
+| `[opts]` | `{choose?: boolean}` | choose: Dropbox fragt nach dem Konto (anderes Konto möglich) |
 
 **Rückgabe:** `Promise<string>` Adresse der Dropbox-Anmeldeseite
 

@@ -4,14 +4,14 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-74 Module, 279 exportierte Funktionen, Konstanten und Klassen.
+74 Module, 283 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
 | Modul | Inhalt |
 |---|---|
 | [`app.js`](app.md) | Einstieg der App: steckt die Teile der Oberfläche zusammen und öffnet das erste Lied. |
-| [`books.js`](books.md) | Mehrere Liederbücher auf einem Gerät: das persönliche und beliebig viele gemeinsame. |
+| [`books.js`](books.md) | Mehrere Liederbücher auf einem Gerät. |
 | [`context-menu.js`](context-menu.md) | Kontextmenü: Rechtsklick (Maus), langes Drücken (Touch) oder Menütaste / Umschalt+F10. |
 | [`metronome.js`](metronome.md) | Metronom mit Web Audio: genaue Zeitplanung (vorausplanen statt setInterval-Klicks), betonte Eins je nach Taktart. |
 | [`play-mode.js`](play-mode.md) | Spielmodus: Vollbild nur mit dem Lied, automatisches Scrollen, Bildschirm bleibt an, Blättern per Tastatur oder Bluetooth-Fußpedal (die senden Bild-/Pfeiltasten). |
@@ -118,7 +118,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 |---|---|
 | [`sync/abo-client.js`](sync/abo-client.md) | Abo-Datei vom Server laden – mit Anmeldung, falls der Ordner geschützt ist, und nur, wenn sie sich seit dem letzten Mal geändert hat (ETag). |
 | [`sync/config.js`](sync/config.md) | Google-Zugangsdaten für Google Drive (Einrichtung: docs/google-einrichtung.md). |
-| [`sync/dropbox.js`](sync/dropbox.md) | Cloud-Anbieter Dropbox: das persönliche Liederbuch ist eine JSON-Datei im App-Ordner (Dropbox → Apps → <Name der Dropbox-App> → Liederbuch.json). |
+| [`sync/dropbox.js`](sync/dropbox.md) | Cloud-Anbieter Dropbox: jedes Liederbuch ist eine JSON-Datei im App-Ordner (Dropbox → Apps → <Name der Dropbox-App> → Liederbuch.json, weitere Bücher „Liederbuch – Name.json“). |
 | [`sync/google-auth.js`](sync/google-auth.md) | Anmeldung bei Google (OAuth 2) – ganz im Browser, ohne eigenen Server. |
 | [`sync/google-drive.js`](sync/google-drive.md) | Speicherschicht Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive (Format liederbuch-sync). |
 | [`sync/sync-engine.js`](sync/sync-engine.md) | Abgleich der lokalen Datenbank mit einer gemeinsamen Datei in der Cloud. |

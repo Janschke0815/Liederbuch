@@ -8,13 +8,20 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
-## 2.1.2 – 22.11.2026 · Gemeinsame Liederbücher auch neben WebDAV/Dropbox
+## 2.2.0 – 22.11.2026 · Mehrere Liederbücher mit eigenem Speicherort
 
-- Gleicht das persönliche Liederbuch über WebDAV/Nextcloud oder Dropbox ab, lassen sich trotzdem
-  gemeinsame Liederbücher über Google Drive anlegen und Einladungen öffnen. Die Google-Anmeldung
-  kommt dabei von selbst; das persönliche Liederbuch bleibt bei seinem Speicherort.
-- Die Google-Anmeldung in einem gemeinsamen Liederbuch schaltet den automatischen Abgleich des
-  persönlichen Liederbuchs (z. B. über WebDAV) nicht mehr ab.
+- **Neues Liederbuch** (Cloud → Liederbücher auf diesem Gerät): beliebig viele eigene Liederbücher,
+  jedes mit eigenem Speicherort – nur auf diesem Gerät, Google Drive, Dropbox oder WebDAV.
+  Optional mit den Liedern des geöffneten Buchs.
+- **Eigenes Konto pro Liederbuch:** Bei der ersten Anmeldung fragt Google bzw. Dropbox nach dem Konto;
+  die App merkt es sich und meldet beim nächsten Mal wieder beim richtigen Konto an.
+- Google Drive und Dropbox: Jedes weitere Buch ist eine eigene Datei `Liederbuch – <Name>.json`.
+  WebDAV: eigener Ordner, vorbelegt neben dem Ordner des geöffneten Buchs.
+- In der Liste steht bei jedem Buch, wo es abgeglichen wird; neu sind **Umbenennen** und **Entfernen**.
+- **Einladung öffnen** fragt nach dem Google-Konto – die Einladung kann an ein anderes Konto gegangen sein.
+- Abgeglichen wird wie bisher das geöffnete Liederbuch. „Mein Liederbuch“ und bestehende geteilte
+  Bücher behalten ihre Einstellungen und Anmeldungen.
+- Der Live-Modus rückt im Fahrplan auf Punkt 24.
 
 ## 2.1.1 – 22.11.2026 · Einladung öffnen: Dateiauswahl nicht mehr verdeckt
 
