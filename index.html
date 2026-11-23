@@ -60,6 +60,7 @@
       <symbol id="i-metro" viewBox="0 0 24 24"><path d="M9 3h6l4 18H5z"/><path d="m12 15 5-8"/></symbol>
       <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></symbol>
       <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></symbol>
+      <symbol id="i-select" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/></symbol>
       <symbol id="i-live" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M8.5 15.5a5 5 0 0 1 0-7M15.5 8.5a5 5 0 0 1 0 7M5.6 18.4a9 9 0 0 1 0-12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></symbol>
       <symbol id="i-note" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
     </defs>
@@ -164,6 +165,7 @@
             <button type="button" id="cf-toggle" class="link-btn" aria-expanded="false" aria-controls="cf-panel" title="Nur Lieder zeigen, die aus Griffen bestehen, die du kannst – ein-/ausklappen">
               <span class="cf-label">🎸 Was kann ich spielen?</span><span class="cf-chevron" aria-hidden="true"></span>
             </button>
+            <button type="button" id="sel-start" class="icon-btn sel-start" title="Mehrere Lieder auswählen (auch Strg+Klick)" aria-label="Mehrere Lieder auswählen"><svg class="icon"><use href="#i-select"/></svg></button>
             <div class="sort-box" title="Reihenfolge der Liste">
               <select id="sort-select" aria-label="Sortieren nach"></select>
               <button type="button" id="sort-dir" class="link-btn sort-dir" title="Reihenfolge umkehren">A–Z</button>
@@ -190,6 +192,15 @@
           <button type="button" data-welcome="cloud"><svg class="icon"><use href="#i-cloud"/></svg><span><strong>Mit anderen Geräten abgleichen</strong><small>Google Drive, Dropbox oder WebDAV</small></span></button>
           <button type="button" class="link-btn welcome-hide" data-welcome="hide">Ausblenden</button>
         </div>
+        </div>
+        <!-- Mehrfachauswahl (ui/selection.js): Anzahl, alle, Aktionen, löschen -->
+        <div id="select-bar" class="select-bar" hidden role="toolbar" aria-label="Ausgewählte Lieder">
+          <button type="button" id="sel-cancel" class="icon-btn" title="Auswahl beenden (Esc)" aria-label="Auswahl beenden"><svg class="icon"><use href="#i-x"/></svg></button>
+          <span class="sel-count" aria-live="polite"><strong id="sel-count">0</strong><span class="sel-word"> ausgewählt</span></span>
+          <button type="button" id="sel-all" class="link-btn" title="Alle sichtbaren Lieder auswählen bzw. keines">Alle</button>
+          <span class="spacer"></span>
+          <button type="button" id="sel-actions" aria-haspopup="menu">Aktionen <span class="book-caret" aria-hidden="true"></span></button>
+          <button type="button" id="sel-delete" class="icon-btn danger" title="Ausgewählte löschen (Entf)" aria-label="Ausgewählte löschen"><svg class="icon"><use href="#i-trash"/></svg></button>
         </div>
         <p id="song-count" class="song-count"></p>
       </div>

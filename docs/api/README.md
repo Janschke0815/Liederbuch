@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-85 Module, 323 exportierte Funktionen, Konstanten und Klassen.
+87 Module, 330 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -44,6 +44,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/paste.js`](ui/paste.md) | Text einfügen: Akkorde-über-Text (z. |
 | [`ui/preview-tools.js`](ui/preview-tools.md) | Werkzeuge an der Vorschau: Vergrößern/Verkleinern und Metronom (Klick auf Takt/Tempo). |
 | [`ui/publish.js`](ui/publish.md) | „Für eine Gruppe veröffentlichen“: Lieder (alle, nach Tag oder aus einer Setliste) als Abo-Datei in den Sync-Ordner (WebDAV) legen oder herunterladen, und den Einladungslink zum Weitergeben zeigen. |
+| [`ui/selection.js`](ui/selection.md) | Mehrfachauswahl in der Liederliste: Leiste unten (Anzahl, Alle, Aktionen, Löschen) und die Aktionen für alle ausgewählten Lieder – löschen (mit Rückgängig), in ein anderes Liederbuch kopieren, zu einer Setliste hinzufügen. |
 | [`ui/share-with.js`](ui/share-with.md) | „Mit anderen teilen“: ein Einstieg, der zuerst fragt, ob die anderen mitbearbeiten (gemeinsames Liederbuch über Google Drive) oder nur lesen sollen (Abo) – und dann in den passenden bestehenden Ablauf führt (Cloud-Dialog „Mitglieder“, „Neues Liederbuch“, „Veröffentlichen …“). |
 | [`ui/share.js`](ui/share.md) | Lied teilen: über das Teilen-Menü des Geräts, als ChordPro-Datei, als Text oder als PDF – jeweils in der aktuellen Transposition. |
 | [`ui/shortcuts.js`](ui/shortcuts.md) | Alle Tastenkürzel an einer Stelle: Daraus entstehen die Tasten-Abfrage (app-keys.js, play-mode.js) und die Übersicht im Dialog „Tastenkürzel“. |
@@ -68,6 +69,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`core/play-scroll.js`](core/play-scroll.md) | Rechnungen für den Spielmodus – ohne Bildschirmzugriff, damit sie sich testen lassen. |
 | [`core/playable.js`](core/playable.md) | "Was kann ich spielen?": Lieder, die nur aus bekannten Griffen bestehen (optional mit Capo). |
 | [`core/repeat.js`](core/repeat.md) | Wiederholungsangaben wie "2×", "x2", "(2x)", "2 mal" am Ende eines Textes. |
+| [`core/song-copy.js`](core/song-copy.md) | Mehrere Lieder in ein anderes Liederbuch kopieren: was dort schon steht (gleicher Titel und – falls beide einen haben – Interpret), wird übersprungen. |
 | [`core/song-list.js`](core/song-list.md) | Liederliste: Sortierung und Erkennen doppelter Lieder. |
 | [`core/text.js`](core/text.md) | Textfunktionen, die an mehreren Stellen gebraucht werden: deutsch sortieren, für die Suche vereinfachen, Zeilenenden vereinheitlichen. |
 | [`core/toolbar-pins.js`](core/toolbar-pins.md) | Angeheftete Aktionen der Kopfleiste: welche, in welcher Reihenfolge. |

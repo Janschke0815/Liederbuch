@@ -169,6 +169,7 @@ export async function listedSongs() {
 function songButton(s) {
   const btn = el('button', { type: 'button', className: 'song-item' + (s.id === state.current?.id ? ' active' : '') });
   btn.dataset.id = s.id;
+  if (selection.active) btn.setAttribute('aria-pressed', String(selection.ids.has(s.id)));
   let artist = s.artist;
   if (capoHint.has(s.id)) artist += `${s.artist ? ' · ' : ''}mit Capo ${capoHint.get(s.id)}`;
   btn.append(
@@ -262,9 +263,79 @@ export function focusSearch() {
 listEl.addEventListener('click', async (e) => {
   const btn = e.target.closest('.song-item');
   if (!btn) return;
+  // Mehrfachauswahl: im Auswahlmodus markiert ein Klick; am PC auch Strg/⌘+Klick bzw. Umschalt+Klick (Bereich)
+  if (selection.active || e.ctrlKey || e.metaKey || (e.shiftKey && selection.last)) {
+    e.preventDefault();
+    if (e.shiftKey && selection.last) selectRange(selection.last, btn.dataset.id);
+    else toggleSelected(btn.dataset.id);
+    return;
+  }
   await openSong(btn.dataset.id);
   if (isMobile()) setView('preview');
 });
+
+// ---------- Mehrfachauswahl (Leiste und Aktionen: ui/selection.js) ----------
+
+/** Ausgewählte Lieder. Ereignis „selectionchange“ auf window bei jeder Änderung. */
+export const selection = { active: false, ids: new Set(), last: null };
+
+function selectionChanged() {
+  selection.active = selection.active || selection.ids.size > 0;
+  for (const b of $$('.song-item', listEl)) {
+    if (selection.active) b.setAttribute('aria-pressed', String(selection.ids.has(b.dataset.id)));
+    else b.removeAttribute('aria-pressed');
+  }
+  listEl.classList.toggle('selecting', selection.active);
+  dispatchEvent(new Event('selectionchange'));
+}
+
+/** Auswahlmodus starten (optional gleich mit einem Lied). */
+export function startSelection(id = null) {
+  selection.active = true;
+  if (id) {
+    selection.ids.add(id);
+    selection.last = id;
+  }
+  selectionChanged();
+}
+
+/** Lied an-/abwählen. */
+export function toggleSelected(id) {
+  if (selection.ids.has(id)) selection.ids.delete(id);
+  else selection.ids.add(id);
+  selection.last = id;
+  selection.active = true;
+  selectionChanged();
+}
+
+/** Alle Lieder zwischen zwei (in der Reihenfolge der Liste) auswählen. */
+function selectRange(fromId, toId) {
+  const ids = $$('.song-item', listEl).map((b) => b.dataset.id);
+  const [a, b] = [ids.indexOf(fromId), ids.indexOf(toId)].sort((x, y) => x - y);
+  if (a < 0) return toggleSelected(toId);
+  for (const id of ids.slice(a, b + 1)) selection.ids.add(id);
+  selection.last = toId;
+  selectionChanged();
+}
+
+/** Alle sichtbaren Lieder auswählen bzw. – sind schon alle gewählt – keines. */
+export function selectAllVisible() {
+  const ids = $$('.song-item', listEl).map((b) => b.dataset.id);
+  const all = ids.every((id) => selection.ids.has(id));
+  for (const id of ids) {
+    if (all) selection.ids.delete(id);
+    else selection.ids.add(id);
+  }
+  selectionChanged();
+}
+
+/** Auswahlmodus beenden. */
+export function endSelection() {
+  selection.active = false;
+  selection.ids.clear();
+  selection.last = null;
+  selectionChanged();
+}
 
 // ---------- Kopf der Liste (Suche, Filter, Tags) weg- und hereingleiten lassen ----------
 // Runterscrollen: Kopf gleitet nach oben weg, die Liste bekommt den Platz. Ein Stück hochscrollen: Kopf

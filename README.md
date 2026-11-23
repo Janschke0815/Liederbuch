@@ -99,6 +99,11 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 - **Bausteine** über dem Editor: Akkord, Strophe, Refrain, Bridge, Refrain wiederholen, Hinweis. Markierter Text wird eingeschlossen.
 - **Dateien** einfach ins Fenster ziehen, um sie zu importieren.
 - **Löschen** lässt sich in der Meldung unten rückgängig machen.
+- **Mehrere Lieder auf einmal:** Symbol ☑ über der Liste, *Auswählen* im Rechtsklick-/Lang-drück-Menü eines
+  Liedes oder am PC **Strg+Klick** (Umschalt+Klick wählt einen Bereich). Unten erscheint eine Leiste mit der
+  Anzahl, *Alle*, **Aktionen** (*In anderes Liederbuch kopieren* – Vorhandenes wird übersprungen –, *Zur
+  Setliste hinzufügen*, *Löschen*) und 🗑 (Entf). Gelöschte gehen in den Papierkorb, „Rückgängig“ holt sie
+  zurück. Esc oder ✕ beendet die Auswahl.
 - **Kopf der Liste** (Suche, „Was kann ich spielen?“, Tags) gleitet beim Runterscrollen weg und beim
   Hochscrollen sofort wieder herein – ohne dass die Liste nach oben springt.
 - **Sortieren** (über der Liste): nach Titel, Interpret, zuletzt geändert oder zuletzt gespielt; der Knopf

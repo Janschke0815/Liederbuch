@@ -14,7 +14,7 @@ Mehrere Liederbücher auf einem Gerät. Jedes hat eine eigene lokale Datenbank.
   abonniert (nur lesen):   { id: 'abo-…', name, dbName, abo: { url, publisher, user, password } }
 ```
 
-**Benutzt von:** [`app.js`](app.md), [`sync-ui.js`](sync-ui.md), [`sync/book-name.js`](sync/book-name.md), [`ui/abo.js`](ui/abo.md), [`ui/add-songs.js`](ui/add-songs.md), [`ui/app-state.js`](ui/app-state.md), [`ui/context-menus.js`](ui/context-menus.md), [`ui/files.js`](ui/files.md), [`ui/publish.js`](ui/publish.md)
+**Benutzt von:** [`app.js`](app.md), [`sync-ui.js`](sync-ui.md), [`sync/book-name.js`](sync/book-name.md), [`ui/abo.js`](ui/abo.md), [`ui/add-songs.js`](ui/add-songs.md), [`ui/app-state.js`](ui/app-state.md), [`ui/context-menus.js`](ui/context-menus.md), [`ui/files.js`](ui/files.md), [`ui/publish.js`](ui/publish.md), [`ui/selection.js`](ui/selection.md)
 
 ## Exportiert
 

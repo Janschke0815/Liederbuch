@@ -7,7 +7,7 @@ import { personalBookName } from '../books.js';
 import { readOnly, repo, state, services } from './app-state.js';
 import { copyToPersonal } from './abo.js';
 import { $, isMobile } from './dom.js';
-import { listEl } from './list.js';
+import { listEl, selection, startSelection } from './list.js';
 import { getViewZoom, setViewZoom } from './preview-tools.js';
 import { editor, openSong, setViewOption } from './song.js';
 import { deleteSong, duplicateSong, editSong, printSong, setlistMenu } from './song-actions.js';
@@ -21,6 +21,7 @@ attachContextMenu(listEl, '.song-item', async (btn) => {
     return [
       { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
       { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: async () => { await openSong(id); services.play.open(id); } },
+      { label: 'Auswählen', icon: 'select', hint: 'Strg+Klick', action: () => startSelection(id) },
       '-',
       { label: `In „${personalBookName()}“ kopieren`, icon: 'paste', action: () => copyToPersonal([song]) },
       { label: 'Drucken / PDF', icon: 'print', action: () => printSong(song) },
@@ -30,6 +31,7 @@ attachContextMenu(listEl, '.song-item', async (btn) => {
     { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
     { label: 'Bearbeiten', icon: 'edit', action: async () => { await openSong(id); editSong(); } },
     { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: async () => { await openSong(id); services.play.open(id); } },
+    { label: 'Auswählen', icon: 'select', hint: 'Strg+Klick', action: () => startSelection(id) },
     '-',
     await setlistMenu(id),
     { label: 'Duplizieren', icon: 'paste', action: () => duplicateSong(id) },
@@ -43,7 +45,8 @@ attachContextMenu(listEl, '.song-item', async (btn) => {
 // Doppelklick spielt, Entf löscht (mit Rückgängig)
 listEl.addEventListener('dblclick', async (e) => {
   const btn = e.target.closest('.song-item');
-  if (!btn) return;
+  if (!btn || selection.active) return; // im Auswahlmodus nur markieren
+  if (e.ctrlKey || e.metaKey || e.shiftKey) return;
   await openSong(btn.dataset.id);
   services.play.open(btn.dataset.id);
 });

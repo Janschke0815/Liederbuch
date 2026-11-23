@@ -8,6 +8,18 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.14 – 24.11.2026 · Mehrere Lieder auf einmal
+
+- **Mehrfachauswahl in der Liederliste:** mit dem Symbol ☑ über der Liste, über *Auswählen* im Rechtsklick- bzw.
+  Lang-drück-Menü eines Liedes oder am PC mit **Strg+Klick** (Umschalt+Klick wählt einen ganzen Bereich).
+  Im Auswahlmodus markiert ein Tipp, statt das Lied zu öffnen.
+- **Leiste unten:** Anzahl, *Alle*, **Aktionen** und 🗑:
+  - **In anderes Liederbuch kopieren** – Lieder, die es dort schon gibt, werden übersprungen; „Öffnen“ wechselt
+    gleich ins Ziel-Liederbuch.
+  - **Zur Setliste hinzufügen** – in eine vorhandene oder eine neue Setliste.
+  - **Löschen** (auch mit Entf) – in den Papierkorb, mit „Rückgängig“.
+- Esc oder ✕ beendet die Auswahl.
+
 ## 2.3.13 – 24.11.2026 · Mehr Platz für die Liederliste
 
 - **Suche, „Was kann ich spielen?“ und Tags gleiten beim Runterscrollen weg** – die ganze Fläche gehört dann den
