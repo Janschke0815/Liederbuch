@@ -410,7 +410,7 @@ zählt hoch. Beim Import aus Ultimate Guitar werden „[Chorus x2]“ und „x2�
 
 ## Mit anderen teilen – welcher Weg?
 
-**⋯ → Mit anderen teilen …** (auch oben im Cloud-Dialog) fragt zuerst, was die anderen können sollen:
+**⋯ → Mit anderen teilen …** (auch im Cloud-Dialog, Karte *Mit anderen teilen*) fragt zuerst, was die anderen können sollen:
 
 - **Mitbearbeiten – gemeinsames Liederbuch:** Alle ändern mit, jeder braucht ein Google-Konto. Liegt das Buch
   schon in Google Drive, geht es direkt zu *Mitglieder* (E-Mail eingeben, einladen). Sonst bietet die App an,
@@ -425,7 +425,7 @@ Eine Person pflegt ein Liederbuch, die anderen **abonnieren** es: Sie sehen es a
 Liederbuch, **nur zum Lesen**, und bekommen Änderungen automatisch (beim Öffnen und alle
 30 Minuten). Gedacht für einen **privaten Kreis** – Band, Familie, Freunde.
 
-**Veröffentlichen** (⋯ → *Mit anderen teilen …* → *Nur lesen – Abo*, oder Cloud → *Nur zum Lesen teilen (Abo)* → *Veröffentlichen …*):
+**Veröffentlichen** (⋯ → *Mit anderen teilen …* → *Nur lesen – Abo*, oder Cloud → *Mit anderen teilen* → *Abo veröffentlichen …*):
 alle Lieder, Lieder mit einem Tag oder eine Setliste. Die App legt die Abo-Datei in euren
 **Sync-Ordner** (WebDAV, Unterordner `Abo/`; nur, wenn die App gerade darüber abgleicht) – Abonnenten
 melden sich dort mit ihrem eigenen Benutzer an –

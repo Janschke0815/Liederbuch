@@ -158,6 +158,26 @@ kbd { display: inline-block; min-width: 1.4em; padding: .05em .4em; border: 1px 
 .sw-links .link-btn { padding-inline: .2em; text-align: left; white-space: normal; }
 #sw-step2-text { margin: 0 0 .8em; }
 .sw-step2-actions { display: flex; flex-direction: column; align-items: stretch; gap: .5em; }
-/* Knopf oben im Cloud-Dialog */
-.sync-dialog .dialog-head { display: flex; align-items: center; gap: .6em; flex-wrap: wrap; }
-.sharewith-btn { margin-left: auto; }
+/* Cloud-Dialog: Karte „Mit anderen teilen“ (Mitglieder + Einstieg), Datenschutz-Link in der Fußzeile */
+.members { display: flex; flex-direction: column; gap: .5em; padding-bottom: .7em; margin-bottom: .2em; border-bottom: 1px solid var(--border); }
+.members[hidden] { display: none; }
+.members-head { margin: 0; font-weight: 600; font-size: .92em; }
+.share-start { display: flex; flex-direction: column; gap: .5em; }
+.share-start[hidden] { display: none; }
+#members:not([hidden]) + .share-start > .hint { display: none; } /* Mitglieder stehen schon da – Erklärung unnötig */
+.share-start .cloud-actions { display: flex; align-items: center; gap: .6em; flex-wrap: wrap; }
+#share-card:has(#members[hidden]):has(#publish-card[hidden]) { display: none; } /* Abo/nur lesen: nichts zu teilen */
+.foot-link { font-size: .85em; color: var(--muted); align-self: center; padding-inline: .4em; }
+@media (max-width: 520px) {
+  .sync-dialog .dialog-foot { flex-wrap: nowrap; gap: .3em; }
+  .foot-link { white-space: nowrap; padding-inline: .2em; }
+  #sync-provider .lbl-wide { display: none; } /* „WebDAV“ reicht – Nextcloud steht in der Einrichtung */
+  #sync-provider button { white-space: nowrap; padding-inline: .55em; font-size: .9em; }
+  .sync-dialog .dialog-foot { padding-inline: .7em; }
+  .sync-dialog .dialog-foot #btn-books .icon { display: none; }
+}
+@media (max-width: 360px) {
+  .sync-dialog .dialog-foot { flex-wrap: wrap; row-gap: .1em; }
+  .sync-dialog .foot-link { order: 3; flex-basis: 100%; text-align: center; } /* eigene kleine Zeile */
+  #sync-provider button { padding-inline: .4em; font-size: .85em; }
+}

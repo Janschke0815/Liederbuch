@@ -854,13 +854,12 @@
   <dialog id="sync-dialog" class="sync-dialog">
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
-        <h2>Cloud: Abgleich &amp; Teilen</h2>
-        <button type="button" id="sync-sharewith" class="sharewith-btn"><svg class="icon"><use href="#i-share"/></svg>Mit anderen teilen …</button>
+        <h2>Cloud – „<span id="sync-dlg-book"></span>“</h2>
       </header>
       <div class="dialog-body sync-body">
-        <!-- 1. Abgleich des geöffneten Liederbuchs zwischen Geräten -->
+        <!-- 1. Abgleich des geöffneten Liederbuchs zwischen deinen Geräten -->
         <section class="cloud-card" id="sync-card">
-          <h3><svg class="icon"><use href="#i-cloud"/></svg>Abgleich zwischen Geräten</h3>
+          <h3><svg class="icon"><use href="#i-cloud"/></svg>Auf deinen Geräten abgleichen</h3>
           <div class="cloud-card-body">
             <div id="sync-status" class="sync-status" data-state="off">
               <svg class="icon"><use href="#i-cloud"/></svg>
@@ -876,7 +875,7 @@
                 <div class="segmented" role="radiogroup" aria-label="Speicherort" id="sync-provider">
                   <button type="button" role="radio" data-value="gdrive">Google Drive</button>
                   <button type="button" role="radio" data-value="dropbox">Dropbox</button>
-                  <button type="button" role="radio" data-value="webdav">WebDAV / Nextcloud</button>
+                  <button type="button" role="radio" data-value="webdav"><span>WebDAV<span class="lbl-wide"> / Nextcloud</span></span></button>
                 </div>
               </div>
 
@@ -927,41 +926,41 @@
                 <button type="button" id="sync-connect" class="primary">Verbinden</button>
               </div>
               <p class="hint" id="sync-foot-hint">Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.</p>
-              <p class="hint"><a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> – was die App mit deinen Daten bei Google, Dropbox und WebDAV macht.</p>
             </div>
           </div>
         </section>
 
-        <!-- 2. Mitglieder (nur gemeinsame Liederbücher über Google Drive) -->
-        <section id="members" class="cloud-card" hidden>
-          <h3><svg class="icon"><use href="#i-share"/></svg>Mitglieder von „<span id="members-book"></span>“</h3>
+        <!-- 2. Mit anderen teilen: Mitglieder (gemeinsames Buch über Google Drive, nur wenn verbunden) und ein
+             Einstieg „Mit anderen teilen …“, der nach mitbearbeiten oder nur lesen fragt (ui/share-with.js) -->
+        <section class="cloud-card" id="share-card">
+          <h3><svg class="icon"><use href="#i-share"/></svg>Mit anderen teilen</h3>
           <div class="cloud-card-body">
-            <ul id="member-list" class="member-list"></ul>
-            <div class="invite-row">
-              <input id="invite-email" type="email" placeholder="E-Mail-Adresse (Google-Konto)" autocomplete="off">
-              <select id="invite-role" title="Rechte">
-                <option value="reader" selected>nur lesen</option>
-                <option value="writer">darf bearbeiten</option>
-              </select>
-              <button type="button" id="invite-ok" class="primary">Einladen</button>
+            <div id="members" class="members" hidden>
+              <p class="members-head">Mitglieder von „<span id="members-book"></span>“</p>
+              <ul id="member-list" class="member-list"></ul>
+              <div class="invite-row">
+                <input id="invite-email" type="email" placeholder="E-Mail-Adresse (Google-Konto)" autocomplete="off">
+                <select id="invite-role" title="Rechte">
+                  <option value="reader" selected>nur lesen</option>
+                  <option value="writer">darf bearbeiten</option>
+                </select>
+                <button type="button" id="invite-ok" class="primary">Einladen</button>
+              </div>
+              <p class="hint">Google schickt eine Einladung mit einem Link zur App. Wer ihn öffnet, meldet sich mit Google an, bestätigt die Datei und hat das Liederbuch. „Nur lesen“ setzt Google selbst durch – ändern kann dann nur, wer bearbeiten darf.</p>
             </div>
-            <p class="hint">Google schickt eine Einladung mit einem Link zur App. Wer ihn öffnet, meldet sich mit Google an, bestätigt die Datei und hat das Liederbuch. „Nur lesen“ setzt Google selbst durch – ändern kann dann nur, wer bearbeiten darf.</p>
-          </div>
-        </section>
-
-        <!-- 3. Nur zum Lesen teilen (Abo anbieten) -->
-        <section id="publish-card" class="cloud-card">
-          <h3><svg class="icon"><use href="#i-share"/></svg>Nur zum Lesen teilen (Abo)</h3>
-          <div class="cloud-card-body">
-            <p class="hint">Lieder aus „<span id="publish-from"></span>“ als Abo anbieten: Andere sehen sie nur zum Lesen und bekommen Änderungen automatisch. Nur für einen privaten Kreis.</p>
-            <div class="cloud-actions">
-              <button type="button" id="btn-publish"><svg class="icon"><use href="#i-share"/></svg>Veröffentlichen …</button>
+            <div id="publish-card" class="share-start">
+              <p class="hint">Lieder aus „<span id="publish-from"></span>“ gemeinsam bearbeiten (jeder mit Google-Konto) oder nur zum Lesen als Abo anbieten – der Knopf fragt nach und führt durch.</p>
+              <div class="cloud-actions">
+                <button type="button" id="sync-sharewith"><svg class="icon"><use href="#i-share"/></svg>Mit anderen teilen …</button>
+                <button type="button" id="btn-publish" class="link-btn" title="Abo-Datei erstellen bzw. erneut veröffentlichen">Abo veröffentlichen …</button>
+              </div>
             </div>
           </div>
         </section>
       </div>
       <footer class="dialog-foot">
         <button type="button" id="btn-books"><svg class="icon"><use href="#i-note"/></svg>Liederbücher …</button>
+        <a class="foot-link" href="datenschutz.html" target="_blank" rel="noopener" title="Was die App mit deinen Daten bei Google, Dropbox und WebDAV macht">Datenschutz</a>
         <span class="spacer"></span>
         <button value="close" formnovalidate>Schließen</button>
       </footer>

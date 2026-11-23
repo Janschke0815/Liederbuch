@@ -232,7 +232,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     btn.title = `Cloud-Sync: ${TITLES[state]}${text ? ' – ' + text : ''}`;
     $('#cloud-label').textContent = state === 'off' ? 'Cloud' : state === 'auth' ? 'Anmelden' : TITLES[state];
     $('#sync-status').dataset.state = state;
-    $('#sync-status-title').textContent = book.abo ? `${book.name}: Abo` : `${book.name}: ${TITLES[state]}`;
+    $('#sync-status-title').textContent = book.abo ? 'Abo – wird nicht abgeglichen' : TITLES[state]; // Buchname steht im Titel
+    $('#sync-dlg-book').textContent = book.name;
     $('#sync-status-text').textContent = text;
 
     const connected = state !== 'off';

@@ -8,6 +8,17 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.7 – 23.11.2026 · Cloud-Dialog aufgeräumt
+
+- **Klarer Aufbau:** Der Titel nennt das Liederbuch („Cloud – „Mein Liederbuch““). Darunter zwei Karten:
+  **Auf deinen Geräten abgleichen** und **Mit anderen teilen**.
+- **Teilen an einer Stelle:** Statt eines Knopfs oben im Kopf plus einer eigenen Abo-Karte steht alles in der Karte
+  „Mit anderen teilen“ – die Mitglieder (bei gemeinsamen Büchern in Google Drive), **Mit anderen teilen …** und
+  **Abo veröffentlichen …**. Nur das Verbinden ist noch als roter Hauptknopf hervorgehoben.
+- Der Datenschutz-Link steht in der Fußzeile statt mitten in der Karte.
+- **Am Handy:** Speicherort-Knöpfe in einer Zeile („WebDAV“ statt „WebDAV / Nextcloud“), Fußzeile ohne Umbruch
+  bzw. bei sehr schmalen Handys der Datenschutz-Link in einer eigenen kleinen Zeile.
+
 ## 2.3.6 – 23.11.2026 · Akkorde setzen: am Handy unter Bearbeiten
 
 - **Am Handy** steht „Akkorde setzen“ jetzt unter **Bearbeiten**: Ein kleiner Umschalter **Text | Akkorde** direkt
