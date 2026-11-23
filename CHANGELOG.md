@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.8 – 23.11.2026 · Akkorde mit Stern (Am*)
+
+- **Akkorde wie `Am*`, `G*` oder `D/F#*`** werden jetzt erkannt. Der Stern markiert z. B. bei Ultimate Guitar eine
+  Griff-Variante. Beim Einfügen gilt eine Zeile damit als Akkordzeile, beim Transponieren bleibt der Stern
+  (`Am*` → `Bm*`), Griffbild und „Was kann ich spielen?“ behandeln ihn wie den Akkord ohne Stern.
+
 ## 2.3.7 – 23.11.2026 · Cloud-Dialog aufgeräumt
 
 - **Klarer Aufbau:** Der Titel nennt das Liederbuch („Cloud – „Mein Liederbuch““). Darunter zwei Karten:

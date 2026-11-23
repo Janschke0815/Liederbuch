@@ -23,6 +23,7 @@ describe('UG-Import: Zeilenerkennung', () => {
     expect(isChordLine('N.C.   (Am)   F#m')).toBe(true);
     expect(isChordLine('Hm   Fis')).toBe(false); // "Fis" ist kein unterstützter Akkordname
     expect(isChordLine('Hm   H7')).toBe(true);
+    expect(isChordLine('Am*   C   G*   F')).toBe(true); // Stern = Griff-Variante
   });
 
   it('verwechselt Textzeilen nicht mit Akkordzeilen', () => {

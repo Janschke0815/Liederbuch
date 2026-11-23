@@ -72,6 +72,27 @@ describe('Akkorde und Transposition', () => {
     }
   });
 
+  it('Stern am Ende (Griff-Variante, z. B. Ultimate Guitar): erkannt, Stern bleibt beim Transponieren', () => {
+    for (const c of ['Am*', 'G*', 'C**', 'Am7*', 'D/F#*', 'Asus4*']) {
+      if (!isChord(c)) throw new Error(`${c} sollte ein Akkord sein`);
+    }
+    for (const w of ['*', '*Am', 'A*m', 'x2*']) {
+      if (isChord(w)) throw new Error(`${w} sollte kein Akkord sein`);
+    }
+    expect(transposeChord('Am*', 2, false)).toBe('Bm*');
+    expect(transposeChord('D/F#*', 1, true)).toBe('Eb/G*');
+    expect(transposeChord('C**', -1, false)).toBe('B**');
+  });
+
+  it('Stern zählt nicht zum Akkordtyp: Griffbild und „Was kann ich spielen?“ wie ohne Stern', async () => {
+    const { parseChord } = await import('../src/core/chords.js');
+    const { chordShape } = await import('../src/core/chord-shapes.js');
+    const { parseKnown, playableCapo } = await import('../src/core/playable.js');
+    expect(parseChord('Am7*')).toEqual({ root: 'A', quality: 'm7', bass: null, mark: '*' });
+    expect(JSON.stringify(chordShape('Am*'))).toBe(JSON.stringify(chordShape('Am')));
+    expect(playableCapo(['Am*', 'C', 'G*'], parseKnown('Am C G'))).toBe(0);
+  });
+
   it('transponiert Grundton und Bass', () => {
     expect(transposeChord('Am', 3, false)).toBe('Cm');
     expect(transposeChord('D/F#', 1, true)).toBe('Eb/G');

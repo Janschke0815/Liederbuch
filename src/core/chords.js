@@ -9,18 +9,20 @@ const NOTE_INDEX = {
   H: 11, // deutsche Schreibweise
 };
 
-// Grundton, Akkordtyp (m, 7, maj7, sus4, add9, m7b5, 6/9 …), optional Bass.
+// Grundton, Akkordtyp (m, 7, maj7, sus4, add9, m7b5, 6/9 …), optional Bass, optional Stern(e) am Ende:
+// „Am*“ markiert bei Ultimate Guitar & Co. eine Griff-Variante – der Akkord ist trotzdem Am.
 export const CHORD_RE =
-  /^([A-H][#b]?)((?:maj|min|mi|m|M|dim|aug|sus|add|no|omit|alt|[+°øΔ-]|o(?=\d)|\d+|[#b](?=\d)|\/(?=\d)|\(|\)|,)*)(?:\/([A-H][#b]?))?$/;
+  /^([A-H][#b]?)((?:maj|min|mi|m|M|dim|aug|sus|add|no|omit|alt|[+°øΔ-]|o(?=\d)|\d+|[#b](?=\d)|\/(?=\d)|\(|\)|,)*)(?:\/([A-H][#b]?))?(\*+)?$/;
 
 /**
- * Akkord zerlegen: „F#m7/C#“ -> {root: 'F#', quality: 'm7', bass: 'C#'}.
- * @returns {{root: string, quality: string, bass: string|null} | null}  null, wenn es kein Akkord ist
+ * Akkord zerlegen: „F#m7/C#“ -> {root: 'F#', quality: 'm7', bass: 'C#', mark: ''}.
+ * mark: Stern(e) am Ende („Am*“ = Variante von Am); zählt nicht zum Akkordtyp, bleibt beim Transponieren.
+ * @returns {{root: string, quality: string, bass: string|null, mark: string} | null}  null, wenn es kein Akkord ist
  */
 export function parseChord(name) {
   const m = CHORD_RE.exec(name);
   if (!m) return null;
-  return { root: m[1], quality: m[2], bass: m[3] || null };
+  return { root: m[1], quality: m[2], bass: m[3] || null, mark: m[4] || '' };
 }
 
 /** Ist der Text ein Akkordname (C, Am7, D/F#, Bbsus4 …)? */
@@ -70,7 +72,7 @@ export function transposeChord(name, steps, useFlats) {
   if (steps === 0 && useFlats === undefined) return name;
   const root = transposeNote(c.root, steps, useFlats);
   const bass = c.bass ? '/' + transposeNote(c.bass, steps, useFlats) : '';
-  return root + c.quality + bass;
+  return root + c.quality + bass + c.mark;
 }
 
 /** Halbton-Index 0–11 (C = 0) oder undefined. */
