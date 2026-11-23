@@ -633,3 +633,6 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
 23. ✅ Mehrere Liederbücher (2.2): beliebig viele eigene Liederbücher, jedes mit eigenem Speicherort
     (Gerät, Google Drive, Dropbox, WebDAV) und eigenem Konto; umbenennen, entfernen
 24. Live-Modus fürs Lagerfeuer: ein Gerät wählt das Lied, alle anderen sehen es sofort (Peer-to-Peer)
+25. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
+    zuerst Englisch; Sprache folgt dem Browser und ist unter Einstellungen → App umstellbar. Schrittweise nach
+    Bereichen umbauen (Kopfleiste, Liste, Menü → Dialoge → Hilfetexte); ein Test meldet fehlende Übersetzungen
