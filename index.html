@@ -215,14 +215,6 @@
 
     <section class="pane pane-editor" aria-label="Editor" data-edit="text">
       <!-- Handy: Text bearbeiten oder Akkorde per Antippen setzen (ui/chord-tap.js); am PC immer Text -->
-      <div class="edit-mode" role="radiogroup" aria-label="Bearbeiten">
-        <button type="button" role="radio" data-edit="text" aria-checked="true">Text</button>
-        <button type="button" role="radio" data-edit="chords" aria-checked="false">Akkorde</button>
-      </div>
-      <p class="chord-hint" id="chord-hint-edit">
-        <span class="hint-long">Tippe auf eine Silbe, um einen Akkord zu setzen</span><span class="hint-short">Silbe antippen, um einen Akkord zu setzen</span>
-      </p>
-      <div id="chord-view" class="chord-view" aria-label="Lied – antippen, um Akkorde zu setzen"><div class="songbook sheet" id="chord-view-sheet"></div></div>
       <div class="pane-bar editor-bar">
         <div class="snippets" role="toolbar" aria-label="Einfügen">
           <button type="button" data-snippet="chord" title="Akkord einfügen: [ ]">[A]</button>
@@ -234,6 +226,11 @@
           <button type="button" data-snippet="times" title="Wiederholen: Zeile mit dem Cursor, markierte Zeilen oder – auf der Abschnittszeile – den ganzen Abschnitt. Nochmal klicken = öfter.">2×</button>
           <button type="button" data-snippet="comment" title="Kommentar / Hinweis">Hinweis</button>
           <button type="button" id="btn-syntax" class="syntax-btn" title="ChordPro-Syntax: Übersicht aller Angaben">?</button>
+          <!-- Handy: Text bearbeiten oder Akkorde per Antippen setzen (ui/chord-tap.js); am PC ausgeblendet -->
+          <div class="edit-mode" role="radiogroup" aria-label="Bearbeiten">
+            <button type="button" role="radio" data-edit="text" aria-checked="true">Text</button>
+            <button type="button" role="radio" data-edit="chords" aria-checked="false" aria-label="Akkorde"><span class="lbl-long">Akkorde</span><span class="lbl-short">Akk.</span></button>
+          </div>
         </div>
         <span class="spacer"></span>
         <span id="save-status" class="save-status" aria-live="polite"></span>
@@ -241,6 +238,10 @@
           <svg class="icon"><use href="#i-trash"/></svg>
         </button>
       </div>
+      <p class="chord-hint" id="chord-hint-edit">
+        <span class="hint-long">Tippe auf eine Silbe, um einen Akkord zu setzen</span><span class="hint-short">Silbe antippen, um einen Akkord zu setzen</span>
+      </p>
+      <div id="chord-view" class="chord-view" aria-label="Lied – antippen, um Akkorde zu setzen"><div class="songbook sheet" id="chord-view-sheet"></div></div>
       <details id="song-meta" class="song-meta" open>
         <summary>Liedinfo <span id="meta-summary" class="meta-summary"></span></summary>
         <div class="meta-grid">

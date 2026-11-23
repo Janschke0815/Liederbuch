@@ -236,7 +236,7 @@ Liederbüchern sieht die ganze Band dieselben Setlisten.
 
 ## Akkorde per Antippen
 
-- **Handy:** *Bearbeiten* → oben **Text | Akkorde**. Unter *Akkorde* steht das Lied wie in der Vorschau;
+- **Handy:** *Bearbeiten* → **Text | Akkorde** (kleiner Umschalter hinter dem „?“ in der Knopfleiste). Unter *Akkorde* steht das Lied wie in der Vorschau;
   die antippbaren Zeilen sind leicht unterstrichen. Die App merkt sich, was zuletzt gewählt war.
 - **PC:** Knopf **[A] Akkorde** in der Leiste über der Vorschau; oben erscheint der Hinweis mit **Fertig**.
 

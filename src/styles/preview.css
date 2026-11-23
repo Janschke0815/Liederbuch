@@ -138,13 +138,21 @@
 /* Handy: Bearbeiten → „Text | Akkorde“ */
 .edit-mode, #chord-hint-edit, .chord-view { display: none; }
 @media (max-width: 760px) {
+  /* kleiner Umschalter in der Knopfleiste des Editors, gleich hinter dem „?“ – keine eigene Zeile */
   .edit-mode:not([hidden]) {
-    display: flex; margin: .45em .6em .35em; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; flex-shrink: 0;
+    display: inline-flex; flex: none; align-self: center;
+    border: 1px solid var(--border-strong); border-radius: 999px; overflow: hidden;
   }
-  .edit-mode button { flex: 1; border: 0; border-radius: 0; min-height: 2.4rem; font-weight: 600; background: var(--surface); }
-  .edit-mode button + button { border-left: 1px solid var(--border); }
-  .edit-mode button[aria-checked='true'] { background: var(--accent); color: var(--on-accent); }
-  .pane-editor[data-edit='chords'] > :is(.editor-bar, .song-meta, #editor) { display: none; }
+  .editor-bar .snippets .edit-mode button {
+    min-width: 0; min-height: 2.2rem; padding: .1em .5em; border: 0; border-radius: 0;
+    font-size: .76em; font-weight: 600; background: var(--surface);
+  }
+  .edit-mode .lbl-short { display: none; }
+  .editor-bar .snippets .edit-mode button + button { border-left: 1px solid var(--border); }
+  .editor-bar .snippets .edit-mode button[aria-checked='true'] { background: var(--accent); color: var(--on-accent); }
+  /* Akkorde: von der Leiste bleibt nur der Umschalter (und Löschen) */
+  .pane-editor[data-edit='chords'] .snippets > :not(.edit-mode) { display: none; }
+  .pane-editor[data-edit='chords'] > :is(.song-meta, #editor) { display: none; }
   .pane-editor[data-edit='chords'] #chord-hint-edit { display: flex; margin: 0 .6em .4em; border-radius: 8px; border: 0; }
   .pane-editor[data-edit='chords'] .chord-view { display: block; flex: 1; min-height: 0; overflow: auto; background: var(--sheet); }
   .chord-view .sheet { min-height: 100%; padding-bottom: 14rem; } /* Platz, damit auch die letzten Zeilen über der Auswahl stehen können */
@@ -155,6 +163,9 @@
 @media (max-width: 360px) {
   .hint-long { display: none; }
   .hint-short { display: inline; }
+  .editor-bar .snippets .edit-mode button { padding-inline: .45em; font-size: .74em; }
+  .edit-mode .lbl-long { display: none; }
+  .edit-mode .lbl-short { display: inline; } /* „Akk.“ wie im Spielmodus */
 }
 .chord-pick {
   position: fixed; z-index: 30; width: min(22rem, calc(100vw - 16px));

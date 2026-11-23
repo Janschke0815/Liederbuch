@@ -60,4 +60,14 @@
   .editor-bar .spacer { display: none; } /* nahm sonst die halbe Breite – Knöpfe in vier Zeilen */
   .editor-bar .snippets { flex: 1 1 0; flex-wrap: wrap; overflow: visible; }
   .editor-bar .snippets button { min-height: 2.5rem; min-width: 2.75rem; }
+  /* etwas schmaler, damit „Text | Akkorde“ hinter dem „?“ noch in die zweite Zeile passt */
+  .editor-bar { padding-inline: .3em; gap: .25em; }
+  #btn-delete { padding-inline: .35em; }
+  .editor-bar .snippets { gap: .2em; }
+  .editor-bar .snippets button { min-width: 2.2rem; padding-inline: .4em; font-size: .82em; }
+}
+@media (max-width: 360px) {
+  .editor-bar { padding-inline: .2em; gap: .2em; }
+  .editor-bar .snippets { gap: 2px; }
+  .editor-bar .snippets button { min-width: 2rem; padding-inline: .35em; font-size: .8em; }
 }
