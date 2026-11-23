@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.10 – 23.11.2026 · Pfeiltasten blättern im Zwei-Spalten-Modus
+
+- **→ / ← blättern zweispaltig um** (eine Doppelseite weiter/zurück), statt das Lied zu wechseln. Viele
+  Bluetooth-Blätterpedale senden genau diese Tasten – damit überspringt das Pedal keine Lieder mehr.
+  Nach der letzten Seite geht es wie gewohnt zum nächsten Lied; einspaltig wechseln →/← weiter das Lied.
+
 ## 2.2.9 – 23.11.2026 · Zwei Spalten: von Hand umblättern
 
 - **Zweispaltiger Spielmodus von Hand blätterbar:** rechts bzw. links ins Lied tippen, waagerecht wischen

@@ -501,8 +501,9 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   const KEY_ACTIONS = {
     pageDown: () => page(1),
     pageUp: () => page(-1),
-    next: () => go(1),
-    prev: () => go(-1),
+    // Zweispaltig blättern →/← wie Bild↓/↑ – viele Bluetooth-Pedale senden die Pfeiltasten
+    next: () => (cols ? page(1) : go(1)),
+    prev: () => (cols ? page(-1) : go(-1)),
     toggle: () => setPlaying(!playing),
     bigger: () => setZoom(currentZoom() + 0.1),
     smaller: () => setZoom(currentZoom() - 0.1),

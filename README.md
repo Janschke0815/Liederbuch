@@ -172,7 +172,7 @@ Weitere unter **⋯**. Bei einer Setliste steht unter dem Titel die Position und
 |---|---|
 | Bild↓ / ↓ | eine Seite weiter, am Ende: nächstes Lied |
 | Bild↑ / ↑ | eine Seite zurück, am Anfang: voriges Lied |
-| → / ← | nächstes / voriges Lied |
+| → / ← | nächstes / voriges Lied – zweispaltig: eine Doppelseite weiter / zurück |
 | Leertaste / Enter | automatisches Scrollen an/aus |
 | + / − | Schrift größer / kleiner |
 | > / < | schneller / langsamer scrollen |
@@ -188,12 +188,13 @@ Weitere unter **⋯**. Bei einer Setliste steht unter dem Titel die Position und
 fließt in Spalten von Bildschirmhöhe, je zwei nebeneinander; Blättern schiebt um eine
 Doppelseite weiter, automatisch im Liedtempo. **Von Hand umblättern:** rechts bzw. links ins Lied
 tippen, waagerecht wischen (nach links = weiter), die Pfeile ‹ › an den Rändern, Mausrad/Touchpad
-oder Bild↓/Bild↑ bzw. ↓/↑ (auch per Bluetooth-Pedal). **Griffbilder** lassen sich hier direkt ein- und
+oder die Tasten Bild↓/Bild↑, ↓/↑ und →/← (auch per Bluetooth-Pedal); nach der letzten Seite
+geht es zum nächsten Lied. **Griffbilder** lassen sich hier direkt ein- und
 ausschalten (gleiche Einstellung wie unter Einstellungen → Anzeigen), ebenso die Gitarren-Akkorde
 (**Akk.** bzw. Taste A).
 
 Bluetooth-Fußpedale („Page Turner“) senden meist Bild↑/↓ oder Pfeiltasten und funktionieren
-damit ohne Einrichtung. Geblättert wird in der Reihenfolge der Liederliste (ggf. gefiltert).
+damit ohne Einrichtung. Sendet ein Pedal →/←, wechselt es einspaltig das Lied und blättert zweispaltig um. Geblättert wird in der Reihenfolge der Liederliste (ggf. gefiltert).
 
 ## Setlisten
 

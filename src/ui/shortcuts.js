@@ -28,7 +28,7 @@ export const SHORTCUTS = {
   play: [
     { id: 'pageDown', keys: ['PageDown', 'ArrowDown'], show: 'Bild↓ / ↓', label: 'weiterblättern, am Ende nächstes Lied' },
     { id: 'pageUp', keys: ['PageUp', 'ArrowUp'], show: 'Bild↑ / ↑', label: 'zurückblättern' },
-    { id: 'next', keys: ['ArrowRight'], show: '→ / ←', label: 'nächstes / vorheriges Lied' },
+    { id: 'next', keys: ['ArrowRight'], show: '→ / ←', label: 'nächstes / vorheriges Lied – zweispaltig: blättern (wie viele Pedale)' },
     { id: 'prev', keys: ['ArrowLeft'], show: null, label: '' },
     { id: 'toggle', keys: [' ', 'Enter'], show: 'Leertaste', label: 'automatisch scrollen an/aus' },
     { id: 'slower', keys: ['<', ','], show: '< / >', label: 'langsamer / schneller' },
