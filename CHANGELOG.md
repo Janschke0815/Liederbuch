@@ -8,6 +8,17 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.2 – 23.11.2026 · Verständliche Leiste über der Vorschau
+
+- **Leiste über der Vorschau beschriftet:** Über jedem Wert steht klein, was er ist – **Tonart** G,
+  **Takt · Tempo** 3/4 · ♩ 96 (Klick: Metronom), **Transponieren** − 0 +.
+- **Schreibweise** (auto / ♯ / ♭) ist jetzt ein kleines Aufklappmenü statt dreier Knöpfe. Es erscheint, sobald
+  transponiert wird oder eine Schreibweise gewählt ist – sonst über Rechtsklick bzw. langes Drücken auf das Lied.
+- **Am Handy** bleibt alles in einer Zeile (auch bei 320 px Breite): „Original“ fällt dort weg (zurück auf 0
+  transponieren oder lang drücken → Originaltonart), die Schreibweise zeigt sich nur, wenn eine gewählt ist.
+- Ist die Vorschau-Spalte am PC schmal, blendet die Leiste zuerst Takt/Tempo, dann „Original“ aus, statt über den
+  Rand zu ragen.
+
 ## 2.3.1 – 23.11.2026 · Aufgeräumte Kopfleiste am PC
 
 - **Kopfleiste am PC:** Statt acht unbeschrifteter Symbole stehen oben rechts nur noch **Einfügen**, **Drucken**

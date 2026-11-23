@@ -6,8 +6,12 @@ import { transposeChord } from '../core/chords.js';
 import { getAllMeta, setMeta, getTags, setTags } from '../core/meta-edit.js';
 import { renderSong, songKey } from '../render/song-view.js';
 import { prefs } from '../prefs.js';
+import { showMenu } from '../context-menu.js';
 import { readOnly, repo, state } from './app-state.js';
 import { $, $$, isMobile, toast } from './dom.js';
+
+/** Schreibweise kurz (Knopf über der Vorschau). */
+const ACC_SHORT = { auto: 'auto', sharp: '♯', flat: '♭' };
 
 export const editor = $('#editor');
 export const preview = $('#preview');
@@ -56,7 +60,7 @@ export function updateControls() {
   const current = state.current;
   editor.disabled = !current;
   editor.readOnly = readOnly; // Abo: lesen, markieren, kopieren – aber nicht ändern
-  for (const b of $$('#tr-up, #tr-down, #accidentals button, #btn-delete, #btn-play, .snippets button[data-snippet]')) b.disabled = !current;
+  for (const b of $$('#tr-up, #tr-down, #acc-btn, #btn-delete, #btn-play, .snippets button[data-snippet]')) b.disabled = !current;
   if (readOnly) for (const b of $$('#btn-delete, .snippets button[data-snippet]')) b.disabled = true;
   const t = current?.transpose || 0;
   const out = $('#tr-value');
@@ -64,9 +68,10 @@ export function updateControls() {
   out.classList.toggle('changed', t !== 0);
   $('#tr-reset').hidden = t === 0;
   const acc = current?.accidentals || 'auto';
-  for (const b of $$('#accidentals button')) b.setAttribute('aria-checked', String(b.dataset.value === acc));
-  // Am Handy erst zeigen, wenn transponiert wird (beim ersten Blick sonst nur verwirrend)
-  $('.view-bar').toggleAttribute('data-plain', t === 0 && acc === 'auto');
+  // Schreibweise erst zeigen, wenn transponiert wird oder eine gewählt ist (sonst über Rechtsklick)
+  $('#acc-value').textContent = ACC_SHORT[acc];
+  $('#acc-field').hidden = t === 0 && acc === 'auto';
+  $('#acc-field').classList.toggle('acc-auto', acc === 'auto');
 }
 
 // ---------- Öffnen und Speichern ----------
@@ -120,10 +125,15 @@ export async function setViewOption(changes) {
 $('#tr-up').onclick = () => setViewOption({ transpose: state.current.transpose + 1 });
 $('#tr-down').onclick = () => setViewOption({ transpose: state.current.transpose - 1 });
 $('#tr-reset').onclick = () => setViewOption({ transpose: 0 });
-$('#accidentals').addEventListener('click', (e) => {
-  const b = e.target.closest('button[data-value]');
-  if (b) setViewOption({ accidentals: b.dataset.value });
-});
+// Schreibweise: Aufklappmenü statt dreier Knöpfe
+$('#acc-btn').onclick = () => {
+  const acc = state.current?.accidentals || 'auto';
+  const r = $('#acc-btn').getBoundingClientRect();
+  showMenu([
+    ['auto', 'automatisch (nach Tonart)'], ['sharp', 'immer mit ♯ (Kreuz)'], ['flat', 'immer mit ♭ (b)'],
+  ].map(([v, label]) => ({ label, checked: acc === v, action: () => setViewOption({ accidentals: v }) })),
+  { x: r.left, y: r.bottom + 4, title: 'Schreibweise der Akkorde' }).focusFirst();
+};
 
 // Änderungen von anderen Geräten (Abgleich)
 repo.addEventListener('remote-change', async (e) => {
@@ -184,7 +194,7 @@ function fillMeta() {
   timeChip.dataset.tempo = m.tempo || '';
   timeChip.dataset.time = m.time || '';
   const timeText = [m.time, m.tempo && `♩ ${m.tempo}`].filter(Boolean).join(' · ');
-  timeChip.hidden = !timeText;
+  $('#time-field').hidden = !timeText;
   timeChip.textContent = timeText;
   timeChip.title = [m.time && `${m.time}-Takt`, m.tempo && `Tempo ${m.tempo} Schläge/Minute`].filter(Boolean).join(', ');
 }

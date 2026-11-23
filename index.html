@@ -270,22 +270,29 @@
           <svg class="icon"><use href="#i-stage"/></svg><span class="label">Spielen</span>
         </button>
         <span class="spacer"></span>
-        <div class="key-box" title="Tonart (wird mit dem Lied gespeichert)">
-          <span class="key-label">Tonart</span>
+        <!-- Jeder Wert mit kleiner Überschrift darüber (.vb-cap), damit man ohne Vorwissen versteht, was er ist -->
+        <div class="vb-field key-box" title="Tonart des Liedes (nach dem Transponieren)">
+          <span class="vb-cap">Tonart</span>
           <strong id="key-value">–</strong>
         </div>
         <span id="capo-chip" class="info-chip" hidden></span>
-        <button type="button" id="time-chip" class="info-chip time-chip" hidden title="Metronom im Liedtempo an/aus (M)"></button>
-        <div class="stepper" role="group" aria-label="Transponieren">
-          <button id="tr-down" type="button" title="Halbton tiefer (−)">−</button>
-          <output id="tr-value" title="Transposition in Halbtönen">0</output>
-          <button id="tr-up" type="button" title="Halbton höher (+)">+</button>
+        <div class="vb-field" id="time-field" hidden>
+          <span class="vb-cap">Takt · Tempo</span>
+          <button type="button" id="time-chip" class="info-chip time-chip" title="Metronom im Liedtempo an/aus (M)"></button>
         </div>
-        <button id="tr-reset" type="button" class="link-btn" title="Originaltonart" hidden>Original</button>
-        <div class="segmented" role="radiogroup" aria-label="Schreibweise" id="accidentals">
-          <button type="button" role="radio" data-value="auto" title="automatisch nach Tonart">auto</button>
-          <button type="button" role="radio" data-value="sharp" title="immer mit Kreuz">♯</button>
-          <button type="button" role="radio" data-value="flat" title="immer mit b">♭</button>
+        <div class="vb-field">
+          <span class="vb-cap" id="tr-cap">Transponieren</span>
+          <div class="stepper" role="group" aria-labelledby="tr-cap">
+            <button id="tr-down" type="button" title="Halbton tiefer (−)" aria-label="Halbton tiefer">−</button>
+            <output id="tr-value" title="Transposition in Halbtönen">0</output>
+            <button id="tr-up" type="button" title="Halbton höher (+)" aria-label="Halbton höher">+</button>
+          </div>
+        </div>
+        <button id="tr-reset" type="button" class="link-btn" title="Zurück zur Originaltonart" hidden>Original</button>
+        <div class="vb-field" id="acc-field" hidden>
+          <span class="vb-cap" id="acc-cap"><span class="cap-long">Schreibweise</span><span class="cap-short" aria-hidden="true">♯/♭</span></span>
+          <button type="button" id="acc-btn" class="acc-btn" aria-haspopup="menu" aria-describedby="acc-cap"
+                  title="Akkorde mit ♯ oder ♭ schreiben (wird mit dem Lied gespeichert)"><span id="acc-value">auto</span><span class="book-caret" aria-hidden="true"></span></button>
         </div>
       </div>
       <div class="preview-scroll">

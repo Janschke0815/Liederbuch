@@ -1,9 +1,23 @@
 /* Vorschau: Leiste mit Tonart, Transponieren, Schreibweise; Zoom; Metronom. */
 
 /* Vorschau */
-.pane-preview { background: var(--bg); }
-.key-box { display: inline-flex; align-items: baseline; gap: .4em; padding-inline: .3em; }
-.key-label { font-size: .78em; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.pane-preview { background: var(--bg); container: preview / inline-size; }
+.view-bar { flex-wrap: wrap; row-gap: .3em; } /* letzte Sicherung – normal passt alles in eine Zeile */
+/* Schmale Vorschau-Spalte (auch durch die ziehbaren Trenner): Unwichtigeres zuerst ausblenden */
+@container preview (max-width: 640px) {
+  #time-field { display: none; }
+}
+@container preview (max-width: 520px) {
+  #tr-reset { display: none; }
+}
+/* Wert mit kleiner Überschrift darüber („TONART / G“, „TRANSPONIEREN / − 0 +“) */
+.vb-field { display: inline-flex; flex-direction: column; align-items: center; gap: .1em; line-height: 1.15; }
+.vb-field[hidden] { display: none; }
+.vb-cap { font-size: .62rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.key-box { padding-inline: .3em; }
+.acc-btn { display: inline-flex; align-items: center; gap: .45em; min-height: 2rem; padding: .1em .65em; font-weight: 600; }
+.acc-btn .book-caret { width: .38em; height: .38em; }
+.cap-short { display: none; }
 .stepper { display: inline-flex; border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
 .stepper button { border: 0; border-radius: 0; min-width: 2.4rem; font-size: 1.15em; font-weight: 600; }
 #tr-value {
@@ -25,7 +39,6 @@
 }
 .import-preview .sheet { flex: 1; max-height: 62vh; overflow: auto; width: 100%; padding: 1.4em 1.6em; font-size: .85em; border: 1px solid var(--border); }
 @media (max-width: 1200px) {
-  .key-label { display: none; }
   .view-bar { gap: .35em; }
 }
 @media (max-width: 760px) {
@@ -78,6 +91,17 @@
   .view-bar { flex-wrap: wrap; row-gap: .3em; }
   .view-bar .segmented button { min-width: 2.75rem; min-height: 2.6rem; }
   .view-bar .stepper button { min-width: 2.6rem; min-height: 2.6rem; }
-  /* Schreibweise ♯/♭ erst, wenn transponiert wird – so passt alles in eine Zeile */
-  .view-bar[data-plain] #accidentals { display: none; }
+  /* Handy: eine Zeile. „Original“ fällt weg (zurück: auf 0 transponieren oder lang drücken),
+     Schreibweise nur, wenn eine gewählt ist (sonst über langes Drücken auf das Lied) */
+  #tr-reset, #acc-field.acc-auto { display: none; }
+  #acc-cap .cap-long { display: none; }
+  #acc-cap .cap-short { display: inline; }
+}
+@media (max-width: 360px) {
+  .view-bar .stepper button { min-width: 2.3rem; }
+  #tr-value { min-width: 1.8em; }
+  .acc-btn { padding-inline: .45em; }
+  .view-bar { gap: .25em; padding-inline: .3em; }
+  .view-bar .play-btn { padding-inline: .5em; gap: .3em; }
+  .key-box { padding-inline: 0; }
 }
