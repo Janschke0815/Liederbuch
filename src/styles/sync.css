@@ -53,10 +53,7 @@
   font-weight: 700; font-size: 1.05em; border-color: transparent; background-color: transparent; padding-inline: .4em;
 }
 .book-select-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.book-caret { flex-shrink: 0; width: .45em; height: .45em; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-30%); }
-/* Menü der Liederbücher: Hinweis auf die Optionen je Buch */
-.ctx-foot { padding: .35em .8em .2em; font-size: .75em; color: var(--muted); }
-.book-select:hover { background-color: var(--hover); }
+.book-caret { flex-shrink: 0; width: .45em; height: .45em; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-30%); }.book-select:hover { background-color: var(--hover); }
 /* Handy: Name des Liederbuchs passt neben Neu, Cloud und Menü in die Kopfleiste */
 @media (max-width: 520px) {
   .brand { margin-right: 0; }

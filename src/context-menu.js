@@ -5,8 +5,6 @@
 //            context?: () => Einträge (eigenes Menü per Rechtsklick/lang drücken/Menütaste auf dem Eintrag),
 //            contextTitle? }
 //          oder '-' für eine Trennlinie
-// Optionen von showMenu: x, y, title?, foot? (Hinweiszeile unten)
-
 const LONG_PRESS_MS = 520;
 let open = null; // { el, close }
 
@@ -29,7 +27,7 @@ export function closeMenu() {
  * @param {Array} items
  * @param {{x: number, y: number, title?: string, parent?: HTMLElement}} at
  */
-export function showMenu(items, { x, y, title, foot, parentMenu = null } = {}) {
+export function showMenu(items, { x, y, title, parentMenu = null } = {}) {
   if (!parentMenu) closeMenu();
   const menu = document.createElement('div');
   menu.className = 'ctx-menu';
@@ -134,7 +132,6 @@ export function showMenu(items, { x, y, title, foot, parentMenu = null } = {}) {
     menu.append(b);
   }
   if (menu.lastElementChild?.classList.contains('ctx-sep')) menu.lastElementChild.remove();
-  if (foot) menu.append(Object.assign(document.createElement('div'), { className: 'ctx-foot', textContent: foot }));
 
   document.body.append(menu);
   // im Fenster halten

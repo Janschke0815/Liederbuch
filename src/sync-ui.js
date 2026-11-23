@@ -153,8 +153,6 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   }
 
   const bookLabel = (b) => (b.abo || b.readOnly ? `${b.name} (nur lesen)` : b.shared ? `${b.name} 👥` : b.name);
-  const touch = matchMedia('(pointer: coarse)').matches;
-
   /** Optionen zu einem Liederbuch (Rechtsklick bzw. lang drücken in der Auswahl). */
   function bookOptions(b) {
     const isActive = b.id === book.id;
@@ -194,7 +192,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         '-',
         { label: 'Neues Liederbuch …', icon: 'plus', action: () => openBooks({ create: true }) },
         { label: 'Liederbücher verwalten …', action: () => openBooks() },
-      ], { ...openAt(), title: 'Liederbücher', foot: touch ? 'Lang drücken: Optionen zum Buch' : 'Rechtsklick: Optionen zum Buch' });
+      ], { ...openAt(), title: 'Liederbücher' });
       menu.focusFirst();
     };
     // Rechtsklick auf den Namen oben: Optionen zum geöffneten Buch

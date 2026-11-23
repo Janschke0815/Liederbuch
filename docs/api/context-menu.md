@@ -12,8 +12,6 @@ Eintrag: { label, icon?, hint?, action?, disabled?, danger?, checked?, items? (U
          oder '-' für eine Trennlinie
 ```
 
-Optionen von showMenu: x, y, title?, foot? (Hinweiszeile unten)
-
 **Benutzt von:** [`setlist-ui.js`](setlist-ui.md), [`sync-ui.js`](sync-ui.md), [`ui/context-menus.js`](ui/context-menus.md)
 
 ## Exportiert
@@ -22,7 +20,7 @@ Optionen von showMenu: x, y, title?, foot? (Hinweiszeile unten)
 
 Offenes Kontextmenü schließen (falls eins offen ist).
 
-### `showMenu(items, { x, y, title, foot, parentMenu = null } = {})`
+### `showMenu(items, { x, y, title, parentMenu = null } = {})`
 
 Menü an Position (x, y) zeigen.
 
