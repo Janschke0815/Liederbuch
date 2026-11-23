@@ -106,18 +106,56 @@
   .key-box { padding-inline: 0; }
 }
 
-/* Akkorde per Antippen (ui/chord-tap.js): Schalter unten links in der Vorschau, Auswahl-Fenster */
-.chordtap-btn {
-  position: sticky; bottom: .8em; float: left; margin: -2.6em 0 0 .8em; z-index: 1;
-  display: inline-flex; align-items: center; gap: .45em; min-height: 2.2rem; padding: .2em .8em;
-  border-radius: 999px; background: var(--surface); box-shadow: var(--shadow); font-weight: 600; font-size: .88em;
-}
+/* Akkorde per Antippen (ui/chord-tap.js). PC: Knopf „Akkorde“ in der Leiste über der Vorschau */
+.chordtap-btn { display: inline-flex; align-items: center; gap: .4em; font-weight: 600; }
 .chordtap-btn[hidden] { display: none; }
 .chordtap-icon { font-family: ui-monospace, Consolas, monospace; color: var(--accent); font-weight: 700; }
 .chordtap-btn[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .chordtap-btn[aria-pressed='true'] .chordtap-icon { color: inherit; }
-#preview.chordtap-on .line[data-src] { cursor: pointer; border-radius: 3px; }
-#preview.chordtap-on .line[data-src]:hover { background: #b3261e12; }
+@container preview (max-width: 560px) {
+  .chordtap-btn .label { display: none; }
+}
+/* Feste Hinweisleiste statt schwebendem Knopf/Toast */
+.chord-hint {
+  display: flex; align-items: center; gap: .6em; margin: 0; padding: .45em .9em;
+  background: var(--accent-soft); color: var(--text); font-size: .85em; font-weight: 600;
+  border-bottom: 1px solid var(--border); white-space: nowrap; overflow: hidden;
+}
+.chord-hint[hidden] { display: none; }
+.chord-hint > span { overflow: hidden; text-overflow: ellipsis; }
+.chord-hint .link-btn { margin-left: auto; min-height: 1.9rem; }
+.hint-short { display: none; }
+/* Antippbare Zeilen: immer leicht unterstrichen (Handy kennt kein Drüberfahren) */
+.chordtap-on .line[data-src], .chord-view .line[data-src] {
+  cursor: pointer; background: linear-gradient(transparent calc(100% - 2px), #b3261e30 0);
+}
+.chordtap-on .line[data-src]:hover, .chord-view .line[data-src]:hover { background-color: #b3261e0d; }
+/* Einfügestelle, solange die Auswahl offen ist */
+.chord-caret {
+  display: inline-block; width: 2px; height: 1.25em; margin: 0 -1px; vertical-align: -.2em;
+  background: var(--accent); border-radius: 1px; box-shadow: 0 0 0 2px #b3261e33;
+}
+/* Handy: Bearbeiten → „Text | Akkorde“ */
+.edit-mode, #chord-hint-edit, .chord-view { display: none; }
+@media (max-width: 760px) {
+  .edit-mode:not([hidden]) {
+    display: flex; margin: .45em .6em .35em; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; flex-shrink: 0;
+  }
+  .edit-mode button { flex: 1; border: 0; border-radius: 0; min-height: 2.4rem; font-weight: 600; background: var(--surface); }
+  .edit-mode button + button { border-left: 1px solid var(--border); }
+  .edit-mode button[aria-checked='true'] { background: var(--accent); color: var(--on-accent); }
+  .pane-editor[data-edit='chords'] > :is(.editor-bar, .song-meta, #editor) { display: none; }
+  .pane-editor[data-edit='chords'] #chord-hint-edit { display: flex; margin: 0 .6em .4em; border-radius: 8px; border: 0; }
+  .pane-editor[data-edit='chords'] .chord-view { display: block; flex: 1; min-height: 0; overflow: auto; background: var(--sheet); }
+  .chord-view .sheet { min-height: 100%; padding-bottom: 14rem; } /* Platz, damit auch die letzten Zeilen über der Auswahl stehen können */
+}
+@media (max-width: 760px) {
+  #btn-chordtap, #chord-hint-preview { display: none !important; } /* Handy: Ansehen ist nur zum Ansehen */
+}
+@media (max-width: 360px) {
+  .hint-long { display: none; }
+  .hint-short { display: inline; }
+}
 .chord-pick {
   position: fixed; z-index: 30; width: min(22rem, calc(100vw - 16px));
   display: flex; flex-direction: column; gap: .5em; padding: .6em .7em .7em;

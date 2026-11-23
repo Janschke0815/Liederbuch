@@ -236,14 +236,16 @@ Liederbüchern sieht die ganze Band dieselben Setlisten.
 
 ## Akkorde per Antippen
 
-Unten links in der Vorschau (am Handy: „Ansehen“) schaltet **Akkorde setzen** das Antippen ein. Dann:
-auf eine Stelle im Liedtext tippen → es erscheint eine Auswahl mit den **Akkorden des Liedes**,
-**anderer Akkord …** (Eingabe, z. B. `Em7` oder `D/F#`) und – wenn dort schon einer steht – **entfernen**.
-Mit **◀ ▶** rückt die Stelle um einen Buchstaben; oben zeigt `dar|ling`, wo der Akkord landet. Ein Tipp
-auf einen vorhandenen Akkord wählt ihn zum Ändern aus. Der Akkord kommt als `[G]` an die richtige Stelle
-im Text; „Rückgängig“ in der Meldung macht es ungeschehen. Ist das Lied transponiert, wählt man in der
-angezeigten Tonart – in den Text wird zurücktransponiert geschrieben. **Fertig** schaltet wieder ab.
-Nicht in Nur-Lesen-Büchern. Logik: `src/core/chord-place.js`.
+- **Handy:** *Bearbeiten* → oben **Text | Akkorde**. Unter *Akkorde* steht das Lied wie in der Vorschau;
+  die antippbaren Zeilen sind leicht unterstrichen. Die App merkt sich, was zuletzt gewählt war.
+- **PC:** Knopf **[A] Akkorde** in der Leiste über der Vorschau; oben erscheint der Hinweis mit **Fertig**.
+
+Ein Tipp auf ein Wort setzt den Akkord **vor das Wort** (bei „Gas-o-line“ vor die getippte Silbe); steht im
+Wort schon ein Akkord, wird dieser ausgewählt. Ein roter Strich zeigt die Einfügestelle, mit **◀ ▶** rückt
+sie um einen Buchstaben. Die Auswahl bietet die **Akkorde des Liedes**, **anderer Akkord …** (z. B. `Em7`,
+`D/F#`) und – wenn dort einer steht – **entfernen**. Der Akkord kommt als `[G]` in den Text; „Rückgängig“
+in der Meldung macht es ungeschehen. Transponiert wählt man in der angezeigten Tonart, geschrieben wird
+zurücktransponiert. Nicht in Nur-Lesen-Büchern. Logik: `src/core/chord-place.js`.
 
 ## Liedinfo: Capo, Takt, Tempo, Dauer
 

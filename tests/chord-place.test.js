@@ -1,5 +1,5 @@
 import { describe, it, expect } from './runner.js';
-import { visibleColumns, chordAt, setChordAt, removeChordAt, songChords } from '../src/core/chord-place.js';
+import { visibleColumns, chordAt, setChordAt, removeChordAt, snapColumn, songChords } from '../src/core/chord-place.js';
 
 const SONG = '{title: Clementine}\n\n{start_of_verse}\nOh my [C]darling, oh my [G]darling\n{end_of_verse}';
 const L = 3; // Liedzeile
@@ -55,6 +55,41 @@ describe('Akkorde per Antippen: setzen, ändern, entfernen', () => {
     const { parseChordPro } = await import('../src/core/chordpro.js');
     const line = parseChordPro(SONG).blocks[0].lines[0];
     expect(line.src).toBe(L);
+  });
+});
+
+describe('Akkorde per Antippen: Einrasten', () => {
+  const line = (raw) => [raw, 0];
+  it('Tipp ins Wort → vor das Wort', () => {
+    // „Amazing grace, how sweet“: Spalte 21 = „e“ in „sweet“, Wort beginnt bei 19
+    expect(snapColumn(...line('Amazing grace, how sweet'), 21)).toBe(19);
+    expect(snapColumn(...line('Amazing grace, how sweet'), 19)).toBe(19);
+  });
+
+  it('Bindestrich-Wörter: vor die getippte Silbe', () => {
+    // „Gas-o-line“: G0 a1 s2 -3 o4 -5 l6 i7 n8 e9
+    expect(snapColumn(...line('Gas-o-line'), 8)).toBe(6);
+    expect(snapColumn(...line('Gas-o-line'), 4)).toBe(4);
+    expect(snapColumn(...line('Gas-o-line'), 1)).toBe(0);
+    expect(snapColumn(...line('Gas-o-line'), 3)).toBe(4); // auf den Bindestrich: nächste Silbe
+  });
+
+  it('vorhandener Akkord im Wort wird getroffen statt daneben', () => {
+    // „A[G]mazing“: Akkord an Spalte 1
+    expect(snapColumn(...line('A[G]mazing grace'), 4)).toBe(1);
+    expect(snapColumn(...line('A[G]mazing grace'), 0)).toBe(0); // vor dem Akkord: Wortanfang
+    expect(snapColumn(...line('A[*x2]mazing'), 4)).toBe(0); // Anmerkung zählt nicht
+  });
+
+  it('Leerzeichen und Zeilenende', () => {
+    expect(snapColumn(...line('la  la'), 2)).toBe(4); // Leerzeichen → nächstes Wort
+    expect(snapColumn(...line('la la'), 5)).toBe(5); // Ende bleibt Ende
+    expect(snapColumn(...line('la '), 2)).toBe(3); // Leerzeichen am Ende → Ende
+    expect(snapColumn(...line('la'), 99)).toBe(2);
+  });
+
+  it('andere Zeilen des Textes', () => {
+    expect(snapColumn('{title: X}\nOh my darling', 1, 9)).toBe(6);
   });
 });
 

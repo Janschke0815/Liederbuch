@@ -22,7 +22,7 @@ Nicht hier, weil die Module ihren Speicher selbst verwalten (und dafür Tests ha
   liveLead          Raum-Code des Vorsingers (sessionStorage, nur bis der Tab zu ist)   src/live-ui.js
 ```
 
-**Benutzt von:** [`app.js`](app.md), [`play-mode.js`](play-mode.md), [`setlist-ui.js`](setlist-ui.md), [`settings-ui.js`](settings-ui.md), [`sync-ui.js`](sync-ui.md), [`ui/abo.js`](ui/abo.md), [`ui/list.js`](ui/list.md), [`ui/preview-tools.js`](ui/preview-tools.md), [`ui/publish.js`](ui/publish.md), [`ui/song.js`](ui/song.md), [`ui/toolbar.js`](ui/toolbar.md), [`ui/view.js`](ui/view.md)
+**Benutzt von:** [`app.js`](app.md), [`play-mode.js`](play-mode.md), [`setlist-ui.js`](setlist-ui.md), [`settings-ui.js`](settings-ui.md), [`sync-ui.js`](sync-ui.md), [`ui/abo.js`](ui/abo.md), [`ui/chord-tap.js`](ui/chord-tap.md), [`ui/list.js`](ui/list.md), [`ui/preview-tools.js`](ui/preview-tools.md), [`ui/publish.js`](ui/publish.md), [`ui/song.js`](ui/song.md), [`ui/toolbar.js`](ui/toolbar.md), [`ui/view.js`](ui/view.md)
 
 ## Exportiert
 

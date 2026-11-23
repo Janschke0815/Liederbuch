@@ -31,6 +31,7 @@ export const PREFS = {
   editorShare: { key: 'editorShare', def: 0 }, // Anteil des Editors an Editor + Vorschau (0 = halb/halb)
   songMetaOpen: { key: 'songMetaOpen', def: true }, // Liedinfo aufgeklappt (breiter Bildschirm)
   songMetaOpenMobile: { key: 'songMetaOpenMobile', def: false }, // … am Handy
+  editMode: { key: 'editMode', def: 'text' }, // Handy, Bearbeiten: 'text' (ChordPro) | 'chords' (Akkorde antippen)
   viewZoom: { key: 'viewZoom', def: 1 },
   draft: { key: 'draft', def: '' }, // Entwurf aus der allerersten Version der App
   // Spielmodus

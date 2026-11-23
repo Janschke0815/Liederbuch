@@ -213,7 +213,16 @@
       </div>
     </aside>
 
-    <section class="pane pane-editor" aria-label="Editor">
+    <section class="pane pane-editor" aria-label="Editor" data-edit="text">
+      <!-- Handy: Text bearbeiten oder Akkorde per Antippen setzen (ui/chord-tap.js); am PC immer Text -->
+      <div class="edit-mode" role="radiogroup" aria-label="Bearbeiten">
+        <button type="button" role="radio" data-edit="text" aria-checked="true">Text</button>
+        <button type="button" role="radio" data-edit="chords" aria-checked="false">Akkorde</button>
+      </div>
+      <p class="chord-hint" id="chord-hint-edit">
+        <span class="hint-long">Tippe auf eine Silbe, um einen Akkord zu setzen</span><span class="hint-short">Silbe antippen, um einen Akkord zu setzen</span>
+      </p>
+      <div id="chord-view" class="chord-view" aria-label="Lied – antippen, um Akkorde zu setzen"><div class="songbook sheet" id="chord-view-sheet"></div></div>
       <div class="pane-bar editor-bar">
         <div class="snippets" role="toolbar" aria-label="Einfügen">
           <button type="button" data-snippet="chord" title="Akkord einfügen: [ ]">[A]</button>
@@ -279,6 +288,11 @@
         <button id="btn-play" type="button" class="play-btn" title="Spielmodus: Vollbild, automatisch scrollen, Pedal (F)">
           <svg class="icon"><use href="#i-stage"/></svg><span class="label">Spielen</span>
         </button>
+        <!-- PC: Akkorde per Antippen in der Vorschau (am Handy unter Bearbeiten → Akkorde) -->
+        <button type="button" id="btn-chordtap" class="chordtap-btn" aria-pressed="false" hidden
+                title="Akkorde setzen: aufs Lied tippen, um an der Stelle einen Akkord zu setzen, zu ändern oder zu entfernen">
+          <span class="chordtap-icon" aria-hidden="true">[A]</span><span class="label">Akkorde</span>
+        </button>
         <span class="spacer"></span>
         <!-- Jeder Wert mit kleiner Überschrift darüber (.vb-cap), damit man ohne Vorwissen versteht, was er ist -->
         <div class="vb-field key-box" title="Tonart des Liedes (nach dem Transponieren)">
@@ -305,13 +319,12 @@
                   title="Akkorde mit ♯ oder ♭ schreiben (wird mit dem Lied gespeichert)"><span id="acc-value">auto</span><span class="book-caret" aria-hidden="true"></span></button>
         </div>
       </div>
+      <p class="chord-hint" id="chord-hint-preview" hidden>
+        <span>Tippe auf eine Silbe, um einen Akkord zu setzen</span>
+        <button type="button" id="chordtap-done" class="link-btn">Fertig</button>
+      </p>
       <div class="preview-scroll">
         <div id="preview" class="songbook sheet"></div>
-        <!-- Akkorde per Antippen (ui/chord-tap.js): an = Tippen ins Lied öffnet die Akkord-Auswahl -->
-        <button type="button" id="btn-chordtap" class="chordtap-btn" aria-pressed="false" hidden
-                title="Akkorde setzen: aufs Lied tippen, um an der Stelle einen Akkord zu setzen, zu ändern oder zu entfernen">
-          <span class="chordtap-icon" aria-hidden="true">[A]</span><span class="label">Akkorde setzen</span>
-        </button>
         <div class="zoom-ctl" role="group" aria-label="Vorschau vergrößern">
           <button type="button" id="zoom-out" title="Vorschau kleiner" aria-label="Kleiner">−</button>
           <button type="button" id="zoom-reset" title="Originalgröße">100 %</button>

@@ -8,6 +8,19 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.6 – 23.11.2026 · Akkorde setzen: am Handy unter Bearbeiten
+
+- **Am Handy** steht „Akkorde setzen“ jetzt unter **Bearbeiten**: Oben schaltet **Text | Akkorde** zwischen dem
+  ChordPro-Text und dem Lied wie in der Vorschau um, wo Antippen Akkorde setzt. Die App merkt sich die Wahl.
+  **Ansehen** ist am Handy wieder nur zum Ansehen.
+- **Am PC** sitzt der Schalter als Knopf **[A] Akkorde** in der Leiste über der Vorschau statt schwebend über dem Lied.
+- **Deutlich sichtbar:** feste Hinweisleiste „Tippe auf eine Silbe, um einen Akkord zu setzen“ (am PC mit „Fertig“)
+  statt schwebendem Knopf und Hinweis-Meldung; antippbare Zeilen sind dauerhaft leicht unterstrichen.
+- **Einrasten:** Ein Tipp auf ein Wort setzt den Akkord vor das Wort, bei „Gas-o-line“ vor die Silbe; steht im Wort
+  schon ein Akkord, wird dieser ausgewählt. ◀ ▶ zum Feinjustieren bleibt.
+- **Einfügestelle markiert:** ein roter senkrechter Strich in der Zeile, solange die Auswahl offen ist. Am Handy rückt
+  die angetippte Zeile über die Auswahl, falls sie sonst verdeckt wäre.
+
 ## 2.3.5 – 23.11.2026 · Filter und Sortierrichtung sichtbar
 
 - **„Was kann ich spielen?“:** Ist der Filter aktiv, steht über der Liste deutlich „Gefiltert: 12 von 40 Liedern“

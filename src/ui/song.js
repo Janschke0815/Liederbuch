@@ -44,6 +44,7 @@ export function renderPreview() {
   preview.replaceChildren(renderSong(song, opts));
   if (current.note) preview.prepend(Object.assign(document.createElement('div'), { className: 'song-note', textContent: current.note }));
   const k = songKey(song, opts);
+  dispatchEvent(new Event('previewrendered')); // z. B. Akkord-Ansicht am Handy (chord-tap.js) zieht nach
   fillMeta();
   const keyEl = $('#key-value');
   keyEl.textContent = k ? k.key : '–';

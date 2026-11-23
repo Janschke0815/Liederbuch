@@ -42,6 +42,15 @@ an derselben Stelle eingefügt ([C][4]Text).
 
 Akkord an einer Stelle entfernen (sonst unverändert).
 
+### `snapColumn(text, line, col)`
+
+Getippte Spalte am Anfang des Wortes bzw. der Silbe einrasten: Ein Tipp irgendwo auf „sweet“ setzt den
+Akkord vor das „s“; bei „Gas-o-line“ vor die getippte Silbe. Steht im Wort vor der getippten Stelle
+schon ein Akkord (z. B. „A[G]mazing“), rastet die Spalte dort ein – so wird er ausgewählt statt
+daneben ein zweiter gesetzt. Ein Tipp auf ein Leerzeichen springt zum nächsten Wort.
+
+**Rückgabe:** `number` Spalte
+
 ### `songChords(text)`
 
 Alle Gitarren-Akkorde des Liedes, jeder einmal, in der Reihenfolge ihres ersten Vorkommens.
@@ -54,3 +63,4 @@ Nicht exportiert – nur innerhalb des Moduls benutzt.
 
 - `slot(raw, col)` – Rohtext-Bereich zwischen sichtbarem Zeichen col−1 und col – dort stehen die Klammern „an Spalte col“.
 - `chordBracket(raw, from, to)` – Gitarren-Akkord-Klammer im Bereich (keine Anmerkung [*…], kein Mundharmonika-Tab).
+- `chordColumns(raw)` – Sichtbare Spalten, an denen ein Gitarren-Akkord steht.

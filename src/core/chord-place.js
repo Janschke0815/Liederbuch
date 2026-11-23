@@ -95,6 +95,49 @@ export function removeChordAt(text, line, col) {
   return lines.join('\n');
 }
 
+/** Sichtbare Spalten, an denen ein Gitarren-Akkord steht. */
+function chordColumns(raw) {
+  const cols = [];
+  let visible = 0;
+  for (let i = 0; i < raw.length; i++) {
+    if (raw[i] === '[') {
+      const end = raw.indexOf(']', i);
+      if (end > i) {
+        if (isGuitarChord(raw.slice(i + 1, end))) cols.push(visible);
+        i = end;
+        continue;
+      }
+    }
+    visible++;
+  }
+  return cols;
+}
+
+const SEPARATOR = /[\s-]/; // Wortgrenze bzw. Silbengrenze bei „Gas-o-line“
+
+/**
+ * Getippte Spalte am Anfang des Wortes bzw. der Silbe einrasten: Ein Tipp irgendwo auf „sweet“ setzt den
+ * Akkord vor das „s“; bei „Gas-o-line“ vor die getippte Silbe. Steht im Wort vor der getippten Stelle
+ * schon ein Akkord (z. B. „A[G]mazing“), rastet die Spalte dort ein – so wird er ausgewählt statt
+ * daneben ein zweiter gesetzt. Ein Tipp auf ein Leerzeichen springt zum nächsten Wort.
+ * @returns {number} Spalte
+ */
+export function snapColumn(text, line, col) {
+  const raw = splitLines(text)[line];
+  if (raw === undefined) return col;
+  const vis = visibleColumns(raw).text;
+  let c = Math.max(0, Math.min(col, vis.length));
+  if (c === vis.length) return c;
+  if (SEPARATOR.test(vis[c])) {
+    while (c < vis.length && SEPARATOR.test(vis[c])) c++; // zum nächsten Wort bzw. zur nächsten Silbe
+    return c;
+  }
+  let start = c;
+  while (start > 0 && !SEPARATOR.test(vis[start - 1])) start--;
+  const inWord = chordColumns(raw).filter((x) => x >= start && x <= c);
+  return inWord.length ? inWord.at(-1) : start;
+}
+
 /**
  * Alle Gitarren-Akkorde des Liedes, jeder einmal, in der Reihenfolge ihres ersten Vorkommens.
  * @returns {string[]}

@@ -58,7 +58,7 @@ $('#app-version').textContent = versionLabel();
 $('#app-name').title = `Liederbuch ${versionLabel()}`;
 
 // Einstellungen wirken live auf Vorschau und Import-Vorschau
-setupSettings({ targets: () => [preview, $('#imp-preview')] });
+setupSettings({ targets: () => [preview, $('#imp-preview'), $('#chord-view-sheet')] });
 closeOnBackdrop('#print-dialog', '#settings-dialog');
 
 // ---------- Größere Bereiche ----------
