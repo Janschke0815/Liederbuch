@@ -192,6 +192,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     if (metronome.running) metronome.start(Number(meta.tempo) || 100, beatsPerBar(meta.time));
     syncMetro();
     layout();
+    stopGlide(); // eine Blätter-Bewegung des vorigen Liedes darf hier nicht nachwirken
     scroller.scrollTop = 0;
     scroller.scrollLeft = 0;
     carry = 0;
@@ -281,11 +282,15 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
 
   // Eigene kurze Animation statt behavior:'smooth' – landet garantiert am Ziel
   let anim = 0;
+  let glideTimer = 0;
+  let gliding = null; // Ziel der laufenden Bewegung – schnelles Mehrfach-Blättern zählt davon weiter
   function glideTo(target, ms = 260) {
     cancelAnimationFrame(anim);
+    clearTimeout(glideTimer); // sonst springt die Absicherung einer älteren Bewegung zurück
     const max = maxPos();
     const to = clamp(target, 0, max);
     const from = pos();
+    gliding = to;
     const t0 = performance.now();
     const tick = (t) => {
       const k = Math.min(1, (t - t0) / ms);
@@ -294,25 +299,33 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
       else updateProgress();
     };
     anim = requestAnimationFrame(tick);
-    setTimeout(() => {
+    glideTimer = setTimeout(() => {
       if (Math.abs(pos() - to) > 1) setPos(to);
+      gliding = null;
       updateProgress();
     }, ms + 80);
   }
 
+  function stopGlide() {
+    cancelAnimationFrame(anim);
+    clearTimeout(glideTimer);
+    gliding = null;
+  }
+
   function page(dir) {
     const max = maxPos();
-    const atEnd = pos() >= max - 2;
-    const atStart = pos() <= 2;
+    const here = gliding ?? pos(); // während einer Bewegung: von deren Ziel aus weiterzählen
+    const atEnd = here >= max - 2;
+    const atStart = here <= 2;
     if (dir > 0 && atEnd) return go(1);
     if (dir < 0 && atStart) return go(-1, { toEnd: true });
     pageClock = 0;
     if (cols) {
-      glideTo(pagePos(pageIndex() + dir));
+      glideTo(pagePos(indexOfPage(here, max, pageWidth()) + dir));
       return;
     }
     // ein Bildschirm minus etwas Überlappung, damit keine Zeile verloren geht
-    glideTo(pos() + dir * scroller.clientHeight * 0.82);
+    glideTo(here + dir * scroller.clientHeight * 0.82);
   }
 
   async function go(delta, { toEnd = false } = {}) {
@@ -427,12 +440,59 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     $('#pl-night').setAttribute('aria-pressed', String(on));
   };
 
-  // Tippen aufs Lied blendet die Leiste ein/aus; Bedienung in der Leiste verlängert sie
+  // Tippen aufs Lied blendet die Leiste ein/aus; Bedienung in der Leiste verlängert sie.
+  // Zweispaltig (dort lässt sich nicht scrollen): Tippen ins linke/rechte Drittel blättert.
+  let swiped = false;
   scroller.addEventListener('click', (e) => {
     if (e.target.closest('button')) return;
+    if (swiped) {
+      swiped = false;
+      return;
+    }
+    if (cols) {
+      const r = scroller.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width;
+      if (x < 0.3) return page(-1);
+      if (x > 0.7) return page(1);
+    }
     if (view.classList.contains('bar-hidden')) showBar(playing);
     else if (playing) view.classList.add('bar-hidden');
   });
+  $('#pl-page-prev').onclick = () => page(-1);
+  $('#pl-page-next').onclick = () => page(1);
+  // Zweispaltig: waagerecht wischen blättert (nach links = weiter)
+  let touchStart = null;
+  scroller.addEventListener('pointerdown', (e) => {
+    touchStart = cols && e.pointerType !== 'mouse' ? { x: e.clientX, y: e.clientY } : null;
+  });
+  scroller.addEventListener('pointerup', (e) => {
+    if (!touchStart) return;
+    const dx = e.clientX - touchStart.x;
+    const dy = e.clientY - touchStart.y;
+    touchStart = null;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    swiped = true;
+    setTimeout(() => (swiped = false), 400);
+    page(dx < 0 ? 1 : -1);
+  });
+  scroller.addEventListener('pointercancel', () => (touchStart = null));
+  // Zweispaltig: Mausrad/Touchpad blättert seitenweise (eine Seite je Dreh-Bewegung)
+  let wheelSum = 0;
+  let wheelBlockedUntil = 0;
+  scroller.addEventListener('wheel', (e) => {
+    if (!cols) return;
+    e.preventDefault();
+    const now = performance.now();
+    if (now < wheelBlockedUntil) {
+      wheelBlockedUntil = now + 200; // Nachlauf des Touchpads abwarten
+      return;
+    }
+    wheelSum += Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(wheelSum) < 40) return;
+    page(wheelSum > 0 ? 1 : -1);
+    wheelSum = 0;
+    wheelBlockedUntil = now + 450;
+  }, { passive: false });
   $('#pl-bar').addEventListener('pointerdown', () => showBar(playing));
   // Von Hand scrollen hält das automatische Scrollen nicht an, verschiebt nur die Stelle
   scroller.addEventListener('wheel', () => (carry = 0), { passive: true });

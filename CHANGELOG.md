@@ -8,6 +8,15 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.9 – 23.11.2026 · Zwei Spalten: von Hand umblättern
+
+- **Zweispaltiger Spielmodus von Hand blätterbar:** rechts bzw. links ins Lied tippen, waagerecht wischen
+  (nach links = weiter), die Pfeile ‹ › an den Rändern oder Mausrad/Touchpad. Bisher ging das nur mit Tastatur
+  oder Pedal – auf dem Tablet ohne Tastatur gar nicht.
+- **Schnelles Mehrfach-Blättern** (z. B. zweimal kurz aufs Pedal) geht nicht mehr verloren: Dreimal drücken sind
+  jetzt drei Seiten, vorher manchmal nur zwei.
+- Beim Wechsel zum nächsten Lied springt eine gerade laufende Blätter-Bewegung nicht mehr ins neue Lied hinein.
+
 ## 2.2.8 – 23.11.2026 · Feld „Dauer“ in der Liedinfo
 
 - **Dauer** steht jetzt in der Liedinfo neben Tempo (z. B. `3:20`). Danach richtet sich, wie schnell der

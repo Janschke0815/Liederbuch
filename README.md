@@ -186,7 +186,9 @@ Weitere unter **⋯**. Bei einer Setliste steht unter dem Titel die Position und
 
 **Zwei Spalten** (Symbol in der Leiste oder Taste S), ideal für Tablets im Querformat: Das Lied
 fließt in Spalten von Bildschirmhöhe, je zwei nebeneinander; Blättern schiebt um eine
-Doppelseite weiter, automatisch im Liedtempo. **Griffbilder** lassen sich hier direkt ein- und
+Doppelseite weiter, automatisch im Liedtempo. **Von Hand umblättern:** rechts bzw. links ins Lied
+tippen, waagerecht wischen (nach links = weiter), die Pfeile ‹ › an den Rändern, Mausrad/Touchpad
+oder Bild↓/Bild↑ bzw. ↓/↑ (auch per Bluetooth-Pedal). **Griffbilder** lassen sich hier direkt ein- und
 ausschalten (gleiche Einstellung wie unter Einstellungen → Anzeigen), ebenso die Gitarren-Akkorde
 (**Akk.** bzw. Taste A).
 

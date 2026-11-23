@@ -55,7 +55,7 @@
 /* Spielmodus zweispaltig: Spalten in Bildschirmhöhe, waagerecht blättern */
 #pl-chords[aria-pressed='true'], #pl-diagrams[aria-pressed='true'], #pl-harp[aria-pressed='true'], #pl-tabs[aria-pressed='true'],
 #pl-cols[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
-.play-view.cols2 .play-scroll { overflow: hidden; padding-bottom: 1.2em; }
+.play-view.cols2 .play-scroll { overflow: hidden; padding-bottom: 1.2em; touch-action: pinch-zoom; } /* Wischen wertet play-mode.js aus */
 .play-view.cols2 .play-sheet {
   max-width: none; margin: 0;
   column-count: 2; column-gap: 3em; column-fill: auto;
@@ -63,6 +63,19 @@
 }
 .play-view.cols2 .play-sheet .song-body { column-count: 1; }
 .play-view.cols2 .play-end { display: none; }
+/* Blätter-Knöpfe an den Rändern – nur zweispaltig */
+.pl-edge {
+  display: none; position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 2.6rem; height: 4.5rem; min-height: 0; padding: 0; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border-strong); color: var(--text);
+  opacity: .35; transition: opacity .15s; box-shadow: var(--shadow);
+}
+.pl-edge:hover, .pl-edge:focus-visible { opacity: 1; }
+.pl-edge-prev { left: .3rem; }
+.pl-edge-next { right: .3rem; }
+.play-view.cols2 .pl-edge { display: inline-grid; place-items: center; }
+.play-view.cols2.bar-hidden .pl-edge { opacity: .15; }
+.play-view.night .pl-edge { background: #2a2826; border-color: #444; color: #eee; }
 .play-sheet .song-header, .play-sheet .para, .play-sheet .line { break-inside: avoid; }
 .play-view.cols2 .play-sheet .block { break-inside: auto; }
 .play-view.cols2 .play-sheet .block-label { break-after: avoid; }
