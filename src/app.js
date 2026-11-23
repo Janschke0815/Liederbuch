@@ -47,6 +47,7 @@ import './ui/capo-help.js';
 import './ui/context-menus.js';
 import './ui/app-keys.js';
 import './ui/toolbar.js';
+import './ui/chord-tap.js';
 
 if (book.shared) document.title = `${book.name} – Liederbuch`;
 navigator.storage?.persist?.(); // Browser bitten, die Daten nicht automatisch zu löschen

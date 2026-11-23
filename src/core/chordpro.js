@@ -6,7 +6,8 @@
 //   blocks: [ { kind: null|'verse'|'chorus'|'bridge'|'tab'|'grid'|'part'|<eigener>, label, lines: [Line] } ]
 // }
 // Line:
-//   { type: 'lyrics', segments: [{ chord, annotation, harp?, text }], chordsOnly, harpOnly? }
+//   { type: 'lyrics', segments: [{ chord, annotation, harp?, text }], chordsOnly, harpOnly?, src }
+//     src: Nummer der Zeile im Text (ab 0) – zum Setzen von Akkorden per Antippen (chord-place.js)
 //     harp: Mundharmonika-Tab wie [-4] statt Akkord (siehe harp.js)
 //   { type: 'comment', text, style: 'normal'|'italic'|'box' }
 //   { type: 'tab', text }            – Zeile in Tab/Grid-Block, unverändert
@@ -99,7 +100,7 @@ export function parseChordPro(src) {
   };
 
   const lines = String(src).replace(/\r\n?/g, '\n').split('\n');
-  for (const raw of lines) {
+  for (const [srcIndex, raw] of lines.entries()) {
     const line = raw.replace(/\s+$/, '');
     const d = parseDirective(line);
 
@@ -116,7 +117,7 @@ export function parseChordPro(src) {
     if (!d) {
       if (/^\s*#/.test(line)) continue; // ChordPro-Kommentarzeile
       if (line.trim() === '') pushLine({ type: 'empty' });
-      else pushLine(parseLyricsLine(line));
+      else pushLine({ ...parseLyricsLine(line), src: srcIndex });
       continue;
     }
 

@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-81 Module, 309 exportierte Funktionen, Konstanten und Klassen.
+83 Module, 316 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -35,6 +35,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/app-keys.js`](ui/app-keys.md) | Tastenkürzel der Hauptansicht (die des Spielmodus stehen in play-mode.js). |
 | [`ui/app-state.js`](ui/app-state.md) | Gemeinsamer Zustand der Oberfläche: welches Liederbuch, seine Datenbanken und das gerade geöffnete Lied. |
 | [`ui/capo-help.js`](ui/capo-help.md) | Capo-Hilfe: schlägt Capo-Lagen vor, in denen das Lied mit möglichst einfachen Griffen klingt wie bisher. |
+| [`ui/chord-tap.js`](ui/chord-tap.md) | Akkorde per Antippen: Schalter „Akkorde setzen“ unten in der Vorschau. |
 | [`ui/context-menus.js`](ui/context-menus.md) | Kontextmenüs (Rechtsklick / langes Drücken) für Lieder in der Liste und für die Vorschau, außerdem Doppelklick (spielen) und Entf (löschen) in der Liste. |
 | [`ui/dom.js`](ui/dom.md) | Kleine Hilfen für die Oberfläche – von allen ui-Modulen gemeinsam genutzt. |
 | [`ui/files.js`](ui/files.md) | Dateien öffnen (Sicherung als ZIP oder JSON, ChordPro- und Textdateien) und Sichern als ZIP. |
@@ -57,6 +58,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | Modul | Inhalt |
 |---|---|
 | [`core/capo.js`](core/capo.md) | Capo-Hilfe: In welchem Bund liegt das Lied mit möglichst einfachen Griffen? |
+| [`core/chord-place.js`](core/chord-place.md) | Akkorde per Antippen setzen: eine Stelle im sichtbaren Liedtext (Zeile + Spalte) wird in den ChordPro-Text übersetzt. |
 | [`core/chord-shapes.js`](core/chord-shapes.md) | Gitarrengriffe (Standardstimmung EADGBE) für Griffbilder und die Capo-Hilfe. |
 | [`core/chordpro.js`](core/chordpro.md) | ChordPro-Parser: Text -> Song-Modell. |
 | [`core/chords.js`](core/chords.md) | Akkord-Erkennung und Transposition. |

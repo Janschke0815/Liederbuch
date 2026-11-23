@@ -297,6 +297,11 @@
       </div>
       <div class="preview-scroll">
         <div id="preview" class="songbook sheet"></div>
+        <!-- Akkorde per Antippen (ui/chord-tap.js): an = Tippen ins Lied öffnet die Akkord-Auswahl -->
+        <button type="button" id="btn-chordtap" class="chordtap-btn" aria-pressed="false" hidden
+                title="Akkorde setzen: aufs Lied tippen, um an der Stelle einen Akkord zu setzen, zu ändern oder zu entfernen">
+          <span class="chordtap-icon" aria-hidden="true">[A]</span><span class="label">Akkorde setzen</span>
+        </button>
         <div class="zoom-ctl" role="group" aria-label="Vorschau vergrößern">
           <button type="button" id="zoom-out" title="Vorschau kleiner" aria-label="Kleiner">−</button>
           <button type="button" id="zoom-reset" title="Originalgröße">100 %</button>

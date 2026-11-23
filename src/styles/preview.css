@@ -105,3 +105,35 @@
   .view-bar .play-btn { padding-inline: .5em; gap: .3em; }
   .key-box { padding-inline: 0; }
 }
+
+/* Akkorde per Antippen (ui/chord-tap.js): Schalter unten links in der Vorschau, Auswahl-Fenster */
+.chordtap-btn {
+  position: sticky; bottom: .8em; float: left; margin: -2.6em 0 0 .8em; z-index: 1;
+  display: inline-flex; align-items: center; gap: .45em; min-height: 2.2rem; padding: .2em .8em;
+  border-radius: 999px; background: var(--surface); box-shadow: var(--shadow); font-weight: 600; font-size: .88em;
+}
+.chordtap-btn[hidden] { display: none; }
+.chordtap-icon { font-family: ui-monospace, Consolas, monospace; color: var(--accent); font-weight: 700; }
+.chordtap-btn[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.chordtap-btn[aria-pressed='true'] .chordtap-icon { color: inherit; }
+#preview.chordtap-on .line[data-src] { cursor: pointer; border-radius: 3px; }
+#preview.chordtap-on .line[data-src]:hover { background: #b3261e12; }
+.chord-pick {
+  position: fixed; z-index: 30; width: min(22rem, calc(100vw - 16px));
+  display: flex; flex-direction: column; gap: .5em; padding: .6em .7em .7em;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-lg);
+}
+.cp-head { display: flex; align-items: center; gap: .2em; }
+.cp-where { flex: 1; min-width: 0; font-size: .88em; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cp-where strong { color: var(--text); font-weight: 700; }
+.cp-head .icon-btn { min-width: 2.2rem; }
+.cp-chords { display: flex; flex-wrap: wrap; gap: .35em; }
+.cp-chord { min-width: 3rem; min-height: 2.5rem; font-weight: 700; color: var(--accent); }
+.cp-chord[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.cp-foot { display: flex; justify-content: space-between; gap: .5em; }
+.cp-custom { display: flex; gap: .4em; }
+.cp-custom input { flex: 1; min-width: 0; font-size: 16px; }
+/* Handy: als Leiste unten über den Reitern, gut mit dem Daumen erreichbar */
+@media (max-width: 760px) {
+  .chord-pick { left: 8px !important; right: 8px; top: auto !important; bottom: calc(3.6rem + env(safe-area-inset-bottom)); width: auto; }
+}

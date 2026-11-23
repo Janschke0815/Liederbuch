@@ -8,6 +8,15 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.3 – 23.11.2026 · Akkorde per Antippen
+
+- **Akkorde setzen per Antippen** (vor allem fürs Handy): Unten links in der Vorschau „Akkorde setzen“
+  einschalten, auf eine Stelle im Liedtext tippen – es erscheint eine Auswahl mit den Akkorden des Liedes,
+  „anderer Akkord …“ und „entfernen“. Mit ◀ ▶ rückt die Stelle um einen Buchstaben, oben steht z. B. „dar|ling“.
+  Ein Tipp auf einen vorhandenen Akkord wählt ihn zum Ändern aus. Der Akkord landet an der richtigen Stelle
+  im ChordPro-Text; „Rückgängig“ in der Meldung nimmt ihn wieder heraus.
+- Bei transponierten Liedern wählt man in der angezeigten Tonart; in den Text wird zurücktransponiert geschrieben.
+
 ## 2.3.2 – 23.11.2026 · Verständliche Leiste über der Vorschau
 
 - **Leiste über der Vorschau beschriftet:** Über jedem Wert steht klein, was er ist – **Tonart** G,

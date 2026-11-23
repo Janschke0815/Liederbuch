@@ -16,7 +16,8 @@ Song-Modell:
 Line:
 
 ```text
-  { type: 'lyrics', segments: [{ chord, annotation, harp?, text }], chordsOnly, harpOnly? }
+  { type: 'lyrics', segments: [{ chord, annotation, harp?, text }], chordsOnly, harpOnly?, src }
+    src: Nummer der Zeile im Text (ab 0) – zum Setzen von Akkorden per Antippen (chord-place.js)
     harp: Mundharmonika-Tab wie [-4] statt Akkord (siehe harp.js)
   { type: 'comment', text, style: 'normal'|'italic'|'box' }
   { type: 'tab', text }            – Zeile in Tab/Grid-Block, unverändert
@@ -26,7 +27,7 @@ Line:
 ```
 
 **Benutzt:** [`core/harp.js`](harp.md)  
-**Benutzt von:** [`formats/export-text.js`](../formats/export-text.md), [`formats/paste-import.js`](../formats/paste-import.md), [`live-ui.js`](../live-ui.md), [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`settings-ui.js`](../settings-ui.md), [`storage/repository.js`](../storage/repository.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/list.js`](../ui/list.md), [`ui/paste.js`](../ui/paste.md), [`ui/song.js`](../ui/song.md)
+**Benutzt von:** [`core/chord-place.js`](chord-place.md), [`formats/export-text.js`](../formats/export-text.md), [`formats/paste-import.js`](../formats/paste-import.md), [`live-ui.js`](../live-ui.md), [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`settings-ui.js`](../settings-ui.md), [`storage/repository.js`](../storage/repository.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/chord-tap.js`](../ui/chord-tap.md), [`ui/list.js`](../ui/list.md), [`ui/paste.js`](../ui/paste.md), [`ui/song.js`](../ui/song.md)
 
 ## Exportiert
 

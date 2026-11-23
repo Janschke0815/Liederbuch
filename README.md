@@ -233,6 +233,17 @@ erscheint im Spielmodus) und eine **eigene Transposition** nur für diese Setlis
 Lieder in dieser Reihenfolge. Setlisten werden mit synchronisiert – in gemeinsamen
 Liederbüchern sieht die ganze Band dieselben Setlisten.
 
+## Akkorde per Antippen
+
+Unten links in der Vorschau (am Handy: „Ansehen“) schaltet **Akkorde setzen** das Antippen ein. Dann:
+auf eine Stelle im Liedtext tippen → es erscheint eine Auswahl mit den **Akkorden des Liedes**,
+**anderer Akkord …** (Eingabe, z. B. `Em7` oder `D/F#`) und – wenn dort schon einer steht – **entfernen**.
+Mit **◀ ▶** rückt die Stelle um einen Buchstaben; oben zeigt `dar|ling`, wo der Akkord landet. Ein Tipp
+auf einen vorhandenen Akkord wählt ihn zum Ändern aus. Der Akkord kommt als `[G]` an die richtige Stelle
+im Text; „Rückgängig“ in der Meldung macht es ungeschehen. Ist das Lied transponiert, wählt man in der
+angezeigten Tonart – in den Text wird zurücktransponiert geschrieben. **Fertig** schaltet wieder ab.
+Nicht in Nur-Lesen-Büchern. Logik: `src/core/chord-place.js`.
+
 ## Liedinfo: Capo, Takt, Tempo, Dauer
 
 Über dem Editor gibt es das Feld **Liedinfo** (einklappbar) mit Titel, Interpret, Tonart,

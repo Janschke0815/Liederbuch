@@ -73,6 +73,7 @@ function chordSpan(s, chordName) {
 
 function renderLyricsLineBody(line, chordName) {
   const div = el('div', line.chordsOnly ? 'line line--chords' : 'line');
+  if (line.src !== undefined) div.dataset.src = line.src; // Textzeile – für Akkorde per Antippen
   if (line.segments.some((s) => s.harp)) div.classList.add('line--harp');
   if (line.harpOnly) div.classList.add('line--harp-only');
   // nur Gitarren-Akkorde (z. B. „| C | G |“): verschwindet, wenn Akkorde aus sind
@@ -239,19 +240,44 @@ export function songKey(song, opts = {}) {
 }
 
 /**
+ * Wie ein Akkord angezeigt wird (transponiert, ♯/♭) – genau wie in renderSong.
+ * @param {object} song  Ergebnis von parseChordPro
+ * @param {{transpose?: number, accidentals?: string}} [opts]
+ * @returns {(chord: string) => string}
+ */
+export function chordNamer(song, opts = {}) {
+  const steps = opts.transpose || 0;
+  const mode = opts.accidentals || 'auto';
+  if (steps === 0 && mode === 'auto') return (c) => c;
+  // Ohne {key:} dient der erste Akkord als Anhaltspunkt für # oder b
+  const useFlats = shouldUseFlats(mode, song.meta.key || firstChord(song), steps);
+  return (c) => transposeChord(c, steps, useFlats);
+}
+
+/**
+ * Umkehrung zu chordNamer: ein angezeigter (transponierter) Akkord so, wie er in den Text gehört –
+ * zurücktransponiert, in der Schreibweise der Originaltonart.
+ * @returns {(chord: string) => string}
+ */
+export function chordWriter(song, opts = {}) {
+  const steps = opts.transpose || 0;
+  if (!steps) return (c) => c;
+  const useFlats = shouldUseFlats('auto', song.meta.key || firstChord(song), 0);
+  return (c) => transposeChord(c, -steps, useFlats);
+}
+
+/**
  * Ein Lied als HTML darstellen (Vorschau, Spielmodus, Druck).
  * @param {object} song  Ergebnis von parseChordPro
  * @param {{transpose?: number, accidentals?: 'auto'|'sharp'|'flat'}} [opts]
  * @returns {HTMLElement}
  */
 export function renderSong(song, opts = {}) {
+  const chordName = chordNamer(song, opts);
   const steps = opts.transpose || 0;
-  const mode = opts.accidentals || 'auto';
   const key = song.meta.key;
-  const untouched = steps === 0 && mode === 'auto';
-  // Ohne {key:} dient der erste Akkord als Anhaltspunkt für # oder b
-  const useFlats = shouldUseFlats(mode, key || firstChord(song), steps);
-  const chordName = untouched ? (c) => c : (c) => transposeChord(c, steps, useFlats);
+  const untouched = steps === 0 && (opts.accidentals || 'auto') === 'auto';
+  const useFlats = shouldUseFlats(opts.accidentals || 'auto', key || firstChord(song), steps);
 
   const article = el('article', 'song');
   const header = el('header', 'song-header');
