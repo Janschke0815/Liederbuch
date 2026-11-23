@@ -8,6 +8,14 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.11 – 23.11.2026 · Optionen je Liederbuch per Rechtsklick
+
+- **Liederbuch-Auswahl oben links** ist jetzt ein eigenes Menü: **Rechtsklick** (am Handy: lang drücken) auf ein
+  Buch zeigt seine Optionen – Öffnen, Umbenennen, Entfernen (bzw. Verlassen/Abo beenden) und beim geöffneten Buch
+  die Cloud-Einstellungen. Rechtsklick auf den Namen oben öffnet die Optionen des geöffneten Buchs.
+  Ein Hinweis unten im Menü erklärt das.
+- Lange Buchnamen werden oben sauber mit „…“ gekürzt.
+
 ## 2.2.10 – 23.11.2026 · Pfeiltasten blättern im Zwei-Spalten-Modus
 
 - **→ / ← blättern zweispaltig um** (eine Doppelseite weiter/zurück), statt das Lied zu wechseln. Viele

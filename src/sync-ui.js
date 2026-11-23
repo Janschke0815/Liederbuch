@@ -22,6 +22,7 @@ import { prefs } from './prefs.js';
 import { SongRepository } from './storage/repository.js';
 import { openIdbStore } from './storage/stores.js';
 import { $ } from './ui/dom.js';
+import { showMenu } from './context-menu.js';
 
 const TITLES = {
   off: 'Nicht verbunden',
@@ -151,46 +152,55 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     location.reload();
   }
 
-  /**
-   * Auswahlfeld nur so breit wie der Name des geöffneten Buchs – von selbst wäre es so breit wie der
-   * längste Eintrag („Liederbücher verwalten …“) und schöbe am Handy die Kopfleiste über den Rand.
-   */
-  function fitSelect(sel) {
-    const probe = sel.cloneNode(false);
-    probe.removeAttribute('id');
-    probe.hidden = false;
-    probe.append(new Option(sel.selectedOptions[0]?.textContent || ''));
-    Object.assign(probe.style, { position: 'absolute', visibility: 'hidden', width: 'auto' });
-    sel.after(probe);
-    const w = probe.getBoundingClientRect().width;
-    probe.remove();
-    if (w) sel.style.width = `${Math.ceil(w) + 2}px`;
+  const bookLabel = (b) => (b.abo || b.readOnly ? `${b.name} (nur lesen)` : b.shared ? `${b.name} 👥` : b.name);
+  const touch = matchMedia('(pointer: coarse)').matches;
+
+  /** Optionen zu einem Liederbuch (Rechtsklick bzw. lang drücken in der Auswahl). */
+  function bookOptions(b) {
+    const isActive = b.id === book.id;
+    return [
+      !isActive && { label: 'Öffnen', icon: 'open', action: () => switchTo(b.id) },
+      !b.abo && { label: 'Umbenennen …', icon: 'edit', action: () => rename(b) },
+      isActive && { label: 'Cloud: Abgleich & Teilen …', icon: 'cloud', action: () => openDialog() },
+      '-',
+      b.own && { label: 'Entfernen …', icon: 'trash', danger: true, action: () => removeOwnBook(b) },
+      b.shared && isActive && { label: 'Verlassen …', icon: 'trash', danger: true, action: leaveBook },
+      b.abo && leaveAbo && { label: 'Abo beenden …', icon: 'trash', danger: true, action: () => leaveAbo(b) && (renderBooks(), renderBookSelect()) },
+      '-',
+      { label: 'Liederbücher verwalten …', action: () => openBooks() },
+    ];
   }
 
-  // Einträge unter den Liederbüchern: anlegen und verwalten, ohne den Cloud-Dialog zu suchen
-  const NEW_BOOK = '__new';
-  const MANAGE_BOOKS = '__manage';
-
+  /** Liederbuch-Auswahl in der Kopfleiste: eigenes Menü, damit jedes Buch Optionen per Rechtsklick hat. */
   function renderBookSelect() {
-    const books = listBooks();
-    const sel = $('#book-select');
-    const line = new Option('──────────', '');
-    line.disabled = true;
-    sel.replaceChildren(
-      ...books.map((b) => new Option(b.abo || b.readOnly ? `${b.name} (nur lesen)` : b.shared ? `${b.name} 👥` : b.name, b.id, false, b.id === book.id)),
-      line,
-      new Option('＋ Neues Liederbuch …', NEW_BOOK),
-      new Option('Liederbücher verwalten …', MANAGE_BOOKS),
-    );
-    sel.hidden = false;
+    const btn = $('#book-select');
+    btn.querySelector('.book-select-name').textContent = bookLabel(book);
+    btn.hidden = false;
     $('#app-name').hidden = true;
-    fitSelect(sel);
-    document.fonts?.ready.then(() => fitSelect(sel)); // Schrift geladen: neu messen
-    sel.onchange = () => {
-      const v = sel.value;
-      if (v !== NEW_BOOK && v !== MANAGE_BOOKS) return switchTo(v);
-      sel.value = book.id; // Auswahl bleibt beim geöffneten Buch
-      openBooks({ create: v === NEW_BOOK });
+    const openAt = () => {
+      const r = btn.getBoundingClientRect();
+      return { x: r.left, y: r.bottom + 4 };
+    };
+    btn.onclick = () => {
+      const books = listBooks();
+      const menu = showMenu([
+        ...books.map((b) => ({
+          label: bookLabel(b),
+          checked: b.id === book.id,
+          action: () => b.id !== book.id && switchTo(b.id),
+          context: () => bookOptions(b),
+          contextTitle: b.name,
+        })),
+        '-',
+        { label: 'Neues Liederbuch …', icon: 'plus', action: () => openBooks({ create: true }) },
+        { label: 'Liederbücher verwalten …', action: () => openBooks() },
+      ], { ...openAt(), title: 'Liederbücher', foot: touch ? 'Lang drücken: Optionen zum Buch' : 'Rechtsklick: Optionen zum Buch' });
+      menu.focusFirst();
+    };
+    // Rechtsklick auf den Namen oben: Optionen zum geöffneten Buch
+    btn.oncontextmenu = (e) => {
+      e.preventDefault();
+      showMenu(bookOptions(book), { ...openAt(), title: book.name }).focusFirst();
     };
   }
 

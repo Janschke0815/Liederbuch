@@ -4,13 +4,17 @@
 
 Kontextmenü: Rechtsklick (Maus), langes Drücken (Touch) oder Menütaste / Umschalt+F10. Bedienbar mit Pfeiltasten, Enter, Esc; Untermenüs mit → / ←.
 
-Eintrag: { label, icon?, hint?, action?, disabled?, danger?, checked?, items? (Untermenü) }
+Eintrag: { label, icon?, hint?, action?, disabled?, danger?, checked?, items? (Untermenü),
 
 ```text
+           context?: () => Einträge (eigenes Menü per Rechtsklick/lang drücken/Menütaste auf dem Eintrag),
+           contextTitle? }
          oder '-' für eine Trennlinie
 ```
 
-**Benutzt von:** [`setlist-ui.js`](setlist-ui.md), [`ui/context-menus.js`](ui/context-menus.md)
+Optionen von showMenu: x, y, title?, foot? (Hinweiszeile unten)
+
+**Benutzt von:** [`setlist-ui.js`](setlist-ui.md), [`sync-ui.js`](sync-ui.md), [`ui/context-menus.js`](ui/context-menus.md)
 
 ## Exportiert
 
@@ -18,7 +22,7 @@ Eintrag: { label, icon?, hint?, action?, disabled?, danger?, checked?, items? (U
 
 Offenes Kontextmenü schließen (falls eins offen ist).
 
-### `showMenu(items, { x, y, title, parentMenu = null } = {})`
+### `showMenu(items, { x, y, title, foot, parentMenu = null } = {})`
 
 Menü an Position (x, y) zeigen.
 

@@ -413,6 +413,9 @@ die Lieder des geöffneten Buchs übernommen.
 
 - Gewechselt wird oben links in der Kopfleiste; abgeglichen wird immer das **geöffnete** Buch (die
   anderen beim Öffnen).
+- **Rechtsklick** (am Handy: lang drücken) auf ein Buch in der Auswahl zeigt seine Optionen: Öffnen,
+  Umbenennen, Entfernen bzw. Verlassen/Abo beenden, beim geöffneten Buch auch die Cloud-Einstellungen.
+  Rechtsklick auf den Namen oben öffnet die Optionen des geöffneten Buchs.
 - **Google Drive / Dropbox:** Datei `Liederbuch – <Name>.json` (im Drive bzw. App-Ordner).
   **WebDAV:** eigener Ordner, vorbelegt neben dem Ordner des geöffneten Buchs.
 - **Liederbücher verwalten …** (ebenfalls in der Auswahl oben, oder im Cloud-Dialog unten

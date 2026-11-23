@@ -1,8 +1,11 @@
 // Kontextmenü: Rechtsklick (Maus), langes Drücken (Touch) oder Menütaste / Umschalt+F10.
 // Bedienbar mit Pfeiltasten, Enter, Esc; Untermenüs mit → / ←.
 //
-// Eintrag: { label, icon?, hint?, action?, disabled?, danger?, checked?, items? (Untermenü) }
+// Eintrag: { label, icon?, hint?, action?, disabled?, danger?, checked?, items? (Untermenü),
+//            context?: () => Einträge (eigenes Menü per Rechtsklick/lang drücken/Menütaste auf dem Eintrag),
+//            contextTitle? }
 //          oder '-' für eine Trennlinie
+// Optionen von showMenu: x, y, title?, foot? (Hinweiszeile unten)
 
 const LONG_PRESS_MS = 520;
 let open = null; // { el, close }
@@ -26,7 +29,7 @@ export function closeMenu() {
  * @param {Array} items
  * @param {{x: number, y: number, title?: string, parent?: HTMLElement}} at
  */
-export function showMenu(items, { x, y, title, parentMenu = null } = {}) {
+export function showMenu(items, { x, y, title, foot, parentMenu = null } = {}) {
   if (!parentMenu) closeMenu();
   const menu = document.createElement('div');
   menu.className = 'ctx-menu';
@@ -91,14 +94,47 @@ export function showMenu(items, { x, y, title, parentMenu = null } = {}) {
     } else {
       b.addEventListener('mouseenter', closeSub);
       b.addEventListener('click', async () => {
+        if (b.dataset.longPressed) return; // lang gedrückt: Optionen sind schon offen
         closeMenu();
         await it.action?.();
       });
+    }
+    if (it.context) {
+      // Optionen zu diesem Eintrag (z. B. Liederbuch umbenennen/entfernen)
+      b.openContext = (cx, cy) => {
+        closeMenu();
+        const m = showMenu(it.context(), { x: cx, y: cy, title: it.contextTitle });
+        m.focusFirst();
+      };
+      b.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const kb = e.clientX === 0 && e.clientY === 0;
+        const r = b.getBoundingClientRect();
+        b.openContext(kb ? r.left + 16 : e.clientX, kb ? r.bottom : e.clientY);
+      });
+      let timer = 0;
+      let start = null;
+      b.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'touch') return;
+        start = { x: e.clientX, y: e.clientY };
+        timer = setTimeout(() => {
+          b.dataset.longPressed = '1';
+          navigator.vibrate?.(15);
+          b.openContext(start.x, start.y);
+        }, LONG_PRESS_MS);
+      });
+      const cancel = (e) => {
+        if (e.type === 'pointermove' && start && Math.hypot(e.clientX - start.x, e.clientY - start.y) < 10) return;
+        clearTimeout(timer);
+      };
+      for (const t of ['pointermove', 'pointerup', 'pointercancel']) b.addEventListener(t, cancel);
     }
     buttons.push(b);
     menu.append(b);
   }
   if (menu.lastElementChild?.classList.contains('ctx-sep')) menu.lastElementChild.remove();
+  if (foot) menu.append(Object.assign(document.createElement('div'), { className: 'ctx-foot', textContent: foot }));
 
   document.body.append(menu);
   // im Fenster halten
@@ -156,6 +192,10 @@ export function showMenu(items, { x, y, title, parentMenu = null } = {}) {
       e.preventDefault();
       const d = e.key === 'ArrowDown' ? 1 : -1;
       list[(i + d + list.length) % list.length]?.focus();
+    } else if ((e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) && active?.openContext) {
+      e.preventDefault();
+      const r = active.getBoundingClientRect();
+      active.openContext(r.left + 16, r.bottom);
     } else if (e.key === 'ArrowRight' && active?.openSub) {
       e.preventDefault();
       active.openSub();
