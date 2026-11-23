@@ -27,6 +27,7 @@ import { setupPrint } from './print-ui.js';
 import { setupSetlists } from './setlist-ui.js';
 import { setupSettings } from './settings-ui.js';
 import { setupSync } from './sync-ui.js';
+import { setupLive } from './live-ui.js';
 import { book, repo, sets, state, services } from './ui/app-state.js';
 import { $, closeOnBackdrop, isMobile, toast } from './ui/dom.js';
 import { flushSave, openSong, preview } from './ui/song.js';
@@ -75,6 +76,8 @@ $('#btn-play').onclick = async () => {
   await flushSave();
   services.play.open(state.current.id);
 };
+
+setupLive();
 
 services.setlists = setupSetlists({
   repo,

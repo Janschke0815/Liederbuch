@@ -38,6 +38,7 @@ flowchart TD
 | Dateiformate | `src/formats/` | `.cho`-Dateien und Dateinamen, ZIP, Sicherung, Import von Text und Ultimate Guitar, Export als Text |
 | Speicher | `src/storage/` | Lieder und Setlisten in IndexedDB; weiches Löschen (Papierkorb), Export/Import |
 | Abgleich | `src/sync/` | Sync-Engine (zusammenführen), Anbieter Google Drive, Dropbox und WebDAV, Google-Anmeldung |
+| Live-Modus | `src/live/`, `src/live-ui.js` | kleiner MQTT-Client (WebSocket), Raum-Code und AES-GCM-Verschlüsselung, Live-Raum über zwei öffentliche Server; Dialog und Mitsinger-Ansicht im Spielmodus |
 | Darstellung | `src/render/`, `src/print/`, `src/settings/` | Lied -> HTML, Griffbilder, Seitenumbruch für den Druck, Darstellungs-Einstellungen |
 | Oberfläche | `src/app.js`, `src/ui/`, `src/*-ui.js`, `src/play-mode.js` | alles, was man sieht und anklickt |
 

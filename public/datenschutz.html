@@ -21,13 +21,13 @@
 <main>
   <p><a href="./">← zurück zur App</a></p>
   <h1>Datenschutzerklärung</h1>
-  <p class="meta">Liederbuch – Gitarren-Liederbuch im Browser · Stand: 22.11.2026</p>
+  <p class="meta">Liederbuch – Gitarren-Liederbuch im Browser · Stand: 23.11.2026</p>
 
   <div class="box">
     <strong>Kurz gesagt:</strong> Das Liederbuch hat keinen eigenen Server, keine Werbung, keine Tracker und
     keine Statistik. Deine Lieder liegen auf deinem Gerät – und, wenn du es einschaltest, in deinem eigenen
-    Speicher bei Google Drive, Dropbox oder auf deinem WebDAV-Server. Der Betreiber der App bekommt deine
-    Daten nie zu sehen.
+    Speicher bei Google Drive, Dropbox oder auf deinem WebDAV-Server. Im Live-Modus gehen Lieder verschlüsselt
+    über öffentliche Vermittlungs-Server. Der Betreiber der App bekommt deine Daten nie zu sehen.
   </div>
 
   <h2>1. Verantwortlich</h2>
@@ -82,14 +82,31 @@
   <p><strong>Abos:</strong> Abonnierst du ein Liederbuch, lädt die App die Abo-Datei von der Adresse, die du
     angibst.</p>
 
-  <h2>5. Hosting</h2>
+  <h2 id="live">5. Live-Modus (freiwillig)</h2>
+  <p>Im Live-Modus schickt ein Gerät (Vorsinger) das gerade gezeigte Lied – Liedtext, Akkorde und Tonart – an
+    die Geräte der Mitsinger. Dafür verbinden sich alle Geräte mit öffentlichen Vermittlungs-Servern (MQTT) von
+    <strong>HiveMQ</strong> (<code>broker.hivemq.com</code>) und <strong>EMQX</strong> (<code>broker.emqx.io</code>).</p>
+  <ul>
+    <li><strong>Verschlüsselt:</strong> Die Lieder werden auf dem Gerät mit einem Schlüssel verschlüsselt, der aus dem
+      Raum-Code abgeleitet ist (AES-GCM). Die Server sehen nur verschlüsselte Daten und eine zufällig wirkende
+      Kennung des Raums – weder den Code noch die Lieder.</li>
+    <li><strong>Was die Server sehen:</strong> die IP-Adresse der Geräte, den Zeitpunkt und die Größe der Nachrichten.
+      Das letzte Lied eines Raums heben sie verschlüsselt auf, damit später Dazukommende es sofort sehen; beim
+      Beenden wird es gelöscht.</li>
+    <li><strong>Wer mitlesen kann:</strong> jeder, der den Code bzw. Link oder QR-Code des Raums kennt.</li>
+    <li>Der Live-Modus läuft nur, wenn du ihn startest oder einem Raum beitrittst. Es gelten die Datenschutzhinweise
+      von <a href="https://www.hivemq.com/legal/privacy-policy/">HiveMQ</a> und
+      <a href="https://www.emqx.com/en/policy/privacy-policy">EMQ</a>.</li>
+  </ul>
+
+  <h2>6. Hosting</h2>
   <p>Die App wird über GitHub Pages ausgeliefert. Beim Aufruf verarbeitet GitHub technisch notwendige
     Zugriffsdaten (z. B. IP-Adresse, Zeitpunkt), um die Seite auszuliefern; siehe
     <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement">Datenschutzerklärung von GitHub</a>.
     Der Betreiber der App erhält diese Daten nicht. Wird die App auf einem eigenen Server (z. B. einer NAS)
     betrieben, ist dessen Betreiber dafür verantwortlich.</p>
 
-  <h2>6. Deine Rechte</h2>
+  <h2>7. Deine Rechte</h2>
   <p>Weil der Betreiber keine personenbezogenen Daten von dir speichert, gibt es bei ihm nichts
     auszukunften oder zu löschen. Deine Daten liegen bei dir und bei den Diensten, die du selbst wählst;
     dort kannst du sie einsehen, ändern und löschen. Bei Fragen: siehe Kontakt unter 1.</p>
@@ -99,7 +116,8 @@
     on your device and, if you choose, in your own Google Drive, Dropbox or WebDAV storage. With Google Drive
     the app uses the <code>drive.file</code> scope only, to sync your songbook files between your devices and to
     share a songbook when you invite someone. Data flows directly between your browser and Google; the
-    developer never receives it. Liederbuch's use and transfer of information received from Google APIs
+    developer never receives it. The optional live mode relays songs end-to-end encrypted via public MQTT
+    brokers (HiveMQ, EMQX), which see IP addresses but not the content. Liederbuch's use and transfer of information received from Google APIs
     adheres to the
     <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
     including the Limited Use requirements. Revoke access at any time at

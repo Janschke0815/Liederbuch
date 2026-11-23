@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-75 Module, 286 exportierte Funktionen, Konstanten und Klassen.
+79 Module, 306 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -13,6 +13,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`app.js`](app.md) | Einstieg der App: steckt die Teile der Oberfläche zusammen und öffnet das erste Lied. |
 | [`books.js`](books.md) | Mehrere Liederbücher auf einem Gerät. |
 | [`context-menu.js`](context-menu.md) | Kontextmenü: Rechtsklick (Maus), langes Drücken (Touch) oder Menütaste / Umschalt+F10. |
+| [`live-ui.js`](live-ui.md) | Live-Modus: Dialog (Vorsingen / Mitsingen), „LIVE“-Anzeige in der Kopfleiste, Mitsinger-Ansicht im Spielmodus. |
 | [`metronome.js`](metronome.md) | Metronom mit Web Audio: genaue Zeitplanung (vorausplanen statt setInterval-Klicks), betonte Eins je nach Taktart. |
 | [`play-mode.js`](play-mode.md) | Spielmodus: Vollbild nur mit dem Lied, automatisches Scrollen, Bildschirm bleibt an, Blättern per Tastatur oder Bluetooth-Fußpedal (die senden Bild-/Pfeiltasten). |
 | [`prefs.js`](prefs.md) | Alles, was sich die App pro Gerät im Browser merkt (localStorage) – an einer Stelle. |

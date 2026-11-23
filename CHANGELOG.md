@@ -8,6 +8,19 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.0 – 23.11.2026 · Live-Modus fürs Lagerfeuer
+
+- **Live-Modus** (Menü ⋯ → Live-Modus): Einer singt vor und wählt die Lieder, alle anderen sehen sie sofort
+  auf ihrem Handy – mit Akkorden in der richtigen Tonart.
+  - **Vorsingen:** „Live starten“ zeigt einen QR-Code und einen Code zum Beitreten; „Link kopieren“/„Teilen“
+    schickt den Link z. B. in den Gruppen-Chat. Jedes Lied, das du öffnest oder im Spielmodus zeigst, geht an
+    alle, auch Textänderungen und die Tonart. Oben zeigt „LIVE · 3“, wie viele mitsingen.
+  - **Mitsingen:** QR-Code scannen oder Code eingeben – ohne eigenes Liederbuch und ohne Konto. Das Lied
+    erscheint im Spielmodus; mit −/+ transponierst du zusätzlich nur für dich (z. B. mit Capo), „Übernehmen“
+    legt es in dein eigenes Liederbuch. Wer später dazukommt, sieht sofort das aktuelle Lied.
+  - Alle Geräte brauchen Internet (mobile Daten reichen). Die Lieder gehen Ende-zu-Ende verschlüsselt über
+    öffentliche Vermittlungs-Server (HiveMQ, EMQX) – siehe Datenschutzerklärung, Abschnitt 5.
+
 ## 2.2.12 – 23.11.2026 · Spaltenbreiten einstellbar
 
 - **Breite von Liederliste, Editor und Vorschau** lässt sich auf breiten Bildschirmen ändern: die Trennlinie

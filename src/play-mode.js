@@ -153,7 +153,8 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     if (!entries.length) return;
     index = clamp(i, 0, entries.length - 1);
     const entry = entries[index];
-    song = await repo.get(entry.id);
+    // entry.song: mitgeschicktes Lied (Live-Modus), nicht im eigenen Liederbuch
+    song = entry.song || (await repo.get(entry.id));
     if (!song) return;
     const parsed = parseChordPro(song.chordpro);
     meta = parsed.meta;
@@ -174,14 +175,14 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
       sheet.querySelector('.song-header')?.append(note);
     }
     // zuletzt gespielt (für die Sortierung der Liste)
-    prefs.setIn('playedAt', song.id, new Date().toISOString());
-    songZoom = Number(prefs.get('playZoomSong')[song.id]) || 0;
+    if (song.id) prefs.setIn('playedAt', song.id, new Date().toISOString());
+    songZoom = song.id ? Number(prefs.get('playZoomSong')[song.id]) || 0 : 0;
     applyZoom();
     const next = index < entries.length - 1 ? await repo.get(entries[index + 1].id) : null;
-    $('#pl-title').textContent = song.title || 'Ohne Titel';
+    $('#pl-title').textContent = song.title || meta.title || 'Ohne Titel';
     $('#pl-pos').textContent = entries.length > 1
       ? `${index + 1} / ${entries.length}${next ? ` · Nächstes: ${next.title || 'Ohne Titel'}` : ' · Letztes Lied'}`
-      : song.artist || '';
+      : song.artist || [].concat(meta.artist || []).join(', ');
     $('#pl-prev').disabled = index === 0;
     $('#pl-next').disabled = index >= entries.length - 1;
     const endBtn = $('#pl-next-end');
@@ -198,6 +199,10 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     carry = 0;
     pageClock = 0;
     updateProgress();
+    // Für den Live-Modus (Vorsinger): welches Lied gerade gezeigt wird, mit Tonart aus der Setliste
+    if (!entry.song) {
+      dispatchEvent(new CustomEvent('playsong', { detail: { chordpro: song.chordpro, transpose: transpose || 0, accidentals: song.accidentals || 'auto' } }));
+    }
   }
 
   // ---------- Automatisch scrollen ----------
@@ -360,7 +365,49 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     }
   }
 
+  // ---------- Live-Modus (Mitsinger) ----------
+  // Das Lied kommt vom Vorsinger; Vor/Zurück gibt es nicht, dafür eigene Tonart und „Übernehmen“.
+
+  let live = null; // { onLeave, onOffset, onAdopt }
+
+  /**
+   * Mitgeschicktes Lied zeigen (öffnet den Spielmodus, falls nötig).
+   * @param {{song: {chordpro: string}, transpose: number, accidentals: string}} entry
+   * @param {{offset: number, onLeave: () => void, onOffset: (delta: number) => void, onAdopt: () => void}} opts
+   */
+  async function showLive(entry, opts) {
+    live = opts;
+    view.classList.add('live');
+    $('#pl-live').hidden = false;
+    $('#pl-live-badge').textContent = 'LIVE';
+    $('#pl-live-badge').classList.remove('ended');
+    $('#pl-live-offset').textContent = (opts.offset > 0 ? '+' : '') + opts.offset;
+    const same = !view.hidden && entries[0]?.song?.chordpro === entry.song.chordpro;
+    if (view.hidden) return open(null, [entry]);
+    const rel = pos() / Math.max(1, maxPos());
+    entries = [entry];
+    await show(0);
+    if (same) setPos(cols ? snap(rel * maxPos()) : rel * maxPos()); // nur Tonart geändert: Stelle halten
+  }
+
+  /** Vorsinger hat beendet: letztes Lied bleibt stehen. */
+  function liveEnded() {
+    $('#pl-live-badge').textContent = 'beendet';
+    $('#pl-live-badge').classList.add('ended');
+  }
+
+  $('#pl-live-down').onclick = () => live?.onOffset(-1);
+  $('#pl-live-up').onclick = () => live?.onOffset(1);
+  $('#pl-live-adopt').onclick = () => live?.onAdopt();
+
   function close() {
+    if (live) {
+      const l = live;
+      live = null;
+      view.classList.remove('live');
+      $('#pl-live').hidden = true;
+      l.onLeave?.();
+    }
     setPlaying(false);
     setExtra(false);
     metronome.stop();
@@ -528,5 +575,5 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     KEY_ACTIONS[s.id]();
   }, true);
 
-  return { open, close, get isOpen() { return !view.hidden; } };
+  return { open, close, showLive, liveEnded, get isOpen() { return !view.hidden; }, get isLive() { return Boolean(live); } };
 }

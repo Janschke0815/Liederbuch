@@ -199,6 +199,25 @@ ausschalten (gleiche Einstellung wie unter Einstellungen → Anzeigen), ebenso d
 Bluetooth-Fußpedale („Page Turner“) senden meist Bild↑/↓ oder Pfeiltasten und funktionieren
 damit ohne Einrichtung. Sendet ein Pedal →/←, wechselt es einspaltig das Lied und blättert zweispaltig um. Geblättert wird in der Reihenfolge der Liederliste (ggf. gefiltert).
 
+## Live-Modus (Lagerfeuer)
+
+Einer singt vor und wählt die Lieder – alle anderen sehen sie sofort auf ihrem Handy, mit Akkorden in der
+richtigen Tonart. Menü **⋯ → Live-Modus**.
+
+- **Vorsingen:** *Live starten* zeigt einen **QR-Code** und einen Code (z. B. `K7MQ-2XPA`); *Link kopieren*
+  bzw. *Teilen* schickt den Beitritts-Link z. B. in den Gruppen-Chat. Danach geht jedes Lied, das du öffnest
+  oder im Spielmodus zeigst, an alle – auch Änderungen am Text und die Tonart (bei Setlisten deren Tonart).
+  Oben zeigt **LIVE · 3**, dass es läuft und wie viele mitsingen; ein Tipp darauf öffnet Code und QR-Code
+  wieder. Lädt man die Seite neu, läuft der Raum mit demselben Code weiter.
+- **Mitsingen:** QR-Code mit der Handy-Kamera scannen (öffnet die App und tritt bei) oder den Code unter
+  ⋯ → Live-Modus eingeben. Ein eigenes Liederbuch oder Konto braucht man nicht – das Lied wird mitgeschickt
+  und erscheint im Spielmodus. Dort: **−/+** transponiert zusätzlich nur für dich (z. B. mit Capo),
+  **Übernehmen** legt das Lied in dein eigenes Liederbuch. Spielmodus schließen = Live-Modus verlassen.
+- **Technik:** Alle Geräte brauchen Internet (mobile Daten reichen). Die Lieder gehen Ende-zu-Ende
+  verschlüsselt (AES-GCM, Schlüssel aus dem Raum-Code) über zwei öffentliche MQTT-Server (HiveMQ, EMQX)
+  parallel; die sehen nur verschlüsselte Daten und IP-Adressen. Das letzte Lied heben sie auf, damit
+  Nachzügler es sofort sehen. Kein eigener Server, kein Konto. Code: `src/live/` und `src/live-ui.js`.
+
 ## Setlisten
 
 Reiter **Setlisten** in der linken Spalte: Lieder in fester Reihenfolge, z. B. für einen
@@ -642,7 +661,9 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     Abo liefert Transposition mit
 23. ✅ Mehrere Liederbücher (2.2): beliebig viele eigene Liederbücher, jedes mit eigenem Speicherort
     (Gerät, Google Drive, Dropbox, WebDAV) und eigenem Konto; umbenennen, entfernen
-24. Live-Modus fürs Lagerfeuer: ein Gerät wählt das Lied, alle anderen sehen es sofort (Peer-to-Peer)
+24. ✅ Live-Modus fürs Lagerfeuer (2.3): ein Gerät wählt das Lied, alle anderen sehen es sofort; Beitritt
+    per QR-Code/Link ohne Konto, Lied wird verschlüsselt über öffentliche MQTT-Server mitgeschickt
+    (statt Peer-to-Peer: das scheitert im Mobilfunk oft); Mitsinger transponieren zusätzlich für sich
 25. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
     zuerst Englisch; Sprache folgt dem Browser und ist unter Einstellungen → App umstellbar. Schrittweise nach
     Bereichen umbauen (Kopfleiste, Liste, Menü → Dialoge → Hilfetexte); ein Test meldet fehlende Übersetzungen

@@ -1,0 +1,56 @@
+/* Live-Modus: Anzeige „LIVE“ in der Kopfleiste, Dialog (Vorsingen/Mitsingen), Mitsinger-Leiste. */
+
+/* Kopfleiste */
+.live-pill {
+  display: inline-flex; align-items: center; gap: .35em; padding: .25em .7em; min-height: 2.1rem;
+  border-radius: 999px; border: 0; background: var(--accent); color: var(--on-accent);
+  font-weight: 700; font-size: .85em; letter-spacing: .04em;
+}
+.live-pill[hidden] { display: none; }
+.live-pill .icon { animation: live-pulse 1.6s ease-in-out infinite; }
+.live-pill.offline { background: #7a756e; }
+.live-pill.offline .icon { animation: none; }
+@keyframes live-pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .live-pill .icon { animation: none; } }
+@media (max-width: 520px) {
+  .live-pill { padding: .25em .5em; }
+  #live-pill-text { display: none; } /* Handy: nur das Symbol, damit die Kopfleiste passt */
+}
+
+/* Dialog */
+.live-dialog { width: min(560px, 96vw); }
+.live-start { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.live-choice {
+  display: flex; flex-direction: column; gap: .5em; padding: .9em 1em;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2);
+}
+.live-choice h3 { margin: 0; font-size: 1em; }
+.live-choice .hint { margin: 0; flex: 1; }
+.live-choice > button { align-self: flex-start; }
+.live-join-row { display: flex; gap: .4em; }
+#live-code { flex: 1; min-width: 0; font: 600 1.05em ui-monospace, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; }
+.live-note { grid-column: 1 / -1; margin: 0; font-size: .8em; }
+@media (max-width: 560px) {
+  .live-start { grid-template-columns: 1fr; }
+}
+.live-leading { display: flex; flex-direction: column; align-items: center; gap: .6em; text-align: center; }
+.live-leading > .hint { margin: 0; font-size: .82em; }
+.live-qr { width: min(240px, 62vw); background: #fff; padding: .4em; border-radius: 8px; border: 1px solid var(--border); }
+.live-qr svg { display: block; width: 100%; height: auto; }
+.live-code-big { display: flex; flex-direction: column; align-items: center; }
+.live-code-big small { font-size: .72em; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.live-code-big strong { font: 700 1.9em ui-monospace, Consolas, monospace; letter-spacing: .1em; }
+.live-status { margin: 0; font-weight: 600; }
+.live-actions { display: flex; gap: .5em; flex-wrap: wrap; justify-content: center; }
+.live-waiting { padding: 1.5em 0; text-align: center; }
+
+/* Spielmodus als Mitsinger */
+.play-live { display: flex; align-items: center; gap: .4em; }
+.play-live[hidden] { display: none; }
+.live-badge {
+  padding: .15em .5em; border-radius: 999px; background: var(--accent); color: var(--on-accent);
+  font-size: .75em; font-weight: 700; letter-spacing: .05em;
+}
+.live-badge.ended { background: #7a756e; }
+#pl-live-offset { min-width: 2em; text-align: center; font-variant-numeric: tabular-nums; }
+.play-view.live #pl-prev, .play-view.live #pl-next, .play-view.live #pl-next-end { display: none; }

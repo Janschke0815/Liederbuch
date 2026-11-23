@@ -12,7 +12,7 @@ Ereignisse (auf window), auf die sich Module anmelden können:
 ```
 
 **Benutzt:** [`books.js`](../books.md), [`storage/repository.js`](../storage/repository.md), [`storage/setlists.js`](../storage/setlists.md), [`storage/stores.js`](../storage/stores.md)  
-**Benutzt von:** [`app.js`](../app.md), [`ui/abo.js`](abo.md), [`ui/add-songs.js`](add-songs.md), [`ui/app-keys.js`](app-keys.md), [`ui/capo-help.js`](capo-help.md), [`ui/context-menus.js`](context-menus.md), [`ui/files.js`](files.md), [`ui/list.js`](list.md), [`ui/paste.js`](paste.md), [`ui/publish.js`](publish.md), [`ui/share.js`](share.md), [`ui/snippets.js`](snippets.md), [`ui/song-actions.js`](song-actions.md), [`ui/song.js`](song.md), [`ui/trash.js`](trash.md)
+**Benutzt von:** [`app.js`](../app.md), [`live-ui.js`](../live-ui.md), [`ui/abo.js`](abo.md), [`ui/add-songs.js`](add-songs.md), [`ui/app-keys.js`](app-keys.md), [`ui/capo-help.js`](capo-help.md), [`ui/context-menus.js`](context-menus.md), [`ui/files.js`](files.md), [`ui/list.js`](list.md), [`ui/paste.js`](paste.md), [`ui/publish.js`](publish.md), [`ui/share.js`](share.md), [`ui/snippets.js`](snippets.md), [`ui/song-actions.js`](song-actions.md), [`ui/song.js`](song.md), [`ui/trash.js`](trash.md)
 
 ## Exportiert
 

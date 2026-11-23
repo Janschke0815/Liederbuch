@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="src/styles/setlists.css">
   <link rel="stylesheet" href="src/styles/play.css">
   <link rel="stylesheet" href="src/styles/context-menu.css">
+  <link rel="stylesheet" href="src/styles/live.css">
   <link rel="stylesheet" href="src/print/print.css">
 </head>
 <body>
@@ -59,6 +60,7 @@
       <symbol id="i-metro" viewBox="0 0 24 24"><path d="M9 3h6l4 18H5z"/><path d="m12 15 5-8"/></symbol>
       <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></symbol>
       <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></symbol>
+      <symbol id="i-live" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M8.5 15.5a5 5 0 0 1 0-7M15.5 8.5a5 5 0 0 1 0 7M5.6 18.4a9 9 0 0 1 0-12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></symbol>
       <symbol id="i-note" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
     </defs>
   </svg>
@@ -75,6 +77,9 @@
       <svg class="icon"><use href="#i-plus"/></svg><span class="label">Neues Lied</span>
     </button>
     <span class="spacer"></span>
+    <button id="live-pill" type="button" class="live-pill" hidden title="Live-Modus läuft – Code, QR-Code, beenden">
+      <svg class="icon"><use href="#i-live"/></svg><span id="live-pill-text">LIVE</span>
+    </button>
     <button id="btn-cloud" type="button" class="cloud-btn" data-state="off" title="Cloud-Sync">
       <svg class="icon"><use href="#i-cloud"/></svg><span class="label" id="cloud-label">Cloud</span>
     </button>
@@ -93,6 +98,9 @@
       </button>
       <button id="btn-share" type="button" title="Aktuelles Lied teilen: Datei, Text oder PDF">
         <svg class="icon"><use href="#i-share"/></svg><span class="label">Lied teilen</span>
+      </button>
+      <button id="btn-live" type="button" title="Live-Modus: einer wählt das Lied, alle anderen sehen es sofort">
+        <svg class="icon"><use href="#i-live"/></svg><span class="label">Live-Modus</span>
       </button>
       <button id="btn-print" type="button" title="Liederbuch drucken oder als PDF speichern (Strg+P)">
         <svg class="icon"><use href="#i-print"/></svg><span class="label">Drucken</span>
@@ -583,6 +591,51 @@
     </form>
   </dialog>
 
+  <dialog id="live-dialog" class="live-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Live-Modus</h2>
+        <p class="hint">Einer singt vor und wählt die Lieder – alle anderen sehen sie sofort auf ihrem Handy, mit Akkorden in der richtigen Tonart.</p>
+      </header>
+      <div class="dialog-body live-body">
+        <section id="live-start" class="live-start">
+          <div class="live-choice">
+            <h3>Vorsingen</h3>
+            <p class="hint">Du wählst die Lieder. Die anderen scannen deinen QR-Code oder geben den Code ein.</p>
+            <button type="button" id="live-lead" class="primary"><svg class="icon"><use href="#i-live"/></svg>Live starten</button>
+          </div>
+          <div class="live-choice">
+            <h3>Mitsingen</h3>
+            <p class="hint">QR-Code des Vorsingers mit der Kamera scannen – oder seinen Code hier eingeben.</p>
+            <div class="live-join-row">
+              <input id="live-code" placeholder="z. B. K7MQ-2XPA" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Code des Vorsingers">
+              <button type="button" id="live-join" class="primary">Beitreten</button>
+            </div>
+          </div>
+          <p class="hint live-note">Alle Geräte brauchen Internet – mobile Daten reichen. Die Lieder gehen verschlüsselt über einen öffentlichen Vermittlungs-Server (<a href="datenschutz.html#live" target="_blank" rel="noopener">Datenschutz</a>).</p>
+        </section>
+        <section id="live-leading" class="live-leading" hidden>
+          <div id="live-qr" class="live-qr" aria-label="QR-Code zum Beitreten"></div>
+          <div class="live-code-big"><small>Code</small><strong id="live-code-show"></strong></div>
+          <p class="live-status" id="live-status" aria-live="polite"></p>
+          <div class="live-actions">
+            <button type="button" id="live-copy">Link kopieren</button>
+            <button type="button" id="live-share" hidden>Teilen …</button>
+          </div>
+          <p class="hint">Jedes Lied, das du öffnest oder im Spielmodus zeigst, sehen alle sofort – auch Änderungen und die Tonart. Den Dialog kannst du schließen; oben zeigt „LIVE“, dass es läuft.</p>
+        </section>
+        <section id="live-waiting" class="live-waiting" hidden>
+          <p class="live-status" id="live-wait-status" aria-live="polite"></p>
+        </section>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" id="live-stop" class="danger" hidden>Live beenden</button>
+        <span class="spacer"></span>
+        <button value="close">Schließen</button>
+      </footer>
+    </form>
+  </dialog>
+
   <dialog id="syntax-dialog" class="syntax-dialog">
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
@@ -1063,6 +1116,16 @@
       <button type="button" id="pl-prev" class="icon-btn" title="Vorheriges Lied (←)"><svg class="icon"><use href="#i-left"/></svg></button>
       <div class="play-title"><strong id="pl-title"></strong><small id="pl-pos"></small></div>
       <button type="button" id="pl-next" class="icon-btn" title="Nächstes Lied (→)"><svg class="icon"><use href="#i-right"/></svg></button>
+      <!-- Live-Modus als Mitsinger (live-ui.js): eigene Tonart, Lied übernehmen -->
+      <div class="play-live" id="pl-live" hidden>
+        <span class="live-badge" id="pl-live-badge">LIVE</span>
+        <div class="play-group" title="Für dich transponieren (z. B. mit Capo) – zusätzlich zur Tonart des Vorsingers">
+          <button type="button" id="pl-live-down" aria-label="Halbton tiefer">−</button>
+          <output id="pl-live-offset">0</output>
+          <button type="button" id="pl-live-up" aria-label="Halbton höher">+</button>
+        </div>
+        <button type="button" id="pl-live-adopt" class="text-btn" title="Dieses Lied in dein Liederbuch übernehmen">Übernehmen</button>
+      </div>
       <span class="spacer"></span>
       <div class="play-extra" id="pl-extra">
         <div class="play-group" title="Schriftgröße (+ / −) – wird pro Lied gemerkt">
