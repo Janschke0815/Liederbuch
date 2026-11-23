@@ -404,13 +404,24 @@ Im Editor setzt der Knopf **2×** die Angabe passend: an die Zeile mit dem Curso
 markierte Zeilen, oder – auf der Abschnittszeile – an den ganzen Abschnitt. Nochmal klicken
 zählt hoch. Beim Import aus Ultimate Guitar werden „[Chorus x2]“ und „x2“ am Zeilenende erkannt.
 
+## Mit anderen teilen – welcher Weg?
+
+**⋯ → Mit anderen teilen …** (auch oben im Cloud-Dialog) fragt zuerst, was die anderen können sollen:
+
+- **Mitbearbeiten – gemeinsames Liederbuch:** Alle ändern mit, jeder braucht ein Google-Konto. Liegt das Buch
+  schon in Google Drive, geht es direkt zu *Mitglieder* (E-Mail eingeben, einladen). Sonst bietet die App an,
+  das Buch auf Google Drive umzustellen oder ein neues gemeinsames Liederbuch anzulegen und die Lieder zu
+  übernehmen. Bei WebDAV: den Ordner auf dem Server teilen (siehe unten).
+- **Nur lesen – Abo:** führt zu *Veröffentlichen …* (siehe nächster Abschnitt); die anderen brauchen kein Konto.
+- Außerdem: **ein einzelnes Lied schicken** (Datei, Text, PDF) oder **gemeinsam singen** (Live-Modus).
+
 ## Liederbücher abonnieren (private Gruppen)
 
 Eine Person pflegt ein Liederbuch, die anderen **abonnieren** es: Sie sehen es als eigenes
 Liederbuch, **nur zum Lesen**, und bekommen Änderungen automatisch (beim Öffnen und alle
 30 Minuten). Gedacht für einen **privaten Kreis** – Band, Familie, Freunde.
 
-**Veröffentlichen** (Cloud → *Für eine Gruppe veröffentlichen* → *Veröffentlichen …*):
+**Veröffentlichen** (⋯ → *Mit anderen teilen …* → *Nur lesen – Abo*, oder Cloud → *Nur zum Lesen teilen (Abo)* → *Veröffentlichen …*):
 alle Lieder, Lieder mit einem Tag oder eine Setliste. Die App legt die Abo-Datei in euren
 **Sync-Ordner** (WebDAV, Unterordner `Abo/`; nur, wenn die App gerade darüber abgleicht) – Abonnenten
 melden sich dort mit ihrem eigenen Benutzer an –

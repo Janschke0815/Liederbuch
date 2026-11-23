@@ -100,6 +100,9 @@
         <svg class="icon"><use href="#i-open"/></svg><span class="label">Datei öffnen</span>
       </button>
       <hr class="menu-sep">
+      <button id="btn-sharewith" type="button" title="Liederbuch mit anderen teilen: gemeinsam bearbeiten oder nur zum Lesen (Abo)">
+        <svg class="icon"><use href="#i-share"/></svg><span class="label">Mit anderen teilen …</span>
+      </button>
       <button id="btn-share" type="button" title="Aktuelles Lied teilen: Datei, Text oder PDF">
         <svg class="icon"><use href="#i-share"/></svg><span class="label">Lied teilen</span>
       </button>
@@ -616,6 +619,45 @@
     </form>
   </dialog>
 
+  <dialog id="sharewith-dialog" class="sharewith-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Mit anderen teilen – „<span id="sw-book"></span>“</h2>
+        <p class="hint" id="sw-readonly" hidden>Dieses Liederbuch kannst du nur lesen – teilen kann es, wer es angelegt hat.</p>
+      </header>
+      <div class="dialog-body sw-body">
+        <section id="sw-choose">
+          <p class="sw-question">Was sollen die anderen können?</p>
+          <label class="sw-option">
+            <input type="radio" name="sw-mode" value="edit" checked>
+            <span><strong>Mitbearbeiten – gemeinsames Liederbuch</strong>
+              <small>Alle können Lieder hinzufügen und ändern; jeder sieht alle Änderungen. Jeder braucht ein Google-Konto.</small></span>
+          </label>
+          <label class="sw-option">
+            <input type="radio" name="sw-mode" value="read">
+            <span><strong>Nur lesen – Abo</strong>
+              <small>Die anderen sehen deine Lieder und bekommen Änderungen automatisch; ändern kannst nur du. Kein Konto nötig.</small></span>
+          </label>
+          <div class="sw-links">
+            <button type="button" class="link-btn" id="sw-song">Nur ein einzelnes Lied schicken (Datei, Text, PDF) →</button>
+            <button type="button" class="link-btn" id="sw-live">Gemeinsam singen am Lagerfeuer (Live-Modus) →</button>
+          </div>
+        </section>
+        <!-- Zweiter Schritt, wenn „Mitbearbeiten“ mit dem heutigen Speicherort nicht direkt geht -->
+        <section id="sw-step2" hidden>
+          <p id="sw-step2-text"></p>
+          <div class="sw-step2-actions" id="sw-step2-actions"></div>
+        </section>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" id="sw-back" class="link-btn" hidden>← Zurück</button>
+        <span class="spacer"></span>
+        <button value="cancel" formnovalidate>Abbrechen</button>
+        <button type="button" id="sw-next" class="primary">Weiter</button>
+      </footer>
+    </form>
+  </dialog>
+
   <dialog id="toolbar-dialog" class="toolbar-dialog">
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
@@ -792,6 +834,7 @@
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">
         <h2>Cloud: Abgleich &amp; Teilen</h2>
+        <button type="button" id="sync-sharewith" class="sharewith-btn"><svg class="icon"><use href="#i-share"/></svg>Mit anderen teilen …</button>
       </header>
       <div class="dialog-body sync-body">
         <!-- 1. Abgleich des geöffneten Liederbuchs zwischen Geräten -->
@@ -885,9 +928,9 @@
           </div>
         </section>
 
-        <!-- 3. Für eine Gruppe veröffentlichen (Abo anbieten) -->
+        <!-- 3. Nur zum Lesen teilen (Abo anbieten) -->
         <section id="publish-card" class="cloud-card">
-          <h3><svg class="icon"><use href="#i-share"/></svg>Für eine Gruppe veröffentlichen</h3>
+          <h3><svg class="icon"><use href="#i-share"/></svg>Nur zum Lesen teilen (Abo)</h3>
           <div class="cloud-card-body">
             <p class="hint">Lieder aus „<span id="publish-from"></span>“ als Abo anbieten: Andere sehen sie nur zum Lesen und bekommen Änderungen automatisch. Nur für einen privaten Kreis.</p>
             <div class="cloud-actions">

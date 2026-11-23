@@ -928,5 +928,32 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     localStorage.removeItem('openSyncDialog');
     openDialog();
   }
-  return { get engine() { return engine; } };
+  return {
+    get engine() { return engine; },
+    /** Für „Mit anderen teilen“: wo das geöffnete Buch liegt und ob es verbunden ist. */
+    shareState: () => ({ kind: kind(), connected: Boolean(engine && engine.state !== 'off' && connectedFlag()), shared: Boolean(book.shared) }),
+    /**
+     * Cloud-Dialog öffnen. provider: Speicherort vorwählen (nur solange nicht verbunden);
+     * members: zu „Mitglieder“ springen und das E-Mail-Feld aktivieren (gemeinsames Liederbuch).
+     */
+    async openCloud({ provider = null, members = false } = {}) {
+      if (provider && provider !== kind() && (!engine || engine.state === 'off')) {
+        localStorage.setItem(K('sync.kind'), provider);
+        build();
+      }
+      openDialog();
+      if (!members) return;
+      await renderMembers();
+      if ($('#members').hidden) return;
+      $('#members').scrollIntoView({ block: 'center' });
+      $('#invite-email').focus();
+    },
+    /** „Neues Liederbuch“ mit Speicherort und „Lieder übernehmen“ vorausgefüllt. */
+    openNewBook({ where = 'local', copy = false } = {}) {
+      openBooks({ create: true });
+      $('#book-new-kind').value = where;
+      $('#book-new-kind').dispatchEvent(new Event('change'));
+      $('#book-new-copy').checked = copy;
+    },
+  };
 }

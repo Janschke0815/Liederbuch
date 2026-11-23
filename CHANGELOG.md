@@ -8,6 +8,17 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.4 – 23.11.2026 · Teilen entwirrt
+
+- **Ein Einstieg „Mit anderen teilen …“** (Menü ⋯ und oben im Cloud-Dialog) fragt zuerst: Sollen die anderen
+  **mitbearbeiten** (gemeinsames Liederbuch) oder **nur lesen** (Abo)? Danach geht es in den passenden Ablauf:
+  - Mitbearbeiten: Liegt das Buch in Google Drive, direkt zu „Mitglieder“ (E-Mail eingeben, einladen). Sonst
+    bietet die App an, es auf Google Drive umzustellen oder ein neues gemeinsames Liederbuch anzulegen und die
+    Lieder zu übernehmen.
+  - Nur lesen: zu „Veröffentlichen …“.
+  - Außerdem von dort: ein einzelnes Lied schicken oder den Live-Modus starten.
+- Im Cloud-Dialog heißt „Für eine Gruppe veröffentlichen“ jetzt **„Nur zum Lesen teilen (Abo)“**.
+
 ## 2.3.3 – 23.11.2026 · Akkorde per Antippen
 
 - **Akkorde setzen per Antippen** (vor allem fürs Handy): Unten links in der Vorschau „Akkorde setzen“

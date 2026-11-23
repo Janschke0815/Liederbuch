@@ -141,3 +141,23 @@ kbd { display: inline-block; min-width: 1.4em; padding: .05em .4em; border: 1px 
 /* Installieren-Hilfe */
 .install-steps { margin: .2em 0 .8em; padding-left: 1.4em; display: flex; flex-direction: column; gap: .55em; }
 .install-dialog .dialog-body > .hint { margin: .5em 0 0; }
+
+/* „Mit anderen teilen“ (ui/share-with.js) */
+.sharewith-dialog { width: min(520px, 96vw); }
+.sw-body { display: flex; flex-direction: column; gap: .6em; }
+.sw-question { margin: 0 0 .2em; font-weight: 600; }
+.sw-option {
+  display: flex; gap: .7em; align-items: flex-start; padding: .7em .8em; margin-bottom: .45em; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2);
+}
+.sw-option:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.sw-option input { margin-top: .2em; accent-color: var(--accent); }
+.sw-option span { display: flex; flex-direction: column; gap: .15em; }
+.sw-option small { color: var(--muted); font-size: .85em; }
+.sw-links { display: flex; flex-direction: column; align-items: flex-start; margin-top: .3em; }
+.sw-links .link-btn { padding-inline: .2em; text-align: left; white-space: normal; }
+#sw-step2-text { margin: 0 0 .8em; }
+.sw-step2-actions { display: flex; flex-direction: column; align-items: stretch; gap: .5em; }
+/* Knopf oben im Cloud-Dialog */
+.sync-dialog .dialog-head { display: flex; align-items: center; gap: .6em; flex-wrap: wrap; }
+.sharewith-btn { margin-left: auto; }

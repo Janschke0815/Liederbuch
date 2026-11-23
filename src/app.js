@@ -48,6 +48,7 @@ import './ui/context-menus.js';
 import './ui/app-keys.js';
 import './ui/toolbar.js';
 import './ui/chord-tap.js';
+import './ui/share-with.js';
 
 if (book.shared) document.title = `${book.name} – Liederbuch`;
 navigator.storage?.persist?.(); // Browser bitten, die Daten nicht automatisch zu löschen
@@ -94,7 +95,7 @@ services.setlists = setupSetlists({
   printSongs: (list, opts) => services.printer.printSongs(list, opts),
 });
 
-setupSync({
+services.sync = setupSync({
   repo,
   extra: [{ key: 'setlists', repo: sets, slim: slimSetlist }],
   book,

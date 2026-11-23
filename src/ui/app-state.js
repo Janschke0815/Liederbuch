@@ -29,6 +29,7 @@ export const state = { current: null };
  *   printer   setupPrint()     – printSongs(list, opts)
  *   play      setupPlayMode()  – open(id, list?)
  *   setlists  setupSetlists()  – open(id)
+ *   sync      setupSync()      – shareState(), openCloud({provider, members}), openNewBook({where, copy})
  *   started   Promise, erfüllt sobald das erste Lied geöffnet ist
  */
-export const services = { printer: null, play: null, setlists: null, started: null };
+export const services = { printer: null, play: null, setlists: null, sync: null, started: null };

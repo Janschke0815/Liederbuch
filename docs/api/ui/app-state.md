@@ -12,7 +12,7 @@ Ereignisse (auf window), auf die sich Module anmelden können:
 ```
 
 **Benutzt:** [`books.js`](../books.md), [`storage/repository.js`](../storage/repository.md), [`storage/setlists.js`](../storage/setlists.md), [`storage/stores.js`](../storage/stores.md)  
-**Benutzt von:** [`app.js`](../app.md), [`live-ui.js`](../live-ui.md), [`ui/abo.js`](abo.md), [`ui/add-songs.js`](add-songs.md), [`ui/app-keys.js`](app-keys.md), [`ui/capo-help.js`](capo-help.md), [`ui/chord-tap.js`](chord-tap.md), [`ui/context-menus.js`](context-menus.md), [`ui/files.js`](files.md), [`ui/list.js`](list.md), [`ui/paste.js`](paste.md), [`ui/publish.js`](publish.md), [`ui/share.js`](share.md), [`ui/snippets.js`](snippets.md), [`ui/song-actions.js`](song-actions.md), [`ui/song.js`](song.md), [`ui/trash.js`](trash.md)
+**Benutzt von:** [`app.js`](../app.md), [`live-ui.js`](../live-ui.md), [`ui/abo.js`](abo.md), [`ui/add-songs.js`](add-songs.md), [`ui/app-keys.js`](app-keys.md), [`ui/capo-help.js`](capo-help.md), [`ui/chord-tap.js`](chord-tap.md), [`ui/context-menus.js`](context-menus.md), [`ui/files.js`](files.md), [`ui/list.js`](list.md), [`ui/paste.js`](paste.md), [`ui/publish.js`](publish.md), [`ui/share-with.js`](share-with.md), [`ui/share.js`](share.md), [`ui/snippets.js`](snippets.md), [`ui/song-actions.js`](song-actions.md), [`ui/song.js`](song.md), [`ui/trash.js`](trash.md)
 
 ## Exportiert
 
@@ -45,10 +45,11 @@ Veränderlicher Zustand. current: das geöffnete Lied (Datensatz aus repo) oder 
 
 ### `services`
 
-`= { printer: null, play: null, setlists: null, started: null }`
+`= { printer: null, play: null, setlists: null, sync: null, started: null }`
 
 Teile, die app.js beim Start einrichtet und die mehrere Module brauchen:
   printer   setupPrint()     – printSongs(list, opts)
   play      setupPlayMode()  – open(id, list?)
   setlists  setupSetlists()  – open(id)
+  sync      setupSync()      – shareState(), openCloud({provider, members}), openNewBook({where, copy})
   started   Promise, erfüllt sobald das erste Lied geöffnet ist
