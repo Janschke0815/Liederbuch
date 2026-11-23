@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.8 – 23.11.2026 · Feld „Dauer“ in der Liedinfo
+
+- **Dauer** steht jetzt in der Liedinfo neben Tempo (z. B. `3:20`). Danach richtet sich, wie schnell der
+  Spielmodus scrollt bzw. umblättert – ohne Angabe nimmt er 3 Minuten an. Bisher ging das nur mit `{duration: …}` im Text.
+  Die Dauer erscheint auch in der Kurzzeile der Liedinfo; eine ungültige Eingabe (z. B. „3,20“) wird rot umrandet.
+
 ## 2.2.7 – 22.11.2026 · Übersichtlicher am Handy, leichter Einstieg
 
 - **So geht's los:** Solange ein Liederbuch höchstens ein Lied hat, zeigt die Liste vier Wege zum Start –

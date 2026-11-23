@@ -8,11 +8,12 @@ const NAMES = {
   capo: ['capo'],
   time: ['time'],
   tempo: ['tempo'],
+  duration: ['duration'], // Liedlänge, z. B. 3:20 – danach richtet sich das Scrollen im Spielmodus
   columns: ['columns', 'col'], // Spalten im Druck: 1 oder 2 (leer = wie Einstellung)
 };
 
 // Reihenfolge, in der neue Angaben im Kopf einsortiert werden
-const ORDER = ['title', 'subtitle', 'st', 't', 'artist', 'key', 'capo', 'time', 'tempo', 'columns', 'col', 'tag'];
+const ORDER = ['title', 'subtitle', 'st', 't', 'artist', 'key', 'capo', 'time', 'tempo', 'duration', 'columns', 'col', 'tag'];
 
 const directiveRe = (names) => new RegExp(String.raw`^\s*\{\s*(?:${names.join('|')})\s*(?::\s*([^}]*?))?\s*\}\s*$`, 'i');
 const ANY_DIRECTIVE = /^\s*\{\s*([a-z_]+)\s*(?::[^}]*)?\}\s*$/i;

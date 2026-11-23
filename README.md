@@ -203,11 +203,12 @@ erscheint im Spielmodus) und eine **eigene Transposition** nur für diese Setlis
 Lieder in dieser Reihenfolge. Setlisten werden mit synchronisiert – in gemeinsamen
 Liederbüchern sieht die ganze Band dieselben Setlisten.
 
-## Liedinfo: Capo, Takt, Tempo
+## Liedinfo: Capo, Takt, Tempo, Dauer
 
 Über dem Editor gibt es das Feld **Liedinfo** (einklappbar) mit Titel, Interpret, Tonart,
-Capo, Takt und Tempo. Es schreibt die üblichen ChordPro-Angaben in den Kopf des Liedes
-(`{capo: 2}`, `{time: 3/4}`, `{tempo: 96}`) und zeigt umgekehrt an, was im Text steht.
+Capo, Takt, Tempo und Dauer. Es schreibt die üblichen ChordPro-Angaben in den Kopf des Liedes
+(`{capo: 2}`, `{time: 3/4}`, `{tempo: 96}`, `{duration: 3:20}`) und zeigt umgekehrt an, was im Text steht.
+Die **Dauer** bestimmt, wie schnell der Spielmodus scrollt (ohne Angabe: 3 Minuten).
 Capo und Takt erscheinen im Liedkopf (auch im Druck) und als Kennzeichen über der Vorschau;
 beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ erkannt.
 

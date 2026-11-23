@@ -7,8 +7,19 @@ const SONG = '{title: Clementine}\n{artist: Traditional}\n{key: C}\n\n{start_of_
 describe('Liedinfo: lesen', () => {
   it('liest Kopfangaben inkl. Kurzform {t:}', () => {
     expect(getAllMeta('{t: Hallo}\n{capo: 2}\n{time: 3/4}')).toEqual({
-      title: 'Hallo', artist: '', key: '', capo: '2', time: '3/4', tempo: '', columns: '',
+      title: 'Hallo', artist: '', key: '', capo: '2', time: '3/4', tempo: '', duration: '', columns: '',
     });
+  });
+  it('liest die Dauer', () => {
+    expect(getMeta('{title: X}\n{duration: 3:20}', 'duration')).toBe('3:20');
+  });
+});
+
+describe('Liedinfo: Dauer setzen', () => {
+  it('steht nach dem Tempo, vor den Spalten', () => {
+    let t = setMeta('{title: X}\n{tempo: 96}\n{columns: 2}\n\n[G]la', 'duration', '3:20');
+    expect(t.split('\n').slice(0, 4)).toEqual(['{title: X}', '{tempo: 96}', '{duration: 3:20}', '{columns: 2}']);
+    expect(parseChordPro(t).meta.duration).toBe('3:20');
   });
 });
 

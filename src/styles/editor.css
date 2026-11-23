@@ -41,6 +41,7 @@
 .meta-grid textarea { font: inherit; font-size: .95rem; padding: .35em .5em; border: 1px solid var(--border-strong); border-radius: var(--radius); resize: vertical; color: var(--text); background: var(--surface); }
 .meta-grid input, .meta-grid select { font-size: .95rem; width: 100%; color: var(--text); }
 .meta-grid select { min-height: 2rem; padding: .2em .5em; }
+.meta-grid input:invalid { border-color: var(--accent); } /* z. B. Dauer „3,20“ statt „3:20“ */
 @media (max-width: 1200px) {
   .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

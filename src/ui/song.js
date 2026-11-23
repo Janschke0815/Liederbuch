@@ -173,7 +173,7 @@ function fillMeta() {
   if (noteInput !== document.activeElement) noteInput.value = current?.note || '';
   const capo = Number(m.capo) || 0;
   $('#meta-summary').textContent = [
-    m.key && `Tonart ${m.key}`, capo > 0 && `Capo ${capo}`, m.time && `${m.time}-Takt`, m.tempo && `${m.tempo} bpm`,
+    m.key && `Tonart ${m.key}`, capo > 0 && `Capo ${capo}`, m.time && `${m.time}-Takt`, m.tempo && `${m.tempo} bpm`, m.duration && (m.duration.includes(':') ? `${m.duration} min` : `${m.duration} s`),
     m.columns === '2' && 'zweispaltig', m.columns === '1' && 'einspaltig',
   ].filter(Boolean).join(' · ');
   const capoChip = $('#capo-chip');
