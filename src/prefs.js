@@ -25,6 +25,7 @@ export const PREFS = {
   openSetlist: { key: 'openSetlist', def: '' },
   // Editor und Vorschau
   focusMode: { key: 'focusMode', def: false }, // Editor ausgeblendet
+  toolbarPins: { key: 'toolbarPins', def: ['btn-import', 'btn-print', 'btn-live'] }, // beschriftet in der Leiste, in dieser Reihenfolge
   listWidth: { key: 'listWidth', def: 0 }, // Breite der Liederliste in px (0 = Standard)
   editorShare: { key: 'editorShare', def: 0 }, // Anteil des Editors an Editor + Vorschau (0 = halb/halb)
   songMetaOpen: { key: 'songMetaOpen', def: true }, // Liedinfo aufgeklappt (breiter Bildschirm)

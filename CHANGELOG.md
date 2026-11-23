@@ -13,6 +13,9 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 - **Kopfleiste am PC:** Statt acht unbeschrifteter Symbole stehen oben rechts nur noch **Einfügen**, **Drucken**
   und **Live** – mit Beschriftung. Alles Weitere (Datei öffnen, Lied teilen, Sichern, Papierkorb, Einstellungen,
   Tastenkürzel) steht im Menü **⋯**, in Gruppen geordnet – dieselbe Liste wie am Handy.
+- **Leiste anpassen:** Jede Aktion lässt sich an die Leiste anheften, z. B. Einstellungen oder Sichern, und die
+  Reihenfolge ändern – unter ⋯ → *Leiste anpassen …* oder per Rechtsklick auf einen Eintrag bzw. Knopf.
+  Bei wenig Platz zeigt die Leiste nur Symbole; reicht auch das nicht, rutschen die letzten Knöpfe ins Menü.
 
 ## 2.3.0 – 23.11.2026 · Live-Modus fürs Lagerfeuer
 

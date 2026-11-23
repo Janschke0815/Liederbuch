@@ -77,13 +77,10 @@
       <svg class="icon"><use href="#i-plus"/></svg><span class="label">Neues Lied</span>
     </button>
     <span class="spacer"></span>
-    <!-- Häufige Aktionen beschriftet in der Leiste (breiter Bildschirm); sie lösen den gleichnamigen
-         Eintrag im Menü „⋯“ aus – eine Menüliste für PC und Handy (ui/view.js) -->
-    <div class="quick-actions" role="group" aria-label="Häufige Aktionen">
-      <button type="button" data-for="btn-import"><svg class="icon"><use href="#i-paste"/></svg><span class="label">Einfügen</span></button>
-      <button type="button" data-for="btn-print"><svg class="icon"><use href="#i-print"/></svg><span class="label">Drucken</span></button>
-      <button type="button" data-for="btn-live"><svg class="icon"><use href="#i-live"/></svg><span class="label">Live</span></button>
-    </div>
+    <!-- Angeheftete Aktionen beschriftet in der Leiste (breiter Bildschirm). Welche und in welcher
+         Reihenfolge, stellt man unter ⋯ → Leiste anpassen ein; sie lösen den gleichnamigen Eintrag im
+         Menü „⋯“ aus – eine Menüliste für PC und Handy (ui/toolbar.js) -->
+    <div class="quick-actions" id="quick-actions" role="group" aria-label="Angeheftete Aktionen"></div>
     <button id="live-pill" type="button" class="live-pill" hidden title="Live-Modus läuft – Code, QR-Code, beenden">
       <svg class="icon"><use href="#i-live"/></svg><span id="live-pill-text">LIVE</span>
     </button>
@@ -93,10 +90,10 @@
     <button id="btn-menu" type="button" class="icon-btn menu-toggle" aria-haspopup="true" aria-expanded="false" title="Weitere Aktionen">
       <svg class="icon"><use href="#i-more"/></svg>
     </button>
-    <!-- Menü „⋯“ – dieselbe Liste auf PC und Handy. data-quick: steht auf breiten Bildschirmen schon
+    <!-- Menü „⋯“ – dieselbe Liste auf PC und Handy. data-quick (setzt ui/toolbar.js): steht auf breiten Bildschirmen schon
          beschriftet in der Leiste (.quick-actions) und fehlt dann hier. -->
     <nav id="actions" class="actions" aria-label="Aktionen">
-      <button id="btn-import" type="button" data-quick title="Akkorde-über-Text einfügen (z. B. aus Ultimate Guitar)">
+      <button id="btn-import" type="button" title="Akkorde-über-Text einfügen (z. B. aus Ultimate Guitar)">
         <svg class="icon"><use href="#i-paste"/></svg><span class="label">Text einfügen</span>
       </button>
       <button id="btn-open" type="button" title="ChordPro-, Text- oder Sicherungsdatei (.zip, .json) öffnen">
@@ -106,10 +103,10 @@
       <button id="btn-share" type="button" title="Aktuelles Lied teilen: Datei, Text oder PDF">
         <svg class="icon"><use href="#i-share"/></svg><span class="label">Lied teilen</span>
       </button>
-      <button id="btn-print" type="button" data-quick title="Liederbuch drucken oder als PDF speichern (Strg+P)">
+      <button id="btn-print" type="button" title="Liederbuch drucken oder als PDF speichern (Strg+P)">
         <svg class="icon"><use href="#i-print"/></svg><span class="label">Drucken</span>
       </button>
-      <button id="btn-live" type="button" data-quick title="Live-Modus: einer wählt das Lied, alle anderen sehen es sofort">
+      <button id="btn-live" type="button" title="Live-Modus: einer wählt das Lied, alle anderen sehen es sofort">
         <svg class="icon"><use href="#i-live"/></svg><span class="label">Live-Modus</span>
       </button>
       <hr class="menu-sep">
@@ -128,6 +125,10 @@
       </button>
       <button id="btn-keys" type="button" class="keys-btn" title="Tastenkürzel (?)">
         <span class="icon kbd-icon" aria-hidden="true">?</span><span class="label">Tastenkürzel</span>
+      </button>
+      <hr class="menu-sep toolbar-only">
+      <button id="btn-toolbar" type="button" class="toolbar-only" data-fixed title="Festlegen, welche Aktionen beschriftet oben in der Leiste stehen, und ihre Reihenfolge">
+        <svg class="icon"><use href="#i-panel"/></svg><span class="label">Leiste anpassen …</span>
       </button>
     </nav>
     <input id="file-input" type="file" multiple hidden
@@ -599,6 +600,24 @@
         <span class="spacer"></span>
         <button value="cancel" formnovalidate>Abbrechen</button>
         <button value="ok" class="primary">Speichern</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="toolbar-dialog" class="toolbar-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Leiste anpassen</h2>
+        <p class="hint">Angehakte Aktionen stehen beschriftet oben in der Leiste, in dieser Reihenfolge. Alle anderen
+          findest du im Menü ⋯. Tipp: Rechtsklick auf einen Eintrag geht auch.</p>
+      </header>
+      <div class="dialog-body">
+        <ul id="toolbar-list" class="toolbar-list"></ul>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" id="toolbar-reset" class="link-btn" title="Einfügen, Drucken und Live anheften">Zurücksetzen</button>
+        <span class="spacer"></span>
+        <button value="close" class="primary">Fertig</button>
       </footer>
     </form>
   </dialog>

@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-79 Module, 306 exportierte Funktionen, Konstanten und Klassen.
+81 Module, 309 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -48,6 +48,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/snippets.js`](ui/snippets.md) | Bausteine über dem Editor: Akkord, Strophe, Refrain, Bridge, Tab, Wiederholung, Hinweis – und die Übersicht der ChordPro-Syntax („?“). |
 | [`ui/song-actions.js`](ui/song-actions.md) | Was man mit einem ganzen Lied tun kann: anlegen, löschen, duplizieren, zu einer Setliste hinzufügen. |
 | [`ui/song.js`](ui/song.md) | Das geöffnete Lied: öffnen, automatisch speichern, Vorschau, Transponieren und die Liedinfo (Titel, Capo, Takt … über dem Editor). |
+| [`ui/toolbar.js`](ui/toolbar.md) | Kopfleiste: angeheftete Aktionen beschriftet neben dem Menü „⋯“ (breiter Bildschirm). |
 | [`ui/trash.js`](ui/trash.md) | Papierkorb: gelöschte Lieder wiederherstellen oder endgültig löschen. |
 | [`ui/view.js`](ui/view.md) | Aufteilung des Bildschirms: Handy-Reiter (Lieder / Bearbeiten / Ansehen), Editor ausblenden, Menü „⋯“ am Handy. |
 
@@ -66,6 +67,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`core/repeat.js`](core/repeat.md) | Wiederholungsangaben wie "2×", "x2", "(2x)", "2 mal" am Ende eines Textes. |
 | [`core/song-list.js`](core/song-list.md) | Liederliste: Sortierung und Erkennen doppelter Lieder. |
 | [`core/text.js`](core/text.md) | Textfunktionen, die an mehreren Stellen gebraucht werden: deutsch sortieren, für die Suche vereinfachen, Zeilenenden vereinheitlichen. |
+| [`core/toolbar-pins.js`](core/toolbar-pins.md) | Angeheftete Aktionen der Kopfleiste: welche, in welcher Reihenfolge. |
 
 ## `src/formats/` – Dateiformate: ChordPro-Dateien, ZIP, Sicherung, Import
 
