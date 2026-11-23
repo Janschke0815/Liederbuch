@@ -10,6 +10,9 @@ import { loadSettings, saveSettings, applySettings, FONTS } from './settings/set
 import { withPrintFonts, loadPrintFonts, savePrintFonts } from './print/print-fonts.js';
 import { QUICK_OPTIONS, loadPins, togglePin, formatValue } from './print/print-quick.js';
 import { $ } from './ui/dom.js';
+import { attachContextMenu } from './context-menu.js';
+import { getMeta, setMeta } from './core/meta-edit.js';
+import { readOnly } from './ui/app-state.js';
 
 const OWN_KEY = 'printOptions';
 
@@ -314,6 +317,28 @@ export function setupPrint({ repo, beforeOpen }) {
     }
     style.textContent = `@page { size: ${p.width}mm ${p.height}mm; margin: 0; }`;
   }
+
+  // ---------- Spalten für ein einzelnes Lied (Rechtsklick bzw. lang drücken auf seine Seite) ----------
+  // Dasselbe wie Liedinfo → Spalten: {columns: 1|2} im Liedtext, leer = wie eingestellt.
+
+  async function setSongColumns(s, value) {
+    const chordpro = setMeta(s.chordpro, 'columns', value);
+    if (chordpro === s.chordpro) return;
+    await repo.update(s.id, { chordpro });
+    s.chordpro = chordpro; // Auswahl der Vorschau sofort mitziehen
+    await showPreview({ keepPlace: true });
+  }
+
+  attachContextMenu(root, '.page[data-song]', (page) => {
+    const s = songs.find((x) => x.id === page.dataset.song);
+    if (!s || readOnly) return null;
+    const own = getMeta(s.chordpro, 'columns');
+    const general = Number(options.columns) === 2 ? 'zweispaltig' : 'einspaltig';
+    return [
+      ['', `wie eingestellt (${general})`], ['1', 'einspaltig'], ['2', 'zweispaltig'],
+    ].map(([v, label]) => ({ label, checked: (own === '1' || own === '2' ? own : '') === v, action: () => setSongColumns(s, v) }));
+  }, { title: (page) => `Spalten: „${songs.find((x) => x.id === page.dataset.song)?.title || 'Lied'}“` });
+  root.title = readOnly ? '' : 'Rechtsklick bzw. lang drücken auf ein Lied: ein- oder zweispaltig nur für dieses Lied';
 
   addEventListener('resize', () => !view.hidden && fitZoom());
   $('#pv-back').onclick = () => {

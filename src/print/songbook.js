@@ -129,8 +129,11 @@ export async function buildSongbook(root, songs, options = {}) {
       head.append(header);
     }
     pag.newPage({ className: 'page--song', columns, head });
+    const from = pag.pages.length - 1;
     firstSongPage.set(s.id, pag.pages.length);
     pag.flow(article);
+    // Jede Seite weiß, zu welchem Lied sie gehört (Rechtsklick in der Druck-Vorschau: Spalten dieses Liedes)
+    for (const p of pag.pages.slice(from)) p.el.dataset.song = s.id;
   }
 
   const pages = pag.finish({ numberFrom: 1, skipNumbers: frontPages });

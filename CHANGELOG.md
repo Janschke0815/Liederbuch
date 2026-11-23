@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.9 – 23.11.2026 · Spalten pro Lied auch in der Druck-Vorschau
+
+- **Druck-Vorschau:** Rechtsklick bzw. lang drücken auf eine Seite eines Liedes → *wie eingestellt / einspaltig /
+  zweispaltig* – nur für dieses Lied, die Vorschau setzt sofort neu. So sieht man direkt, ob ein Lied zweispaltig
+  besser auf die Seite passt. Es ist dieselbe Einstellung wie Liedinfo → Spalten (dort bleibt sie auch).
+
 ## 2.3.8 – 23.11.2026 · Akkorde mit Stern (Am*)
 
 - **Akkorde wie `Am*`, `G*` oder `D/F#*`** werden jetzt erkannt. Der Stern markiert z. B. bei Ultimate Guitar eine

@@ -259,7 +259,9 @@ beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ er
 **Spalten pro Lied:** Unter *Spalten* lässt sich je Lied **einspaltig** oder **zweispaltig**
 wählen (ChordPro `{columns: 1}` bzw. `{columns: 2}`). Das geht im Druck vor der allgemeinen
 Einstellung *Einstellungen → Druck → Spalten*, auch auf den Folgeseiten eines langen Liedes;
-„wie Einstellung“ entfernt die Angabe wieder. Deckblatt und Inhaltsverzeichnis bleiben einspaltig.
+„wie Einstellung“ entfernt die Angabe wieder. Dasselbe geht direkt in der **Druck-Vorschau**: Rechtsklick
+bzw. lang drücken auf eine Seite des Liedes → *wie eingestellt / einspaltig / zweispaltig* – die Vorschau
+setzt sofort neu. Deckblatt und Inhaltsverzeichnis bleiben einspaltig.
 Bei zweispaltigen Liedern steht der Liedkopf (Titel, Interpret, Infozeile, Griffbilder) über
 beiden Spalten – beide Spalten beginnen erst darunter.
 
