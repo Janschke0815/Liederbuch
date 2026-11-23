@@ -51,7 +51,10 @@ export class BookNameStore extends EventTarget {
     this.storage = storage;
   }
 
-  /** @returns {Promise<object[]>} */
+  /**
+   * Eigener Namens-Datensatz für den Abgleich (leer beim Standardnamen).
+   * @returns {Promise<object[]>}
+   */
   async allRecords() {
     const r = nameRecord(this.book, this.storage);
     return r ? [r] : [];

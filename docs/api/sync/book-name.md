@@ -41,6 +41,8 @@ Ereignis „remote-name“ (detail: neuer Name), wenn ein anderes Gerät umbenan
 
 #### `async allRecords()`
 
+Eigener Namens-Datensatz für den Abgleich (leer beim Standardnamen).
+
 **Rückgabe:** `Promise<object[]>`
 
 #### `async applyRemote(records)`
