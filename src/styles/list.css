@@ -8,6 +8,17 @@
 .search-box input { width: 100%; padding-left: 2.4em; }
 #search { background: var(--surface); }
 .song-list { list-style: none; margin: 0; padding: .3em 0; overflow: auto; flex: 1; }
+/* Lieder-Reiter: ein Scrollbereich. Der Kopf (Suche, Filter, Tags) klebt oben, gleitet beim Runterscrollen
+   weg und beim Hochscrollen sofort wieder herein – ohne dass die Liste springt (list.js) */
+.list-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; }
+.list-scroll > * { flex-shrink: 0; }
+.list-head { position: sticky; top: 0; z-index: 2; background: var(--surface-2); transition: transform .2s ease; }
+.list-head.away { transform: translateY(-100%); }
+.list-head.away:focus-within { transform: none; } /* beim Tippen nie verstecken */
+.list-scroll .song-letter { top: var(--head-offset, 0px); transition: top .2s ease; } /* Buchstabe unter dem Kopf */
+@media (prefers-reduced-motion: reduce) { .list-head, .list-scroll .song-letter { transition: none; } }
+.list-scroll .song-list { flex: 1 0 auto; overflow: visible; }
+.list-scroll .tag-filter { max-height: none; overflow: visible; }
 .song-letter {
   position: sticky; top: 0; z-index: 1;
   padding: .5em 1em .2em;

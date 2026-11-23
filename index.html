@@ -151,6 +151,10 @@
         <button type="button" role="tab" data-tab="sets" aria-selected="false">Setlisten</button>
       </div>
       <div id="tab-songs" class="list-tab">
+        <!-- Suche, Filter und Tags: Kopf der Liste, der beim Scrollen weg- und wieder hereingleitet -->
+        <div class="list-scroll" id="list-scroll">
+        <!-- Kopf: gleitet beim Runterscrollen weg, beim Hochscrollen sofort wieder herein (list.js) -->
+        <div class="list-head" id="list-head">
         <div class="search-box">
           <svg class="icon"><use href="#i-search"/></svg>
           <input id="search" type="search" placeholder="Suchen …" autocomplete="off" title="Titel, Interpret oder Text (Strg+K)">
@@ -175,6 +179,7 @@
           <span id="filter-note-text"></span>
           <button type="button" id="filter-clear" class="link-btn">aufheben</button>
         </p>
+        </div>
         <ul id="song-list" class="song-list"></ul>
         <!-- Erste Schritte: solange das Buch höchstens ein Lied hat (list.js) -->
         <div id="welcome" class="welcome" hidden>
@@ -184,6 +189,7 @@
           <button type="button" data-welcome="open"><svg class="icon"><use href="#i-open"/></svg><span><strong>Datei oder Sicherung öffnen</strong><small>ChordPro, Text oder eine Liederbuch-Sicherung</small></span></button>
           <button type="button" data-welcome="cloud"><svg class="icon"><use href="#i-cloud"/></svg><span><strong>Mit anderen Geräten abgleichen</strong><small>Google Drive, Dropbox oder WebDAV</small></span></button>
           <button type="button" class="link-btn welcome-hide" data-welcome="hide">Ausblenden</button>
+        </div>
         </div>
         <p id="song-count" class="song-count"></p>
       </div>

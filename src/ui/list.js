@@ -266,6 +266,33 @@ listEl.addEventListener('click', async (e) => {
   if (isMobile()) setView('preview');
 });
 
+// ---------- Kopf der Liste (Suche, Filter, Tags) weg- und hereingleiten lassen ----------
+// Runterscrollen: Kopf gleitet nach oben weg, die Liste bekommt den Platz. Ein Stück hochscrollen: Kopf
+// gleitet sofort wieder herein, an der aktuellen Stelle (kein Sprung nach oben).
+
+{
+  const scroller = $('#list-scroll');
+  const head = $('#list-head');
+  let last = scroller.scrollTop;
+  let away = false;
+  const setAway = (value) => {
+    away = value;
+    head.classList.toggle('away', away);
+    // Buchstaben-Zeilen kleben unter dem sichtbaren Kopf bzw. ganz oben
+    scroller.style.setProperty('--head-offset', `${away ? 0 : head.offsetHeight}px`);
+  };
+  scroller.addEventListener('scroll', () => {
+    const y = scroller.scrollTop;
+    const delta = y - last;
+    last = y;
+    if (y <= head.offsetHeight) setAway(false); // ganz oben: Kopf an seinem Platz
+    else if (delta > 4 && !away && !head.contains(document.activeElement)) setAway(true);
+    else if (delta < -4 && away) setAway(false);
+  }, { passive: true });
+  // Höhe ändert sich (Griffe-Feld auf/zu, Tags, Hinweis) – Abstand der Buchstaben-Zeilen nachziehen
+  new ResizeObserver(() => setAway(away)).observe(head);
+}
+
 // Pfeiltasten in der Liste
 listEl.addEventListener('keydown', (e) => {
   if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;

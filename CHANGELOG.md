@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.13 – 24.11.2026 · Mehr Platz für die Liederliste
+
+- **Suche, „Was kann ich spielen?“ und Tags gleiten beim Runterscrollen weg** – die ganze Fläche gehört dann den
+  Liedern, vor allem am Handy. Ein kleines Stück **hochscrollen holt sie sofort zurück**, an der aktuellen Stelle
+  (die Liste springt nicht nach oben). Beim Tippen in Suche oder Griffe-Feld bleiben sie stehen. Die Buchstaben-
+  Zeilen (A, B, C …) stehen dabei immer direkt darunter.
+
 ## 2.3.12 – 24.11.2026 · „Was kann ich spielen?“ einklappbar
 
 - **Einklappbar, Filter bleibt aktiv:** Das Eingabefeld von „Was kann ich spielen?“ lässt sich einklappen – mit dem Pfeil

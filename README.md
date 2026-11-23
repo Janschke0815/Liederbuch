@@ -99,6 +99,8 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 - **Bausteine** über dem Editor: Akkord, Strophe, Refrain, Bridge, Refrain wiederholen, Hinweis. Markierter Text wird eingeschlossen.
 - **Dateien** einfach ins Fenster ziehen, um sie zu importieren.
 - **Löschen** lässt sich in der Meldung unten rückgängig machen.
+- **Kopf der Liste** (Suche, „Was kann ich spielen?“, Tags) gleitet beim Runterscrollen weg und beim
+  Hochscrollen sofort wieder herein – ohne dass die Liste nach oben springt.
 - **Sortieren** (über der Liste): nach Titel, Interpret, zuletzt geändert oder zuletzt gespielt; der Knopf
   daneben zeigt und dreht die Richtung (*A–Z* / *Z–A* bzw. *neueste zuerst* / *älteste zuerst*).
 - **Doppelte Lieder**: Beim Einfügen, über das Lesezeichen und beim Öffnen von Dateien fragt die App
