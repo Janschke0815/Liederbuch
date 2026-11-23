@@ -41,7 +41,8 @@ async function renderTagFilter() {
 // ---------- „Was kann ich spielen?“ – Filter nach bekannten Griffen ----------
 
 const cf = {
-  open: prefs.get('chordFilterOpen'),
+  open: prefs.get('chordFilterOpen'), // eingeschaltet: filtert, sobald Griffe eingetragen sind
+  expanded: prefs.get('chordFilterExpanded'), // Eingabefeld sichtbar (eingeklappt filtert es weiter)
   chords: prefs.get('chordFilterChords'),
   capo: prefs.get('chordFilterCapo'),
 };
@@ -68,21 +69,51 @@ function applyChordFilter(songs) {
 {
   const panel = $('#cf-panel');
   const toggle = $('#cf-toggle');
+  const save = () => {
+    prefs.set('chordFilterOpen', cf.open);
+    prefs.set('chordFilterExpanded', cf.expanded);
+  };
   const sync = () => {
-    panel.hidden = !cf.open;
-    toggle.setAttribute('aria-expanded', String(cf.open));
+    const shown = cf.open && cf.expanded;
+    panel.hidden = !shown;
+    toggle.setAttribute('aria-expanded', String(shown));
     toggle.classList.toggle('active', chordFilterActive());
+    toggle.classList.toggle('collapsed', cf.open && !cf.expanded);
+    // Eingeklappt und aktiv: statt der Frage die eigenen Griffe zeigen – eine kurze Zeile
+    toggle.querySelector('.cf-label').textContent = chordFilterActive() && !cf.expanded
+      ? `🎸 ${cf.chords.trim().replace(/[\s,;]+/g, ' ')}`
+      : '🎸 Was kann ich spielen?';
   };
   syncChordFilter = sync;
   $('#cf-chords').value = cf.chords;
   $('#cf-capo').checked = cf.capo;
-  toggle.onclick = () => {
-    cf.open = !cf.open;
-    prefs.set('chordFilterOpen', cf.open);
+  /** Einklappen; ohne eingetragene Griffe heißt das: Filter aus. */
+  const collapse = () => {
+    cf.expanded = false;
+    if (!parseKnown(cf.chords).size) cf.open = false;
+    save();
     sync();
     refreshList();
-    if (cf.open) $('#cf-chords').focus();
   };
+  toggle.onclick = () => {
+    if (!cf.open) {
+      cf.open = true;
+      cf.expanded = true;
+    } else if (cf.expanded) {
+      return collapse();
+    } else cf.expanded = true;
+    save();
+    sync();
+    refreshList();
+    if (cf.expanded) $('#cf-chords').focus();
+  };
+  // Enter (bzw. „Fertig“ auf der Handy-Tastatur): einklappen, Filter bleibt
+  $('#cf-chords').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    e.target.blur();
+    collapse();
+  });
   let t;
   $('#cf-chords').addEventListener('input', (e) => {
     cf.chords = e.target.value;

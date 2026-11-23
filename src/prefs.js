@@ -18,7 +18,8 @@ export const PREFS = {
   listSort: { key: 'listSort', def: 'title' }, // title | artist | updated | played
   listSortReverse: { key: 'listSortReverse', def: false }, // umgekehrt: Z–A bzw. älteste zuerst
   activeTag: { key: 'activeTag', def: '' },
-  chordFilterOpen: { key: 'cfOpen', def: false }, // „Was kann ich spielen?“
+  chordFilterOpen: { key: 'cfOpen', def: false }, // „Was kann ich spielen?“ eingeschaltet (filtert)
+  chordFilterExpanded: { key: 'cfExpanded', def: true }, // … Eingabefeld aufgeklappt (eingeklappt filtert es weiter)
   chordFilterChords: { key: 'cfChords', def: '' },
   chordFilterCapo: { key: 'cfCapo', def: false },
   welcomeHidden: { key: 'welcomeHidden', def: false }, // „So geht's los“ ausgeblendet

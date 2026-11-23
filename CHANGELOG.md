@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.12 – 24.11.2026 · „Was kann ich spielen?“ einklappbar
+
+- **Einklappbar, Filter bleibt aktiv:** Das Eingabefeld von „Was kann ich spielen?“ lässt sich einklappen – mit dem Pfeil
+  am Knopf oder mit Enter bzw. „Fertig“ auf der Handy-Tastatur. Eingeklappt zeigt der Knopf kurz deine Griffe
+  („🎸 G C D Em“), die Liste bleibt gefiltert. „aufheben“ schaltet den Filter aus; die Griffe bleiben gemerkt.
+- **Kompakter:** Eingabe und „mit Capo“ stehen in einer Zeile statt untereinander.
+
 ## 2.3.11 – 23.11.2026 · Sicherung zurückholen trotz Abgleich
 
 - **Fehler behoben:** Holte man mit einer Sicherung Lieder zurück, die in der Cloud schon als gelöscht vermerkt waren,

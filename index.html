@@ -157,7 +157,9 @@
         </div>
         <div class="chord-filter">
           <div class="list-tools">
-            <button type="button" id="cf-toggle" class="link-btn" aria-expanded="false" title="Nur Lieder zeigen, die aus Griffen bestehen, die du kannst">🎸 Was kann ich spielen?</button>
+            <button type="button" id="cf-toggle" class="link-btn" aria-expanded="false" aria-controls="cf-panel" title="Nur Lieder zeigen, die aus Griffen bestehen, die du kannst – ein-/ausklappen">
+              <span class="cf-label">🎸 Was kann ich spielen?</span><span class="cf-chevron" aria-hidden="true"></span>
+            </button>
             <div class="sort-box" title="Reihenfolge der Liste">
               <select id="sort-select" aria-label="Sortieren nach"></select>
               <button type="button" id="sort-dir" class="link-btn sort-dir" title="Reihenfolge umkehren">A–Z</button>
@@ -165,7 +167,7 @@
           </div>
           <div id="cf-panel" class="cf-panel" hidden>
             <input id="cf-chords" placeholder="Deine Griffe, z. B. G C D Em Am" autocomplete="off" spellcheck="false">
-            <label class="check"><input type="checkbox" id="cf-capo"> auch mit Capo</label>
+            <label class="check" title="Auch Lieder zeigen, die mit Kapodaster aus deinen Griffen bestehen"><input type="checkbox" id="cf-capo"> mit Capo</label>
           </div>
         </div>
         <div id="tag-filter" class="tag-filter" hidden></div>

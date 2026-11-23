@@ -341,7 +341,8 @@ weiterhin.
 bestehen (mit der gespeicherten Transposition; Slash-Bass zählt nicht). Mit **„auch mit Capo“**
 kommen Lieder dazu, die mit Kapodaster passen – der Bund steht dann in der Liste.
 Über der Liste steht dann **„Gefiltert: 12 von 40 Liedern – aufheben“**; *aufheben* zeigt wieder alle
-(die Griffe bleiben gemerkt). Der Spielmodus blättert in dieser gefilterten Liste.
+(die Griffe bleiben gemerkt). Das Eingabefeld lässt sich **einklappen** (Pfeil am Knopf oder Enter) – der Filter
+bleibt dabei aktiv, der Knopf zeigt dann kurz deine Griffe („🎸 G C D Em“). Der Spielmodus blättert in dieser gefilterten Liste.
 
 ## Griffbilder und Capo-Hilfe
 
