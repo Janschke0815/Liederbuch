@@ -125,5 +125,11 @@ menuBtn.onclick = (e) => {
   setMenu(!menu.classList.contains('open'));
 };
 menu.addEventListener('click', () => setMenu(false));
+// Beschriftete Knöpfe in der Leiste lösen den gleichnamigen Menüeintrag aus (eine Liste für PC und Handy)
+for (const b of $$('.quick-actions [data-for]')) {
+  const target = $(`#${b.dataset.for}`);
+  b.title = target.title;
+  b.onclick = () => target.click();
+}
 document.addEventListener('click', (e) => !menu.contains(e.target) && setMenu(false));
 addEventListener('keydown', (e) => e.key === 'Escape' && setMenu(false));

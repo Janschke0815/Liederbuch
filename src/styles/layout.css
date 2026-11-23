@@ -26,10 +26,26 @@ body {
 .brand { display: flex; align-items: center; gap: .55em; margin-right: .6em; min-width: 0; }
 .brand img { border-radius: 6px; flex-shrink: 0; }
 .app-name { font-size: 1.12em; letter-spacing: .01em; }
-.actions { display: flex; align-items: center; gap: .35em; }
-.actions button { border-color: transparent; background: transparent; }
+/* Menü „⋯“ (PC und Handy): aufklappende Liste unter dem Knopf */
+.actions {
+  display: none;
+  position: absolute; right: .6em; top: calc(100% + .3em);
+  flex-direction: column; align-items: stretch; gap: 0;
+  min-width: 14em; padding: .35em;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-lg);
+}
+.actions.open { display: flex; }
+.actions button { border-color: transparent; background: transparent; justify-content: flex-start; padding: .5em .8em; min-height: 2.4rem; }
 .actions button:hover:not(:disabled) { background: var(--hover); }
-.menu-toggle { display: none; border-color: transparent; background: transparent; }
+.menu-sep { border: 0; border-top: 1px solid var(--border); margin: .3em .4em; }
+.menu-toggle { display: inline-flex; border-color: transparent; background: transparent; }
+/* Häufige Aktionen beschriftet in der Leiste; im Menü stehen sie dann nicht noch einmal */
+.quick-actions { display: flex; align-items: center; gap: .2em; }
+.quick-actions button { border-color: transparent; background: transparent; padding-inline: .6em; }
+.quick-actions button:hover:not(:disabled) { background: var(--hover); }
+@media (min-width: 761px) {
+  .actions [data-quick] { display: none; }
+}
 #btn-install { color: var(--accent); }
 .offline-badge {
   font-size: .7em; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
@@ -73,8 +89,6 @@ body.resizing iframe { pointer-events: none; }
 .mobile-tabs { display: none; }
 /* Mittlere Breite: nur Symbole in der Kopfleiste */
 @media (max-width: 1200px) {
-  .actions .label { display: none; }
-  .actions button { padding-inline: .55em; }
   .workspace { grid-template-columns: var(--list-col, 210px) minmax(0, var(--editor-fr, 1fr)) minmax(0, var(--preview-fr, 1fr)); }
   .workspace.focus { grid-template-columns: var(--list-col, 210px) minmax(0, 1fr); }
 }
@@ -84,17 +98,8 @@ body.resizing iframe { pointer-events: none; }
   .brand { margin-right: 0; }
   #btn-new .label { display: none; }
   #btn-new { padding-inline: .6em; }
-  .menu-toggle { display: inline-flex; }
-  .actions {
-    display: none;
-    position: absolute; right: .6em; top: calc(100% + .3em);
-    flex-direction: column; align-items: stretch; gap: 0;
-    min-width: 14em; padding: .35em;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-lg);
-  }
-  .actions.open { display: flex; }
-  .actions .label { display: inline; }
-  .actions button { justify-content: flex-start; padding: .65em .8em; min-height: 2.8rem; }
+  .quick-actions { display: none; } /* am Handy steht alles im Menü */
+  .actions button { padding: .65em .8em; min-height: 2.8rem; }
   .workspace, .workspace.focus { grid-template-columns: 1fr; }
   .workspace > .pane { display: none; }
   .splitter { display: none; }

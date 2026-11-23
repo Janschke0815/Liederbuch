@@ -77,6 +77,13 @@
       <svg class="icon"><use href="#i-plus"/></svg><span class="label">Neues Lied</span>
     </button>
     <span class="spacer"></span>
+    <!-- Häufige Aktionen beschriftet in der Leiste (breiter Bildschirm); sie lösen den gleichnamigen
+         Eintrag im Menü „⋯“ aus – eine Menüliste für PC und Handy (ui/view.js) -->
+    <div class="quick-actions" role="group" aria-label="Häufige Aktionen">
+      <button type="button" data-for="btn-import"><svg class="icon"><use href="#i-paste"/></svg><span class="label">Einfügen</span></button>
+      <button type="button" data-for="btn-print"><svg class="icon"><use href="#i-print"/></svg><span class="label">Drucken</span></button>
+      <button type="button" data-for="btn-live"><svg class="icon"><use href="#i-live"/></svg><span class="label">Live</span></button>
+    </div>
     <button id="live-pill" type="button" class="live-pill" hidden title="Live-Modus läuft – Code, QR-Code, beenden">
       <svg class="icon"><use href="#i-live"/></svg><span id="live-pill-text">LIVE</span>
     </button>
@@ -86,30 +93,35 @@
     <button id="btn-menu" type="button" class="icon-btn menu-toggle" aria-haspopup="true" aria-expanded="false" title="Weitere Aktionen">
       <svg class="icon"><use href="#i-more"/></svg>
     </button>
+    <!-- Menü „⋯“ – dieselbe Liste auf PC und Handy. data-quick: steht auf breiten Bildschirmen schon
+         beschriftet in der Leiste (.quick-actions) und fehlt dann hier. -->
     <nav id="actions" class="actions" aria-label="Aktionen">
-      <button id="btn-import" type="button" title="Akkorde-über-Text einfügen (z. B. aus Ultimate Guitar)">
+      <button id="btn-import" type="button" data-quick title="Akkorde-über-Text einfügen (z. B. aus Ultimate Guitar)">
         <svg class="icon"><use href="#i-paste"/></svg><span class="label">Text einfügen</span>
       </button>
       <button id="btn-open" type="button" title="ChordPro-, Text- oder Sicherungsdatei (.zip, .json) öffnen">
         <svg class="icon"><use href="#i-open"/></svg><span class="label">Datei öffnen</span>
       </button>
-      <button id="btn-export" type="button" title="Lieder und Setlisten als ZIP-Datei sichern: lesbare .cho-Dateien und vollständige Sicherung">
-        <svg class="icon"><use href="#i-save"/></svg><span class="label">Sichern</span>
-      </button>
+      <hr class="menu-sep">
       <button id="btn-share" type="button" title="Aktuelles Lied teilen: Datei, Text oder PDF">
         <svg class="icon"><use href="#i-share"/></svg><span class="label">Lied teilen</span>
       </button>
-      <button id="btn-live" type="button" title="Live-Modus: einer wählt das Lied, alle anderen sehen es sofort">
-        <svg class="icon"><use href="#i-live"/></svg><span class="label">Live-Modus</span>
-      </button>
-      <button id="btn-print" type="button" title="Liederbuch drucken oder als PDF speichern (Strg+P)">
+      <button id="btn-print" type="button" data-quick title="Liederbuch drucken oder als PDF speichern (Strg+P)">
         <svg class="icon"><use href="#i-print"/></svg><span class="label">Drucken</span>
       </button>
-      <button id="btn-install" type="button" hidden title="Als App auf diesem Gerät installieren (Home-Bildschirm)">
-        <svg class="icon"><use href="#i-install"/></svg><span class="label">Installieren</span>
+      <button id="btn-live" type="button" data-quick title="Live-Modus: einer wählt das Lied, alle anderen sehen es sofort">
+        <svg class="icon"><use href="#i-live"/></svg><span class="label">Live-Modus</span>
+      </button>
+      <hr class="menu-sep">
+      <button id="btn-export" type="button" title="Lieder und Setlisten als ZIP-Datei sichern: lesbare .cho-Dateien und vollständige Sicherung">
+        <svg class="icon"><use href="#i-save"/></svg><span class="label">Sichern</span>
       </button>
       <button id="btn-trash" type="button" title="Gelöschte Lieder wiederherstellen">
         <svg class="icon"><use href="#i-trash"/></svg><span class="label">Papierkorb</span>
+      </button>
+      <hr class="menu-sep">
+      <button id="btn-install" type="button" hidden title="Als App auf diesem Gerät installieren (Home-Bildschirm)">
+        <svg class="icon"><use href="#i-install"/></svg><span class="label">Installieren</span>
       </button>
       <button id="btn-settings" type="button" title="Schrift, Farben, Druck">
         <svg class="icon"><use href="#i-gear"/></svg><span class="label">Einstellungen</span>

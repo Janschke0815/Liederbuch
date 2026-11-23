@@ -86,6 +86,8 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
   - Setliste: Öffnen, Spielen, Duplizieren, Löschen; Eintrag: Ab hier spielen, Verschieben,
     Notiz & Transposition, Entfernen
   - Menüs lassen sich auch mit der Tastatur bedienen (Menütaste / Umschalt+F10, Pfeile, Enter, Esc).
+- **Kopfleiste:** oben rechts stehen *Einfügen*, *Drucken* und *Live* beschriftet, alles Weitere im Menü
+  **⋯** (Datei öffnen, Lied teilen, Sichern, Papierkorb, Einstellungen …) – am Handy steht alles im Menü.
 - **Doppelklick** auf ein Lied startet den Spielmodus, **Entf** löscht das markierte Lied (mit Rückgängig).
 - **Editor ein-/ausblenden** (Symbol links über der Vorschau): nur Liste und Lied, z. B. zum Spielen.
 - **Spaltenbreiten** (breiter Bildschirm): die Trennlinie rechts neben der Liederliste bzw. dem Editor

@@ -108,16 +108,12 @@ kbd { font-family: inherit; font-size: .85em; border: 1px solid var(--border-str
 .dup-foot { flex-wrap: wrap; }
 /* Tastenkürzel */
 .kbd-icon { display: inline-grid; place-items: center; font-weight: 700; font-size: .95em; }
-.keys-btn .label { display: none; }
 .keys-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(16em, 1fr)); gap: 0 1.5em; }
 .keys-body h3 { font-size: .95em; margin: .3em 0 .4em; }
 .keys-table { border-collapse: collapse; width: 100%; font-size: .9em; }
 .keys-table td { padding: .25em .4em .25em 0; vertical-align: top; }
 .keys-table td:first-child { white-space: nowrap; width: 1%; padding-right: .8em; }
 kbd { display: inline-block; min-width: 1.4em; padding: .05em .4em; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); font: 600 .85em system-ui, sans-serif; text-align: center; }
-@media (max-width: 760px) {
-  .actions .keys-btn .label { display: inline; }
-}
 /* Reine Touch-Geräte (Handy, Tablet ohne Tastatur): Tastenkürzel nützen dort nichts */
 @media (hover: none) and (pointer: coarse) {
   .actions .keys-btn { display: none; }
