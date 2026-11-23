@@ -13,7 +13,7 @@ Liederliste: Sortierung und Erkennen doppelter Lieder.
 
 `= {`
 
-### `sortSongs(songs, mode = 'title', played = {})`
+### `sortSongs(songs, mode = 'title', played = {}, reverse = false)`
 
 Lieder sortieren (neues Array).
 
@@ -22,6 +22,13 @@ Lieder sortieren (neues Array).
 | `songs` |  | Liste aus repo.list() |
 | `mode` |  | title \| artist \| updated \| played |
 | `played` |  | Lied-ID -> Zeitpunkt (ISO oder ms) des letzten Spielens |
+| `reverse` |  | umgekehrt (Z–A bzw. älteste zuerst); Lieder ohne Titel/Interpret bzw. nie gespielte bleiben am Ende |
+
+### `sortDirectionLabel(mode, reverse = false)`
+
+Beschriftung der Sortierrichtung: „A–Z“/„Z–A“ (Titel, Interpret) bzw. „neueste zuerst“/„älteste zuerst“.
+
+**Rückgabe:** `string`
 
 ### `letterOf(text)`
 
@@ -36,3 +43,9 @@ Titel/Interpret vergleichbar machen: klein, ohne Akzente, Satzzeichen und Klamme
 Vorhandene Lieder mit gleichem Titel (und, falls beide einen haben, gleichem Interpreten).
 
 **Rückgabe:** `object[]` Treffer aus songs
+
+## Intern
+
+Nicht exportiert – nur innerhalb des Moduls benutzt.
+
+- `sortForward(songs, mode, played)`

@@ -1,5 +1,5 @@
 import { describe, it, expect } from './runner.js';
-import { sortSongs, letterOf, songKey, findDuplicates, SORT_MODES } from '../src/core/song-list.js';
+import { sortSongs, sortDirectionLabel, letterOf, songKey, findDuplicates, SORT_MODES } from '../src/core/song-list.js';
 
 const songs = [
   { id: 'a', title: 'Zebra', artist: 'Abba', sortTitle: 'Zebra', updatedAt: '2026-01-01T00:00:00Z' },
@@ -18,6 +18,18 @@ describe('Liste sortieren', () => {
   it('ändert die Eingabe nicht', () => {
     sortSongs(songs, 'artist');
     expect(ids(songs)).toBe('abc');
+  });
+  it('umgekehrt: Z–A bzw. älteste zuerst, Fehlendes bleibt am Ende', () => {
+    expect(ids(sortSongs(songs, 'title', {}, true))).toBe('acb');
+    expect(ids(sortSongs(songs, 'artist', {}, true))).toBe('cab'); // ohne Interpret (b) weiter hinten
+    expect(ids(sortSongs(songs, 'updated', {}, true))).toBe('acb');
+    expect(ids(sortSongs(songs, 'played', { a: '2026-05-01T00:00:00Z', c: '2026-04-01T00:00:00Z' }, true))).toBe('cab');
+  });
+  it('Beschriftung der Richtung', () => {
+    expect(sortDirectionLabel('title')).toBe('A–Z');
+    expect(sortDirectionLabel('artist', true)).toBe('Z–A');
+    expect(sortDirectionLabel('updated')).toBe('neueste zuerst');
+    expect(sortDirectionLabel('played', true)).toBe('älteste zuerst');
   });
   it('kennt vier Sortierungen', () => expect(Object.keys(SORT_MODES)).toEqual(['title', 'artist', 'updated', 'played']));
   it('Anfangsbuchstabe', () => {

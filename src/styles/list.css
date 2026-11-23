@@ -63,9 +63,17 @@
 .cf-panel input:not([type=checkbox]) { width: 100%; font-size: .92em; }
 .cf-panel .check { display: flex; gap: .45em; align-items: center; font-size: .85em; color: var(--muted); }
 /* Griff-Filter und Sortierung in einer Zeile */
-.list-tools { display: flex; align-items: center; gap: .4em; justify-content: space-between; }
-.sort-box { display: inline-flex; align-items: center; gap: .25em; font-size: .85em; color: var(--muted); }
+.list-tools { display: flex; align-items: center; gap: .1em .4em; justify-content: space-between; flex-wrap: wrap; }
+.sort-box { display: inline-flex; align-items: center; gap: .25em; margin-left: auto; font-size: .85em; color: var(--muted); }
 .sort-box select { font-size: .95em; min-height: 1.8rem; padding: 0 .3em; border-color: transparent; background: transparent; color: var(--text); max-width: 10em; }
+.sort-dir { font-size: .95em; min-height: 1.8rem; padding: 0 .35em; white-space: nowrap; }
+/* Hinweis über der Liste, solange „Was kann ich spielen?“ filtert */
+.filter-note {
+  display: flex; align-items: center; gap: .4em; margin: .3em .8em .2em; padding: .35em .7em;
+  border-radius: var(--radius); background: var(--accent-soft); color: var(--text); font-size: .85em; font-weight: 600;
+}
+.filter-note[hidden] { display: none; }
+.filter-note .link-btn { margin-left: auto; min-height: 1.8rem; padding-inline: .4em; }
 
 /* Abonniertes Liederbuch: Leiste über der Liste */
 .abo-bar {

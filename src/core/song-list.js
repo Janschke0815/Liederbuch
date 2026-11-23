@@ -17,8 +17,26 @@ const byTitle = (a, b) => (!titleOf(a) - !titleOf(b)) || collator.compare(titleO
  * @param songs  Liste aus repo.list()
  * @param mode   title | artist | updated | played
  * @param played Lied-ID -> Zeitpunkt (ISO oder ms) des letzten Spielens
+ * @param reverse umgekehrt (Z–A bzw. älteste zuerst); Lieder ohne Titel/Interpret bzw. nie gespielte
+ *                bleiben am Ende
  */
-export function sortSongs(songs, mode = 'title', played = {}) {
+export function sortSongs(songs, mode = 'title', played = {}, reverse = false) {
+  const sorted = sortForward(songs, mode, played);
+  if (!reverse) return sorted;
+  const missing = (s) => (mode === 'artist' ? !s.artist : mode === 'played' ? !played[s.id] : mode === 'title' ? !titleOf(s) : false);
+  return [...sorted.filter((s) => !missing(s)).reverse(), ...sorted.filter(missing)];
+}
+
+/**
+ * Beschriftung der Sortierrichtung: „A–Z“/„Z–A“ (Titel, Interpret) bzw. „neueste zuerst“/„älteste zuerst“.
+ * @returns {string}
+ */
+export function sortDirectionLabel(mode, reverse = false) {
+  if (mode === 'updated' || mode === 'played') return reverse ? 'älteste zuerst' : 'neueste zuerst';
+  return reverse ? 'Z–A' : 'A–Z';
+}
+
+function sortForward(songs, mode, played) {
   const list = [...songs];
   switch (mode) {
     case 'artist':

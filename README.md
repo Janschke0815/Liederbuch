@@ -99,7 +99,8 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 - **Bausteine** über dem Editor: Akkord, Strophe, Refrain, Bridge, Refrain wiederholen, Hinweis. Markierter Text wird eingeschlossen.
 - **Dateien** einfach ins Fenster ziehen, um sie zu importieren.
 - **Löschen** lässt sich in der Meldung unten rückgängig machen.
-- **Sortieren** (↕ über der Liste): nach Titel, Interpret, zuletzt geändert oder zuletzt gespielt.
+- **Sortieren** (über der Liste): nach Titel, Interpret, zuletzt geändert oder zuletzt gespielt; der Knopf
+  daneben zeigt und dreht die Richtung (*A–Z* / *Z–A* bzw. *neueste zuerst* / *älteste zuerst*).
 - **Doppelte Lieder**: Beim Einfügen, über das Lesezeichen und beim Öffnen von Dateien fragt die App
   nach, wenn es Titel und Interpret schon gibt – überspringen, vorhandenes ersetzen oder als Kopie anlegen.
 - **ZIP öffnen** zeigt danach, welche Lieder und Setlisten geändert oder neu angelegt wurden.
@@ -335,7 +336,8 @@ weiterhin.
 (z. B. `G C D Em Am`). Die Liste zeigt nur noch Lieder, die ausschließlich aus diesen Griffen
 bestehen (mit der gespeicherten Transposition; Slash-Bass zählt nicht). Mit **„auch mit Capo“**
 kommen Lieder dazu, die mit Kapodaster passen – der Bund steht dann in der Liste.
-Der Spielmodus blättert in dieser gefilterten Liste.
+Über der Liste steht dann **„Gefiltert: 12 von 40 Liedern – aufheben“**; *aufheben* zeigt wieder alle
+(die Griffe bleiben gemerkt). Der Spielmodus blättert in dieser gefilterten Liste.
 
 ## Griffbilder und Capo-Hilfe
 

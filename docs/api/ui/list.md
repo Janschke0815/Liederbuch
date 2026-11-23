@@ -35,6 +35,7 @@ Nicht exportiert – nur innerhalb des Moduls benutzt.
 
 - `async renderTagFilter()` – Tag-Filter über der Liste (nur sichtbar, wenn es Tags gibt).
 - `applyChordFilter(songs)` – Lieder filtern, die nur aus bekannten Griffen bestehen (mit gespeicherter Transposition).
+- `syncSortDir()` – Knopf für die Richtung: zeigt die aktuelle („A–Z“, „neueste zuerst“), Klick kehrt sie um.
 - `songButton(s)`
 - `emptyText()`
 - `async render()`

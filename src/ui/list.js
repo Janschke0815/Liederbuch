@@ -4,7 +4,7 @@
 import { parseChordPro } from '../core/chordpro.js';
 import { transposeChord } from '../core/chords.js';
 import { parseKnown, playableCapo } from '../core/playable.js';
-import { SORT_MODES, sortSongs, letterOf } from '../core/song-list.js';
+import { SORT_MODES, sortSongs, sortDirectionLabel, letterOf } from '../core/song-list.js';
 import { usedChords } from '../render/song-view.js';
 import { prefs } from '../prefs.js';
 import { book, repo, state } from './app-state.js';
@@ -46,6 +46,8 @@ const cf = {
   capo: prefs.get('chordFilterCapo'),
 };
 const capoHint = new Map(); // songId -> Capo-Bund für die Anzeige in der Liste
+let beforeChordFilter = 0; // Anzahl vor dem Griff-Filter – für „Gefiltert: 12 von 40“ über der Liste
+let syncChordFilter = () => {};
 
 const chordFilterActive = () => cf.open && parseKnown(cf.chords).size > 0;
 
@@ -71,6 +73,7 @@ function applyChordFilter(songs) {
     toggle.setAttribute('aria-expanded', String(cf.open));
     toggle.classList.toggle('active', chordFilterActive());
   };
+  syncChordFilter = sync;
   $('#cf-chords').value = cf.chords;
   $('#cf-capo').checked = cf.capo;
   toggle.onclick = () => {
@@ -99,19 +102,37 @@ function applyChordFilter(songs) {
 // ---------- Sortierung (gilt ohne Suchbegriff; Suchtreffer bleiben nach Relevanz) ----------
 
 const sortSelect = $('#sort-select');
+const sortDir = $('#sort-dir');
 sortSelect.replaceChildren(...Object.entries(SORT_MODES).map(([v, l]) => new Option(l, v)));
 sortSelect.value = SORT_MODES[prefs.get('listSort')] ? prefs.get('listSort') : 'title';
+/** Knopf für die Richtung: zeigt die aktuelle („A–Z“, „neueste zuerst“), Klick kehrt sie um. */
+function syncSortDir() {
+  const reverse = prefs.get('listSortReverse');
+  const now = sortDirectionLabel(sortSelect.value, reverse);
+  sortDir.textContent = now;
+  sortDir.setAttribute('aria-label', `Reihenfolge: ${now} – umkehren zu ${sortDirectionLabel(sortSelect.value, !reverse)}`);
+  sortDir.title = `Umkehren: ${sortDirectionLabel(sortSelect.value, !reverse)}`;
+}
 sortSelect.onchange = () => {
   prefs.set('listSort', sortSelect.value);
+  syncSortDir();
   refreshList();
 };
+sortDir.onclick = () => {
+  prefs.set('listSortReverse', !prefs.get('listSortReverse'));
+  syncSortDir();
+  refreshList();
+};
+syncSortDir();
 
 // ---------- Liste ----------
 
 /** Lieder in der Reihenfolge der Liste (Suche, Tag, Griff-Filter, Sortierung) – auch fürs Blättern im Spielmodus. */
 export async function listedSongs() {
-  const songs = applyChordFilter(await repo.list({ query: search.value, tag: activeTag }));
-  return search.value ? songs : sortSongs(songs, sortSelect.value, prefs.get('playedAt'));
+  const all = await repo.list({ query: search.value, tag: activeTag });
+  const songs = applyChordFilter(all);
+  beforeChordFilter = all.length;
+  return search.value ? songs : sortSongs(songs, sortSelect.value, prefs.get('playedAt'), prefs.get('listSortReverse'));
 }
 
 function songButton(s) {
@@ -153,9 +174,22 @@ async function render() {
   listEl.replaceChildren(...items);
   const filtered = search.value || activeTag || chordFilterActive();
   $('#song-count').textContent = filtered ? `${songs.length} Treffer` : `${songs.length} ${songs.length === 1 ? 'Lied' : 'Lieder'}`;
+  // „Was kann ich spielen?“ aktiv: deutlich sagen, dass die Liste gefiltert ist
+  const note = $('#filter-note');
+  note.hidden = !chordFilterActive();
+  if (!note.hidden) {
+    $('#filter-note-text').textContent = `Gefiltert: ${songs.length} von ${beforeChordFilter} ${beforeChordFilter === 1 ? 'Lied' : 'Liedern'}`;
+  }
   // Erste Schritte, solange das Buch fast leer ist (nur das Beispiellied) – nicht in Abos
   $('#welcome').hidden = Boolean(filtered || songs.length > 1 || document.body.dataset.readonly || prefs.get('welcomeHidden'));
 }
+
+$('#filter-clear').onclick = () => {
+  cf.open = false; // Griffe bleiben gespeichert – beim nächsten Aufklappen wieder da
+  prefs.set('chordFilterOpen', false);
+  syncChordFilter();
+  refreshList();
+};
 
 $('#welcome').addEventListener('click', (e) => {
   const what = e.target.closest('[data-welcome]')?.dataset.welcome;

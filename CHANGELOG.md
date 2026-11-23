@@ -8,6 +8,14 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.5 – 23.11.2026 · Filter und Sortierrichtung sichtbar
+
+- **„Was kann ich spielen?“:** Ist der Filter aktiv, steht über der Liste deutlich „Gefiltert: 12 von 40 Liedern“
+  mit **aufheben** (die Griffe bleiben gemerkt).
+- **Sortierrichtung:** Neben der Sortierung steht jetzt beschriftet, wie herum sortiert ist – *A–Z* / *Z–A* bzw.
+  *neueste zuerst* / *älteste zuerst*; ein Klick dreht die Reihenfolge um (vorher gab es nur ein unbeschriftetes ↕).
+  Lieder ohne Titel/Interpret und nie gespielte bleiben dabei am Ende.
+
 ## 2.3.4 – 23.11.2026 · Teilen entwirrt
 
 - **Ein Einstieg „Mit anderen teilen …“** (Menü ⋯ und oben im Cloud-Dialog) fragt zuerst: Sollen die anderen

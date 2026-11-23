@@ -16,6 +16,7 @@ export const PREFS = {
   // Liste
   lastSong: { key: 'lastSong', def: '' }, // zuletzt geöffnetes Lied
   listSort: { key: 'listSort', def: 'title' }, // title | artist | updated | played
+  listSortReverse: { key: 'listSortReverse', def: false }, // umgekehrt: Z–A bzw. älteste zuerst
   activeTag: { key: 'activeTag', def: '' },
   chordFilterOpen: { key: 'cfOpen', def: false }, // „Was kann ich spielen?“
   chordFilterChords: { key: 'cfChords', def: '' },
