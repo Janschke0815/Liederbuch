@@ -24,3 +24,11 @@ Ist der Editor gerade ausgeblendet?
 ### `setMenu(open)`
 
 Menü „⋯“ öffnen oder schließen.
+
+## Intern
+
+Nicht exportiert – nur innerhalb des Moduls benutzt.
+
+- `applyWidths()` – Gespeicherte Breiten anwenden (0 = Standard aus dem CSS).
+- `resizeTo(which, x)` – Neue Breite aus der Mausposition x; which: 'list' (Liste) oder 'editor' (Editor | Vorschau).
+- `addSplitter(pane, which)`

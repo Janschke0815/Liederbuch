@@ -88,6 +88,9 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
   - Menüs lassen sich auch mit der Tastatur bedienen (Menütaste / Umschalt+F10, Pfeile, Enter, Esc).
 - **Doppelklick** auf ein Lied startet den Spielmodus, **Entf** löscht das markierte Lied (mit Rückgängig).
 - **Editor ein-/ausblenden** (Symbol links über der Vorschau): nur Liste und Lied, z. B. zum Spielen.
+- **Spaltenbreiten** (breiter Bildschirm): die Trennlinie rechts neben der Liederliste bzw. dem Editor
+  ziehen; Doppelklick stellt die Standardbreite wieder her, mit Tab angewählt geht es auch mit ← / →.
+  Die Breiten bleiben auf dem Gerät gespeichert.
 - **Bausteine** über dem Editor: Akkord, Strophe, Refrain, Bridge, Refrain wiederholen, Hinweis. Markierter Text wird eingeschlossen.
 - **Dateien** einfach ins Fenster ziehen, um sie zu importieren.
 - **Löschen** lässt sich in der Meldung unten rückgängig machen.

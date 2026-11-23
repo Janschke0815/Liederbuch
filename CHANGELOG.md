@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.2.12 – 23.11.2026 · Spaltenbreiten einstellbar
+
+- **Breite von Liederliste, Editor und Vorschau** lässt sich auf breiten Bildschirmen ändern: die Trennlinie
+  rechts neben der Liste bzw. dem Editor ziehen. Doppelklick stellt die Standardbreite wieder her; mit Tab
+  angewählt geht es auch mit ← / →. Die Breiten bleiben auf dem Gerät gespeichert (die Liste höchstens 40 %
+  des Fensters, Editor und Vorschau mindestens 260 px).
+
 ## 2.2.11 – 23.11.2026 · Optionen je Liederbuch per Rechtsklick
 
 - **Liederbuch-Auswahl oben links** ist jetzt ein eigenes Menü: **Rechtsklick** (am Handy: lang drücken) auf ein
