@@ -174,10 +174,7 @@ export class WebDavProvider {
    */
   async read(knownVersion) {
     const [songs, sets] = await Promise.all([this.#list(this.songDirUrl), this.#list(this.setDirUrl)]);
-    const version = listingSignature(songs) + '||' + listingSignature(sets);
-    if (knownVersion && knownVersion === version && this.lists) return { unchanged: true };
-
-    // Liederbuch.json: Hinweisdatei (neu) oder älteres Ablageformat
+    // Liederbuch.json: Hinweisdatei (neu) oder älteres Ablageformat; enthält auch den Namen des Buchs
     const res = await this.http.request('GET', this.fileUrl);
     let guard = null;
     if (res.ok) {
@@ -187,6 +184,10 @@ export class WebDavProvider {
         guard = null;
       }
     }
+    const bookRecords = Array.isArray(guard?.book) ? guard.book : [];
+    // Umbenennen auf einem anderen Gerät ändert nur die Hinweisdatei – zählt trotzdem als Änderung
+    const version = listingSignature(songs) + '||' + listingSignature(sets) + '||' + JSON.stringify(bookRecords);
+    if (knownVersion && knownVersion === version && this.lists) return { unchanged: true };
     if (guard?.format === SYNC_FORMAT && guard.version > GUARD_VERSION) {
       throw new Error('Das Liederbuch auf dem Server stammt aus einer neueren Version der App – bitte App neu laden');
     }
@@ -211,7 +212,7 @@ export class WebDavProvider {
     this.#saveState(state);
     if (!guard && !songs.size && !sets.size && !data.songs.length) return null; // noch leer
     return {
-      data: { format: SYNC_FORMAT, version: ENGINE_VERSION, ...data },
+      data: { format: SYNC_FORMAT, version: ENGINE_VERSION, ...data, book: bookRecords },
       version,
       rewrite,
     };
@@ -422,14 +423,17 @@ export class WebDavProvider {
       state.setlists[name] = { id: s.id, etag, hash, updatedAt: s.updatedAt, createdAt: s.createdAt };
     }
 
-    // Hinweisdatei statt Daten-JSON (ersetzt auch ein älteres Format)
-    if (!(this.guard?.format === SYNC_FORMAT && this.guard.version === GUARD_VERSION)) {
+    // Hinweisdatei statt Daten-JSON (ersetzt auch ein älteres Format); trägt auch den Namen des Buchs
+    const book = Array.isArray(data.book) ? data.book : [];
+    const sameBook = JSON.stringify(this.guard?.book || []) === JSON.stringify(book);
+    if (!(this.guard?.format === SYNC_FORMAT && this.guard.version === GUARD_VERSION) || !sameBook) {
       const guard = {
         format: SYNC_FORMAT,
         version: GUARD_VERSION,
         hinweis: 'Die Lieder liegen als ChordPro-Dateien im Ordner „Lieder“, Setlisten als Textdateien im Ordner ' +
-          '„Setlisten“. Diese Datei enthält keine Daten – sie hält nur ältere Versionen der Liederbuch-App davon ab, ' +
-          'etwas zu überschreiben.',
+          '„Setlisten“. Diese Datei enthält keine Liedtexte – sie hält ältere Versionen der Liederbuch-App davon ab, ' +
+          'etwas zu überschreiben, und merkt sich den Namen des Liederbuchs.',
+        ...(book.length ? { book } : {}),
       };
       const res = await this.http.request('PUT', this.fileUrl, { headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: toFileJson(guard) });
       if (!res.ok) throw new Error(`WebDAV-Fehler ${res.status} beim Speichern von „${WEBDAV_FILE}“`);
@@ -442,6 +446,6 @@ export class WebDavProvider {
     for (const [n, f] of lists.songs) if (!songList.has(n) && !SONG_FILE.test(n)) songList.set(n, f);
     const setList = new Map(Object.entries(state.setlists).map(([n, st]) => [n, { etag: st.etag, modified: 0 }]));
     this.lists = { songs: songList, sets: setList };
-    return listingSignature(songList) + '||' + listingSignature(setList);
+    return listingSignature(songList) + '||' + listingSignature(setList) + '||' + JSON.stringify(book);
   }
 }

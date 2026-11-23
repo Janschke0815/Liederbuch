@@ -91,9 +91,9 @@ function davServer() {
   return srv;
 }
 
-const sync = (dev, srv) => {
+const sync = (dev, srv, { extraBook = null } = {}) => {
   const e = new SyncEngine(dev.songs, new WebDavProvider({ url: BASE, user: 'jan', password: 'x', fetch: srv.fetch, now, storage: dev.storage }), {
-    extra: [{ key: 'setlists', repo: dev.sets, slim: slimSetlist }],
+    extra: [{ key: 'setlists', repo: dev.sets, slim: slimSetlist }, ...(extraBook ? [extraBook] : [])],
   });
   e.state = 'idle';
   return e;
@@ -156,7 +156,7 @@ describe('WebDAV: nur ChordPro-Dateien, keine Daten-JSON', () => {
     expect([bc.chordpro, bc.transpose, bc.note]).toEqual(['{title: Clementine}\n{artist: Percy Montrose}\n[C]Oh my darling', 2, 'Capo 2']);
   });
 
-  it('ohne Änderungen: nur die zwei Ordnerlisten, nichts wird geladen oder geschrieben', async () => {
+  it('ohne Änderungen: nur die zwei Ordnerlisten und die kleine Hinweisdatei (Name des Buchs), nichts wird geschrieben', async () => {
     const srv = davServer();
     const A = device('a');
     await A.songs.create('{title: Alpha}');
@@ -165,7 +165,33 @@ describe('WebDAV: nur ChordPro-Dateien, keine Daten-JSON', () => {
     await sa.sync();
     srv.log.length = 0;
     await sa.sync();
-    expect(srv.log).toEqual(['PROPFIND ' + DIR, 'PROPFIND ' + SETS]);
+    expect(srv.log).toEqual(['PROPFIND ' + DIR, 'PROPFIND ' + SETS, 'GET ' + GUARD]);
+  });
+
+  it('Name des Buchs steht in der Hinweisdatei und kommt auf dem anderen Gerät an (2.3.10)', async () => {
+    const { BookNameStore, slimName } = await import('../src/sync/book-name.js');
+    const srv = davServer();
+    const A = device('a');
+    const B = device('b');
+    const bookA = { id: 'book-x', name: 'Band' };
+    const bookB = { id: 'book-y', name: 'Band' };
+    const mem = () => {
+      const m = new Map();
+      return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) };
+    };
+    const storeA = new BookNameStore(bookA, mem());
+    const storeB = new BookNameStore(bookB, mem());
+    await A.songs.create('{title: Alpha}'); // legt beim ersten Abgleich den Ordner an
+    const withName = (dev, store) => {
+      const e = sync(dev, srv, { extraBook: { key: 'book', repo: store, slim: slimName } });
+      return e;
+    };
+    await withName(A, storeA).sync();
+    storeA.renamed('Band 2026');
+    await withName(A, storeA).sync();
+    expect(JSON.parse(srv.files.get(GUARD).body).book[0].name).toBe('Band 2026');
+    await withName(B, storeB).sync();
+    expect(bookB.name).toBe('Band 2026');
   });
 
   it('Titel geändert: Datei umbenannt, anderes Gerät behält dasselbe Lied; Löschen: in den Papierkorb', async () => {

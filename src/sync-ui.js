@@ -23,6 +23,7 @@ import { SongRepository } from './storage/repository.js';
 import { openIdbStore } from './storage/stores.js';
 import { $ } from './ui/dom.js';
 import { showMenu } from './context-menu.js';
+import { BookNameStore, driveFileName, rememberRename, slimName } from './sync/book-name.js';
 
 const TITLES = {
   off: 'Nicht verbunden',
@@ -93,6 +94,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   let provider = null;
   let engine = null;
   let auth = null; // Google-Anmeldung
+  const nameStore = new BookNameStore(book); // Name des geöffneten Buchs als Abgleich-Datensatz
   let info = null; // Name/Rechte der Drive-Datei des aktiven Liederbuchs
 
   const googleAuth = () => new GoogleAuth({ clientId: clientId(), tokenKey: K('gdrive.token'), accountKey: K('gdrive.account') });
@@ -112,13 +114,27 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       : k === 'dropbox'
         ? new DropboxProvider({ appKey: appKey(), tokenKey: K('dropbox.token'), ...(book.own ? { path: book.file } : {}) })
         : driveFor(book);
-    engine = new SyncEngine(repo, provider, { beforeSync, extra, readOnly: Boolean(book.readOnly) });
+    // Der Name des Buchs gleicht mit ab (book-name.js) – Umbenennen gilt auf allen Geräten
+    const collections = [...extra, { key: 'book', repo: nameStore, slim: slimName }];
+    engine = new SyncEngine(repo, provider, { beforeSync, extra: collections, readOnly: Boolean(book.readOnly) });
     engine.addEventListener('status', render);
     engine.addEventListener('status', () => {
       if (engine.state === 'error' && engine.error instanceof ReadOnlyError) markRole('reader');
       if (engine.state === 'idle' && book.shared && !roleChecked) checkRole();
+      // Google Drive: Datei heißt wie das Buch („Liederbuch – DPSG Liederbuch.json“)
+      if (engine.state === 'idle' && provider.ensureName) {
+        provider.ensureName(driveFileName(book, book.name)).catch((err) => console.warn('Drive-Datei umbenennen:', err));
+      }
     });
   }
+
+  // Ein anderes Gerät hat das Buch umbenannt: Namen überall nachziehen
+  nameStore.addEventListener('remote-name', (e) => {
+    renderBookSelect();
+    renderBooks();
+    render();
+    toast(`Liederbuch heißt jetzt „${e.detail}“ (auf einem anderen Gerät umbenannt)`);
+  });
 
   // ---------- Rechte eines geteilten Liederbuchs ----------
 
@@ -356,11 +372,16 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       return;
     }
     renameBook(b.id, name);
-    if (b.id === book.id) book.name = name;
+    // Name gleicht mit ab: das geöffnete Buch sofort, andere beim nächsten Öffnen
+    if (b.id === book.id) {
+      book.name = name;
+      nameStore.renamed(name);
+    } else rememberRename(b, name);
     renderBooks();
     renderBookSelect();
     render();
-    toast(`Umbenannt in „${name}“`);
+    const synced = localStorage.getItem(bookKey(b, 'sync.provider'));
+    toast(synced ? `Umbenannt in „${name}“ – gilt auch auf deinen anderen Geräten` : `Umbenannt in „${name}“`);
   }
 
   /** Eigenes Liederbuch von diesem Gerät entfernen (die Datei in der Cloud bleibt). */

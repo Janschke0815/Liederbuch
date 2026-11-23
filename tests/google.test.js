@@ -4,6 +4,8 @@ import { createMemoryStore } from '../src/storage/stores.js';
 import { SyncEngine, AuthError, ConflictError, ReadOnlyError } from '../src/sync/sync-engine.js';
 import { GoogleAuth, DRIVE_SCOPE, authMessage, googleRedirectUri } from '../src/sync/google-auth.js';
 import { GoogleDriveProvider } from '../src/sync/google-drive.js';
+import { BookNameStore, slimName, driveFileName } from '../src/sync/book-name.js';
+import { personalBookName, renameBook } from '../src/books.js';
 
 const memory = () => {
   const m = new Map();
@@ -69,9 +71,20 @@ function fakeDrive(tokens = { 'tok-a': 'anna', 'tok-b': 'ben' }) {
     }
     // Suchen (nur eigene, von der App angelegte Dateien)
     if (method === 'GET' && !id) {
-      const name = /name='((?:[^'\\]|\\.)*)'/.exec(u.searchParams.get('q') || '')?.[1];
-      const files = [...d.files.values()].filter((x) => x.owner === who && x.appProperties?.liederbuch === 'sync' && (!name || x.name === name));
+      const q = u.searchParams.get('q') || '';
+      const name = /name='((?:[^'\\]|\\.)*)'/.exec(q)?.[1];
+      const tag = /key='liederbuchBook' and value='([^']*)'/.exec(q)?.[1];
+      const files = [...d.files.values()].filter((x) => x.owner === who && x.appProperties?.liederbuch === 'sync'
+        && (!name || x.name === name) && (!tag || x.appProperties?.liederbuchBook === tag));
       return json({ files: files.map((x) => ({ id: x.id })) });
+    }
+    // Metadaten ändern (Name, appProperties) – nicht der Inhalt (der geht über /upload/)
+    if (method === 'PATCH' && id && !u.pathname.startsWith('/upload/') && !m[2]) {
+      if (roleOf(f, who) === 'reader') return json({ error: { code: 403, errors: [{ reason: 'insufficientFilePermissions' }] } }, 403);
+      const b = JSON.parse(opts.body);
+      if (b.name) f.name = b.name;
+      if (b.appProperties) f.appProperties = { ...f.appProperties, ...b.appProperties };
+      return json({ id: f.id, name: f.name });
     }
     const role = roleOf(f, who);
     if (m[2]) {
@@ -460,5 +473,69 @@ describe('Google: mehrere Liederbücher mit eigenem Konto (2.2)', () => {
     const other = person(drive, 'tok-a');
     const again = new GoogleDriveProvider({ auth: other.auth, storage: other.storage, fetch: drive.fetch, fileName: 'Liederbuch – Band.json', fileIdKey: 'gdrive.fileId:book-1' });
     expect((await again.read()).data.songs[0].id).toBe('b');
+  });
+});
+
+describe('Google: Name des Liederbuchs gleicht mit ab (2.3.10)', () => {
+  const device = (drive, name = null) => {
+    const p = person(drive, 'tok-a');
+    if (name) p.storage.setItem('personalName', name);
+    const book = { id: 'personal', name: name || 'Mein Liederbuch' };
+    const store = new BookNameStore(book, p.storage);
+    const repo = new SongRepository(createMemoryStore());
+    const engine = new SyncEngine(repo, p.provider, { extra: [{ key: 'book', repo: store, slim: slimName }] });
+    engine.state = 'idle';
+    return { ...p, book, store, repo, engine };
+  };
+
+  it('Handy „DPSG Liederbuch“, Laptop Standardname: danach heißen beide „DPSG Liederbuch“', async () => {
+    const drive = fakeDrive();
+    const phone = device(drive, 'DPSG Liederbuch');
+    const laptop = device(drive);
+    await phone.engine.sync();
+    await laptop.engine.sync();
+    expect(laptop.book.name).toBe('DPSG Liederbuch');
+    expect(personalBookName(laptop.storage)).toBe('DPSG Liederbuch');
+    expect(drive.files.size).toBe(1);
+  });
+
+  it('spätere Umbenennung gewinnt, auch gegen einen schon gewählten Namen', async () => {
+    const drive = fakeDrive();
+    const phone = device(drive, 'DPSG Liederbuch');
+    const laptop = device(drive);
+    await phone.engine.sync();
+    await laptop.engine.sync();
+    renameBook('personal', 'Lagerfeuer', laptop.storage);
+    laptop.book.name = 'Lagerfeuer';
+    laptop.store.renamed('Lagerfeuer');
+    await laptop.engine.sync();
+    await phone.engine.sync();
+    expect(phone.book.name).toBe('Lagerfeuer');
+    expect(personalBookName(phone.storage)).toBe('Lagerfeuer');
+  });
+
+  it('Drive-Datei heißt wie das Buch; alte „Liederbuch.json“ wird gefunden, gekennzeichnet und nicht doppelt angelegt', async () => {
+    const drive = fakeDrive();
+    // Datei aus der Zeit vor der Kennung
+    drive.files.set('old', { id: 'old', name: 'Liederbuch.json', appProperties: { liederbuch: 'sync' }, owner: 'anna', perms: [], version: '1', content: JSON.stringify({ format: 'liederbuch-sync', version: 2, songs: [], setlists: [] }) });
+    const phone = device(drive, 'DPSG Liederbuch');
+    await phone.engine.sync();
+    expect(drive.files.get('old').appProperties.liederbuchBook).toBe('personal');
+    await phone.provider.ensureName(driveFileName(phone.book, phone.book.name));
+    expect(drive.files.get('old').name).toBe('Liederbuch – DPSG Liederbuch.json');
+    // neues Gerät ohne gemerkte Datei-ID findet sie trotz neuem Namen
+    const tablet = device(drive);
+    await tablet.engine.sync();
+    expect(drive.files.size).toBe(1);
+    expect(tablet.book.name).toBe('DPSG Liederbuch');
+  });
+
+  it('neu angelegte persönliche Datei trägt die Kennung; Standardname bleibt „Liederbuch.json“', async () => {
+    const drive = fakeDrive();
+    const laptop = device(drive);
+    await laptop.engine.sync();
+    const f = [...drive.files.values()][0];
+    expect(f.appProperties.liederbuchBook).toBe('personal');
+    expect(driveFileName(laptop.book, laptop.book.name)).toBe('Liederbuch.json');
   });
 });

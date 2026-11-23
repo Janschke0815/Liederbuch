@@ -24,6 +24,8 @@ export const PERSONAL_FILE = 'Liederbuch.json';
 const MARK_KEY = 'liederbuch';
 const MARK_PERSONAL = 'sync';
 const MARK_SHARED = 'shared';
+const BOOK_KEY = 'liederbuchBook'; // Kennung des persönlichen Liederbuchs (unabhängig vom Dateinamen)
+const BOOK_PERSONAL = 'personal';
 
 /** Fehler: Auf ein gemeinsames Liederbuch gibt es keinen Zugriff mehr (gelöscht oder Freigabe entfernt). */
 export class NoAccessError extends Error {
@@ -70,6 +72,10 @@ export class GoogleDriveProvider {
     this.storage = storage;
     this.fetch = f;
     this.fileId = this.shared ? book.fileId : storage.getItem(fileIdKey) || null;
+    // Persönliches Liederbuch: an einer unsichtbaren Kennung erkennbar, nicht am Namen – so darf die
+    // Datei in Drive den Namen des Buchs tragen („Liederbuch – DPSG Liederbuch.json“)
+    this.personal = !this.shared && fileName === PERSONAL_FILE;
+    this.knownName = null; // Dateiname in Drive, soweit bekannt (ensureName)
   }
 
   // ---------- Anmeldung (weitergereicht) ----------
@@ -125,14 +131,48 @@ export class GoogleDriveProvider {
     return res.status === 204 ? null : res.json();
   }
 
+  async #search(extra) {
+    const q = `'me' in owners and trashed=false and appProperties has { key='${MARK_KEY}' and value='${MARK_PERSONAL}' } and ${extra}`;
+    const r = await this.#json(`${API}?spaces=drive&orderBy=createdTime&fields=files(id)&q=${encodeURIComponent(q)}`);
+    return r.files?.[0]?.id || null;
+  }
+
   async #findFile() {
     if (this.fileId || this.shared) return this.fileId;
-    const name = this.fileName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    const q = `name='${name}' and 'me' in owners and trashed=false and appProperties has { key='${MARK_KEY}' and value='${MARK_PERSONAL}' }`;
-    const r = await this.#json(`${API}?spaces=drive&orderBy=createdTime&fields=files(id)&q=${encodeURIComponent(q)}`);
-    this.fileId = r.files?.[0]?.id || null;
+    const byName = () => this.#search(`name='${this.fileName.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`);
+    if (this.personal) {
+      this.fileId = await this.#search(`appProperties has { key='${BOOK_KEY}' and value='${BOOK_PERSONAL}' }`);
+      if (!this.fileId) {
+        // Datei aus der Zeit vor der Kennung (heißt noch „Liederbuch.json“): finden und kennzeichnen
+        this.fileId = await byName();
+        if (this.fileId) {
+          await this.#json(`${API}/${this.fileId}?fields=id`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ appProperties: { [BOOK_KEY]: BOOK_PERSONAL } }),
+          }).catch(() => {}); // klappt es nicht, wird beim nächsten Mal wieder über den Namen gesucht
+        }
+      }
+    } else {
+      this.fileId = await byName();
+    }
     if (this.fileId) this.storage.setItem(this.fileIdKey, this.fileId);
     return this.fileId;
+  }
+
+  /**
+   * Datei in Drive umbenennen, falls sie noch anders heißt (z. B. nach dem Umbenennen des Liederbuchs).
+   * Ohne Datei oder mit Leserechten passiert nichts.
+   */
+  async ensureName(name) {
+    if (this.readOnly || !name || this.knownName === name) return;
+    const id = await this.#findFile();
+    if (!id) return;
+    if (this.knownName === null) this.knownName = (await this.#json(`${API}/${id}?fields=name`)).name;
+    if (this.knownName === name) return;
+    await this.#json(`${API}/${id}?fields=name`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }),
+    });
+    this.knownName = name;
   }
 
   /** Version der Datei oder null, wenn sie fehlt/im Papierkorb ist/kein Zugriff besteht. */
@@ -147,6 +187,7 @@ export class GoogleDriveProvider {
   #forget() {
     if (this.shared) throw new NoAccessError();
     this.fileId = null;
+    this.knownName = null;
     this.storage.removeItem(this.fileIdKey);
   }
 
@@ -168,7 +209,8 @@ export class GoogleDriveProvider {
   }
 
   async #create(name, mark, data) {
-    const meta = { name, mimeType: 'application/json', appProperties: { [MARK_KEY]: mark } };
+    const props = { [MARK_KEY]: mark, ...(this.personal && mark === MARK_PERSONAL ? { [BOOK_KEY]: BOOK_PERSONAL } : {}) };
+    const meta = { name, mimeType: 'application/json', appProperties: props };
     const form = new FormData();
     form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
     form.append('file', new Blob([toFileJson(data)], { type: 'application/json' }));

@@ -471,6 +471,12 @@ die Lieder des geöffneten Buchs übernommen.
 - **Rechtsklick** (am Handy: lang drücken) auf ein Buch in der Auswahl zeigt seine Optionen: Öffnen,
   Umbenennen, Entfernen bzw. Verlassen/Abo beenden, beim geöffneten Buch auch die Cloud-Einstellungen.
   Rechtsklick auf den Namen oben öffnet die Optionen des geöffneten Buchs.
+- **Der Name gleicht mit ab:** Umbenennen auf einem Gerät gilt nach dem nächsten Abgleich auf allen (bei
+  gemeinsamen Büchern für alle Mitglieder); bei Widerspruch gewinnt die neueste Umbenennung, ein selbst
+  gewählter Name immer gegen den Standardnamen „Mein Liederbuch“. In Google Drive heißt die Datei mit
+  („Liederbuch – DPSG Liederbuch.json“); das persönliche Buch erkennt die App an einer unsichtbaren Kennung,
+  nicht am Dateinamen. Bei WebDAV steht der Name in `Liederbuch.json`, bei Dropbox in der Liederbuch-Datei.
+  Alle Geräte brauchen dafür Version 2.3.10 oder neuer.
 - **Google Drive / Dropbox:** Datei `Liederbuch – <Name>.json` (im Drive bzw. App-Ordner).
   **WebDAV:** eigener Ordner, vorbelegt neben dem Ordner des geöffneten Buchs.
 - **Liederbücher verwalten …** (ebenfalls in der Auswahl oben, oder im Cloud-Dialog unten

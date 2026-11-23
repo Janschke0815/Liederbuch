@@ -17,7 +17,7 @@ Rechte: Wer eine Datei nur lesen darf (Drive-Freigabe „Betrachter“), dem ver
 Berechtigung "drive.file": Die App sieht ausschließlich Dateien, die sie selbst angelegt hat oder die man ihr über die Google-Dateiauswahl (Picker) gibt – nicht den Rest des Drives.
 
 **Benutzt:** [`formats/file-format.js`](../formats/file-format.md), [`sync/google-auth.js`](google-auth.md), [`sync/sync-engine.js`](sync-engine.md)  
-**Benutzt von:** [`sync-ui.js`](../sync-ui.md)
+**Benutzt von:** [`sync-ui.js`](../sync-ui.md), [`sync/book-name.js`](book-name.md)
 
 ## Exportiert
 
@@ -52,6 +52,11 @@ Anmelden (kleines Google-Fenster, siehe GoogleAuth.signIn).
 #### `signOut()`
 
 Abmelden; die Dateien in Drive bleiben erhalten.
+
+#### `async ensureName(name)`
+
+Datei in Drive umbenennen, falls sie noch anders heißt (z. B. nach dem Umbenennen des Liederbuchs).
+Ohne Datei oder mit Leserechten passiert nichts.
 
 #### `async read(knownVersion)`
 

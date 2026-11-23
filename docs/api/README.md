@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-84 Module, 318 exportierte Funktionen, Konstanten und Klassen.
+85 Module, 323 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -124,6 +124,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | Modul | Inhalt |
 |---|---|
 | [`sync/abo-client.js`](sync/abo-client.md) | Abo-Datei vom Server laden – mit Anmeldung, falls der Ordner geschützt ist, und nur, wenn sie sich seit dem letzten Mal geändert hat (ETag). |
+| [`sync/book-name.js`](sync/book-name.md) | Name eines Liederbuchs mit abgleichen. |
 | [`sync/config.js`](sync/config.md) | Google-Zugangsdaten für Google Drive (Einrichtung: docs/google-einrichtung.md). |
 | [`sync/dropbox.js`](sync/dropbox.md) | Cloud-Anbieter Dropbox: jedes Liederbuch ist eine JSON-Datei im App-Ordner (Dropbox → Apps → <Name der Dropbox-App> → Liederbuch.json, weitere Bücher „Liederbuch – Name.json“). |
 | [`sync/google-auth.js`](sync/google-auth.md) | Anmeldung bei Google (OAuth 2) – ganz im Browser, ohne eigenen Server. |

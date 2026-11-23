@@ -152,7 +152,7 @@ export function bookKey(book, base) {
 /** Einstellungen, die bookKey pro Liederbuch trennt. */
 export const BOOK_KEYS = Object.freeze([
   'sync.kind', 'sync.provider', 'webdav.url', 'webdav.user', 'webdav.pass',
-  'gdrive.token', 'gdrive.account', 'gdrive.fileId', 'dropbox.token',
+  'gdrive.token', 'gdrive.account', 'gdrive.fileId', 'dropbox.token', 'book.name',
 ]);
 
 /** Aus der Liste entfernen (samt eigener Einstellungen); die lokale Datenbank löscht der Aufrufer. */

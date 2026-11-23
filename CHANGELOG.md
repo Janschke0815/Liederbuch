@@ -8,6 +8,18 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.10 – 23.11.2026 · Name des Liederbuchs gleicht mit ab
+
+- **Ein Buch, ein Name auf allen Geräten:** Der Name eines Liederbuchs wird jetzt mit abgeglichen. Benennst du es
+  auf einem Gerät um, heißt es nach dem nächsten Abgleich überall so – bei gemeinsamen Büchern für alle Mitglieder.
+  Bei Widerspruch gewinnt die neueste Umbenennung; ein selbst gewählter Name gewinnt immer gegen den Standardnamen
+  „Mein Liederbuch“ (ein auf dem Handy umbenanntes Buch heißt danach also auch auf dem Laptop so).
+- **Google Drive:** Die Datei trägt den Namen des Buchs, z. B. „Liederbuch – DPSG Liederbuch.json“. Das persönliche
+  Buch erkennt die App jetzt an einer unsichtbaren Kennung statt am Dateinamen – vorhandene „Liederbuch.json“
+  werden beim ersten Abgleich gefunden und gekennzeichnet, es entsteht keine zweite Datei.
+- **WebDAV:** Der Name steht in der Hinweisdatei `Liederbuch.json`; **Dropbox:** in der Liederbuch-Datei.
+- Alle Geräte einmal neu laden: Eine ältere Version kann den abgeglichenen Namen sonst beim Schreiben wieder verlieren.
+
 ## 2.3.9 – 23.11.2026 · Spalten pro Lied auch in der Druck-Vorschau
 
 - **Druck-Vorschau:** Rechtsklick bzw. lang drücken auf eine Seite eines Liedes → *wie eingestellt / einspaltig /
