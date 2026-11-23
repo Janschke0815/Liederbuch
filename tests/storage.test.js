@@ -110,6 +110,37 @@ describe('Speicher: Export und Import', () => {
     expect((await repo.list()).map((s) => s.title)).toEqual(['Alt – aus Sicherung', 'Bleibt – lokal geändert', 'Ganz neu']);
   });
 
+  it('Sicherung holt ein hier gelöschtes Lied zurück – und das gewinnt danach beim Abgleich (2.3.11)', async () => {
+    const { mergeRecords } = await import('../src/sync/sync-engine.js');
+    const repo = makeRepo();
+    const a = await repo.create(song('Clementine'));
+    const backup = await repo.exportData(); // Sicherung mit altem Zeitstempel
+    await repo.remove(a.id); // später gelöscht (Gelöscht-Vermerk ist neuer als die Sicherung)
+    const tombstone = (await repo.allRecords()).find((r) => r.id === a.id);
+    expect(await repo.importData(backup)).toEqual({ added: 1, updated: 0, skipped: 0, trash: 0 });
+    const restored = (await repo.allRecords()).find((r) => r.id === a.id);
+    expect(restored.deletedAt).toBe(null);
+    expect(restored.updatedAt > tombstone.updatedAt).toBe(true);
+    // Gegenprobe Abgleich: die Cloud hat noch den Gelöscht-Vermerk – das Lied muss bleiben
+    const r = mergeRecords([restored], [tombstone]);
+    expect(r.merged[0].deletedAt).toBe(null);
+    expect(r.toLocal.length).toBe(0);
+  });
+
+  it('Papierkorb: alle wiederherstellen holt sie mit neuer Zeit zurück', async () => {
+    const repo = makeRepo();
+    const a = await repo.create(song('A'));
+    const b = await repo.create(song('B'));
+    await repo.remove(a.id);
+    await repo.remove(b.id);
+    const gone = await repo.allRecords();
+    for (const s of await repo.trash()) await repo.restore(s.id);
+    for (const r of await repo.allRecords()) {
+      expect(r.deletedAt).toBe(null);
+      expect(r.updatedAt > gone.find((g) => g.id === r.id).updatedAt).toBe(true);
+    }
+  });
+
   it('lehnt fremde Dateien ab', async () => {
     const repo = makeRepo();
     for (const bad of [null, {}, { format: 'x', songs: [] }, { format: 'liederbuch', version: 99, songs: [] }]) {

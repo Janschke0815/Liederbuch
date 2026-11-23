@@ -379,9 +379,13 @@ export class SongRepository extends EventTarget {
         if (!existing) {
           result.added++;
           toPut.push(incoming);
-        } else if (existing.deletedAt || incoming.updatedAt > existing.updatedAt) {
-          if (existing.deletedAt) result.added++;
-          else result.updated++;
+        } else if (existing.deletedAt) {
+          // Hier gelöscht, die Sicherung holt es zurück: bewusste Wiederherstellung mit jetziger Zeit –
+          // sonst gewänne beim Abgleich der (neuere) Gelöscht-Vermerk und das Lied verschwände wieder
+          result.added++;
+          toPut.push({ ...incoming, updatedAt: this.#stamp(existing) });
+        } else if (incoming.updatedAt > existing.updatedAt) {
+          result.updated++;
           toPut.push(incoming);
         } else {
           result.skipped++;

@@ -17,6 +17,10 @@ const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
 /** Sicherung (JSON) übernehmen: Lieder, Papierkorb, Setlisten. */
 async function importBackup(name, data) {
+  // Erst den Stand aus der Cloud holen: Was dort gelöscht wurde, gilt dann auch hier als gelöscht –
+  // und die Sicherung holt es als bewusste Wiederherstellung zurück (importData), statt beim nächsten
+  // Abgleich wieder zu verschwinden.
+  await services.sync?.engine?.sync().catch(() => {});
   const r = await repo.importData(data);
   const nSets = await sets.importRecords(data.setlists);
   const parts = [`${r.added} neu`, `${r.updated} aktualisiert`, `${r.skipped} übersprungen`];

@@ -29,7 +29,17 @@ async function render() {
   }));
   if (!items.length) $('#trash-list').append(el('li', { className: 'list-empty', textContent: 'Der Papierkorb ist leer.' }));
   $('#trash-empty').hidden = !items.length;
+  $('#trash-restore-all').hidden = items.length < 2;
 }
+
+// Alle zurückholen (z. B. wenn ein Abgleich Lieder als gelöscht gemeldet hat): jetzige Zeit – gilt dann
+// auch auf den anderen Geräten
+$('#trash-restore-all').onclick = async () => {
+  const items = await repo.trash();
+  for (const s of items) await repo.restore(s.id);
+  render();
+  toast(`${items.length} ${items.length === 1 ? 'Lied' : 'Lieder'} wiederhergestellt`);
+};
 
 $('#btn-trash').onclick = async () => {
   await flushSave();

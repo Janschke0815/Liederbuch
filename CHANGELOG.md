@@ -8,6 +8,16 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.11 – 23.11.2026 · Sicherung zurückholen trotz Abgleich
+
+- **Fehler behoben:** Holte man mit einer Sicherung Lieder zurück, die in der Cloud schon als gelöscht vermerkt waren,
+  verschwanden sie beim nächsten Abgleich wieder – der Gelöscht-Vermerk war neuer als der Stand der Sicherung.
+  Jetzt gleicht die App vor dem Import einmal ab, und ein Lied, das hier gelöscht ist und aus der Sicherung
+  zurückkommt, gilt als bewusste Wiederherstellung (mit jetziger Zeit) – es bleibt und kommt auch auf den anderen
+  Geräten an.
+- **Papierkorb: „Alle wiederherstellen“** – holt alle gelöschten Lieder auf einmal zurück, auch auf deinen anderen
+  Geräten (ab zwei Liedern im Papierkorb).
+
 ## 2.3.10 – 23.11.2026 · Name des Liederbuchs gleicht mit ab
 
 - **Ein Buch, ein Name auf allen Geräten:** Der Name eines Liederbuchs wird jetzt mit abgeglichen. Benennst du es
