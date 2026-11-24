@@ -50,6 +50,7 @@ import './ui/toolbar.js';
 import './ui/chord-tap.js';
 import './ui/share-with.js';
 import './ui/selection.js';
+import './ui/harp-from-notes.js';
 
 if (book.shared) document.title = `${book.name} – Liederbuch`;
 navigator.storage?.persist?.(); // Browser bitten, die Daten nicht automatisch zu löschen

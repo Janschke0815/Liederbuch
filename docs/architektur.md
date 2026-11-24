@@ -199,3 +199,12 @@ ersten Besuch bereit, auch wenn noch nie Noten gezeigt wurden. Die Samples lande
 Export: `transposeChordPro` lässt Tab- und Notenabschnitte unverändert; Noten ohne eigenes `K:` bekommen
 beim Transponieren die ursprüngliche Tonart ausdrücklich (sonst läsen sie sich mit der neuen `{key}`
 falsch). Der Text-Export („Akkorde über dem Text“) lässt Noten weg.
+
+Melodie → Harp-Tabs: `core/harp-melody.js` liest Töne (MIDI) und Silben aus dem ABC-Text (eigener kleiner
+Leser: Tonart und Versetzungszeichen je Takt, Bindebögen, Akkorde aus Noten, Verzierungen und Vorschläge
+überspringen), ordnet jedem Ton einen Kanal der Richter-Harp zu (Tabelle der C-Harp, andere Tonarten um
+−5…+6 Halbtöne verschoben; blasen/ziehen vor Bending vor Overblow), verschiebt die Melodie bei Bedarf um
+Oktaven und bewertet alle 12 Harp-Tonarten (`rankHarpKeys`). `ui/harp-from-notes.js` hängt den Knopf
+„Harp“ an jeden Notenabschnitt der Vorschau, zeigt Auswahl und Ergebnis und fügt es über `insertText`
+(snippets.js) hinter `{end_of_abc}` ein – so bleibt Rückgängig im Editor möglich.
+

@@ -183,7 +183,7 @@ function addPlayButton(abcjs, score) {
     else play(abcjs, score, btn);
   };
   const label = section.querySelector('.block-label');
-  if (label) label.append(btn);
+  if (label) label.insertBefore(btn, label.querySelector('.abc-harp')); // ▶ vor „Harp“ (ui/harp-from-notes.js)
   else section.prepend(btn);
 }
 

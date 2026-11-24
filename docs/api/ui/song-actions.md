@@ -5,7 +5,7 @@
 Was man mit ganzen Liedern tun kann: anlegen, löschen, duplizieren, zu einer Setliste hinzufügen, in ein anderes Liederbuch kopieren. Wird von Knöpfen, Kontextmenüs und der Mehrfachauswahl benutzt.
 
 **Benutzt:** [`books.js`](../books.md), [`core/meta-edit.js`](../core/meta-edit.md), [`core/song-copy.js`](../core/song-copy.md), [`sample.js`](../sample.md), [`storage/repository.js`](../storage/repository.md), [`storage/stores.js`](../storage/stores.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md), [`ui/list.js`](list.md), [`ui/song.js`](song.md), [`ui/view.js`](view.md)  
-**Benutzt von:** [`app.js`](../app.md), [`ui/context-menus.js`](context-menus.md), [`ui/selection.js`](selection.md), [`ui/share.js`](share.md)
+**Benutzt von:** [`app.js`](../app.md), [`ui/context-menus.js`](context-menus.md), [`ui/harp-from-notes.js`](harp-from-notes.md), [`ui/selection.js`](selection.md), [`ui/share.js`](share.md)
 
 ## Exportiert
 

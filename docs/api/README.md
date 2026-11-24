@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-93 Module, 356 exportierte Funktionen, Konstanten und Klassen.
+95 Module, 365 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -41,6 +41,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/context-menus.js`](ui/context-menus.md) | Kontextmenüs (Rechtsklick / langes Drücken) für Lieder in der Liste und für die Vorschau, außerdem Doppelklick (spielen) und Entf (löschen) in der Liste. |
 | [`ui/dom.js`](ui/dom.md) | Kleine Hilfen für die Oberfläche – von allen ui-Modulen gemeinsam genutzt. |
 | [`ui/files.js`](ui/files.md) | Dateien öffnen (Sicherung als ZIP oder JSON, ChordPro- und Textdateien) und Sichern als ZIP. |
+| [`ui/harp-from-notes.js`](ui/harp-from-notes.md) | „Harp“ am Notenabschnitt der Vorschau: Melodie in Mundharmonika-Tabs umwandeln (core/harp-melody.js). |
 | [`ui/install-help.js`](ui/install-help.md) | Installieren-Hilfe: Welche Schritte passen zu diesem Gerät und Browser? |
 | [`ui/list-select.js`](ui/list-select.md) | Mehrfachauswahl in der Liederliste: welche Lieder markiert sind und wie sich das ändert (Klick im Auswahlmodus, Strg/⌘+Klick, Umschalt+Klick für einen Bereich, „Alle“). |
 | [`ui/list.js`](ui/list.md) | Liederliste links: Suche, Tag-Filter, Sortierung, Einträge, Kopf weggleiten lassen. |
@@ -68,6 +69,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`core/chord-shapes.js`](core/chord-shapes.md) | Gitarrengriffe (Standardstimmung EADGBE) für Griffbilder und die Capo-Hilfe. |
 | [`core/chordpro.js`](core/chordpro.md) | ChordPro-Parser: Text -> Song-Modell. |
 | [`core/chords.js`](core/chords.md) | Akkord-Erkennung und Transposition. |
+| [`core/harp-melody.js`](core/harp-melody.md) | Melodie (ABC-Notation) → Mundharmonika-Tabs für eine diatonische 10-Kanal-Harp (Richter-Stimmung). |
 | [`core/harp.js`](core/harp.md) | Mundharmonika-Tabs (Harp-Tabs): Kanalnummern über dem Text, wie Akkorde in eckigen Klammern. |
 | [`core/meta-edit.js`](core/meta-edit.md) | Kopfangaben ({title:}, {capo:}, {time:} …) direkt im ChordPro-Text lesen und setzen. |
 | [`core/play-scroll.js`](core/play-scroll.md) | Rechnungen für den Spielmodus – ohne Bildschirmzugriff, damit sie sich testen lassen. |

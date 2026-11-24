@@ -8,6 +8,15 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.4.2 – 24.11.2026 · Melodie als Harp-Tabs
+
+- **Harp** am Notenabschnitt der Vorschau wandelt die Melodie in Mundharmonika-Tabs um (10-Kanal-Harp).
+  Der Dialog schlägt die passende Harp vor und sagt für jede Tonart, ob alles ohne Bending geht oder wie
+  viele Bendings, Overblows oder fehlende Töne nötig wären; darunter steht gleich das Ergebnis.
+- **Einfügen** schreibt die Tabs als eigenen Abschnitt hinter die Noten – über den Silben des Liedtexts
+  (ohne Liedtext als Tab-Zeile). Zu hohe oder zu tiefe Melodien werden um Oktaven verschoben, Töne, die es
+  auf der Harp nicht gibt, stehen als „?“. Rückgängig geht im Editor.
+
 ## 2.4.1 – 24.11.2026 · Einstellungen für die Noten
 
 - Neuer Bereich **Einstellungen → Noten**: Größe der Noten (60–160 %), Liedtext unter den Noten an/aus,

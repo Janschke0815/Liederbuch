@@ -210,10 +210,11 @@
 .songbook[data-chords='hide'] .abc-score .abcjs-chord,
 .songbook[data-abc-chords='hide'] .abc-score .abcjs-chord { display: none; }
 .abc-warn { margin: .2em 0 0; font-family: var(--chord-font); font-size: .75em; color: var(--label-color); cursor: help; }
-.abc-play {
+.abc-play, .abc-harp {
   margin-left: .5em; padding: 0 .55em; min-height: 0; height: 1.6em; line-height: 1; vertical-align: middle;
   font-size: .9em; border: 1px solid var(--chord-bar-color); border-radius: 999px; background: transparent;
   color: var(--chord-color); cursor: pointer;
 }
 .abc-play.playing { background: var(--chord-color); color: #fff; }
-@media print { .abc-play { display: none; } }
+.abc-harp { color: var(--harp-color, #1565c0); border-color: currentColor; font-size: .78em; font-family: var(--chord-font); font-weight: 700; }
+@media print { .abc-play, .abc-harp { display: none; } }

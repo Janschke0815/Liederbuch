@@ -439,6 +439,20 @@ Der Klang liegt in der App (Klavier-Samples aus dem FluidR3-Soundfont, CC BY 3.0
 `public/soundfont/LIESMICH.md`; ca. 1,2 MB, erst beim ersten ▶ geladen) und klingt danach
 auch offline.
 
+**Harp** am Abschnittsnamen wandelt die Melodie in **Mundharmonika-Tabs** um (diatonische Harp mit
+10 Kanälen, Richter-Stimmung). Ein kleiner Dialog schlägt die passende Harp vor – für jede Tonart steht
+dabei, ob alles ohne Bending geht oder wie viele Bendings, Overblows oder fehlende Töne nötig wären – und
+zeigt das Ergebnis. „Einfügen“ schreibt es als eigenen Abschnitt hinter die Noten, z. B.
+
+    {start_of_part: Melodie (C-Harp)}
+    [4]Al[-4]le [5]mei[-5]ne [6]Ent[6]chen [-6]schwim[-6]men [-6]auf [-6]dem [6]See,
+    {end_of_part}
+
+Die Tabs stehen über den Silben der ersten `w:`-Zeile; ohne Liedtext wird es eine reine Tab-Zeile je
+Notenzeile. Liegt die Melodie zu hoch oder zu tief für die Harp, wird sie um Oktaven verschoben (steht im
+Dialog). Töne, die es auf der gewählten Harp nicht gibt, erscheinen als „?“. Ist das Lied gerade
+transponiert, gilt die Empfehlung für die neue Tonart. Rückgängig geht wie gewohnt im Editor.
+
 Ausblenden: **Einstellungen → Anzeigen → Noten**, per Rechtsklick auf die Vorschau → *Anzeigen* oder im
 Spielmodus mit **♪**. Unter **Einstellungen → Noten** stellst du außerdem die Größe der Noten ein, ob der
 Liedtext darunter und die Akkorde darüber stehen und welches Tempo ▶ nimmt, wenn die Liedinfo keins nennt –
@@ -760,9 +774,10 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
 25. ✅ Noten im Liederbuch, Stufe 1 (2.4): Melodie als ABC-Notation im Lied (`{start_of_abc}`), gezeichnet
     mit abcjs (nur bei Bedarf geladen) in Vorschau, Spielmodus und Druck, transponierbar, mit ▶ abspielbar
     (Klavier-Samples in der App, offline); Baustein „Noten“, ABC-Hilfe in der Syntax-Übersicht.
+    Melodie → Harp-Tabs (2.4.2): passende Harp vorschlagen, Tabs über den Silben einfügen (`core/harp-melody.js`).
     Später: Stufe 2 – MusicXML-Datei (z. B. aus MuseScore oder einer Notenscan-App) importieren und im
-    Browser mit xml2abc in einen ABC-Abschnitt umwandeln; Harp-Tabs automatisch aus den Noten erzeugen
-    (`core/harp.js`); Stufe 3 – Scan/Foto direkt in Noten, sobald es brauchbare Lösungen im Browser gibt
+    Browser mit xml2abc in einen ABC-Abschnitt umwandeln; Stufe 3 – Scan/Foto direkt in Noten, sobald es
+    brauchbare Lösungen im Browser gibt
 26. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
     zuerst Englisch; Sprache folgt dem Browser und ist unter Einstellungen → App umstellbar. Schrittweise nach
     Bereichen umbauen (Kopfleiste, Liste, Menü → Dialoge → Hilfetexte); ein Test meldet fehlende Übersetzungen

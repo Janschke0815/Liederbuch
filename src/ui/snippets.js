@@ -8,8 +8,13 @@ import { state } from './app-state.js';
 import { $, closeOnBackdrop, toast } from './dom.js';
 import { editor } from './song.js';
 
-/** Text an der Cursorstelle einfügen; danach optional einen Teil davon markieren. */
-function insertText(text, selectFrom, selectTo) {
+/**
+ * Text an der Cursorstelle des Editors einfügen (mit Rückgängig); danach optional einen Teil markieren.
+ * @param {string} text
+ * @param {number} [selectFrom]  Markierung ab hier (relativ zum eingefügten Text)
+ * @param {number} [selectTo]
+ */
+export function insertText(text, selectFrom, selectTo) {
   editor.focus();
   const start = editor.selectionStart;
   // execCommand erhält den Rückgängig-Verlauf des Browsers

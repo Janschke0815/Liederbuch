@@ -1147,6 +1147,24 @@
     </form>
   </dialog>
 
+  <dialog id="harp-dialog" class="capo-dialog harp-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Melodie als Harp-Tabs</h2>
+        <p class="hint">Für eine diatonische Mundharmonika mit 10 Kanälen. Die Tabs kommen als eigener Abschnitt hinter die Noten – über die Silben des Liedtexts.</p>
+      </header>
+      <div class="dialog-body">
+        <label class="harp-key-row"><span>Harp</span><select id="harp-key"></select></label>
+        <p class="hint" id="harp-info"></p>
+        <div id="harp-preview" class="songbook harp-preview"></div>
+      </div>
+      <footer class="dialog-foot">
+        <button value="cancel" formnovalidate>Abbrechen</button>
+        <button value="ok" id="harp-ok" class="primary">Einfügen</button>
+      </footer>
+    </form>
+  </dialog>
+
   <dialog id="dup-dialog" class="capo-dialog">
     <form method="dialog" class="dialog-form">
       <header class="dialog-head">

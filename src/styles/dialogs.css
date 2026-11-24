@@ -83,6 +83,10 @@ dialog::backdrop { background: #0006; backdrop-filter: blur(2px); }
 .ugm-warn { color: var(--accent); }
 kbd { font-family: inherit; font-size: .85em; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 .35em; background: var(--surface); }
 .capo-dialog { width: min(560px, 95vw); }
+/* Melodie als Harp-Tabs (ui/harp-from-notes.js) */
+.harp-key-row { display: flex; align-items: center; gap: .6em; font-weight: 600; }
+.harp-key-row select { flex: 1; min-width: 0; }
+.harp-preview { margin-top: .4em; padding: .6em .8em; max-height: 40vh; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--sheet); color: #111; }
 .capo-options { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .4em; }
 .capo-options button {
   width: 100%; display: grid; grid-template-columns: 6.5em 1fr auto; align-items: center; gap: .8em;
