@@ -161,7 +161,7 @@ function renderAbcBlock(section, block, chordName, ctx) {
   const score = el('div', 'abc-score');
   score.dataset.abc = text;
   score.dataset.transpose = String(ctx.steps || 0);
-  score.dataset.tempo = String(abcTempo(ctx.meta)); // zum Abspielen
+  if (ctx.meta.tempo) score.dataset.tempo = String(abcTempo(ctx.meta)); // zum Abspielen; sonst Einstellung
   // Akkorde über den Noten so benennen wie im Liedtext (Transponieren, ♯/♭)
   score.dataset.chords = JSON.stringify(abcChords(text).map(chordName));
   section.append(score);

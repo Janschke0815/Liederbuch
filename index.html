@@ -454,6 +454,7 @@
           <a href="#st-sec-show" class="active"><span>◉</span>Anzeigen</a>
           <a href="#st-sec-text"><span>Aa</span>Liedtext</a>
           <a href="#st-sec-chords"><span>C<sup>7</sup></span>Akkorde &amp; Harp</a>
+          <a href="#st-sec-abc"><span>♪</span>Noten</a>
           <a href="#st-sec-head"><span>T</span>Titel &amp; Interpret</a>
           <a href="#st-sec-print"><span>⎙</span>Druck</a>
           <a href="#st-sec-app"><span>ⓘ</span>App</a>
@@ -485,7 +486,7 @@
                 <div class="st-control"><label class="switch"><input id="st-showTabs" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
               </div>
               <div class="st-row">
-                <div class="st-text"><span class="st-title">Noten</span><span class="st-hint">Melodie auf Notenlinien ({start_of_abc}), mit ▶ zum Anhören</span></div>
+                <div class="st-text"><span class="st-title">Noten</span><span class="st-hint">Melodie auf Notenlinien – mehr unter „Noten“</span></div>
                 <div class="st-control"><label class="switch"><input id="st-showAbc" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
               </div>
               <div class="st-row">
@@ -553,6 +554,27 @@
                   <button type="button" class="swatch" data-color="#00796b" style="--c:#00796b" title="Türkis (bisherige Farbe)"></button>
                   <input id="st-harpColor" type="color" title="Eigene Farbe">
                 </span></div>
+              </div>
+          </section>
+
+          <section class="st-card" id="st-sec-abc">
+            <h3>Noten</h3>
+              <p class="st-card-hint">Melodie auf Notenlinien ({start_of_abc}) – in Vorschau, Spielmodus und Druck; ▶ spielt sie ab.</p>
+              <div class="st-row" data-needs="showAbc">
+                <div class="st-text"><span class="st-title">Größe</span><span class="st-hint">100 % = Noten etwa so groß wie der Liedtext</span></div>
+                <div class="st-control"><input id="st-abcSize" type="range" min="60" max="160" step="5"><output class="range-val" data-for="st-abcSize" data-unit="%"></output></div>
+              </div>
+              <div class="st-row" data-needs="showAbc">
+                <div class="st-text"><span class="st-title">Liedtext unter den Noten</span><span class="st-hint">die w:-Zeilen – aus: nur Noten, weniger Platz</span></div>
+                <div class="st-control"><label class="switch"><input id="st-abcLyrics" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row" data-needs="showAbc showChords">
+                <div class="st-text"><span class="st-title">Akkorde über den Noten</span><span class="st-hint">„Gitarren-Akkorde“ aus blendet sie ebenfalls aus</span></div>
+                <div class="st-control"><label class="switch"><input id="st-abcChords" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row" data-needs="showAbc">
+                <div class="st-text"><span class="st-title">Tempo beim Abspielen</span><span class="st-hint">wenn die Liedinfo kein Tempo nennt (Schläge pro Minute)</span></div>
+                <div class="st-control"><input id="st-abcTempo" type="range" min="40" max="220" step="5"><output class="range-val" data-for="st-abcTempo" data-unit=" bpm"></output></div>
               </div>
           </section>
 

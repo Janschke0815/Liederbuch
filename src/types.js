@@ -59,6 +59,10 @@
  * @property {'inline'|'split'} harpLayout
  * @property {boolean} showTabs
  * @property {boolean} showAbc
+ * @property {number} abcSize  Prozent
+ * @property {boolean} abcLyrics
+ * @property {boolean} abcChords
+ * @property {number} abcTempo  Schläge pro Minute
  * @property {'A4'|'A5'|'Letter'} paper
  * @property {1|2} columns
  * @property {number} margin

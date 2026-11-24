@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.4.1 – 24.11.2026 · Einstellungen für die Noten
+
+- Neuer Bereich **Einstellungen → Noten**: Größe der Noten (60–160 %), Liedtext unter den Noten an/aus,
+  Akkorde über den Noten an/aus und das Tempo, mit dem ▶ spielt, wenn die Liedinfo keins nennt.
+- Das Muster im Einstellungsdialog zeigt eine kurze Melodie, damit man die Wirkung gleich sieht.
+- Der Schalter „Noten“ bleibt unter *Anzeigen*.
+
 ## 2.4.0 – 24.11.2026 · Noten im Liederbuch
 
 - **Melodie als Noten:** Im Lied darf jetzt ein Notenabschnitt stehen – `{start_of_abc: label="Melodie"}`

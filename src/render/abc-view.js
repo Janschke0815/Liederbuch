@@ -44,19 +44,29 @@ function cssPx(value, fallback) {
 // Zuletzt gezeichnete Noten: beim Tippen im Editor wird die Vorschau neu aufgebaut – unveränderte
 // Notenabschnitte übernehmen ihr fertiges Bild, statt kurz leer zu sein und neu gezeichnet zu werden.
 const recent = new Map(); // Schlüssel -> { nodes, tune }
-const keyOf = (score, width) => `${width}|${score.dataset.transpose}|${score.dataset.chords}|${getComputedStyle(score).font}|${score.dataset.abc}`;
+/** Einstellungen aus Einstellungen → Noten (settings.js setzt sie auf das .songbook-Element). */
+function viewOptions(score) {
+  const book = score.closest('.songbook');
+  return {
+    size: parseFloat(getComputedStyle(score).getPropertyValue('--abc-size')) || 1,
+    lyrics: book?.dataset.abcLyrics !== 'hide',
+  };
+}
+const keyOf = (score, width, o) => `${width}|${o.size}|${o.lyrics}|${score.dataset.transpose}|${score.dataset.chords}|${getComputedStyle(score).font}|${score.dataset.abc}`;
 
 function draw(abcjs, score) {
   const width = Math.max(200, Math.round(score.clientWidth || 600));
   score.dataset.width = String(width);
-  const key = keyOf(score, width);
+  const opts = viewOptions(score);
+  const key = keyOf(score, width, opts);
   const hit = recent.get(key);
   if (hit && !hit.nodes.some((n) => n.isConnected)) {
     score.replaceChildren(...hit.nodes);
     score.tune = hit.tune;
     return;
   }
-  const virtual = Math.round(width / SCALE);
+  const scale = SCALE * opts.size;
+  const virtual = Math.round(width / scale);
   const cs = getComputedStyle(score);
   const textPx = parseFloat(cs.fontSize) || 16;
   const chordPx = cssPx(cs.getPropertyValue('--chord-size'), textPx * 0.9);
@@ -68,7 +78,9 @@ function draw(abcjs, score) {
   document.body.append(holder);
   let tune;
   try {
-    [tune] = abcjs.renderAbc(holder, score.dataset.abc, {
+    // Liedtext aus: w:-Zeilen weglassen (statt nur verstecken – sonst bliebe der Platz frei)
+    const text = opts.lyrics ? score.dataset.abc : score.dataset.abc.replace(/^w:.*$/gm, '%');
+    [tune] = abcjs.renderAbc(holder, text, {
       responsive: 'resize',
       oneSvgPerLine: true,
       add_classes: true,
@@ -80,9 +92,9 @@ function draw(abcjs, score) {
       format: {
         stretchlast: 0.5, // letzte Zeile mitdehnen, wenn sie mindestens halb voll ist – sonst stehen die Silben gedrängt
         // in Zeichen-Pixeln (werden mit SCALE verkleinert) – am Ende so groß wie Liedtext und Akkorde
-        vocalfont: fontOf(cs.fontFamily, (textPx * 0.8) / SCALE),
-        gchordfont: fontOf(cs.getPropertyValue('--chord-font'), chordPx / SCALE, true),
-        annotationfont: fontOf(cs.fontFamily, (textPx * 0.85) / SCALE),
+        vocalfont: fontOf(cs.fontFamily, (textPx * 0.8) / scale),
+        gchordfont: fontOf(cs.getPropertyValue('--chord-font'), chordPx / scale, true),
+        annotationfont: fontOf(cs.fontFamily, (textPx * 0.85) / scale),
       },
     });
   } finally {
@@ -136,6 +148,14 @@ export async function renderScores(root, { follow = true } = {}) {
       score.replaceChildren(Object.assign(document.createElement('p'), { className: 'abc-warn', textContent: `⚠ Noten konnten nicht gezeichnet werden: ${err.message}` }));
     }
     if (!follow) continue;
+    // Einstellungen → Noten geändert (Größe, Liedtext …): neu zeichnen
+    const book = score.closest('.songbook');
+    if (book && !book.abcListening) {
+      book.abcListening = true;
+      book.addEventListener('songbooksettings', () => {
+        for (const s of book.querySelectorAll('.abc-score')) if (s.tune) draw(abcjs, s);
+      });
+    }
     if (!score.observer) {
       score.observer = new ResizeObserver(() => {
         if (!score.isConnected || !score.clientWidth) return;
@@ -171,7 +191,8 @@ async function play(abcjs, score, btn) {
   stopAbc();
   const tune = score.tune;
   if (!tune) return;
-  const qpm = Number(score.dataset.tempo) || 100;
+  // Tempo der Liedinfo, sonst aus Einstellungen → Noten
+  const qpm = Number(score.dataset.tempo) || Number(score.closest('.songbook')?.dataset.abcTempo) || 100;
   const marked = new Set();
   const unmark = () => {
     for (const e of marked) e.classList.remove('abc-now');

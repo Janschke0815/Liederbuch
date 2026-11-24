@@ -6,7 +6,7 @@ Notenabschnitte zeichnen und abspielen (abcjs). renderSong legt nur Platzhalter 
 
 Jede Notenzeile ist ein eigenes Bild (oneSvgPerLine, Klasse „atomic“): So bricht der Druck (print/paginate.js) zwischen zwei Notenzeilen um, nie mitten durch eine.
 
-**Benutzt von:** [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`ui/song.js`](../ui/song.md)
+**Benutzt von:** [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`settings-ui.js`](../settings-ui.md), [`ui/song.js`](../ui/song.md)
 
 ## Exportiert
 
@@ -31,6 +31,7 @@ Nicht exportiert – nur innerhalb des Moduls benutzt.
 
 - `fontOf(family, sizePx, bold = false)` – Schrift für abcjs aus dem CSS (Liedtext- bzw. Akkordschrift der Einstellungen).
 - `cssPx(value, fallback)` – CSS-Größe („10.5pt“, „14px“, „1.1em“) in Pixel.
+- `viewOptions(score)` – Einstellungen aus Einstellungen → Noten (settings.js setzt sie auf das .songbook-Element).
 - `draw(abcjs, score)`
 - `addPlayButton(abcjs, score)` – ▶ am Abschnittsnamen: Melodie abspielen, die gerade klingende Note markieren.
 - `async play(abcjs, score, btn)`

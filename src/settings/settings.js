@@ -45,6 +45,10 @@ export const DEFAULT_SETTINGS = Object.freeze({
   harpLayout: 'inline', // Akkorde und Harp-Tabs: 'inline' = eine Zeile, 'split' = zwei Zeilen
   showTabs: true, // Gitarren-Tabs ({start_of_tab})
   showAbc: true, // Noten ({start_of_abc})
+  abcSize: 100, // Noten: Größe in Prozent (100 = Notenkopf etwa so groß wie der Liedtext)
+  abcLyrics: true, // Liedtext (w:) unter den Noten
+  abcChords: true, // Akkorde über den Noten (zusätzlich zu „Gitarren-Akkorde“)
+  abcTempo: 100, // Tempo beim Abspielen, wenn die Liedinfo keins nennt
   lineSpacing: 'normal',
   // Liedkopf: Titel und Interpret
   titleFont: '', // '' = wie Liedtext
@@ -92,6 +96,10 @@ export function sanitize(input = {}) {
     harpLayout: oneOf(s.harpLayout, ['inline', 'split'], d.harpLayout),
     showTabs: typeof s.showTabs === 'boolean' ? s.showTabs : d.showTabs,
     showAbc: typeof s.showAbc === 'boolean' ? s.showAbc : d.showAbc,
+    abcSize: Math.round(clamp(s.abcSize, 60, 160, d.abcSize) / 5) * 5,
+    abcLyrics: bool(s.abcLyrics, d.abcLyrics),
+    abcChords: bool(s.abcChords, d.abcChords),
+    abcTempo: Math.round(clamp(s.abcTempo, 40, 220, d.abcTempo)),
     lineSpacing: oneOf(s.lineSpacing, Object.keys(LINE_SPACING), d.lineSpacing),
     titleFont: oneOf(s.titleFont, ['', ...Object.keys(FONTS)], d.titleFont),
     titleSize: clamp(s.titleSize, 10, 40, d.titleSize),
@@ -143,6 +151,12 @@ export function applySettings(el, settings) {
   el.dataset.harpLayout = s.harpLayout;
   el.dataset.tabs = s.showTabs ? 'show' : 'hide';
   el.dataset.abc = s.showAbc ? 'show' : 'hide';
+  st.setProperty('--abc-size', String(s.abcSize / 100));
+  el.dataset.abcLyrics = s.abcLyrics ? 'show' : 'hide';
+  el.dataset.abcChords = s.abcChords ? 'show' : 'hide';
+  el.dataset.abcTempo = String(s.abcTempo);
+  // Noten werden gezeichnet, nicht nur per CSS gestaltet: render/abc-view.js zeichnet sie dann neu
+  el.dispatchEvent?.(new Event('songbooksettings'));
   el.dataset.pageNumbers = s.pageNumbers ? 'show' : 'hide';
 }
 

@@ -136,3 +136,43 @@ describe('Noten (ABC): Export', () => {
     expect(text.includes('"G"G')).toBe(false);
   });
 });
+
+describe('Noten (ABC): Einstellungen', () => {
+  it('Standardwerte und Grenzen (Größe in 5-%-Schritten, Tempo 40–220)', async () => {
+    const { sanitize } = await import('../src/settings/settings.js');
+    const d = sanitize({});
+    expect([d.abcSize, d.abcLyrics, d.abcChords, d.abcTempo]).toEqual([100, true, true, 100]);
+    const s = sanitize({ abcSize: 233, abcTempo: 3, abcLyrics: 'ja', abcChords: false });
+    expect([s.abcSize, s.abcTempo, s.abcLyrics, s.abcChords]).toEqual([160, 40, true, false]);
+    expect(sanitize({ abcSize: 87 }).abcSize).toBe(85);
+  });
+
+  it('wirken auf das Liederbuch-Element: Größe, Liedtext, Akkorde, Tempo', async () => {
+    const { applySettings } = await import('../src/settings/settings.js');
+    const el = document.createElement('div');
+    applySettings(el, { abcSize: 80, abcLyrics: false, abcChords: false, abcTempo: 72 });
+    expect([el.style.getPropertyValue('--abc-size'), el.dataset.abcLyrics, el.dataset.abcChords, el.dataset.abcTempo])
+      .toEqual(['0.8', 'hide', 'hide', '72']);
+  });
+
+  it('Liedtext aus: Noten ohne Silben; Einstellung ändern zeichnet neu', async () => {
+    const { applySettings } = await import('../src/settings/settings.js');
+    const box = document.createElement('div');
+    box.className = 'songbook';
+    box.style.width = '600px';
+    document.body.append(box);
+    applySettings(box, {});
+    box.append(renderSong(parseChordPro(SONG)));
+    await renderScores(box);
+    expect(box.querySelectorAll('.abcjs-lyric').length > 0).toBe(true);
+    applySettings(box, { abcLyrics: false });
+    expect(box.querySelectorAll('.abcjs-lyric').length).toBe(0);
+    expect(box.querySelectorAll('.abc-score svg').length > 0).toBe(true);
+    box.remove();
+  });
+
+  it('ohne Tempo in der Liedinfo: kein data-tempo (dann gilt die Einstellung)', () => {
+    const el = renderSong(parseChordPro('{soa}\nC D |\n{eoa}'));
+    expect(el.querySelector('.abc-score').dataset.tempo).toBe(undefined);
+  });
+});

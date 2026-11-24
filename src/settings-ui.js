@@ -6,6 +6,7 @@ import {
 } from './settings/settings.js';
 import { parseChordPro } from './core/chordpro.js';
 import { renderSong } from './render/song-view.js';
+import { renderScores } from './render/abc-view.js';
 import { $ } from './ui/dom.js';
 import { prefs } from './prefs.js';
 
@@ -37,6 +38,13 @@ e|-----0---3---0-----|
 B|---1-------------1-|
 {end_of_tab}
 
+{start_of_abc: label="Melodie"}
+M:3/4
+L:1/4
+"C"C/C/ C G, | E/E/ E C | C/E/ G G | "G"F/E/ D2 |
+w: In a cav-ern, in a can-yon, ex-ca-vat-ing for a mine,
+{end_of_abc}
+
 {chorus}
 `;
 
@@ -44,7 +52,7 @@ const FIELDS = ['lyricFont', 'lyricSize', 'lineSpacing',
   'headerAlign', 'titleFont', 'titleSize', 'titleBold', 'titleUppercase', 'titleColor',
   'showArtist', 'artistInline', 'artistSize', 'artistItalic', 'artistColor',
   'chordFont', 'chordSize', 'chordColor',
-  'chordBold', 'harpColor', 'showChords', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'showAbc', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin', 'pageNumbers'];
+  'chordBold', 'harpColor', 'showChords', 'showDiagrams', 'showHarp', 'harpLayout', 'showTabs', 'showAbc', 'abcSize', 'abcLyrics', 'abcChords', 'abcTempo', 'chorusStyle', 'showLabels', 'paper', 'columns', 'margin', 'pageNumbers'];
 
 function fillSelect(sel, entries) {
   sel.replaceChildren(...entries.map(([value, label]) => new Option(label, value)));
@@ -69,6 +77,7 @@ export function setupSettings({ targets }) {
   }
   fillSelect($('#st-chorusStyle'), Object.entries(CHORUS_STYLES));
   sample.replaceChildren(renderSong(parseChordPro(SAMPLE)));
+  let sampleDrawn = false; // Noten im Muster erst zeichnen, wenn der Dialog offen ist (abcjs nur bei Bedarf)
 
   // Auswahllisten mit wenigen Werten als Knopfgruppe (die Liste bleibt versteckt die Quelle)
   for (const sel of dlg.querySelectorAll('select[data-segmented]')) {
@@ -243,6 +252,7 @@ export function setupSettings({ targets }) {
     applyAll(saved);
     dlg.returnValue = '';
     dlg.showModal();
+    if (!sampleDrawn) renderScores(sample).then(() => (sampleDrawn = true));
     showSection(section); // am Handy: zuletzt gewählter Bereich
     fields.scrollTop = 0;
     fields.dispatchEvent(new Event('scroll'));

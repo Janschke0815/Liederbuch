@@ -4,7 +4,7 @@
 
 Einstellungsdialog mit Live-Muster. Änderungen wirken sofort auf Muster und Vorschau; "Abbrechen" stellt den vorherigen Stand wieder her, "Speichern" übernimmt ihn dauerhaft.
 
-**Benutzt:** [`core/chordpro.js`](core/chordpro.md), [`prefs.js`](prefs.md), [`render/song-view.js`](render/song-view.md), [`settings/settings.js`](settings/settings.md), [`ui/dom.js`](ui/dom.md)  
+**Benutzt:** [`core/chordpro.js`](core/chordpro.md), [`prefs.js`](prefs.md), [`render/abc-view.js`](render/abc-view.md), [`render/song-view.js`](render/song-view.md), [`settings/settings.js`](settings/settings.md), [`ui/dom.js`](ui/dom.md)  
 **Benutzt von:** [`app.js`](app.md)
 
 ## Exportiert

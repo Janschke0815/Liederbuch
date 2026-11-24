@@ -80,6 +80,10 @@ Darstellungs-Einstellungen (settings/settings.js, DEFAULT_SETTINGS).
 | `harpLayout` | `'inline'\|'split'` |  |
 | `showTabs` | `boolean` |  |
 | `showAbc` | `boolean` |  |
+| `abcSize` | `number` | Prozent |
+| `abcLyrics` | `boolean` |  |
+| `abcChords` | `boolean` |  |
+| `abcTempo` | `number` | Schläge pro Minute |
 | `paper` | `'A4'\|'A5'\|'Letter'` |  |
 | `columns` | `1\|2` |  |
 | `margin` | `number` |  |

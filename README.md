@@ -440,7 +440,9 @@ Der Klang liegt in der App (Klavier-Samples aus dem FluidR3-Soundfont, CC BY 3.0
 auch offline.
 
 Ausblenden: **Einstellungen → Anzeigen → Noten**, per Rechtsklick auf die Vorschau → *Anzeigen* oder im
-Spielmodus mit **♪**. Das Notenprogramm ([abcjs](https://www.abcjs.net), MIT-Lizenz) wird nur geladen,
+Spielmodus mit **♪**. Unter **Einstellungen → Noten** stellst du außerdem die Größe der Noten ein, ob der
+Liedtext darunter und die Akkorde darüber stehen und welches Tempo ▶ nimmt, wenn die Liedinfo keins nennt –
+das Muster im Dialog zeigt dazu eine kurze Melodie. Das Notenprogramm ([abcjs](https://www.abcjs.net), MIT-Lizenz) wird nur geladen,
 wenn ein Lied Noten hat; nach dem ersten Besuch liegt es für offline bereit.
 
 ## Wiederholungen
