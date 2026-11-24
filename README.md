@@ -125,6 +125,7 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | M | Metronom an/aus |
 | ? | Übersicht der Tastenkürzel |
 | Enter | im Dialog: bestätigen (roter Knopf); in großen Textfeldern Strg+Enter |
+| Alt+A / S / R / B / T / N / C / W / H | im Editor: Akkord, Strophe, Refrain, Bridge, Tab, Noten, ↻ Refrain, 2×, Hinweis |
 
 ## ChordPro-Syntax (Kurzüberblick)
 

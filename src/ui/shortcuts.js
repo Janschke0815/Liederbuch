@@ -2,7 +2,7 @@
 // play-mode.js) und die Übersicht im Dialog „Tastenkürzel“. Wer ein Kürzel ändert, ändert es nur hier
 // (und im README).
 //
-// keys:  was gedrückt wird – 'Mod+k' (Strg bzw. ⌘), 'f', '+', 'PageDown', ' ' (Leertaste) …
+// keys:  was gedrückt wird – 'Mod+k' (Strg bzw. ⌘), 'Alt+s', 'f', '+', 'PageDown', ' ' (Leertaste) …
 //        Buchstaben ohne Rücksicht auf Groß-/Kleinschreibung.
 // show:  so steht es in der Übersicht (Tasten durch Leerzeichen getrennt, '/' für „oder“)
 // id:    Name der Aktion; null = wird woanders erledigt und steht nur in der Übersicht
@@ -44,14 +44,34 @@ export const SHORTCUTS = {
     { id: 'metronome', keys: ['m'], show: 'M', label: 'Metronom' },
     { id: 'exit', keys: ['Escape'], show: 'Esc', label: 'beenden' },
   ],
+  // Bausteine über dem Editor (id = data-snippet), nur wenn das Textfeld den Fokus hat
+  editor: [
+    { id: 'chord', keys: ['Alt+a'], show: 'Alt+A', label: 'Akkord [ ]' },
+    { id: 'verse', keys: ['Alt+s'], show: 'Alt+S', label: 'Strophe' },
+    { id: 'chorus', keys: ['Alt+r'], show: 'Alt+R', label: 'Refrain' },
+    { id: 'bridge', keys: ['Alt+b'], show: 'Alt+B', label: 'Bridge' },
+    { id: 'tab', keys: ['Alt+t'], show: 'Alt+T', label: 'Gitarren-Tab' },
+    { id: 'abc', keys: ['Alt+n'], show: 'Alt+N', label: 'Noten (ABC)' },
+    { id: 'repeat', keys: ['Alt+c'], show: 'Alt+C', label: 'Refrain wiederholen ({chorus})' },
+    { id: 'times', keys: ['Alt+w'], show: 'Alt+W', label: 'Wiederholen (2×, nochmal = öfter)' },
+    { id: 'comment', keys: ['Alt+h'], show: 'Alt+H', label: 'Hinweis' },
+  ],
 };
 
-/** Passt der Tastendruck zu 'Mod+k', 'f', 'PageDown' …? */
+/** Anzeige des ersten Kürzels zu einer Aktion (z. B. 'Alt+S') oder ''. */
+export function shortcutLabel(list, id) {
+  return list.find((s) => s.id === id)?.show || '';
+}
+
+/** Passt der Tastendruck zu 'Mod+k', 'Alt+s', 'f', 'PageDown' …? */
 export function keyMatches(e, spec) {
   const mod = e.ctrlKey || e.metaKey;
   const wantMod = spec.startsWith('Mod+');
-  const key = wantMod ? spec.slice(4) : spec;
-  if (mod !== wantMod || e.altKey) return false;
+  const wantAlt = spec.startsWith('Alt+');
+  const key = wantMod || wantAlt ? spec.slice(4) : spec;
+  if (mod !== wantMod || !!e.altKey !== wantAlt) return false;
+  // Mit Alt liefert e.key auf dem Mac Sonderzeichen (Alt+S = ß): dann zählt die Taste (e.code)
+  if (wantAlt && key.length === 1 && e.code === `Key${key.toUpperCase()}`) return true;
   return key.length === 1 ? e.key.toLowerCase() === key.toLowerCase() : e.key === key;
 }
 

@@ -6,6 +6,7 @@ import { parseChordPro } from '../core/chordpro.js';
 import { bumpRepeat } from '../core/repeat.js';
 import { state } from './app-state.js';
 import { $, closeOnBackdrop, toast } from './dom.js';
+import { SHORTCUTS, findShortcut, shortcutLabel, shortcutTable } from './shortcuts.js';
 import { editor } from './song.js';
 
 /**
@@ -96,6 +97,23 @@ $('.snippets').addEventListener('click', (e) => {
   if (b && state.current) insertSnippet(b.dataset.snippet);
 });
 
+// Tastenkürzel (SHORTCUTS.editor) – nur wenn das Textfeld den Fokus hat
+editor.addEventListener('keydown', (e) => {
+  const s = findShortcut(e, SHORTCUTS.editor);
+  if (!s || !state.current || editor.readOnly) return;
+  e.preventDefault();
+  insertSnippet(s.id);
+});
+
+// Kürzel im Tooltip der Knöpfe
+for (const b of document.querySelectorAll('.snippets button[data-snippet]')) {
+  const k = shortcutLabel(SHORTCUTS.editor, b.dataset.snippet);
+  if (k) b.title = `${b.title} (${k})`;
+}
+
 // Übersicht der ChordPro-Syntax
-$('#btn-syntax').onclick = () => $('#syntax-dialog').showModal();
+$('#btn-syntax').onclick = () => {
+  $('#syntax-keys').replaceChildren(shortcutTable(SHORTCUTS.editor));
+  $('#syntax-dialog').showModal();
+};
 closeOnBackdrop('#syntax-dialog');

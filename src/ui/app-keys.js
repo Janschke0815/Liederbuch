@@ -47,6 +47,7 @@ addEventListener('keydown', (e) => {
 export function openShortcuts() {
   $('#keys-app').replaceChildren(shortcutTable(SHORTCUTS.app));
   $('#keys-play').replaceChildren(shortcutTable(SHORTCUTS.play));
+  $('#keys-editor').replaceChildren(shortcutTable(SHORTCUTS.editor));
   $('#keys-dialog').showModal();
 }
 $('#btn-keys').onclick = openShortcuts;

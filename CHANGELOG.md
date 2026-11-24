@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.4.5 – 24.11.2026 · Bausteine per Tastenkürzel
+
+- Die Bausteine über dem Editor lassen sich jetzt ohne Maus einfügen, solange der Cursor im Editor steht:
+  **Alt+A** Akkord, **Alt+S** Strophe, **Alt+R** Refrain, **Alt+B** Bridge, **Alt+T** Tab, **Alt+N** Noten,
+  **Alt+C** Refrain wiederholen, **Alt+W** 2× (nochmal = öfter), **Alt+H** Hinweis.
+- Die Kürzel stehen im Tooltip der Knöpfe, in der Syntax-Hilfe („?“ über dem Editor) und in der Übersicht der Tastenkürzel.
+
 ## 2.4.4 – 24.11.2026 · Knopf „In Google Drive suchen“
 
 - Liederbücher → **In Google Drive suchen**: holt alle Liederbücher, die auf einem anderen Gerät mit demselben

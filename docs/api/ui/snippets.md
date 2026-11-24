@@ -4,7 +4,7 @@
 
 Bausteine über dem Editor: Akkord, Strophe, Refrain, Bridge, Tab, Noten, Wiederholung, Hinweis – und die Übersicht der ChordPro-Syntax („?“).
 
-**Benutzt:** [`core/abc.js`](../core/abc.md), [`core/chordpro.js`](../core/chordpro.md), [`core/repeat.js`](../core/repeat.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md), [`ui/song.js`](song.md)  
+**Benutzt:** [`core/abc.js`](../core/abc.md), [`core/chordpro.js`](../core/chordpro.md), [`core/repeat.js`](../core/repeat.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md), [`ui/shortcuts.js`](shortcuts.md), [`ui/song.js`](song.md)  
 **Benutzt von:** [`app.js`](../app.md), [`ui/harp-from-notes.js`](harp-from-notes.md)
 
 ## Exportiert
