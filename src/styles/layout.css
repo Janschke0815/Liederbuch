@@ -152,5 +152,6 @@ body.resizing iframe { pointer-events: none; }
 
 /* Abonniertes Liederbuch: nur lesen – Anlegen, Löschen und Bausteine ausblenden */
 body[data-readonly] #btn-new,
+body[data-readonly] #btn-save,
 body[data-readonly] .snippets { display: none !important; }
 body[data-readonly] #editor { background: var(--surface-2); }

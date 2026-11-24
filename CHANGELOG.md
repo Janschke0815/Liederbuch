@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.5.3 – 24.11.2026 · Speichern-Knopf mit Diskette
+
+- Über dem Editor steht jetzt eine **Diskette**: Antippen speichert sofort (wie Strg+S). Der Punkt daran zeigt
+  den Speicherstand – grün = gespeichert, orange = noch nicht gespeichert. Gespeichert wird weiterhin auch
+  automatisch.
+
 ## 2.5.2 – 24.11.2026 · Aufgeräumte Leiste über dem Editor
 
 - Der Mülleimer über dem Editor ist weg. Löschen geht weiter in der Liederliste: Rechtsklick bzw. langes

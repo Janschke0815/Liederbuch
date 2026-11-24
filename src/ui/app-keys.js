@@ -6,14 +6,11 @@ import { $, anyDialogOpen, isTyping } from './dom.js';
 import { focusSearch } from './list.js';
 import { toggleMetronome } from './preview-tools.js';
 import { SHORTCUTS, findShortcut, shortcutTable } from './shortcuts.js';
-import { flushSave, isDirty, setStatus } from './song.js';
+import { saveNow } from './song.js';
 
 const ACTIONS = {
   search: focusSearch,
-  save: () => {
-    if (!isDirty() && state.current) setStatus('Gespeichert', 'saved');
-    flushSave();
-  },
+  save: saveNow,
   print: () => {
     if (!$('#print-view').hidden) $('#pv-print').click();
     else if (!$('dialog[open]')) $('#btn-print').click();

@@ -19,13 +19,21 @@ export const preview = $('#preview');
 
 let saveTimer = null;
 
-/** Anzeige rechts über dem Editor: „Ungespeichert …“, „Gespeichert“, Fehler. */
+/** Anzeige rechts über dem Editor (Punkt an der Diskette): „Ungespeichert …“, „Gespeichert“, Fehler. */
 export function setStatus(text, kind = '') {
   const box = $('#save-status');
   box.textContent = text;
-  box.title = text;
   box.dataset.state = kind;
+  $('#btn-save').title = `${text ? `${text} – ` : ''}Speichern (Strg+S)`;
 }
+
+/** Sofort speichern (Diskette, Strg+S); ist schon alles gespeichert, wird das kurz bestätigt. */
+export async function saveNow() {
+  if (!state.current) return;
+  if (!saveTimer) setStatus('Gespeichert', 'saved');
+  await flushSave();
+}
+$('#btn-save').onclick = () => saveNow();
 
 /** Gibt es Tipp-Änderungen, die noch nicht gespeichert sind? */
 export const isDirty = () => Boolean(saveTimer);
@@ -63,7 +71,7 @@ export function updateControls() {
   const current = state.current;
   editor.disabled = !current;
   editor.readOnly = readOnly; // Abo: lesen, markieren, kopieren – aber nicht ändern
-  for (const b of $$('#tr-up, #tr-down, #acc-btn, #btn-play, .snippets button[data-snippet]')) b.disabled = !current;
+  for (const b of $$('#tr-up, #tr-down, #acc-btn, #btn-play, #btn-save, .snippets button[data-snippet]')) b.disabled = !current;
   if (readOnly) for (const b of $$('.snippets button[data-snippet]')) b.disabled = true;
   const t = current?.transpose || 0;
   const out = $('#tr-value');

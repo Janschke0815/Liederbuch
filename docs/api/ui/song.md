@@ -19,7 +19,11 @@ Das geöffnete Lied: öffnen, automatisch speichern, Vorschau, Transponieren und
 
 ### `setStatus(text, kind = '')`
 
-Anzeige rechts über dem Editor: „Ungespeichert …“, „Gespeichert“, Fehler.
+Anzeige rechts über dem Editor (Punkt an der Diskette): „Ungespeichert …“, „Gespeichert“, Fehler.
+
+### `async saveNow()`
+
+Sofort speichern (Diskette, Strg+S); ist schon alles gespeichert, wird das kurz bestätigt.
 
 ### `isDirty()`
 
