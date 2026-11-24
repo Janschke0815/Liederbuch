@@ -7,6 +7,7 @@ import { focusSearch } from './list.js';
 import { toggleMetronome } from './preview-tools.js';
 import { SHORTCUTS, findShortcut, shortcutTable } from './shortcuts.js';
 import { saveNow } from './song.js';
+import { togglePane } from './view.js';
 
 const ACTIONS = {
   search: focusSearch,
@@ -15,8 +16,8 @@ const ACTIONS = {
     if (!$('#print-view').hidden) $('#pv-print').click();
     else if (!$('dialog[open]')) $('#btn-print').click();
   },
-  focus: () => $('#btn-focus').click(),
-  listPane: () => $('#btn-pane-list').click(),
+  focus: () => togglePane('editor'),
+  listPane: () => togglePane('list'),
   play: () => $('#btn-play').click(),
   metronome: toggleMetronome,
   up: () => $('#tr-up').click(),

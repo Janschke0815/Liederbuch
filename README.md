@@ -92,9 +92,9 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
   einen Menüeintrag bzw. Knopf (*An die Leiste anheften*, *Nach links/rechts*). Wird es eng, zeigt die Leiste
   nur Symbole, dann rutschen die letzten Knöpfe zurück ins Menü.
 - **Doppelklick** auf ein Lied startet den Spielmodus, **Entf** löscht das markierte Lied (mit Rückgängig).
-- **Bereiche ein-/ausblenden** (drei Symbole oben in der Kopfleiste, am Laptop/PC): **Liederliste** (Strg+B),
-  **Editor** (Strg+E) und **Vorschau** einzeln aus- und wieder einblenden, z. B. nur Editor zum Schreiben oder nur
-  das Lied zum Spielen. Editor und Vorschau sind nie beide weg; die Wahl merkt sich die App.
+- **Bereiche einklappen** (Laptop/PC): kleine Pfeile ‹ › auf den Trennlinien klappen **Liederliste**
+  (Strg+B), **Editor** (Strg+E) oder **Vorschau** ein; eingeklappt bleibt eine schmale Leiste mit dem Namen,
+  ein Klick darauf klappt wieder auf. Editor und Vorschau sind nie beide zu; die Wahl merkt sich die App.
 - **Spaltenbreiten** (breiter Bildschirm): die Trennlinie rechts neben der Liederliste bzw. dem Editor
   ziehen; Doppelklick stellt die Standardbreite wieder her, mit Tab angewählt geht es auch mit ← / →.
   Die Breiten bleiben auf dem Gerät gespeichert.

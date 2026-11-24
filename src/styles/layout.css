@@ -69,20 +69,41 @@ body {
   /* --cols setzt ui/view.js aus den sichtbaren Bereichen und den gezogenen Breiten (--list-col);
      --list-default ist die Standardbreite der Liste */
   --list-default: minmax(220px, 280px);
+  --rail: 22px; /* Breite eines eingeklappten Bereichs */
   grid-template-columns: var(--cols, var(--list-default) minmax(0, 1fr) minmax(0, 1fr));
   min-height: 0;
 }
-/* Ausgeblendete Bereiche (Knöpfe oben, nur breiter Bildschirm – am Handy gibt es die Reiter) */
+/* Einklappen (ui/view.js): Pfeile ‹ › auf den Trennlinien; eingeklappt bleibt eine schmale Leiste mit dem
+   Namen, die wieder aufklappt. Nur breiter Bildschirm – am Handy gibt es die Reiter unten. */
+.pane-rail, .collapse-btns { display: none; }
 @media (min-width: 761px) {
-  .workspace.no-list .pane-list,
-  .workspace.focus .pane-editor,
-  .workspace.no-preview .pane-preview { display: none; }
+  .workspace.no-list .pane-list > :not(.pane-rail),
+  .workspace.focus .pane-editor > :not(.pane-rail),
+  .workspace.no-preview .pane-preview > :not(.pane-rail) { display: none; }
+  .workspace.no-list .pane-list > .pane-rail,
+  .workspace.focus .pane-editor > .pane-rail,
+  .workspace.no-preview .pane-preview > .pane-rail { display: flex; }
   .workspace[data-split-list='false'] .pane-list .splitter,
   .workspace[data-split-editor='false'] .pane-editor .splitter { display: none; }
+  .collapse-btns {
+    display: flex; flex-direction: column; gap: 6px;
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  }
 }
-.pane-toggles { display: inline-flex; gap: 2px; }
-.pane-toggles .icon-btn { padding-inline: .4em; color: var(--muted); }
-.pane-toggles .icon-btn[aria-pressed='true'] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.pane-rail {
+  flex: 1; align-items: center; justify-content: flex-start; padding: .8em 0; margin: 0;
+  width: 100%; border: 0; border-radius: 0; border-right: 1px solid var(--border);
+  background: var(--surface-2, var(--surface)); color: var(--muted); cursor: pointer;
+  writing-mode: vertical-rl; font-size: .75rem; letter-spacing: .04em; min-height: 0;
+}
+.pane-rail:hover, .pane-rail:focus-visible { color: var(--accent); background: var(--accent-soft); }
+.collapse-btn {
+  width: 16px; height: 26px; padding: 0; min-height: 0; border-radius: 8px;
+  font-size: 13px; line-height: 1; display: grid; place-items: center;
+  background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+  opacity: .6; cursor: pointer;
+}
+.collapse-btn:hover, .collapse-btn:focus-visible { opacity: 1; color: var(--accent); border-color: var(--accent); }
 .pane { min-height: 0; min-width: 0; display: flex; flex-direction: column; position: relative; }
 /* Ziehbarer Trenner am rechten Rand von Liste und Editor */
 .splitter {
@@ -122,7 +143,6 @@ body.resizing iframe { pointer-events: none; }
   .quick-actions, .toolbar-only { display: none; } /* am Handy steht alles im Menü */
   .actions button { padding: .65em .8em; min-height: 2.8rem; }
   .workspace { grid-template-columns: 1fr; }
-  .pane-toggles { display: none; }
   .workspace > .pane { display: none; }
   .workspace[data-view='list'] .pane-list,
   .workspace[data-view='editor'] .pane-editor,

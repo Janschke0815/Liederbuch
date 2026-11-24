@@ -19,15 +19,18 @@ for (const b of $$('.mobile-tabs button')) {
 }
 
 // ---------- Bereiche ein-/ausblenden (breiter Bildschirm) ----------
-// Liste, Editor und Vorschau lassen sich einzeln ausblenden (Knöpfe oben, gedrückt = sichtbar).
-// Editor und Vorschau nie beide: wer das eine ausblendet, während das andere schon aus ist, bekommt
-// das andere zurück. Klassen am Arbeitsbereich: no-list, focus (kein Editor), no-preview.
+// Liste, Editor und Vorschau lassen sich einzeln einklappen: kleine Pfeile auf den Trennlinien
+// (‹ › neben dem Bereich, der zuklappt). Ein eingeklappter Bereich bleibt als schmale Leiste mit
+// seinem Namen stehen – ein Klick darauf klappt ihn wieder auf. Editor und Vorschau nie beide: wer das
+// eine einklappt, während das andere schon zu ist, bekommt das andere zurück.
+// Klassen am Arbeitsbereich: no-list, focus (kein Editor), no-preview.
 
 const PANES = {
-  list: { cls: 'no-list', btn: '#btn-pane-list', pref: 'listHidden' },
-  editor: { cls: 'focus', btn: '#btn-focus', pref: 'focusMode' },
-  preview: { cls: 'no-preview', btn: '#btn-pane-preview', pref: 'previewHidden' },
+  list: { cls: 'no-list', pane: '.pane-list', pref: 'listHidden', name: 'Lieder', label: 'Liederliste', key: 'Strg+B' },
+  editor: { cls: 'focus', pane: '.pane-editor', pref: 'focusMode', name: 'Editor', label: 'Editor', key: 'Strg+E' },
+  preview: { cls: 'no-preview', pane: '.pane-preview', pref: 'previewHidden', name: 'Vorschau', label: 'Vorschau', key: '' },
 };
+const keyHint = (p) => (p.key ? ` (${p.key})` : '');
 
 /** Ist der Bereich ('list' | 'editor' | 'preview') gerade ausgeblendet? */
 export const isPaneHidden = (pane) => $('.workspace').classList.contains(PANES[pane].cls);
@@ -40,7 +43,6 @@ export const isPaneHidden = (pane) => $('.workspace').classList.contains(PANES[p
 export function setPaneHidden(pane, hidden) {
   const p = PANES[pane];
   $('.workspace').classList.toggle(p.cls, hidden);
-  $(p.btn).setAttribute('aria-pressed', String(!hidden));
   prefs.set(p.pref, hidden);
   // nie Editor und Vorschau zugleich weg
   const other = { editor: 'preview', preview: 'editor' }[pane];
@@ -55,8 +57,34 @@ export const setFocusMode = (on) => setPaneHidden('editor', on);
 /** Ist der Editor gerade ausgeblendet? */
 export const isFocusMode = () => isPaneHidden('editor');
 
+/** Bereich ein-/ausklappen (Tastenkürzel Strg+B, Strg+E). */
+export const togglePane = (pane) => setPaneHidden(pane, !isPaneHidden(pane));
+
+// Schmale Leiste je Bereich: nur sichtbar, solange er eingeklappt ist
 for (const [pane, p] of Object.entries(PANES)) {
-  $(p.btn).onclick = () => setPaneHidden(pane, !isPaneHidden(pane));
+  const rail = document.createElement('button');
+  rail.type = 'button';
+  rail.className = 'pane-rail';
+  rail.title = `${p.label} aufklappen${keyHint(p)}`;
+  rail.setAttribute('aria-label', `${p.label} aufklappen`);
+  rail.append(Object.assign(document.createElement('span'), { textContent: p.name }));
+  rail.onclick = () => setPaneHidden(pane, false);
+  $(p.pane).prepend(rail);
+}
+
+/** Kleiner Pfeil auf einer Trennlinie, der den Bereich daneben einklappt. */
+function collapseButton(pane, arrow) {
+  const p = PANES[pane];
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'collapse-btn';
+  b.textContent = arrow;
+  b.title = `${p.label} einklappen${keyHint(p)}`;
+  b.setAttribute('aria-label', `${p.label} einklappen`);
+  b.addEventListener('pointerdown', (e) => e.stopPropagation()); // nicht ziehen
+  b.addEventListener('dblclick', (e) => e.stopPropagation());
+  b.onclick = () => setPaneHidden(pane, true);
+  return b;
 }
 
 // ---------- Spaltenbreiten (ziehbare Trenner, breiter Bildschirm) ----------
@@ -79,11 +107,12 @@ function applyWidths() {
   const showEditor = !workspace.classList.contains('focus');
   const showPreview = !workspace.classList.contains('no-preview');
   const both = showEditor && showPreview;
+  // eingeklappte Bereiche: schmale Leiste (--rail)
   const cols = [
-    showList && 'var(--list-col, var(--list-default))',
-    showEditor && `minmax(0, ${both && share ? share : 1}fr)`,
-    showPreview && `minmax(0, ${both && share ? 1 - share : 1}fr)`,
-  ].filter(Boolean);
+    showList ? 'var(--list-col, var(--list-default))' : 'var(--rail)',
+    showEditor ? `minmax(0, ${both && share ? share : 1}fr)` : 'var(--rail)',
+    showPreview ? `minmax(0, ${both && share ? 1 - share : 1}fr)` : 'var(--rail)',
+  ];
   workspace.style.setProperty('--cols', cols.join(' '));
   // Trenner nur zwischen zwei sichtbaren Bereichen
   workspace.dataset.splitList = String(showList);
@@ -95,7 +124,7 @@ const clampNum = (v, lo, hi) => Math.min(Math.max(v, lo), Math.max(lo, hi));
 /** Neue Breite aus der Mausposition x; which: 'list' (Liste) oder 'editor' (Editor | Vorschau). */
 function resizeTo(which, x) {
   const ws = workspace.getBoundingClientRect();
-  const listRight = isPaneHidden('list') ? workspace.getBoundingClientRect().left : $('.pane-list').getBoundingClientRect().right;
+  const listRight = $('.pane-list').getBoundingClientRect().right;
   if (which === 'list') {
     prefs.set('listWidth', Math.round(clampNum(x - ws.left, LIST_MIN, ws.width * 0.4)));
   } else {
@@ -106,7 +135,7 @@ function resizeTo(which, x) {
   applyWidths();
 }
 
-function addSplitter(pane, which) {
+function addSplitter(pane, which, buttons = []) {
   const s = document.createElement('div');
   s.className = 'splitter';
   s.tabIndex = 0;
@@ -142,16 +171,18 @@ function addSplitter(pane, which) {
     const x = pane.getBoundingClientRect().right + (e.key === 'ArrowRight' ? 24 : -24);
     resizeTo(which, x);
   });
+  if (buttons.length) {
+    const box = Object.assign(document.createElement('div'), { className: 'collapse-btns' });
+    box.append(...buttons);
+    s.append(box);
+  }
   pane.append(s);
 }
 
-addSplitter($('.pane-list'), 'list');
-addSplitter($('.pane-editor'), 'editor');
+addSplitter($('.pane-list'), 'list', [collapseButton('list', '‹')]);
+addSplitter($('.pane-editor'), 'editor', [collapseButton('editor', '‹'), collapseButton('preview', '›')]);
 // gemerkte Bereiche wiederherstellen (setzt auch die Spalten)
-for (const [, p] of Object.entries(PANES)) {
-  workspace.classList.toggle(p.cls, prefs.get(p.pref));
-  $(p.btn).setAttribute('aria-pressed', String(!prefs.get(p.pref)));
-}
+for (const p of Object.values(PANES)) workspace.classList.toggle(p.cls, prefs.get(p.pref));
 if (isPaneHidden('editor') && isPaneHidden('preview')) setPaneHidden('preview', false);
 applyWidths();
 
