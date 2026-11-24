@@ -122,11 +122,10 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
    */
   async function offerDriveBooks({ force = false } = {}) {
     lookedForBooks = true;
-    if (kind() !== 'gdrive' || !provider?.listOwnBooks || !auth?.signedIn) return;
-    if (book.shared && !book.ownAuth && book.readOnly) return; // fremdes Konto
+    if (kind() !== 'gdrive' || !auth?.signedIn) return;
     let found;
     try {
-      found = unknownDriveBooks(await provider.listOwnBooks());
+      found = await unknownInDrive();
     } catch (err) {
       console.warn('Liederbücher in Drive suchen:', err);
       return;
@@ -134,22 +133,46 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     const offered = new Set(JSON.parse(localStorage.getItem(OFFERED) || '[]'));
     const fresh = force ? found : found.filter((f) => !offered.has(f.fileId));
     if (!fresh.length) return;
-    localStorage.setItem(OFFERED, JSON.stringify([...offered, ...fresh.map((f) => f.fileId)]));
     const names = fresh.map((f) => `„${driveBookName(f.name)}“`).join(', ');
     toast(fresh.length === 1 ? `In deinem Google Drive liegt noch das Liederbuch ${names}`
       : `In deinem Google Drive liegen noch ${fresh.length} Liederbücher: ${names}`, {
       action: 'Hinzufügen',
       ms: 12000,
-      onAction() {
-        const tokenKey = K('gdrive.token');
-        const from = { token: localStorage.getItem(tokenKey), account: localStorage.getItem(K('gdrive.account')), global: tokenKey === 'gdrive.token' };
-        fresh.forEach((f) => adoptDriveBook(f, from));
-        books.refresh();
-        toast(fresh.length === 1 ? `${names} hinzugefügt – oben in der Liederbuch-Auswahl`
-          : `${fresh.length} Liederbücher hinzugefügt – oben in der Liederbuch-Auswahl`, { ms: 5000 });
-      },
+      onAction: () => adoptAll(fresh),
     });
+    // erst nach einer Weile als angeboten merken (eine andere Meldung kann diese verdrängen)
+    setTimeout(() => localStorage.setItem(OFFERED, JSON.stringify([...offered, ...fresh.map((f) => f.fileId)])), 12000);
   }
+
+  /** Eigene Liederbuch-Dateien im Google-Konto des geöffneten Buchs, die dieses Gerät nicht kennt. */
+  async function unknownInDrive() {
+    return unknownDriveBooks(await provider.listOwnBooks());
+  }
+
+  /** Gefundene Drive-Liederbücher eintragen (mit der Anmeldung des geöffneten Buchs). */
+  function adoptAll(files) {
+    const tokenKey = K('gdrive.token');
+    const from = { token: localStorage.getItem(tokenKey), account: localStorage.getItem(K('gdrive.account')), global: tokenKey === 'gdrive.token' };
+    files.forEach((f) => adoptDriveBook(f, from));
+    books.refresh();
+    const names = files.map((f) => `„${driveBookName(f.name)}“`).join(', ');
+    toast(`${names} hinzugefügt – oben in der Liederbuch-Auswahl`, { ms: 6000 });
+  }
+
+  // Knopf „In Google Drive suchen“ im Dialog Liederbücher
+  $('#book-find').onclick = async () => {
+    if (kind() !== 'gdrive' || !connectedFlag()) {
+      return toast('Erst das geöffnete Liederbuch mit Google Drive verbinden (Cloud) – gesucht wird in dessen Google-Konto', { ms: 6000 });
+    }
+    if (!auth.signedIn && !(await connect({ silent: true }))) return;
+    try {
+      const found = await unknownInDrive();
+      if (found.length) adoptAll(found);
+      else toast(`Keine weiteren Liederbücher in Google Drive${auth.account ? ` (${auth.account})` : ''}`, { ms: 6000 });
+    } catch (err) {
+      toast(`Suche in Google Drive fehlgeschlagen: ${err.message}`, { ms: 8000 });
+    }
+  };
 
   // ---------- Rechte eines geteilten Liederbuchs ----------
 

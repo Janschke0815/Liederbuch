@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.4.4 – 24.11.2026 · Knopf „In Google Drive suchen“
+
+- Liederbücher → **In Google Drive suchen**: holt alle Liederbücher, die auf einem anderen Gerät mit demselben
+  Google-Konto angelegt wurden, auf dieses Gerät – auch wenn die Meldung nach dem Abgleich verpasst wurde.
+  Findet sie nichts, nennt die App das durchsuchte Konto; bei einem Fehler zeigt sie den Grund.
+- Die Meldung nach dem Abgleich kommt wieder, wenn eine andere Meldung sie sofort verdrängt hat.
+
 ## 2.4.3 – 24.11.2026 · Liederbücher aus Google Drive auf jedem Gerät
 
 - Ein Liederbuch, das auf einem anderen Gerät angelegt und mit Google Drive abgeglichen wurde, erscheint jetzt auch
