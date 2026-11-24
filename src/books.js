@@ -149,6 +149,49 @@ export function bookKey(book, base) {
   return global ? base : `${base}:${book.id}`;
 }
 
+/**
+ * Liederbuch-Dateien aus Google Drive, die auf diesem Gerät noch kein Liederbuch haben
+ * (bekannt per Datei-ID oder – solange die ID noch nicht gemerkt ist – per Dateiname).
+ * @param {{fileId: string, name: string}[]} files  aus GoogleDriveProvider.listOwnBooks()
+ * @returns {{fileId: string, name: string}[]}
+ */
+export function unknownDriveBooks(files, storage = localStorage) {
+  const books = listBooks(storage);
+  const ids = new Set(books.flatMap((b) => [b.fileId, storage.getItem(bookKey(b, 'gdrive.fileId'))]).filter(Boolean));
+  const names = new Set(books.filter((b) => b.own && !storage.getItem(bookKey(b, 'gdrive.fileId'))).map((b) => b.file));
+  return files.filter((f) => !ids.has(f.fileId) && !names.has(f.name));
+}
+
+/**
+ * Liederbuch für eine eigene Drive-Datei eintragen, gleich mit Google Drive verbunden.
+ * auth: Anmeldung, die das Buch übernimmt ({token, account} – Werte aus dem Speicher; global: nutzt
+ * die Anmeldung des persönlichen Liederbuchs).
+ * @param {{fileId: string, name: string, shared?: boolean}} file
+ * @param {{token?: string|null, account?: string|null, global?: boolean}} auth
+ * @returns {object} das neue Buch
+ */
+export function adoptDriveBook({ fileId, name, shared = false }, auth = {}, storage = localStorage) {
+  const display = bookNameFromFile(name);
+  let book;
+  if (shared) {
+    book = addSharedBook({ fileId, name: display, ownAuth: !auth.global }, storage);
+  } else {
+    book = addBook({ name: display }, storage);
+    const list = read(storage);
+    list.find((b) => b.id === book.id).file = name; // Datei heißt in Drive schon so
+    storage.setItem(KEY, JSON.stringify(list));
+    book.file = name;
+    storage.setItem(bookKey(book, 'gdrive.fileId'), fileId);
+    storage.setItem(bookKey(book, 'sync.kind'), 'gdrive');
+    storage.setItem(bookKey(book, 'sync.provider'), 'gdrive');
+  }
+  if (!auth.global || !shared) {
+    if (auth.token) storage.setItem(bookKey(book, 'gdrive.token'), auth.token);
+    if (auth.account) storage.setItem(bookKey(book, 'gdrive.account'), auth.account);
+  }
+  return book;
+}
+
 /** Einstellungen, die bookKey pro Liederbuch trennt. */
 export const BOOK_KEYS = Object.freeze([
   'sync.kind', 'sync.provider', 'webdav.url', 'webdav.user', 'webdav.pass',

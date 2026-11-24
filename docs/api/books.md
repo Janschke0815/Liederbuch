@@ -82,6 +82,30 @@ Das persönliche Liederbuch nutzt die alten, globalen Schlüssel (keine Umstellu
 geteilte Bücher die globale Google-Anmeldung; alles andere ist je Buch getrennt: „webdav.url:book-abc“.
 (So überschreibt z. B. ein geteiltes Buch nie den Speicherort des persönlichen.)
 
+### `unknownDriveBooks(files, storage = localStorage)`
+
+Liederbuch-Dateien aus Google Drive, die auf diesem Gerät noch kein Liederbuch haben
+(bekannt per Datei-ID oder – solange die ID noch nicht gemerkt ist – per Dateiname).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `files` | `{fileId: string, name: string}[]` | aus GoogleDriveProvider.listOwnBooks() |
+
+**Rückgabe:** `{fileId: string, name: string}[]`
+
+### `adoptDriveBook({ fileId, name, shared = false }, auth = {}, storage = localStorage)`
+
+Liederbuch für eine eigene Drive-Datei eintragen, gleich mit Google Drive verbunden.
+auth: Anmeldung, die das Buch übernimmt ({token, account} – Werte aus dem Speicher; global: nutzt
+die Anmeldung des persönlichen Liederbuchs).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `file` | `{fileId: string, name: string, shared?: boolean}` |  |
+| `auth` | `{token?: string\|null, account?: string\|null, global?: boolean}` |  |
+
+**Rückgabe:** `object` das neue Buch
+
 ### `BOOK_KEYS`
 
 `= Object.freeze([`

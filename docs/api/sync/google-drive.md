@@ -53,6 +53,14 @@ Anmelden (kleines Google-Fenster, siehe GoogleAuth.signIn).
 
 Abmelden; die Dateien in Drive bleiben erhalten.
 
+#### `async listOwnBooks()`
+
+Alle eigenen Liederbuch-Dateien dieses Google-Kontos (ohne das persönliche Liederbuch) –
+damit ein anderes Gerät Liederbücher findet, die es noch nicht kennt.
+shared: von hier aus mit anderen geteiltes Liederbuch (wird dort als gemeinsames Liederbuch geöffnet).
+
+**Rückgabe:** `Promise<{fileId: string, name: string, shared: boolean}[]>`
+
 #### `async ensureName(name)`
 
 Datei in Drive umbenennen, falls sie noch anders heißt (z. B. nach dem Umbenennen des Liederbuchs).

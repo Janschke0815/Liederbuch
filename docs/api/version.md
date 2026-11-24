@@ -14,7 +14,7 @@ Version der App – bei jeder veröffentlichten Änderung erhöhen (und das Datu
 
 ### `APP_VERSION`
 
-`= '2.4.2'`
+`= '2.4.3'`
 
 Version der App – bei jeder veröffentlichten Änderung erhöhen (und das Datum anpassen).
 Wird in den Einstellungen und als Hinweis am App-Namen angezeigt, damit man sieht, welche

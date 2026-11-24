@@ -17,7 +17,9 @@ import { GoogleDriveProvider } from './sync/google-drive.js';
 import { WebDavProvider, webdavUrlProblem } from './sync/webdav.js';
 import { DropboxProvider, dropboxRedirectUri } from './sync/dropbox.js';
 import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID, DROPBOX_APP_KEY } from './sync/config.js';
-import { listBooks, addSharedBook, removeBook, driveBookName, bookKey, personalBookName } from './books.js';
+import {
+  listBooks, addSharedBook, removeBook, driveBookName, bookKey, personalBookName, unknownDriveBooks, adoptDriveBook,
+} from './books.js';
 import { setupBooks } from './books-ui.js';
 import { $, el, textButton, textSpan } from './ui/dom.js';
 import { BookNameStore, driveFileName, slimName } from './sync/book-name.js';
@@ -94,6 +96,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     engine.addEventListener('status', () => {
       if (engine.state === 'error' && engine.error instanceof ReadOnlyError) markRole('reader');
       if (engine.state === 'idle' && book.shared && !roleChecked) checkRole();
+      if (engine.state === 'idle' && !lookedForBooks) offerDriveBooks();
       // Google Drive: Datei heißt wie das Buch („Liederbuch – DPSG Liederbuch.json“)
       if (engine.state === 'idle' && provider.ensureName) {
         provider.ensureName(driveFileName(book, book.name)).catch((err) => console.warn('Drive-Datei umbenennen:', err));
@@ -107,6 +110,46 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     render();
     toast(`Liederbuch heißt jetzt „${e.detail}“ (auf einem anderen Gerät umbenannt)`);
   });
+
+  // ---------- Weitere eigene Liederbücher in Drive (z. B. am Laptop angelegt) ----------
+
+  let lookedForBooks = false;
+  const OFFERED = 'gdrive.offeredBooks'; // schon angebotene Datei-IDs (nicht bei jedem Start nachfragen)
+
+  /**
+   * Nach dem Abgleich: Gibt es im selben Google-Konto Liederbücher, die dieses Gerät nicht kennt?
+   * Dann anbieten, sie hinzuzufügen. force: auch schon einmal angebotene (beim Verbinden).
+   */
+  async function offerDriveBooks({ force = false } = {}) {
+    lookedForBooks = true;
+    if (kind() !== 'gdrive' || !provider?.listOwnBooks || !auth?.signedIn) return;
+    if (book.shared && !book.ownAuth && book.readOnly) return; // fremdes Konto
+    let found;
+    try {
+      found = unknownDriveBooks(await provider.listOwnBooks());
+    } catch (err) {
+      console.warn('Liederbücher in Drive suchen:', err);
+      return;
+    }
+    const offered = new Set(JSON.parse(localStorage.getItem(OFFERED) || '[]'));
+    const fresh = force ? found : found.filter((f) => !offered.has(f.fileId));
+    if (!fresh.length) return;
+    localStorage.setItem(OFFERED, JSON.stringify([...offered, ...fresh.map((f) => f.fileId)]));
+    const names = fresh.map((f) => `„${driveBookName(f.name)}“`).join(', ');
+    toast(fresh.length === 1 ? `In deinem Google Drive liegt noch das Liederbuch ${names}`
+      : `In deinem Google Drive liegen noch ${fresh.length} Liederbücher: ${names}`, {
+      action: 'Hinzufügen',
+      ms: 12000,
+      onAction() {
+        const tokenKey = K('gdrive.token');
+        const from = { token: localStorage.getItem(tokenKey), account: localStorage.getItem(K('gdrive.account')), global: tokenKey === 'gdrive.token' };
+        fresh.forEach((f) => adoptDriveBook(f, from));
+        books.refresh();
+        toast(fresh.length === 1 ? `${names} hinzugefügt – oben in der Liederbuch-Auswahl`
+          : `${fresh.length} Liederbücher hinzugefügt – oben in der Liederbuch-Auswahl`, { ms: 5000 });
+      },
+    });
+  }
 
   // ---------- Rechte eines geteilten Liederbuchs ----------
 
@@ -322,6 +365,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     if (engine.state === 'off') engine.start();
     else await engine.sync();
     if (first) toast(`Mit Google Drive verbunden${auth.account ? ` (${auth.account})` : ''}`);
+    if (first) setTimeout(() => offerDriveBooks({ force: true }), 3000); // nach der Meldung „verbunden“
     // Konto nachtragen (Anmeldungen von vor 2.2 kennen es noch nicht) und anzeigen
     if (!auth.account) auth.ensureAccount().then(() => render()).catch(() => {});
     if (dlg.open) renderMembers();

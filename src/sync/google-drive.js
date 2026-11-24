@@ -137,6 +137,21 @@ export class GoogleDriveProvider {
     return r.files?.[0]?.id || null;
   }
 
+  /**
+   * Alle eigenen Liederbuch-Dateien dieses Google-Kontos (ohne das persönliche Liederbuch) –
+   * damit ein anderes Gerät Liederbücher findet, die es noch nicht kennt.
+   * shared: von hier aus mit anderen geteiltes Liederbuch (wird dort als gemeinsames Liederbuch geöffnet).
+   * @returns {Promise<{fileId: string, name: string, shared: boolean}[]>}
+   */
+  async listOwnBooks() {
+    const q = `'me' in owners and trashed=false and (appProperties has { key='${MARK_KEY}' and value='${MARK_PERSONAL}' }`
+      + ` or appProperties has { key='${MARK_KEY}' and value='${MARK_SHARED}' })`;
+    const r = await this.#json(`${API}?spaces=drive&orderBy=createdTime&pageSize=100&fields=files(id,name,appProperties)&q=${encodeURIComponent(q)}`);
+    return (r.files || [])
+      .filter((f) => f.appProperties?.[BOOK_KEY] !== BOOK_PERSONAL && !/^Liederbuch\.json$/i.test(f.name))
+      .map((f) => ({ fileId: f.id, name: f.name, shared: f.appProperties?.[MARK_KEY] === MARK_SHARED }));
+  }
+
   async #findFile() {
     if (this.fileId || this.shared) return this.fileId;
     const byName = () => this.#search(`name='${this.fileName.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`);

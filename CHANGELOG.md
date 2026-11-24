@@ -8,6 +8,14 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.4.3 – 24.11.2026 · Liederbücher aus Google Drive auf jedem Gerät
+
+- Ein Liederbuch, das auf einem anderen Gerät angelegt und mit Google Drive abgeglichen wurde, erscheint jetzt auch
+  auf den anderen Geräten mit demselben Google-Konto: Nach dem Abgleich meldet die App „In deinem Google Drive liegt
+  noch das Liederbuch …“ – mit **Hinzufügen** steht es oben in der Liederbuch-Auswahl, gleich mit Drive verbunden.
+- Das gilt auch für Liederbücher, die du von dort aus mit anderen geteilt hast.
+- Jedes Buch wird nur einmal angeboten; beim Verbinden mit Google Drive wird noch einmal nachgesehen.
+
 ## 2.4.2 – 24.11.2026 · Melodie als Harp-Tabs
 
 - **Harp** am Notenabschnitt der Vorschau wandelt die Melodie in Mundharmonika-Tabs um (10-Kanal-Harp).

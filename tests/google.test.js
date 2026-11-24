@@ -5,7 +5,7 @@ import { SyncEngine, AuthError, ConflictError, ReadOnlyError } from '../src/sync
 import { GoogleAuth, DRIVE_SCOPE, authMessage, googleRedirectUri } from '../src/sync/google-auth.js';
 import { GoogleDriveProvider } from '../src/sync/google-drive.js';
 import { BookNameStore, slimName, driveFileName } from '../src/sync/book-name.js';
-import { personalBookName, renameBook } from '../src/books.js';
+import { addBook, adoptDriveBook, bookKey, personalBookName, renameBook, unknownDriveBooks } from '../src/books.js';
 
 const memory = () => {
   const m = new Map();
@@ -74,9 +74,10 @@ function fakeDrive(tokens = { 'tok-a': 'anna', 'tok-b': 'ben' }) {
       const q = u.searchParams.get('q') || '';
       const name = /name='((?:[^'\\]|\\.)*)'/.exec(q)?.[1];
       const tag = /key='liederbuchBook' and value='([^']*)'/.exec(q)?.[1];
-      const files = [...d.files.values()].filter((x) => x.owner === who && x.appProperties?.liederbuch === 'sync'
+      const marks = [...q.matchAll(/key='liederbuch' and value='([^']*)'/g)].map((x) => x[1]);
+      const files = [...d.files.values()].filter((x) => x.owner === who && marks.includes(x.appProperties?.liederbuch)
         && (!name || x.name === name) && (!tag || x.appProperties?.liederbuchBook === tag));
-      return json({ files: files.map((x) => ({ id: x.id })) });
+      return json({ files: files.map((x) => ({ id: x.id, name: x.name, appProperties: x.appProperties })) });
     }
     // Metadaten ändern (Name, appProperties) – nicht der Inhalt (der geht über /upload/)
     if (method === 'PATCH' && id && !u.pathname.startsWith('/upload/') && !m[2]) {
@@ -473,6 +474,39 @@ describe('Google: mehrere Liederbücher mit eigenem Konto (2.2)', () => {
     const other = person(drive, 'tok-a');
     const again = new GoogleDriveProvider({ auth: other.auth, storage: other.storage, fetch: drive.fetch, fileName: 'Liederbuch – Band.json', fileIdKey: 'gdrive.fileId:book-1' });
     expect((await again.read()).data.songs[0].id).toBe('b');
+  });
+});
+
+describe('Google: weitere eigene Liederbücher finden (2.4.3)', () => {
+  it('neues Gerät findet die am Laptop angelegten Bücher, ohne das persönliche', async () => {
+    const drive = fakeDrive();
+    const laptop = person(drive, 'tok-a');
+    await new GoogleDriveProvider({ auth: laptop.auth, storage: laptop.storage, fetch: drive.fetch }).write({ songs: [] }, null);
+    await new GoogleDriveProvider({ auth: laptop.auth, storage: laptop.storage, fetch: drive.fetch, fileName: 'Liederbuch – Band.json', fileIdKey: 'x' }).write({ songs: [{ id: 'b' }] }, null);
+    const sharedId = (await laptop.provider.createShared('Liederbuch – Chor.json', { songs: [] })).id;
+    await person(drive, 'tok-b').provider.listOwnBooks().then((l) => expect(l).toEqual([])); // fremdes Konto
+    const phone = person(drive, 'tok-a');
+    const found = await phone.provider.listOwnBooks();
+    expect(found.map((f) => [f.name, f.shared])).toEqual([['Liederbuch – Band.json', false], ['Liederbuch – Chor.json', true]]);
+    expect(found[1].fileId).toBe(sharedId);
+    // eintragen: Band wird eigenes Buch mit gemerkter Datei-ID und liest die Lieder des Laptops
+    const unknown = unknownDriveBooks(found, phone.storage);
+    expect(unknown.length).toBe(2);
+    const token = phone.storage.getItem('gdrive.token');
+    const band = adoptDriveBook(unknown[0], { token, global: true }, phone.storage);
+    const chor = adoptDriveBook(unknown[1], { token, global: true }, phone.storage);
+    expect([band.name, band.file, chor.name, chor.shared, Boolean(chor.ownAuth)]).toEqual(['Band', 'Liederbuch – Band.json', 'Chor', true, false]);
+    expect(phone.storage.getItem(bookKey(band, 'sync.provider'))).toBe('gdrive');
+    const auth = new GoogleAuth({ clientId: 'cid', storage: phone.storage, session: memory(), fetch: drive.fetch, tokenKey: bookKey(band, 'gdrive.token') });
+    const p = new GoogleDriveProvider({ auth, storage: phone.storage, fetch: drive.fetch, fileName: band.file, fileIdKey: bookKey(band, 'gdrive.fileId') });
+    expect((await p.read()).data.songs[0].id).toBe('b');
+    expect(unknownDriveBooks(found, phone.storage)).toEqual([]); // nicht noch einmal anbieten
+  });
+
+  it('bekannt per Dateiname, solange die Datei-ID noch fehlt', () => {
+    const st = memory();
+    const b = addBook({ name: 'Band' }, st);
+    expect(unknownDriveBooks([{ fileId: 'f9', name: b.file }], st)).toEqual([]);
   });
 });
 
