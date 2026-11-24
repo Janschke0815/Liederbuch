@@ -185,3 +185,9 @@ kbd { display: inline-block; min-width: 1.4em; padding: .05em .4em; border: 1px 
   .sync-dialog .foot-link { order: 3; flex-basis: 100%; text-align: center; } /* eigene kleine Zeile */
   #sync-provider button { padding-inline: .4em; font-size: .85em; }
 }
+
+/* Noten einfügen (ui/notes-import.js) */
+.notes-source { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .6em; margin-bottom: .5em; }
+#notes-paste { width: 100%; box-sizing: border-box; font-family: var(--mono, monospace); font-size: .85em; resize: vertical; }
+.notes-dialog.dragover .dialog-form { outline: 3px dashed var(--accent); outline-offset: -6px; }
+#notes-pick-row select { max-width: 100%; }

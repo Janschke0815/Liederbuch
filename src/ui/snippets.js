@@ -26,6 +26,19 @@ export function insertText(text, selectFrom, selectTo) {
   if (selectFrom !== undefined) editor.setSelectionRange(start + selectFrom, start + (selectTo ?? selectFrom));
 }
 
+
+/** Zeilenumbruch, falls der Cursor nicht am Zeilenanfang steht. */
+const lineStart = () => (editor.selectionStart === 0 || editor.value[editor.selectionStart - 1] === '\n' ? '' : '\n');
+
+/** Leeres Notengerüst mit Takt und Tonart des Liedes; die Beispielzeilen sind markiert zum Überschreiben. */
+export function insertAbcSkeleton() {
+  const nl = lineStart();
+  const lines = abcSkeleton(parseChordPro(editor.value).meta).split('\n');
+  const head = `${nl}${lines.slice(0, 5).join('\n')}\n`;
+  const body = lines.slice(5, -1).join('\n');
+  insertText(`${head}${body}\n${lines.at(-1)}\n`, head.length, head.length + body.length);
+}
+
 /** Wiederholung: Zeile mit dem Cursor, markierte Zeilen oder – auf der Abschnittszeile – der Abschnitt. */
 function insertRepeat() {
   const v = editor.value;
@@ -73,13 +86,8 @@ function insertSnippet(kind) {
     const head = `${nl}{start_of_tab: Tab}\n`;
     return insertText(`${head}${body}\n{end_of_tab}\n`, head.length, head.length + body.length);
   }
-  if (kind === 'abc') {
-    // Noten: Gerüst mit Takt und Tonart des Liedes; die Beispielzeilen sind markiert zum Überschreiben
-    const lines = abcSkeleton(parseChordPro(editor.value).meta).split('\n');
-    const head = `${nl}${lines.slice(0, 5).join('\n')}\n`;
-    const body = lines.slice(5, -1).join('\n');
-    return insertText(`${head}${body}\n${lines.at(-1)}\n`, head.length, head.length + body.length);
-  }
+  // Noten: Dialog „Noten einfügen“ (Datei, ABC aus dem Internet oder leeres Gerüst)
+  if (kind === 'abc') return import('./notes-import.js').then((m) => m.openNotesImport());
   // Abschnitte: markierter Text kommt hinein
   const verses = (editor.value.match(/\{(start_of_verse|sov)\b/g) || []).length;
   const [env, label] = {

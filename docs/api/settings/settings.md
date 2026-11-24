@@ -4,7 +4,7 @@
 
 Layout-Einstellungen: Standardwerte, Prüfung, Speichern, Anwenden. Angewendet wird ausschließlich über CSS-Variablen und data-Attribute auf einem .songbook-Element – Vorschau, Einstellungs-Muster und Druck nutzen dasselbe CSS.
 
-**Benutzt von:** [`play-mode.js`](../play-mode.md), [`print-ui.js`](../print-ui.md), [`print/print-fonts.js`](../print/print-fonts.md), [`settings-ui.js`](../settings-ui.md), [`ui/context-menus.js`](../ui/context-menus.md), [`ui/harp-from-notes.js`](../ui/harp-from-notes.md), [`ui/paste.js`](../ui/paste.md), [`ui/share.js`](../ui/share.md)
+**Benutzt von:** [`play-mode.js`](../play-mode.md), [`print-ui.js`](../print-ui.md), [`print/print-fonts.js`](../print/print-fonts.md), [`settings-ui.js`](../settings-ui.md), [`ui/context-menus.js`](../ui/context-menus.md), [`ui/harp-from-notes.js`](../ui/harp-from-notes.md), [`ui/notes-import.js`](../ui/notes-import.md), [`ui/paste.js`](../ui/paste.md), [`ui/share.js`](../ui/share.md)
 
 ## Exportiert
 

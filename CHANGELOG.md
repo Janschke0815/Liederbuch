@@ -8,6 +8,20 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.5.0 – 24.11.2026 · Noten holen statt abschreiben
+
+- Der Baustein **Noten** (am Handy ♪, Alt+N) öffnet jetzt den Dialog **Noten einfügen**:
+  - **MusicXML-Datei** wählen oder hineinziehen (`.musicxml`, `.xml`, gepackt `.mxl`) – z. B. aus MuseScore,
+    Sibelius, einer Notenscan-App oder von musescore.com. Die App macht daraus die Melodie mit Akkorden und
+    Liedtext (erste Strophe), mit Wiederholungen, Bindebögen und Triolen. Bei mehreren Spuren wählst du aus.
+  - **ABC aus dem Internet** einfügen (z. B. abcnotation.com): Titel, Komponist und Co. kommen aus den Noten
+    heraus, mehrere Stücke auf einer Seite stehen zur Auswahl.
+  - **Vorschau** vor dem Einfügen; fehlen im Lied Titel, Tonart, Takt oder Tempo, werden sie übernommen
+    (leere Felder wie `{key: }` werden gefüllt).
+  - **Leeres Gerüst** fügt wie bisher ein Gerüst zum Selberschreiben ein.
+- Ein ganzes Notenstück (ABC mit Kopf oder MusicXML) direkt in den Editor eingefügt öffnet den Dialog von selbst.
+- Alles läuft im Browser, auch offline.
+
 ## 2.4.5 – 24.11.2026 · Bausteine per Tastenkürzel
 
 - Die Bausteine über dem Editor lassen sich jetzt ohne Maus einfügen, solange der Cursor im Editor steht:

@@ -425,8 +425,15 @@ Textschreibweise für Noten, im Standard-Abschnitt von ChordPro. Das Lied bleibt
 - Kopfzeilen `M:` (Takt), `L:` (Grundlänge) und `K:` (Tonart) darf man weglassen: Fehlt `K:`, nimmt die
   App Takt und Tonart aus der Liedinfo, sonst C-Dur.
 
-Der Knopf **Noten** über dem Editor fügt ein Gerüst mit Takt und Tonart des Liedes ein (am Handy ♪);
-die Übersicht **?** erklärt die Schreibweise. Die Vorschau zeichnet die Noten beim Tippen; versteht sie
+Der Knopf **Noten** über dem Editor (am Handy ♪, Alt+N) öffnet **Noten einfügen**: Dort holst du fertige
+Noten, statt sie abzuschreiben – eine **MusicXML**-Datei (`.musicxml`, `.xml` oder gepackt `.mxl`, aus
+MuseScore, Sibelius, Finale, einer Notenscan-App oder z. B. von musescore.com) wählen oder hineinziehen,
+oder **ABC**-Noten aus dem Internet (z. B. abcnotation.com) einfügen. Übernommen wird die Melodie mit
+Akkordsymbolen und dem Liedtext der ersten Strophe; hat eine Partitur mehrere Spuren oder ein ABC-Text
+mehrere Stücke, wählst du aus. Eine Vorschau zeigt das Ergebnis; fehlen im Lied Titel, Tonart, Takt oder
+Tempo, werden sie auf Wunsch aus den Noten übernommen. Fügst du ein ganzes Notenstück direkt in den
+Editor ein, öffnet sich der Dialog von selbst. **Leeres Gerüst** fügt wie bisher ein Gerüst mit Takt und
+Tonart des Liedes zum Selberschreiben ein. Die Übersicht **?** erklärt die Schreibweise. Die Vorschau zeichnet die Noten beim Tippen; versteht sie
 eine Stelle nicht, bleiben die Noten stehen und darunter erscheint ein kleiner Hinweis.
 
 Die Noten stehen in **Vorschau, Spielmodus und Druck**, passen sich der Breite an (auch zweispaltig und
@@ -776,9 +783,13 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     mit abcjs (nur bei Bedarf geladen) in Vorschau, Spielmodus und Druck, transponierbar, mit ▶ abspielbar
     (Klavier-Samples in der App, offline); Baustein „Noten“, ABC-Hilfe in der Syntax-Übersicht.
     Melodie → Harp-Tabs (2.4.2): passende Harp vorschlagen, Tabs über den Silben einfügen (`core/harp-melody.js`).
-    Später: Stufe 2 – MusicXML-Datei (z. B. aus MuseScore oder einer Notenscan-App) importieren und im
-    Browser mit xml2abc in einen ABC-Abschnitt umwandeln; Stufe 3 – Scan/Foto direkt in Noten, sobald es
-    brauchbare Lösungen im Browser gibt
-26. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
+    Später: Stufe 3 – Scan/Foto direkt in Noten, sobald es brauchbare Lösungen im Browser gibt
+26. ✅ Noten holen statt abschreiben, Stufe 2 (2.5): Dialog „Noten einfügen“ – MusicXML (.musicxml, .xml,
+    gepacktes .mxl) aus MuseScore, Sibelius, Notenscan-Apps oder Downloads wird im Browser in ABC umgewandelt
+    (eigener Wandler `core/musicxml.js`: Melodiestimme, Akkordsymbole, Liedtext, Wiederholungen, Triolen);
+    ABC aus dem Internet wird aufgeräumt, mehrere Stücke zur Auswahl (`core/abc-import.js`); Vorschau,
+    fehlende Liedinfo (Titel, Tonart, Takt, Tempo) wird übernommen; ganzes Notenstück in den Editor
+    eingefügt → Dialog öffnet sich
+27. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
     zuerst Englisch; Sprache folgt dem Browser und ist unter Einstellungen → App umstellbar. Schrittweise nach
     Bereichen umbauen (Kopfleiste, Liste, Menü → Dialoge → Hilfetexte); ein Test meldet fehlende Übersetzungen

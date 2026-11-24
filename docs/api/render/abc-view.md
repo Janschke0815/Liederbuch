@@ -6,7 +6,7 @@ Notenabschnitte zeichnen und abspielen (abcjs). renderSong legt nur Platzhalter 
 
 Jede Notenzeile ist ein eigenes Bild (oneSvgPerLine, Klasse „atomic“): So bricht der Druck (print/paginate.js) zwischen zwei Notenzeilen um, nie mitten durch eine.
 
-**Benutzt von:** [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`settings-ui.js`](../settings-ui.md), [`ui/song.js`](../ui/song.md)
+**Benutzt von:** [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`settings-ui.js`](../settings-ui.md), [`ui/notes-import.js`](../ui/notes-import.md), [`ui/song.js`](../ui/song.md)
 
 ## Exportiert
 

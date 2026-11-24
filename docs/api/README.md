@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-95 Module, 368 exportierte Funktionen, Konstanten und Klassen.
+98 Module, 379 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -45,6 +45,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/install-help.js`](ui/install-help.md) | Installieren-Hilfe: Welche Schritte passen zu diesem Gerät und Browser? |
 | [`ui/list-select.js`](ui/list-select.md) | Mehrfachauswahl in der Liederliste: welche Lieder markiert sind und wie sich das ändert (Klick im Auswahlmodus, Strg/⌘+Klick, Umschalt+Klick für einen Bereich, „Alle“). |
 | [`ui/list.js`](ui/list.md) | Liederliste links: Suche, Tag-Filter, Sortierung, Einträge, Kopf weggleiten lassen. |
+| [`ui/notes-import.js`](ui/notes-import.md) | Dialog „Noten einfügen“ (Baustein „Noten“ über dem Editor): MusicXML-Datei oder ABC aus dem Internet als Notenabschnitt ins Lied holen (core/abc-import.js, core/musicxml.js), mit Vorschau. |
 | [`ui/paste.js`](ui/paste.md) | Text einfügen: Akkorde-über-Text (z. |
 | [`ui/preview-tools.js`](ui/preview-tools.md) | Werkzeuge an der Vorschau: Vergrößern/Verkleinern und Metronom (Klick auf Takt/Tempo). |
 | [`ui/publish.js`](ui/publish.md) | „Für eine Gruppe veröffentlichen“: Lieder (alle, nach Tag oder aus einer Setliste) als Abo-Datei in den Sync-Ordner (WebDAV) legen oder herunterladen, und den Einladungslink zum Weitergeben zeigen. |
@@ -63,6 +64,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 
 | Modul | Inhalt |
 |---|---|
+| [`core/abc-import.js`](core/abc-import.md) | Fertige Noten ins Lied holen: ABC aus dem Internet (abcnotation.com, Volkslied-Sammlungen …) oder eine MusicXML-Datei. |
 | [`core/abc.js`](core/abc.md) | Noten als ABC-Notation im ChordPro-Text ({start_of_abc} … {end_of_abc}, Kurzform {soa}/{eoa}). |
 | [`core/capo.js`](core/capo.md) | Capo-Hilfe: In welchem Bund liegt das Lied mit möglichst einfachen Griffen? |
 | [`core/chord-place.js`](core/chord-place.md) | Akkorde per Antippen setzen: eine Stelle im sichtbaren Liedtext (Zeile + Spalte) wird in den ChordPro-Text übersetzt. |
@@ -72,6 +74,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`core/harp-melody.js`](core/harp-melody.md) | Melodie (ABC-Notation) → Mundharmonika-Tabs für eine diatonische 10-Kanal-Harp (Richter-Stimmung). |
 | [`core/harp.js`](core/harp.md) | Mundharmonika-Tabs (Harp-Tabs): Kanalnummern über dem Text, wie Akkorde in eckigen Klammern. |
 | [`core/meta-edit.js`](core/meta-edit.md) | Kopfangaben ({title:}, {capo:}, {time:} …) direkt im ChordPro-Text lesen und setzen. |
+| [`core/musicxml.js`](core/musicxml.md) | MusicXML → ABC: Noten aus MuseScore, Sibelius, Finale, Notenscan-Apps oder Downloads (musescore.com, IMSLP …) als Notenabschnitt ins Lied holen. |
 | [`core/play-scroll.js`](core/play-scroll.md) | Rechnungen für den Spielmodus – ohne Bildschirmzugriff, damit sie sich testen lassen. |
 | [`core/playable.js`](core/playable.md) | "Was kann ich spielen?": Lieder, die nur aus bekannten Griffen bestehen (optional mit Capo). |
 | [`core/repeat.js`](core/repeat.md) | Wiederholungsangaben wie "2×", "x2", "(2x)", "2 mal" am Ende eines Textes. |

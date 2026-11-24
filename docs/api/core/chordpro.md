@@ -28,7 +28,7 @@ Line:
 ```
 
 **Benutzt:** [`core/harp.js`](harp.md)  
-**Benutzt von:** [`core/chord-place.js`](chord-place.md), [`formats/export-text.js`](../formats/export-text.md), [`formats/paste-import.js`](../formats/paste-import.md), [`live-ui.js`](../live-ui.md), [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`settings-ui.js`](../settings-ui.md), [`storage/repository.js`](../storage/repository.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/chord-filter.js`](../ui/chord-filter.md), [`ui/chord-tap.js`](../ui/chord-tap.md), [`ui/harp-from-notes.js`](../ui/harp-from-notes.md), [`ui/paste.js`](../ui/paste.md), [`ui/snippets.js`](../ui/snippets.md), [`ui/song.js`](../ui/song.md)
+**Benutzt von:** [`core/chord-place.js`](chord-place.md), [`formats/export-text.js`](../formats/export-text.md), [`formats/paste-import.js`](../formats/paste-import.md), [`live-ui.js`](../live-ui.md), [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`settings-ui.js`](../settings-ui.md), [`storage/repository.js`](../storage/repository.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/chord-filter.js`](../ui/chord-filter.md), [`ui/chord-tap.js`](../ui/chord-tap.md), [`ui/harp-from-notes.js`](../ui/harp-from-notes.md), [`ui/notes-import.js`](../ui/notes-import.md), [`ui/paste.js`](../ui/paste.md), [`ui/snippets.js`](../ui/snippets.md), [`ui/song.js`](../ui/song.md)
 
 ## Exportiert
 

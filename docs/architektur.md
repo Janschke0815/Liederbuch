@@ -208,3 +208,13 @@ Oktaven und bewertet alle 12 Harp-Tonarten (`rankHarpKeys`). `ui/harp-from-notes
 „Harp“ an jeden Notenabschnitt der Vorschau, zeigt Auswahl und Ergebnis und fügt es über `insertText`
 (snippets.js) hinter `{end_of_abc}` ein – so bleibt Rückgängig im Editor möglich.
 
+Noten holen (2.5): `core/musicxml.js` wandelt MusicXML (score-partwise) ohne fremde Bibliothek in ABC um –
+`DOMParser`, eine Spur (die mit Liedtext), davon Stimme 1 und Notensystem 1; Längen relativ zu `L:1/8`,
+Versetzungszeichen gegen Tonart und Takt gerechnet (MusicXML gibt die klingende Tonhöhe an), Akkordsymbole
+aus `<harmony>`, Silben aus `<lyric number="1">` (gebundene Folgenoten ohne Silbe, wie beim Harp-Leser),
+Balken aus `<beam>`, Zeilen nach `<print new-system>` oder je 4 Takte. `.mxl` packt `readMxl` aus (ZIP-
+Verzeichnis lesen, `DecompressionStream('deflate-raw')`). `core/abc-import.js` trennt ABC-Stücke, räumt
+den Kopf auf (`abcForSong`), erkennt Notentext (`looksLikeNotes`) und setzt den Abschnitt samt fehlender
+Liedinfo in einem Schritt in den Text (`placeNotes`). `ui/notes-import.js` ist der Dialog; er ersetzt den
+ganzen Editortext über `insertText`, damit ein Strg+Z alles zurücknimmt.
+

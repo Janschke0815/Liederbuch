@@ -242,7 +242,7 @@
           <button type="button" data-snippet="chorus" title="Refrain einfügen">Refrain</button>
           <button type="button" data-snippet="bridge" title="Bridge einfügen">Bridge</button>
           <button type="button" data-snippet="tab" title="Gitarren-Tab einfügen (markierter Text wird zum Tab; sonst leeres Griffbrett zum Überschreiben)">Tab</button>
-          <button type="button" data-snippet="abc" title="Noten einfügen: Melodie in ABC-Notation (Gerüst mit Takt und Tonart des Liedes)" aria-label="Noten"><span class="lbl-long">Noten</span><span class="lbl-short">♪</span></button>
+          <button type="button" data-snippet="abc" title="Noten einfügen: MusicXML-Datei, ABC aus dem Internet oder leeres Gerüst" aria-label="Noten"><span class="lbl-long">Noten</span><span class="lbl-short">♪</span></button>
           <button type="button" data-snippet="repeat" title="Refrain wiederholen ({chorus})">↻ Refrain</button>
           <button type="button" data-snippet="times" title="Wiederholen: Zeile mit dem Cursor, markierte Zeilen oder – auf der Abschnittszeile – den ganzen Abschnitt. Nochmal klicken = öfter.">2×</button>
           <button type="button" data-snippet="comment" title="Kommentar / Hinweis">Hinweis</button>
@@ -1149,6 +1149,33 @@
       </div>
       <footer class="dialog-foot">
         <button value="cancel" formnovalidate>Schließen</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="notes-dialog" class="capo-dialog notes-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Noten einfügen</h2>
+        <p class="hint">Fertige Noten holen statt abschreiben: eine <b>MusicXML</b>-Datei (aus MuseScore, Sibelius, einer Notenscan-App oder von musescore.com) oder <b>ABC</b>-Noten aus dem Internet (z. B. abcnotation.com). Übernommen wird die Melodie mit Akkorden und Liedtext.</p>
+      </header>
+      <div class="dialog-body">
+        <div class="notes-source">
+          <button type="button" id="notes-file-btn"><svg class="icon"><use href="#i-open"/></svg>Datei wählen …</button>
+          <input type="file" id="notes-file" accept=".musicxml,.xml,.mxl,.abc,.txt,application/vnd.recordare.musicxml+xml,application/vnd.recordare.musicxml" hidden>
+          <span class="hint">.musicxml, .mxl, .xml, .abc – oder Datei hierher ziehen</span>
+        </div>
+        <textarea id="notes-paste" rows="5" spellcheck="false" placeholder="… oder ABC-Noten bzw. MusicXML hier einfügen (Strg+V)"></textarea>
+        <label class="field" id="notes-pick-row" hidden><span id="notes-pick-label">Stück</span> <select id="notes-pick"></select></label>
+        <p class="hint" id="notes-info"></p>
+        <label class="check" id="notes-meta-row" hidden><input type="checkbox" id="notes-meta" checked> <span id="notes-meta-text"></span></label>
+        <div id="notes-preview" class="songbook harp-preview" hidden></div>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" id="notes-empty" title="Leeres Gerüst mit Takt und Tonart des Liedes zum Selberschreiben">Leeres Gerüst</button>
+        <span class="spacer"></span>
+        <button value="cancel" formnovalidate>Abbrechen</button>
+        <button value="ok" id="notes-ok" class="primary" disabled>Einfügen</button>
       </footer>
     </form>
   </dialog>

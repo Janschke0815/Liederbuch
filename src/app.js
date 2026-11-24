@@ -38,6 +38,7 @@ import { leaveAbo, refreshAbo, startAbo } from './ui/abo.js';
 import './ui/publish.js';
 import { newSong, playSong } from './ui/song-actions.js';
 import './ui/snippets.js';
+import './ui/notes-import.js';
 import './ui/preview-tools.js';
 import './ui/add-songs.js';
 import { chooseFiles } from './ui/files.js';
