@@ -4,13 +4,14 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-87 Module, 330 exportierte Funktionen, Konstanten und Klassen.
+91 Module, 349 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
 | Modul | Inhalt |
 |---|---|
 | [`app.js`](app.md) | Einstieg der App: steckt die Teile der Oberfläche zusammen und öffnet das erste Lied. |
+| [`books-ui.js`](books-ui.md) | Liederbücher: Auswahl in der Kopfleiste (mit Optionen per Rechtsklick), Dialog „Liederbücher“ (Liste, Umbenennen, Entfernen, Abo-Angaben) und „Neues Liederbuch“. |
 | [`books.js`](books.md) | Mehrere Liederbücher auf einem Gerät. |
 | [`context-menu.js`](context-menu.md) | Kontextmenü: Rechtsklick (Maus), langes Drücken (Touch) oder Menütaste / Umschalt+F10. |
 | [`live-ui.js`](live-ui.md) | Live-Modus: Dialog (Vorsingen / Mitsingen), „LIVE“-Anzeige in der Kopfleiste, Mitsinger-Ansicht im Spielmodus. |
@@ -22,7 +23,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`sample.js`](sample.md) | Beispiellied für ein leeres Liederbuch (gemeinfrei). |
 | [`setlist-ui.js`](setlist-ui.md) | Setlisten in der linken Spalte: Übersicht, Bearbeiten (Reihenfolge, Notiz, eigene Transposition), Spielen und Drucken in Setlisten-Reihenfolge. |
 | [`settings-ui.js`](settings-ui.md) | Einstellungsdialog mit Live-Muster. |
-| [`sync-ui.js`](sync-ui.md) | Cloud-Knopf, Liederbuch-Auswahl und Dialog (verbinden, gemeinsame Liederbücher, Mitglieder). |
+| [`sync-ui.js`](sync-ui.md) | Cloud: Knopf in der Kopfleiste, Dialog (verbinden, Mitglieder, einladen), Abgleich des geöffneten Liederbuchs und die Leiste „nur lesen“. |
 | [`types.js`](types.md) | Beschreibung der wichtigsten Datensätze – nur für Editoren wie VS Code (Autovervollständigung, Hinweise bei Tippfehlern). |
 | [`version.js`](version.md) | Version der App – bei jeder veröffentlichten Änderung erhöhen (und das Datum anpassen). |
 
@@ -30,26 +31,28 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 
 | Modul | Inhalt |
 |---|---|
-| [`ui/abo.js`](ui/abo.md) | Abonnierte Liederbücher: per Einladungslink abonnieren, regelmäßig aktualisieren, beenden – und einzelne Lieder ins eigene Liederbuch kopieren. |
+| [`ui/abo.js`](ui/abo.md) | Abonnierte Liederbücher: per Einladungslink abonnieren, regelmäßig aktualisieren, beenden. |
 | [`ui/add-songs.js`](ui/add-songs.md) | Neue Lieder anlegen – mit Nachfrage, wenn es Titel und Interpret schon gibt (eingefügter Text, Lesezeichen von Ultimate Guitar, ChordPro-/Textdateien). |
 | [`ui/app-keys.js`](ui/app-keys.md) | Tastenkürzel der Hauptansicht (die des Spielmodus stehen in play-mode.js). |
 | [`ui/app-state.js`](ui/app-state.md) | Gemeinsamer Zustand der Oberfläche: welches Liederbuch, seine Datenbanken und das gerade geöffnete Lied. |
 | [`ui/capo-help.js`](ui/capo-help.md) | Capo-Hilfe: schlägt Capo-Lagen vor, in denen das Lied mit möglichst einfachen Griffen klingt wie bisher. |
+| [`ui/chord-filter.js`](ui/chord-filter.md) | „Was kann ich spielen?“ über der Liederliste: Filter nach Griffen, die man kann (optional mit Capo). |
 | [`ui/chord-tap.js`](ui/chord-tap.md) | Akkorde per Antippen. |
 | [`ui/context-menus.js`](ui/context-menus.md) | Kontextmenüs (Rechtsklick / langes Drücken) für Lieder in der Liste und für die Vorschau, außerdem Doppelklick (spielen) und Entf (löschen) in der Liste. |
 | [`ui/dom.js`](ui/dom.md) | Kleine Hilfen für die Oberfläche – von allen ui-Modulen gemeinsam genutzt. |
 | [`ui/files.js`](ui/files.md) | Dateien öffnen (Sicherung als ZIP oder JSON, ChordPro- und Textdateien) und Sichern als ZIP. |
 | [`ui/install-help.js`](ui/install-help.md) | Installieren-Hilfe: Welche Schritte passen zu diesem Gerät und Browser? |
-| [`ui/list.js`](ui/list.md) | Liederliste links: Suche, Tag-Filter, „Was kann ich spielen?“, Sortierung. |
+| [`ui/list-select.js`](ui/list-select.md) | Mehrfachauswahl in der Liederliste: welche Lieder markiert sind und wie sich das ändert (Klick im Auswahlmodus, Strg/⌘+Klick, Umschalt+Klick für einen Bereich, „Alle“). |
+| [`ui/list.js`](ui/list.md) | Liederliste links: Suche, Tag-Filter, Sortierung, Einträge, Kopf weggleiten lassen. |
 | [`ui/paste.js`](ui/paste.md) | Text einfügen: Akkorde-über-Text (z. |
 | [`ui/preview-tools.js`](ui/preview-tools.md) | Werkzeuge an der Vorschau: Vergrößern/Verkleinern und Metronom (Klick auf Takt/Tempo). |
 | [`ui/publish.js`](ui/publish.md) | „Für eine Gruppe veröffentlichen“: Lieder (alle, nach Tag oder aus einer Setliste) als Abo-Datei in den Sync-Ordner (WebDAV) legen oder herunterladen, und den Einladungslink zum Weitergeben zeigen. |
-| [`ui/selection.js`](ui/selection.md) | Mehrfachauswahl in der Liederliste: Leiste unten (Anzahl, Alle, Aktionen, Löschen) und die Aktionen für alle ausgewählten Lieder – löschen (mit Rückgängig), in ein anderes Liederbuch kopieren, zu einer Setliste hinzufügen. |
+| [`ui/selection.js`](ui/selection.md) | Mehrfachauswahl in der Liederliste: Leiste unten (Anzahl, Alle, Aktionen, Löschen) und die Aktionen für alle ausgewählten Lieder – löschen (mit Rückgängig), in ein anderes Liederbuch kopieren, zu einer Setliste hinzufügen (song-actions.js). |
 | [`ui/share-with.js`](ui/share-with.md) | „Mit anderen teilen“: ein Einstieg, der zuerst fragt, ob die anderen mitbearbeiten (gemeinsames Liederbuch über Google Drive) oder nur lesen sollen (Abo) – und dann in den passenden bestehenden Ablauf führt (Cloud-Dialog „Mitglieder“, „Neues Liederbuch“, „Veröffentlichen …“). |
 | [`ui/share.js`](ui/share.md) | Lied teilen: über das Teilen-Menü des Geräts, als ChordPro-Datei, als Text oder als PDF – jeweils in der aktuellen Transposition. |
 | [`ui/shortcuts.js`](ui/shortcuts.md) | Alle Tastenkürzel an einer Stelle: Daraus entstehen die Tasten-Abfrage (app-keys.js, play-mode.js) und die Übersicht im Dialog „Tastenkürzel“. |
 | [`ui/snippets.js`](ui/snippets.md) | Bausteine über dem Editor: Akkord, Strophe, Refrain, Bridge, Tab, Wiederholung, Hinweis – und die Übersicht der ChordPro-Syntax („?“). |
-| [`ui/song-actions.js`](ui/song-actions.md) | Was man mit einem ganzen Lied tun kann: anlegen, löschen, duplizieren, zu einer Setliste hinzufügen. |
+| [`ui/song-actions.js`](ui/song-actions.md) | Was man mit ganzen Liedern tun kann: anlegen, löschen, duplizieren, zu einer Setliste hinzufügen, in ein anderes Liederbuch kopieren. |
 | [`ui/song.js`](ui/song.md) | Das geöffnete Lied: öffnen, automatisch speichern, Vorschau, Transponieren und die Liedinfo (Titel, Capo, Takt … über dem Editor). |
 | [`ui/toolbar.js`](ui/toolbar.md) | Kopfleiste: angeheftete Aktionen beschriftet neben dem Menü „⋯“ (breiter Bildschirm). |
 | [`ui/trash.js`](ui/trash.md) | Papierkorb: gelöschte Lieder wiederherstellen oder endgültig löschen. |
@@ -127,6 +130,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 |---|---|
 | [`sync/abo-client.js`](sync/abo-client.md) | Abo-Datei vom Server laden – mit Anmeldung, falls der Ordner geschützt ist, und nur, wenn sie sich seit dem letzten Mal geändert hat (ETag). |
 | [`sync/book-name.js`](sync/book-name.md) | Name eines Liederbuchs mit abgleichen. |
+| [`sync/book-settings.js`](sync/book-settings.md) | Wo ein Liederbuch abgeglichen wird: die gespeicherten Einstellungen je Buch (Schlüssel über bookKey, siehe books.js). |
 | [`sync/config.js`](sync/config.md) | Google-Zugangsdaten für Google Drive (Einrichtung: docs/google-einrichtung.md). |
 | [`sync/dropbox.js`](sync/dropbox.md) | Cloud-Anbieter Dropbox: jedes Liederbuch ist eine JSON-Datei im App-Ordner (Dropbox → Apps → <Name der Dropbox-App> → Liederbuch.json, weitere Bücher „Liederbuch – Name.json“). |
 | [`sync/google-auth.js`](sync/google-auth.md) | Anmeldung bei Google (OAuth 2) – ganz im Browser, ohne eigenen Server. |

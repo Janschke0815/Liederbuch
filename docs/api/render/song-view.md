@@ -7,7 +7,7 @@ Song-Modell -> DOM. Wird für Vorschau und später für den Druck verwendet.
 Akkorde stehen über der richtigen Silbe, ohne Monospace: jedes Akkord-Segment ist ein inline-block aus Akkord (oben) und dem ersten Wort darunter. Der restliche Text des Segments läuft als normaler Text weiter, damit lange Zeilen umbrechen können.
 
 **Benutzt:** [`core/chords.js`](../core/chords.md), [`core/harp.js`](../core/harp.md), [`core/repeat.js`](../core/repeat.md), [`render/chord-diagram.js`](chord-diagram.md)  
-**Benutzt von:** [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`settings-ui.js`](../settings-ui.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/chord-tap.js`](../ui/chord-tap.md), [`ui/list.js`](../ui/list.md), [`ui/paste.js`](../ui/paste.md), [`ui/song.js`](../ui/song.md)
+**Benutzt von:** [`play-mode.js`](../play-mode.md), [`print/songbook.js`](../print/songbook.md), [`settings-ui.js`](../settings-ui.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/chord-filter.js`](../ui/chord-filter.md), [`ui/chord-tap.js`](../ui/chord-tap.md), [`ui/paste.js`](../ui/paste.md), [`ui/song.js`](../ui/song.md)
 
 ## Exportiert
 

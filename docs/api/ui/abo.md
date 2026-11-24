@@ -2,10 +2,10 @@
 
 [← Übersicht](../README.md)
 
-Abonnierte Liederbücher: per Einladungslink abonnieren, regelmäßig aktualisieren, beenden – und einzelne Lieder ins eigene Liederbuch kopieren. Ein Abo ist ein eigenes Liederbuch (eigene Datenbank), nur zum Lesen (siehe readOnly in app-state.js).
+Abonnierte Liederbücher: per Einladungslink abonnieren, regelmäßig aktualisieren, beenden. Lieder ins eigene Liederbuch kopieren: copySongsTo in song-actions.js. Ein Abo ist ein eigenes Liederbuch (eigene Datenbank), nur zum Lesen (siehe readOnly in app-state.js).
 
-**Benutzt:** [`books.js`](../books.md), [`core/song-list.js`](../core/song-list.md), [`formats/abo.js`](../formats/abo.md), [`prefs.js`](../prefs.md), [`storage/repository.js`](../storage/repository.md), [`storage/setlists.js`](../storage/setlists.md), [`storage/stores.js`](../storage/stores.md), [`sync/abo-client.js`](../sync/abo-client.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md)  
-**Benutzt von:** [`app.js`](../app.md), [`ui/context-menus.js`](context-menus.md)
+**Benutzt:** [`books.js`](../books.md), [`formats/abo.js`](../formats/abo.md), [`prefs.js`](../prefs.md), [`storage/repository.js`](../storage/repository.md), [`storage/setlists.js`](../storage/setlists.md), [`storage/stores.js`](../storage/stores.md), [`sync/abo-client.js`](../sync/abo-client.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md)  
+**Benutzt von:** [`app.js`](../app.md)
 
 ## Exportiert
 
@@ -35,15 +35,6 @@ geht es zurück zu „Mein Liederbuch“.
 ### `startAbo()`
 
 Beim Start: Einladungslink prüfen und – in einem Abo – den neuesten Stand holen.
-
-### `async copyToPersonal(songs)`
-
-Lieder aus dem Abo nach „Mein Liederbuch“ kopieren (dort bearbeitbar). Schon vorhandene
-(gleicher Titel und Interpret) werden übersprungen.
-
-| Parameter | Typ | Bedeutung |
-|---|---|---|
-| `songs` | `object[]` | Datensätze aus dem Abo |
 
 ## Intern
 

@@ -243,4 +243,5 @@ export function setupLive() {
     // services.started setzt app.js erst nach setupLive() – darum einen Takt später darauf warten
     if (code) Promise.resolve().then(() => services.started).then(() => startLead(code)).then(() => toast('Live-Modus läuft weiter'));
   }
+  return { open: openDialog };
 }

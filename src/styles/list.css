@@ -64,7 +64,6 @@
 .tag-chip small { color: var(--muted); margin-left: .25em; }
 .tag-chip[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .tag-chip[aria-pressed='true'] small { color: inherit; opacity: .8; }
-.song-item-tags { font-size: .72em; color: var(--muted); }
 
 /* „Was kann ich spielen?“ */
 .chord-filter { padding: .1em .6em .4em; border-bottom: 1px solid var(--border); }

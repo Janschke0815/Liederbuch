@@ -15,7 +15,7 @@
 //   ui/abo.js, ui/publish.js   Liederbuch abonnieren bzw. für eine Gruppe veröffentlichen
 //   ui/trash.js, share.js, capo-help.js, context-menus.js
 //   ui/app-keys.js, ui/shortcuts.js   Tastenkürzel
-//   play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js, sync-ui.js   größere Bereiche
+//   play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js, sync-ui.js (+ books-ui.js)   größere Bereiche
 
 import { bookKey, PERSONAL } from './books.js';
 import { prefs } from './prefs.js';
@@ -33,14 +33,14 @@ import { $, closeOnBackdrop, isMobile, toast } from './ui/dom.js';
 import { flushSave, openSong, preview } from './ui/song.js';
 import { listedSongs, refreshList } from './ui/list.js';
 import { setView } from './ui/view.js';
-import { checkBookmarkHash } from './ui/paste.js';
+import { checkBookmarkHash, openImport } from './ui/paste.js';
 import { leaveAbo, refreshAbo, startAbo } from './ui/abo.js';
 import './ui/publish.js';
-import './ui/song-actions.js';
+import { newSong, playSong } from './ui/song-actions.js';
 import './ui/snippets.js';
 import './ui/preview-tools.js';
 import './ui/add-songs.js';
-import './ui/files.js';
+import { chooseFiles } from './ui/files.js';
 import './ui/trash.js';
 import './ui/share.js';
 import './ui/capo-help.js';
@@ -75,13 +75,9 @@ services.play = setupPlayMode({
     else refreshList(); // „zuletzt gespielt“ hat sich geändert
   },
 });
-$('#btn-play').onclick = async () => {
-  if (!state.current) return;
-  await flushSave();
-  services.play.open(state.current.id);
-};
+$('#btn-play').onclick = () => playSong();
 
-setupLive();
+services.live = setupLive();
 
 services.setlists = setupSetlists({
   repo,
@@ -113,6 +109,10 @@ services.sync = setupSync({
     }
   },
 });
+
+// Erste Schritte in der (fast) leeren Liste – list.js zeigt bzw. versteckt die Karte
+const welcomeActions = { new: newSong, import: () => openImport(), open: chooseFiles, cloud: () => services.sync.openCloud() };
+$('#welcome').addEventListener('click', (e) => welcomeActions[e.target.closest('[data-welcome]')?.dataset.welcome]?.());
 
 // ---------- Start ----------
 

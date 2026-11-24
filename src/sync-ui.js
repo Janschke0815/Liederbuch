@@ -1,4 +1,6 @@
-// Cloud-Knopf, Liederbuch-Auswahl und Dialog (verbinden, gemeinsame Liederbücher, Mitglieder).
+// Cloud: Knopf in der Kopfleiste, Dialog (verbinden, Mitglieder, einladen), Abgleich des geöffneten
+// Liederbuchs und die Leiste „nur lesen“. Die Liederbücher selbst (Auswahl oben, Verwaltung, Neues
+// Liederbuch) stehen in books-ui.js; setupSync richtet beides ein.
 //
 // Google Drive: Anmeldung mit google-auth.js (Fenster, auf iPhone/iPad per Weiterleitung), Speichern mit
 // google-drive.js. Einladung per E-Mail mit Link <App>#drive=<Datei-ID>: Wer ihn öffnet, meldet sich
@@ -15,15 +17,11 @@ import { GoogleDriveProvider } from './sync/google-drive.js';
 import { WebDavProvider, webdavUrlProblem } from './sync/webdav.js';
 import { DropboxProvider, dropboxRedirectUri } from './sync/dropbox.js';
 import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID, DROPBOX_APP_KEY } from './sync/config.js';
-import {
-  listBooks, setActiveBook, addSharedBook, addBook, renameBook, removeBook, driveBookName, bookKey, personalBookName,
-} from './books.js';
-import { prefs } from './prefs.js';
-import { SongRepository } from './storage/repository.js';
-import { openIdbStore } from './storage/stores.js';
-import { $ } from './ui/dom.js';
-import { showMenu } from './context-menu.js';
-import { BookNameStore, driveFileName, rememberRename, slimName } from './sync/book-name.js';
+import { listBooks, addSharedBook, removeBook, driveBookName, bookKey, personalBookName } from './books.js';
+import { setupBooks } from './books-ui.js';
+import { $, el, textButton, textSpan } from './ui/dom.js';
+import { BookNameStore, driveFileName, slimName } from './sync/book-name.js';
+import { connectedVia, syncKindOf, webdavOf } from './sync/book-settings.js';
 
 const TITLES = {
   off: 'Nicht verbunden',
@@ -35,22 +33,6 @@ const TITLES = {
 };
 
 const fmtTime = (d) => d?.toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-const fmtWhen = (iso) => (iso ? new Date(iso).toLocaleString('de', { day: 'numeric', month: 'numeric', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '–');
-const li = (...children) => {
-  const el = document.createElement('li');
-  el.append(...children);
-  return el;
-};
-const span = (className, text, small) => {
-  const el = document.createElement('span');
-  el.className = className;
-  el.textContent = text;
-  if (small) el.append(Object.assign(document.createElement('small'), { textContent: small }));
-  return el;
-};
-const button = (text, onclick, className = '') =>
-  Object.assign(document.createElement('button'), { type: 'button', textContent: text, onclick, className });
-
 /**
  * Cloud-Dialog und Abgleich einrichten (Google Drive, Dropbox oder WebDAV, gemeinsame Liederbücher).
  * @param {{repo, book, beforeSync: () => Promise<void>, beforeConnect?: () => Promise<void>,
@@ -60,7 +42,7 @@ const button = (text, onclick, className = '') =>
  */
 export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, beforeSwitch, toast, leaveAbo, refreshAbo }) {
   const dlg = $('#sync-dialog'); // Cloud: Abgleich, Mitglieder, Veröffentlichen des geöffneten Buchs
-  const booksDlg = $('#books-dialog'); // Liederbücher: Liste, neu, Einladung, Abo
+  const booksDlg = $('#books-dialog'); // Liederbücher (books-ui.js) – hier nur für die Google-Dateiauswahl
   const btn = $('#btn-cloud');
   $('#sync-origin').textContent = location.origin;
   $('#sync-redirect').textContent = googleRedirectUri();
@@ -76,18 +58,9 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   const appKey = () => cfg('dropbox.appKey', DROPBOX_APP_KEY);
   // Einstellung des geöffneten Liederbuchs (eigene Schlüssel je Buch, siehe bookKey)
   const K = (base) => bookKey(book, base);
-  // Geteilte Liederbücher laufen immer über Google Drive; alle anderen wahlweise über Dropbox oder WebDAV
-  const kindOf = (b) => {
-    const k = localStorage.getItem(bookKey(b, 'sync.kind'));
-    return b.shared || !['webdav', 'dropbox'].includes(k) ? 'gdrive' : k;
-  };
-  const kind = () => kindOf(book);
-  const connectedFlag = () => localStorage.getItem(K('sync.provider')) === kind();
-  const webdavOf = (b) => ({
-    url: localStorage.getItem(bookKey(b, 'webdav.url')) || '',
-    user: localStorage.getItem(bookKey(b, 'webdav.user')) || '',
-    password: localStorage.getItem(bookKey(b, 'webdav.pass')) || '',
-  });
+  // Speicherort und Zugangsdaten des geöffneten Buchs (sync/book-settings.js)
+  const kind = () => syncKindOf(book);
+  const connectedFlag = () => connectedVia(book) === kind();
   const webdav = () => webdavOf(book);
   const configured = () => ({ webdav: Boolean(webdav().url), dropbox: Boolean(appKey()) })[kind()] ?? Boolean(clientId());
 
@@ -130,8 +103,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   // Ein anderes Gerät hat das Buch umbenannt: Namen überall nachziehen
   nameStore.addEventListener('remote-name', (e) => {
-    renderBookSelect();
-    renderBooks();
+    books.refresh();
     render();
     toast(`Liederbuch heißt jetzt „${e.detail}“ (auf einem anderen Gerät umbenannt)`);
   });
@@ -158,64 +130,6 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     } catch (err) {
       console.warn(err);
     }
-  }
-
-  // ---------- Liederbuch-Auswahl in der Kopfleiste ----------
-
-  async function switchTo(id) {
-    await beforeSwitch?.();
-    setActiveBook(id);
-    location.reload();
-  }
-
-  const bookLabel = (b) => (b.abo || b.readOnly ? `${b.name} (nur lesen)` : b.shared ? `${b.name} 👥` : b.name);
-  /** Optionen zu einem Liederbuch (Rechtsklick bzw. lang drücken in der Auswahl). */
-  function bookOptions(b) {
-    const isActive = b.id === book.id;
-    return [
-      !isActive && { label: 'Öffnen', icon: 'open', action: () => switchTo(b.id) },
-      !b.abo && { label: 'Umbenennen …', icon: 'edit', action: () => rename(b) },
-      isActive && { label: 'Cloud: Abgleich & Teilen …', icon: 'cloud', action: () => openDialog() },
-      '-',
-      b.own && { label: 'Entfernen …', icon: 'trash', danger: true, action: () => removeOwnBook(b) },
-      b.shared && isActive && { label: 'Verlassen …', icon: 'trash', danger: true, action: leaveBook },
-      b.abo && leaveAbo && { label: 'Abo beenden …', icon: 'trash', danger: true, action: () => leaveAbo(b) && (renderBooks(), renderBookSelect()) },
-      '-',
-      { label: 'Liederbücher verwalten …', action: () => openBooks() },
-    ];
-  }
-
-  /** Liederbuch-Auswahl in der Kopfleiste: eigenes Menü, damit jedes Buch Optionen per Rechtsklick hat. */
-  function renderBookSelect() {
-    const btn = $('#book-select');
-    btn.querySelector('.book-select-name').textContent = bookLabel(book);
-    btn.hidden = false;
-    $('#app-name').hidden = true;
-    const openAt = () => {
-      const r = btn.getBoundingClientRect();
-      return { x: r.left, y: r.bottom + 4 };
-    };
-    btn.onclick = () => {
-      const books = listBooks();
-      const menu = showMenu([
-        ...books.map((b) => ({
-          label: bookLabel(b),
-          checked: b.id === book.id,
-          action: () => b.id !== book.id && switchTo(b.id),
-          context: () => bookOptions(b),
-          contextTitle: b.name,
-        })),
-        '-',
-        { label: 'Neues Liederbuch …', icon: 'plus', action: () => openBooks({ create: true }) },
-        { label: 'Liederbücher verwalten …', action: () => openBooks() },
-      ], { ...openAt(), title: 'Liederbücher' });
-      menu.focusFirst();
-    };
-    // Rechtsklick auf den Namen oben: Optionen zum geöffneten Buch
-    btn.oncontextmenu = (e) => {
-      e.preventDefault();
-      showMenu(bookOptions(book), { ...openAt(), title: book.name }).focusFirst();
-    };
   }
 
   // ---------- Status ----------
@@ -258,13 +172,10 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#sync-now').hidden = !usable;
     $('#sync-connect').hidden = usable;
     $('#sync-connect').textContent = state === 'auth' ? 'Neu anmelden' : gd ? 'Mit Google anmelden' : 'Verbinden';
-    $('#book-actions').hidden = !clientId();
     // Abo: wird nie mit der Cloud abgeglichen – keine Einstellungen zum Abgleich zeigen
     $('#sync-config').hidden = Boolean(book.abo);
     $('#sync-card').classList.toggle('muted', Boolean(book.abo));
     $('#publish-from').textContent = book.name;
-    $('#book-new-from').textContent = book.name;
-    $('#drive-invite').hidden = !pendingJoin;
     for (const id of ['#sync-client-id', '#sync-api-key', '#sync-app-id']) $(id).disabled = usable;
     for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).disabled = usable;
     $('#dropbox-app-key').disabled = usable;
@@ -287,122 +198,6 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         : 'Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.';
   }
 
-  /** Angaben zu einem Abo: Adresse (zum Kopieren), Stand, Aktualisieren und Beenden. */
-  function aboDetails(b, isActive) {
-    const st = prefs.get('aboState')[b.id] || {};
-    const box = document.createElement('div');
-    box.className = 'abo-details';
-    const url = Object.assign(document.createElement('input'), { readOnly: true, value: b.abo.url, title: 'Adresse des Abos', className: 'abo-url' });
-    url.onfocus = () => url.select();
-    const copy = button('Kopieren', async () => {
-      try {
-        await navigator.clipboard.writeText(b.abo.url);
-        toast('Adresse kopiert');
-      } catch {
-        url.select();
-      }
-    });
-    const urlRow = document.createElement('div');
-    urlRow.className = 'abo-url-row';
-    urlRow.append(url, copy);
-    const facts = [
-      b.abo.publisher && `von ${b.abo.publisher}`,
-      `Stand ${fmtWhen(st.publishedAt)}`,
-      st.count != null && `${st.count} ${st.count === 1 ? 'Lied' : 'Lieder'}`,
-      b.abo.user && `angemeldet als ${b.abo.user}`,
-    ];
-    const info = span('hint', facts.filter(Boolean).join(' · '));
-    if (st.error) info.append(Object.assign(document.createElement('span'), { className: 'warn', textContent: ` · ⚠ ${st.error}` }));
-    const actions = document.createElement('div');
-    actions.className = 'abo-detail-actions';
-    if (isActive && refreshAbo) {
-      actions.append(button('Jetzt aktualisieren', async () => {
-        await refreshAbo({ quiet: false });
-        renderBooks();
-      }));
-    }
-    if (leaveAbo) actions.append(button('Abo beenden', () => leaveAbo(b) && (renderBooks(), renderBookSelect()), 'danger'));
-    box.append(urlRow, info, actions);
-    return box;
-  }
-
-  /** Wo ein Liederbuch abgeglichen wird, kurz (für die Liste). */
-  function whereOf(b) {
-    if (b.abo) return 'abonniert · nur lesen';
-    const account = localStorage.getItem(bookKey(b, 'gdrive.account'));
-    if (b.shared) return `geteilt · Google Drive${b.readOnly ? ' · nur lesen' : ''}${account ? ` · ${account}` : ''}`;
-    const k = localStorage.getItem(bookKey(b, 'sync.provider'));
-    if (k !== kindOf(b)) return 'nur auf diesem Gerät';
-    if (k === 'webdav') {
-      let host = '';
-      try {
-        host = new URL(webdavOf(b).url).host;
-      } catch {
-        /* egal */
-      }
-      return `WebDAV${host ? ` (${host})` : ''}`;
-    }
-    return k === 'dropbox' ? 'Dropbox' : `Google Drive${account ? ` · ${account}` : ''}`;
-  }
-
-  function renderBooks() {
-    const items = listBooks().map((b) => {
-      const isActive = b.id === book.id;
-      const row = li(span('book-name', b.name, whereOf(b)));
-      if (isActive) {
-        row.classList.add('active');
-        row.append(span('hint', 'geöffnet'));
-      } else {
-        row.append(button('Öffnen', () => switchTo(b.id)));
-      }
-      if (!b.abo) row.append(button('Umbenennen', () => rename(b)));
-      if (b.own) row.append(button('Entfernen', () => removeOwnBook(b), 'danger'));
-      if (b.shared && isActive) row.append(button('Verlassen', leaveBook, 'danger'));
-      if (b.abo) row.append(aboDetails(b, isActive));
-      return row;
-    });
-    $('#book-list').replaceChildren(...items);
-  }
-
-  function rename(b) {
-    const name = prompt('Neuer Name für das Liederbuch:', b.name)?.trim();
-    if (!name || name === b.name) return;
-    if (listBooks().some((x) => x.id !== b.id && x.name.toLowerCase() === name.toLowerCase())) {
-      toast('Ein Liederbuch mit diesem Namen gibt es schon');
-      return;
-    }
-    renameBook(b.id, name);
-    // Name gleicht mit ab: das geöffnete Buch sofort, andere beim nächsten Öffnen
-    if (b.id === book.id) {
-      book.name = name;
-      nameStore.renamed(name);
-    } else rememberRename(b, name);
-    renderBooks();
-    renderBookSelect();
-    render();
-    const synced = localStorage.getItem(bookKey(b, 'sync.provider'));
-    toast(synced ? `Umbenannt in „${name}“ – gilt auch auf deinen anderen Geräten` : `Umbenannt in „${name}“`);
-  }
-
-  /** Eigenes Liederbuch von diesem Gerät entfernen (die Datei in der Cloud bleibt). */
-  async function removeOwnBook(b) {
-    const synced = localStorage.getItem(bookKey(b, 'sync.provider'));
-    const msg = synced
-      ? `„${b.name}“ von diesem Gerät entfernen? Die Lieder hier werden gelöscht – was in der Cloud liegt, bleibt erhalten.`
-      : `„${b.name}“ löschen? Es ist mit keiner Cloud verbunden – seine Lieder sind dann weg.`;
-    if (!confirm(msg)) return;
-    if (b.id === book.id) {
-      engine?.stop();
-      provider?.signOut?.();
-    }
-    removeBook(b.id);
-    indexedDB.deleteDatabase(b.dbName);
-    if (b.id === book.id) return switchTo('personal');
-    renderBooks();
-    renderBookSelect();
-    toast(`„${b.name}“ entfernt`);
-  }
-
   async function renderMembers() {
     const box = $('#members');
     box.hidden = true;
@@ -414,7 +209,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       $('#members-book').textContent = book.name;
       $('#member-list').replaceChildren(...members.map((m) => {
         const owner = m.role === 'owner';
-        const row = li(span('member-name', m.displayName || m.emailAddress, owner ? 'Besitzer' : m.emailAddress));
+        const row = el('li', {}, textSpan('member-name', m.displayName || m.emailAddress, owner ? 'Besitzer' : m.emailAddress));
         if (!owner) {
           const role = document.createElement('select');
           role.title = 'Rechte';
@@ -430,7 +225,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
             renderMembers();
           };
           row.append(role);
-          row.append(button('Entfernen', async () => {
+          row.append(textButton('Entfernen', async () => {
             if (!confirm(`${m.displayName || m.emailAddress} aus „${book.name}“ entfernen?`)) return;
             try {
               await provider.removeMember(m.id);
@@ -579,7 +374,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       return;
     }
     pendingJoin = fileId;
-    openBooks();
+    books.open();
   }
   let pendingJoin = null;
 
@@ -775,58 +570,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     toast('Cloud-Sync getrennt – die Lieder bleiben auf diesem Gerät');
   };
 
-  // ---------- Neues Liederbuch ----------
-
-  /** WebDAV-Ordner für ein neues Buch: neben dem Ordner des geöffneten Buchs, benannt nach dem Buch. */
-  function webdavFolderFor(name) {
-    const base = webdav().url || localStorage.getItem('webdav.url') || '';
-    if (!base) return '';
-    const folder = base.replace(/[^/]*\.json$/i, '').replace(/\/*$/, '');
-    return `${folder.replace(/[^/]*$/, '')}${encodeURIComponent(name)}/`;
-  }
-
-  $('#book-new-ok').onclick = async () => {
-    const name = $('#book-new-name').value.trim();
-    if (!name) {
-      $('#book-new-name').focus();
-      return;
-    }
-    if (listBooks().some((b) => b.name.toLowerCase() === name.toLowerCase())) {
-      toast('Ein Liederbuch mit diesem Namen gibt es schon');
-      return;
-    }
-    try {
-      await beforeSync?.();
-      const created = addBook({ name });
-      const where = $('#book-new-kind').value;
-      if (where !== 'local') localStorage.setItem(bookKey(created, 'sync.kind'), where);
-      if (where === 'webdav') {
-        const w = webdav().url ? webdav() : webdavOf({ id: 'personal' });
-        const url = webdavFolderFor(name);
-        if (url) {
-          localStorage.setItem(bookKey(created, 'webdav.url'), url);
-          if (w.user) localStorage.setItem(bookKey(created, 'webdav.user'), w.user);
-          if (w.password) localStorage.setItem(bookKey(created, 'webdav.pass'), w.password);
-        }
-      }
-      if ($('#book-new-copy').checked) {
-        const songs = (await repo.allRecords()).filter((r) => !r.deletedAt);
-        await new SongRepository(await openIdbStore(created.dbName)).applyRemote(songs);
-      }
-      toast(where === 'local' ? `„${name}“ angelegt` : `„${name}“ angelegt – jetzt unter „Abgleich“ verbinden`);
-      if (where !== 'local') localStorage.setItem('openSyncDialog', '1');
-      await switchTo(created.id);
-    } catch (err) {
-      toast(`Anlegen fehlgeschlagen: ${err.message}`);
-    }
-  };
-
-  $('#book-join').onclick = () => {
-    saveSetup();
-    joinDrive();
-  };
-  $('#drive-invite-ok').onclick = () => joinDrive(pendingJoin);
-
+  /** Gemeinsames Liederbuch auf diesem Gerät entfernen. */
   async function leaveBook() {
     const owner = info?.ownedByMe || (await provider.info().catch(() => null))?.ownedByMe;
     const msg = owner
@@ -902,27 +646,11 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     dlg.showModal();
   }
 
-  /** Liederbücher-Dialog öffnen; create: gleich das Formular „Neues Liederbuch“. */
-  function openBooks({ create = false } = {}) {
-    render();
-    renderBooks();
-    $('#book-new').open = create || $('#book-new').open;
-    booksDlg.showModal();
-    if (create) {
-      $('#book-new-name').focus();
-      $('#book-new').scrollIntoView({ block: 'center' });
-    }
-  }
-
-  const reopenDialog = (d) => (d === booksDlg ? openBooks() : openDialog());
+  const reopenDialog = (d) => (d === booksDlg ? books.open() : openDialog());
 
   $('#btn-books').onclick = () => {
     dlg.close();
-    openBooks();
-  };
-  $('#btn-books-cloud').onclick = () => {
-    booksDlg.close();
-    openDialog();
+    books.open();
   };
 
   // Abgelaufene Anmeldung: Klick auf den Cloud-Knopf erneuert sie direkt
@@ -930,11 +658,31 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     if (engine?.state === 'auth' && kind() === 'gdrive' && (await connect({ silent: true }))) return;
     openDialog();
   };
-  for (const d of [dlg, booksDlg]) d.addEventListener('click', (e) => e.target === d && d.close());
+  dlg.addEventListener('click', (e) => e.target === dlg && dlg.close());
+
+  // Liederbücher (books-ui.js): bekommt vom Cloud-Teil nur, was es braucht
+  const books = setupBooks({
+    book, repo, toast, beforeSync, beforeSwitch, leaveAbo, refreshAbo,
+    cloud: {
+      openDialog,
+      leaveBook,
+      renamed(name) {
+        nameStore.renamed(name);
+        render();
+      },
+      stop() {
+        engine?.stop();
+        provider?.signOut?.();
+      },
+      join: joinDrive,
+      pendingJoin: () => pendingJoin,
+      googleReady: () => Boolean(clientId()),
+    },
+  });
+  const { switchTo } = books;
 
   build();
   render();
-  renderBookSelect();
   if (book.readOnly) setupReadOnlyBar();
   // Abo: wird über das Abo aktualisiert, nie mit der eigenen Cloud abgeglichen.
   // Geteilte Liederbücher gehören immer zu Google Drive: abgleichen, sobald einmal angemeldet.
@@ -971,11 +719,6 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       $('#invite-email').focus();
     },
     /** „Neues Liederbuch“ mit Speicherort und „Lieder übernehmen“ vorausgefüllt. */
-    openNewBook({ where = 'local', copy = false } = {}) {
-      openBooks({ create: true });
-      $('#book-new-kind').value = where;
-      $('#book-new-kind').dispatchEvent(new Event('change'));
-      $('#book-new-copy').checked = copy;
-    },
+    openNewBook: books.openNew,
   };
 }

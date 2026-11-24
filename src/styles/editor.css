@@ -1,32 +1,27 @@
-/* Editor: Bausteine, Liedinfo, Speicherstatus. */
+/* Editor: Bausteine, Liedinfo, Speicherstatus. Umschalter „Text | Akkorde“ steht in chord-tap.css. */
 
 .workspace.focus .pane-editor { display: none; }
-/* Editor */
 .pane-editor { border-right: 1px solid var(--border); background: var(--surface); }
+
+/* ---------- Knopfleiste ---------- */
 .snippets { display: flex; gap: .25em; min-width: 0; flex: 0 1 auto; overflow-x: auto; scrollbar-width: none; }
 .snippets::-webkit-scrollbar { display: none; }
 .snippets button { flex: none; min-height: 1.9rem; padding: .15em .55em; font-size: .85em; border-color: var(--border); }
+.syntax-btn { font-weight: 700; min-width: 2rem; border-radius: 999px !important; }
 .save-status { font-size: .8em; color: var(--muted); display: inline-flex; align-items: center; gap: .35em; }
 .save-status::before { content: ''; width: .5em; height: .5em; border-radius: 50%; background: currentColor; opacity: 0; }
 .save-status[data-state='saved']::before { background: #3b8c4a; opacity: 1; }
 .save-status[data-state='dirty']::before { background: #d18f1c; opacity: 1; }
 .save-status[data-state='error'] { color: var(--accent); }
+
+/* ---------- Textfeld ---------- */
 #editor {
   flex: 1; border: 0; resize: none; padding: 1em 1.2em; outline: none;
   font: 14px/1.6 ui-monospace, Consolas, 'Cascadia Mono', 'Courier New', monospace;
   background: var(--surface); tab-size: 4;
 }
-@media (max-width: 1200px) {
-  .save-status { font-size: 0; gap: 0; }
-  .save-status::before { font-size: 1rem; }
-}
-@media (max-width: 760px) {
-  .pane-list, .pane-editor { border-right: 0; }
-  .snippets button { min-height: 2.2rem; }
-  #editor { font-size: 15px; padding: .8em; }
-}
-.syntax-btn { font-weight: 700; min-width: 2rem; border-radius: 999px !important; }
-/* Liedinfo über dem Editor */
+
+/* ---------- Liedinfo über dem Editor ---------- */
 .song-meta { border-bottom: 1px solid var(--border); background: var(--surface-2); padding: .4em .8em; }
 .song-meta summary { cursor: pointer; font-weight: 600; font-size: .88em; padding: .2em 0; display: flex; gap: .6em; align-items: baseline; }
 .song-meta summary::-webkit-details-marker { display: none; }
@@ -42,29 +37,30 @@
 .meta-grid input, .meta-grid select { font-size: .95rem; width: 100%; color: var(--text); }
 .meta-grid select { min-height: 2rem; padding: .2em .5em; }
 .meta-grid input:invalid { border-color: var(--accent); } /* z. B. Dauer „3,20“ statt „3:20“ */
+.capo-help { grid-column: span 2; justify-self: start; font-size: .85em; min-height: 1.6rem; padding: 0; }
+
+/* ---------- Bildschirmgrößen ---------- */
 @media (max-width: 1200px) {
+  .save-status { font-size: 0; gap: 0; }
+  .save-status::before { font-size: 1rem; }
   .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
+  .pane-list, .pane-editor { border-right: 0; }
+  /* Knopfleiste: umbrechen statt abschneiden, etwas schmaler, damit „Text | Akkorde“ hinter dem „?“
+     noch in die zweite Zeile passt */
+  .editor-bar { align-items: flex-start; padding-inline: .3em; gap: .25em; }
+  .editor-bar .spacer { display: none; } /* nahm sonst die halbe Breite – Knöpfe in vier Zeilen */
+  .editor-bar .snippets { flex: 1 1 0; flex-wrap: wrap; overflow: visible; gap: .2em; }
+  .snippets button { min-height: 2.2rem; }
+  .editor-bar .snippets button { min-height: 2.5rem; min-width: 2.2rem; padding-inline: .4em; font-size: .82em; }
+  #btn-delete { padding-inline: .35em; }
+  #editor { font-size: 15px; padding: .8em; }
+  /* Liedinfo: höchstens die halbe Höhe, Rest scrollt – der Editor bleibt sichtbar */
+  .song-meta summary { min-height: 2.4rem; align-items: center; }
+  .song-meta[open] .meta-grid { max-height: 42vh; overflow-y: auto; }
   .meta-grid input, .meta-grid select { font-size: 16px; }
   .meta-grid select { min-height: 2.4rem; }
-}
-/* Capo-Hilfe */
-.capo-help { grid-column: span 2; justify-self: start; font-size: .85em; min-height: 1.6rem; padding: 0; }
-/* Liedinfo am Handy: höchstens die halbe Höhe, Rest scrollt – der Editor bleibt sichtbar */
-@media (max-width: 760px) {
-  .song-meta[open] .meta-grid { max-height: 42vh; overflow-y: auto; }
-  .song-meta summary { min-height: 2.4rem; align-items: center; }
-  /* Symbolleiste über dem Editor: umbrechen statt abschneiden */
-  .editor-bar { align-items: flex-start; }
-  .editor-bar .spacer { display: none; } /* nahm sonst die halbe Breite – Knöpfe in vier Zeilen */
-  .editor-bar .snippets { flex: 1 1 0; flex-wrap: wrap; overflow: visible; }
-  .editor-bar .snippets button { min-height: 2.5rem; min-width: 2.75rem; }
-  /* etwas schmaler, damit „Text | Akkorde“ hinter dem „?“ noch in die zweite Zeile passt */
-  .editor-bar { padding-inline: .3em; gap: .25em; }
-  #btn-delete { padding-inline: .35em; }
-  .editor-bar .snippets { gap: .2em; }
-  .editor-bar .snippets button { min-width: 2.2rem; padding-inline: .4em; font-size: .82em; }
 }
 @media (max-width: 360px) {
   .editor-bar { padding-inline: .2em; gap: .2em; }

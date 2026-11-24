@@ -1,9 +1,8 @@
-// Abonnierte Liederbücher: per Einladungslink abonnieren, regelmäßig aktualisieren, beenden – und
-// einzelne Lieder ins eigene Liederbuch kopieren. Ein Abo ist ein eigenes Liederbuch (eigene
+// Abonnierte Liederbücher: per Einladungslink abonnieren, regelmäßig aktualisieren, beenden. Lieder ins
+// eigene Liederbuch kopieren: copySongsTo in song-actions.js. Ein Abo ist ein eigenes Liederbuch (eigene
 // Datenbank), nur zum Lesen (siehe readOnly in app-state.js).
 
 import { addAboBook, listBooks, removeBook, setActiveBook, PERSONAL, personalBookName } from '../books.js';
-import { findDuplicates } from '../core/song-list.js';
 import { parseAboLink } from '../formats/abo.js';
 import { prefs } from '../prefs.js';
 import { SongRepository } from '../storage/repository.js';
@@ -206,26 +205,3 @@ export function startAbo() {
   if (book.abo) refreshAbo();
 }
 
-// ---------- Lieder ins eigene Liederbuch kopieren ----------
-
-/**
- * Lieder aus dem Abo nach „Mein Liederbuch“ kopieren (dort bearbeitbar). Schon vorhandene
- * (gleicher Titel und Interpret) werden übersprungen.
- * @param {object[]} songs  Datensätze aus dem Abo
- */
-export async function copyToPersonal(songs) {
-  const mine = new SongRepository(await openIdbStore(PERSONAL.dbName));
-  const existing = await mine.list();
-  let copied = 0;
-  let skipped = 0;
-  for (const s of songs) {
-    if (findDuplicates(existing, s).length) {
-      skipped++;
-      continue;
-    }
-    existing.push(await mine.create(s.chordpro, { transpose: s.transpose || 0, accidentals: s.accidentals || 'auto' }));
-    copied++;
-  }
-  toast([copied && `${copied} ${copied === 1 ? 'Lied' : 'Lieder'} nach „${personalBookName()}“ kopiert`,
-    skipped && `${skipped} gab es dort schon`].filter(Boolean).join(' · ') || 'Nichts kopiert');
-}

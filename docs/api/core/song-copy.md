@@ -5,7 +5,7 @@
 Mehrere Lieder in ein anderes Liederbuch kopieren: was dort schon steht (gleicher Titel und – falls beide einen haben – Interpret), wird übersprungen. Reine Logik, getestet in tests/song-copy.test.js.
 
 **Benutzt:** [`core/song-list.js`](song-list.md)  
-**Benutzt von:** [`ui/selection.js`](../ui/selection.md)
+**Benutzt von:** [`ui/selection.js`](../ui/selection.md), [`ui/song-actions.js`](../ui/song-actions.md)
 
 ## Exportiert
 

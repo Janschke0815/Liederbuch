@@ -112,6 +112,9 @@ body.resizing iframe { pointer-events: none; }
   .actions button { padding: .65em .8em; min-height: 2.8rem; }
   .workspace, .workspace.focus { grid-template-columns: 1fr; }
   .workspace > .pane { display: none; }
+  .workspace[data-view='list'] .pane-list,
+  .workspace[data-view='editor'] .pane-editor,
+  .workspace[data-view='preview'] .pane-preview { display: flex; }
   .splitter { display: none; }
   .mobile-tabs {
     display: flex;

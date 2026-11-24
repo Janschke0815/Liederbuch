@@ -33,7 +33,8 @@ function optionButton(o, capoOld) {
   return b;
 }
 
-$('#btn-capo-help').onclick = () => {
+/** Capo-Hilfe für das geöffnete Lied. */
+export function openCapoHelp() {
   if (!state.current) return;
   const song = parseChordPro(editor.value);
   const capoOld = Number(song.meta.capo) || 0;
@@ -46,5 +47,6 @@ $('#btn-capo-help').onclick = () => {
   if (now && !shown.includes(now)) shown.push(now);
   $('#capo-options').replaceChildren(...shown.map((o) => el('li', {}, optionButton(o, capoOld))));
   dialog.showModal();
-};
+}
+$('#btn-capo-help').onclick = openCapoHelp;
 closeOnBackdrop(dialog);

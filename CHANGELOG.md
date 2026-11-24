@@ -8,6 +8,20 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.3.15 – 24.11.2026 · Aufgeräumt unter der Haube
+
+Für Nutzer sieht alles aus wie vorher – der Code ist nach vielen kleinen Erweiterungen neu geordnet:
+
+- „Zur Setliste hinzufügen“ und „In ein Liederbuch kopieren“ laufen für ein einzelnes Lied, das Abo und die
+  Mehrfachauswahl jetzt über dieselben Funktionen. Kleine Angleichung dabei: Auch beim Kopieren aus einem
+  Abo nach „Mein Liederbuch“ bietet die Meldung jetzt „Öffnen“ an und die Notiz zum Lied wird mitkopiert.
+- Liederbücher (Auswahl oben, Verwaltung, Neues Liederbuch) und Cloud-Abgleich sind getrennte Teile, ebenso
+  „Was kann ich spielen?“ und die Mehrfachauswahl in der Liederliste.
+- Menüs rufen Teilen, Capo-Hilfe, Spielen, Veröffentlichen und Live direkt auf, statt fremde Knöpfe
+  „anzuklicken“ – bricht nicht mehr unbemerkt, wenn ein Knopf umbenannt wird.
+- CSS der Vorschau geordnet: „Akkorde per Antippen“ in eigener Datei, Handy-Regeln je Bereich an einer
+  Stelle, eine unbenutzte Regel entfernt. Vorher/nachher verglichen – keine sichtbare Änderung.
+
 ## 2.3.14 – 24.11.2026 · Mehrere Lieder auf einmal
 
 - **Mehrfachauswahl in der Liederliste:** mit dem Symbol ☑ über der Liste, über *Auswählen* im Rechtsklick- bzw.

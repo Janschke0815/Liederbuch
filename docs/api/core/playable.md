@@ -5,7 +5,7 @@
 "Was kann ich spielen?": Lieder, die nur aus bekannten Griffen bestehen (optional mit Capo).
 
 **Benutzt:** [`core/chord-shapes.js`](chord-shapes.md), [`core/chords.js`](chords.md)  
-**Benutzt von:** [`ui/list.js`](../ui/list.md)
+**Benutzt von:** [`ui/chord-filter.js`](../ui/chord-filter.md)
 
 ## Exportiert
 

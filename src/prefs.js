@@ -9,7 +9,7 @@
 //   settings          Schrift, Farben, Druck            src/settings/settings.js
 //   printOptions, printFonts, printPins                src/print-ui.js, src/print/*.js
 //   books, activeBook gemeinsame Liederbücher           src/books.js
-//   sync.*, webdav.*  Cloud-Verbindung, Zugangsdaten    src/sync-ui.js, src/sync/*.js
+//   sync.*, webdav.*  Cloud-Verbindung, Zugangsdaten    src/sync-ui.js, src/books-ui.js, src/sync/*.js
 //   liveLead          Raum-Code des Vorsingers (sessionStorage, nur bis der Tab zu ist)   src/live-ui.js
 
 export const PREFS = {

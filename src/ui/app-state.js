@@ -1,9 +1,16 @@
 // Gemeinsamer Zustand der Oberfläche: welches Liederbuch, seine Datenbanken und das gerade
 // geöffnete Lied. Alle ui-Module holen sich das hier, statt es herumzureichen.
 //
-// Ereignisse (auf window), auf die sich Module anmelden können:
-//   songopened   ein anderes Lied ist geöffnet (detail: id oder null)
-//   repo 'change'  Lieder wurden geändert (eigene oder vom Abgleich)
+// Ereignisse, auf die sich Module anmelden können (auf window, wenn nicht anders angegeben):
+//   songopened        ein anderes Lied ist geöffnet (detail: id oder null)            ui/song.js
+//   previewrendered   die Vorschau ist neu gezeichnet                                 ui/song.js
+//   settingschange    Anzeige-Einstellungen geändert (detail: Einstellungen)          settings/settings.js
+//   selectionchange   Mehrfachauswahl in der Liste geändert                           ui/list-select.js
+//   playsong          Spielmodus zeigt ein Lied (detail: {chordpro, transpose, accidentals})  play-mode.js
+//   metronome-beat    Schlag des Metronoms (detail: Nummer im Takt)                   ui/preview-tools.js
+//   repo/sets 'change'         Lieder bzw. Setlisten geändert (eigene oder vom Abgleich)  storage/*.js
+//   repo/sets 'remote-change'  nur Änderungen vom Abgleich (detail: IDs)                  storage/*.js
+//   'remote-name' (BookNameStore)  Buch auf einem anderen Gerät umbenannt                 sync/book-name.js
 
 import { activeBook } from '../books.js';
 import { SongRepository } from '../storage/repository.js';
@@ -30,6 +37,7 @@ export const state = { current: null };
  *   play      setupPlayMode()  – open(id, list?)
  *   setlists  setupSetlists()  – open(id)
  *   sync      setupSync()      – shareState(), openCloud({provider, members}), openNewBook({where, copy})
+ *   live      setupLive()      – open()
  *   started   Promise, erfüllt sobald das erste Lied geöffnet ist
  */
-export const services = { printer: null, play: null, setlists: null, sync: null, started: null };
+export const services = { printer: null, play: null, setlists: null, sync: null, live: null, started: null };

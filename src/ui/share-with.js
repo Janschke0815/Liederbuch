@@ -4,6 +4,8 @@
 
 import { book, readOnly, services } from './app-state.js';
 import { $, closeOnBackdrop } from './dom.js';
+import { openPublish } from './publish.js';
+import { shareSong } from './share.js';
 
 const dlg = $('#sharewith-dialog');
 
@@ -65,16 +67,16 @@ function shareEditable() {
 $('#sw-next').onclick = () => {
   if (dlg.querySelector('input[name="sw-mode"]:checked').value === 'edit') return shareEditable();
   dlg.close();
-  $('#btn-publish').click(); // bestehender Ablauf „Veröffentlichen …“
+  openPublish();
 };
 $('#sw-back').onclick = () => showStep(false);
 $('#sw-song').onclick = () => {
   dlg.close();
-  $('#btn-share').click();
+  shareSong();
 };
 $('#sw-live').onclick = () => {
   dlg.close();
-  $('#btn-live').click();
+  services.live.open();
 };
 $('#btn-sharewith').onclick = open;
 $('#sync-sharewith').onclick = () => {

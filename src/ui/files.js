@@ -128,7 +128,9 @@ export async function importFiles(files) {
 }
 
 // Dateidialog
-$('#btn-open').onclick = () => $('#file-input').click();
+/** Dateiauswahl zum Öffnen von Liedern oder Sicherungen. */
+export const chooseFiles = () => $('#file-input').click();
+$('#btn-open').onclick = chooseFiles;
 $('#file-input').onchange = async (e) => {
   const files = [...e.target.files];
   e.target.value = '';

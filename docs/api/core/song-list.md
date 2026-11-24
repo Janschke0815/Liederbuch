@@ -5,7 +5,7 @@
 Liederliste: Sortierung und Erkennen doppelter Lieder.
 
 **Benutzt:** [`core/text.js`](text.md)  
-**Benutzt von:** [`core/song-copy.js`](song-copy.md), [`ui/abo.js`](../ui/abo.md), [`ui/add-songs.js`](../ui/add-songs.md), [`ui/list.js`](../ui/list.md)
+**Benutzt von:** [`core/song-copy.js`](song-copy.md), [`ui/add-songs.js`](../ui/add-songs.md), [`ui/list.js`](../ui/list.md)
 
 ## Exportiert
 

@@ -61,6 +61,21 @@ export async function snapshot() {
     await wait(150);
     capture(`view-${view}`, out);
   }
+  // Akkorde per Antippen: am Handy Bearbeiten → „Akkorde“, am PC der Knopf über der Vorschau
+  const chordsBtn = $('.edit-mode [data-edit=chords]');
+  $('.mobile-tabs [data-view=editor]').click();
+  await wait(150);
+  if (chordsBtn?.offsetParent) {
+    chordsBtn.click();
+    await wait(200);
+    capture('edit-chords', out);
+    $('.edit-mode [data-edit=text]').click();
+  } else if ($('#btn-chordtap')?.offsetParent) {
+    $('#btn-chordtap').click();
+    await wait(200);
+    capture('chordtap', out);
+    $('#btn-chordtap').click();
+  }
   for (const [btn, label] of [['#btn-settings', 'settings'], ['#btn-cloud', 'cloud'], ['#btn-keys', 'keys'], ['#btn-import', 'import'], ['#btn-trash', 'trash']]) {
     $(btn).click();
     await wait(400);

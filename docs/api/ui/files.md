@@ -13,6 +13,10 @@ Dateien öffnen (Sicherung als ZIP oder JSON, ChordPro- und Textdateien) und Sic
 
 Importiert Dateien (Sicherung, ZIP, ChordPro, Text).
 
+### `chooseFiles()`
+
+Dateiauswahl zum Öffnen von Liedern oder Sicherungen.
+
 ## Intern
 
 Nicht exportiert – nur innerhalb des Moduls benutzt.

@@ -5,7 +5,13 @@
 Lied teilen: über das Teilen-Menü des Geräts, als ChordPro-Datei, als Text oder als PDF – jeweils in der aktuellen Transposition.
 
 **Benutzt:** [`formats/export-text.js`](../formats/export-text.md), [`formats/file-format.js`](../formats/file-format.md), [`settings/settings.js`](../settings/settings.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md), [`ui/song-actions.js`](song-actions.md), [`ui/song.js`](song.md)  
-**Benutzt von:** [`app.js`](../app.md)
+**Benutzt von:** [`app.js`](../app.md), [`ui/context-menus.js`](context-menus.md), [`ui/share-with.js`](share-with.md)
+
+## Exportiert
+
+### `async shareSong()`
+
+Dialog „Lied teilen“ für das geöffnete Lied.
 
 ## Intern
 

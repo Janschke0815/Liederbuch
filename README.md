@@ -643,7 +643,8 @@ und fasst beim Bauen alles zu wenigen Dateien in `dist/` zusammen. Abhängigkeit
                       app-state.js   Liederbuch, Datenbanken, geöffnetes Lied
                       dom.js         kleine Hilfen: $, toast, ask(dialog) …
                       song.js        Lied öffnen/speichern, Vorschau, Transponieren, Liedinfo
-                      list.js        Liederliste (Suche, Filter, Sortierung)
+                      list.js        Liederliste (Suche, Tags, Sortierung); chord-filter.js „Was kann
+                                     ich spielen?“; list-select.js + selection.js Mehrfachauswahl
                       view.js        Handy-Reiter, Editor ausblenden, Menü
                       song-actions.js, snippets.js, preview-tools.js, paste.js, add-songs.js,
                       files.js, trash.js, share.js, capo-help.js, context-menus.js,
@@ -654,7 +655,8 @@ und fasst beim Bauen alles zu wenigen Dateien in `dist/` zusammen. Abhängigkeit
     src/app.js      Einstieg: steckt alles zusammen, öffnet das erste Lied
     src/prefs.js    alles, was pro Gerät gemerkt wird (localStorage), mit Standardwerten
     src/types.js    Beschreibung der Datensätze (nur für den Editor)
-    src/play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js, sync-ui.js   größere Bereiche
+    src/play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js   größere Bereiche
+    src/sync-ui.js  Cloud: Abgleich, Mitglieder, Einladungen; books-ui.js: Liederbücher (Auswahl, Verwaltung)
     src/pwa.js      Service Worker anmelden, Offline-Hinweis, Installieren
     public/         wird unverändert nach dist/ kopiert:
                       sw.js                 Service Worker (Cache „Netz zuerst“)

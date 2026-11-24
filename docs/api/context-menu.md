@@ -12,7 +12,7 @@ Eintrag: { label, icon?, hint?, action?, disabled?, danger?, checked?, items? (U
          oder '-' für eine Trennlinie
 ```
 
-**Benutzt von:** [`print-ui.js`](print-ui.md), [`setlist-ui.js`](setlist-ui.md), [`sync-ui.js`](sync-ui.md), [`ui/context-menus.js`](ui/context-menus.md), [`ui/selection.js`](ui/selection.md), [`ui/song.js`](ui/song.md), [`ui/toolbar.js`](ui/toolbar.md)
+**Benutzt von:** [`books-ui.js`](books-ui.md), [`print-ui.js`](print-ui.md), [`setlist-ui.js`](setlist-ui.md), [`ui/context-menus.js`](ui/context-menus.md), [`ui/selection.js`](ui/selection.md), [`ui/song.js`](ui/song.md), [`ui/toolbar.js`](ui/toolbar.md)
 
 ## Exportiert
 

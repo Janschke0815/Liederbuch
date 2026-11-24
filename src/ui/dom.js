@@ -12,6 +12,13 @@ export function el(tag, props = {}, ...children) {
   return node;
 }
 
+/** Knopf mit Text: textButton('Öffnen', () => …, 'danger') */
+export const textButton = (text, onclick, className = '') => el('button', { type: 'button', textContent: text, onclick, className });
+
+/** Text mit optionaler kleiner zweiter Zeile: textSpan('book-name', 'Name', 'Google Drive') */
+export const textSpan = (className, text, small) =>
+  el('span', { className, textContent: text }, ...(small ? [el('small', { textContent: small })] : []));
+
 /** Schmale Ansicht (Handy): dieselbe Grenze wie in den CSS-Dateien. */
 export const isMobile = () => matchMedia('(max-width: 760px)').matches;
 

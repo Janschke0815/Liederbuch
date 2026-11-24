@@ -24,13 +24,15 @@ function currentExport() {
 }
 const asFile = ({ name, chordpro }) => new File([chordpro], `${name}.cho`, { type: 'text/plain' });
 
-$('#btn-share').onclick = async () => {
+/** Dialog „Lied teilen“ für das geöffnete Lied. */
+export async function shareSong() {
   if (!state.current) return toast('Kein Lied geöffnet');
   await flushSave();
   $('#share-title').textContent = state.current.title || 'Ohne Titel';
   $('#share-native').hidden = !navigator.canShare?.({ files: [asFile(currentExport())] }) && !navigator.share;
   dialog.showModal();
-};
+}
+$('#btn-share').onclick = shareSong;
 $('#share-native').onclick = async () => {
   const exp = currentExport();
   const file = asFile(exp);

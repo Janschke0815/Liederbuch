@@ -1,14 +1,14 @@
-// Liederliste links: Suche, Tag-Filter, „Was kann ich spielen?“, Sortierung.
+// Liederliste links: Suche, Tag-Filter, Sortierung, Einträge, Kopf weggleiten lassen.
 // Die Liste zeichnet sich selbst neu, wenn sich Lieder ändern oder ein anderes Lied geöffnet wird.
+// „Was kann ich spielen?“ steht in chord-filter.js, die Mehrfachauswahl in list-select.js (Zustand)
+// und selection.js (Leiste, Aktionen).
 
-import { parseChordPro } from '../core/chordpro.js';
-import { transposeChord } from '../core/chords.js';
-import { parseKnown, playableCapo } from '../core/playable.js';
 import { SORT_MODES, sortSongs, sortDirectionLabel, letterOf } from '../core/song-list.js';
-import { usedChords } from '../render/song-view.js';
 import { prefs } from '../prefs.js';
 import { book, repo, state } from './app-state.js';
+import { applyChordFilter, capoFor, chordFilterActive, onChordFilterChange } from './chord-filter.js';
 import { $, $$, el, isMobile } from './dom.js';
+import { selection, selectRange, toggleSelected } from './list-select.js';
 import { openSong } from './song.js';
 import { setView } from './view.js';
 
@@ -36,98 +36,6 @@ async function renderTagFilter() {
     return b;
   }));
   $('#dl-tags').replaceChildren(...tags.map((t) => new Option(t.tag)));
-}
-
-// ---------- „Was kann ich spielen?“ – Filter nach bekannten Griffen ----------
-
-const cf = {
-  open: prefs.get('chordFilterOpen'), // eingeschaltet: filtert, sobald Griffe eingetragen sind
-  expanded: prefs.get('chordFilterExpanded'), // Eingabefeld sichtbar (eingeklappt filtert es weiter)
-  chords: prefs.get('chordFilterChords'),
-  capo: prefs.get('chordFilterCapo'),
-};
-const capoHint = new Map(); // songId -> Capo-Bund für die Anzeige in der Liste
-let beforeChordFilter = 0; // Anzahl vor dem Griff-Filter – für „Gefiltert: 12 von 40“ über der Liste
-let syncChordFilter = () => {};
-
-const chordFilterActive = () => cf.open && parseKnown(cf.chords).size > 0;
-
-/** Lieder filtern, die nur aus bekannten Griffen bestehen (mit gespeicherter Transposition). */
-function applyChordFilter(songs) {
-  capoHint.clear();
-  if (!chordFilterActive()) return songs;
-  const known = parseKnown(cf.chords);
-  return songs.filter((s) => {
-    const chords = usedChords(parseChordPro(s.chordpro)).map((c) => transposeChord(c, s.transpose || 0, false));
-    const capo = playableCapo(chords, known, { withCapo: cf.capo });
-    if (capo === null) return false;
-    if (capo > 0) capoHint.set(s.id, capo);
-    return true;
-  });
-}
-
-{
-  const panel = $('#cf-panel');
-  const toggle = $('#cf-toggle');
-  const save = () => {
-    prefs.set('chordFilterOpen', cf.open);
-    prefs.set('chordFilterExpanded', cf.expanded);
-  };
-  const sync = () => {
-    const shown = cf.open && cf.expanded;
-    panel.hidden = !shown;
-    toggle.setAttribute('aria-expanded', String(shown));
-    toggle.classList.toggle('active', chordFilterActive());
-    toggle.classList.toggle('collapsed', cf.open && !cf.expanded);
-    // Eingeklappt und aktiv: statt der Frage die eigenen Griffe zeigen – eine kurze Zeile
-    toggle.querySelector('.cf-label').textContent = chordFilterActive() && !cf.expanded
-      ? `🎸 ${cf.chords.trim().replace(/[\s,;]+/g, ' ')}`
-      : '🎸 Was kann ich spielen?';
-  };
-  syncChordFilter = sync;
-  $('#cf-chords').value = cf.chords;
-  $('#cf-capo').checked = cf.capo;
-  /** Einklappen; ohne eingetragene Griffe heißt das: Filter aus. */
-  const collapse = () => {
-    cf.expanded = false;
-    if (!parseKnown(cf.chords).size) cf.open = false;
-    save();
-    sync();
-    refreshList();
-  };
-  toggle.onclick = () => {
-    if (!cf.open) {
-      cf.open = true;
-      cf.expanded = true;
-    } else if (cf.expanded) {
-      return collapse();
-    } else cf.expanded = true;
-    save();
-    sync();
-    refreshList();
-    if (cf.expanded) $('#cf-chords').focus();
-  };
-  // Enter (bzw. „Fertig“ auf der Handy-Tastatur): einklappen, Filter bleibt
-  $('#cf-chords').addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter') return;
-    e.preventDefault();
-    e.target.blur();
-    collapse();
-  });
-  let t;
-  $('#cf-chords').addEventListener('input', (e) => {
-    cf.chords = e.target.value;
-    prefs.set('chordFilterChords', cf.chords);
-    sync();
-    clearTimeout(t);
-    t = setTimeout(refreshList, 200);
-  });
-  $('#cf-capo').addEventListener('change', (e) => {
-    cf.capo = e.target.checked;
-    prefs.set('chordFilterCapo', cf.capo);
-    refreshList();
-  });
-  sync();
 }
 
 // ---------- Sortierung (gilt ohne Suchbegriff; Suchtreffer bleiben nach Relevanz) ----------
@@ -158,6 +66,8 @@ syncSortDir();
 
 // ---------- Liste ----------
 
+let beforeChordFilter = 0; // Anzahl vor dem Griff-Filter – für „Gefiltert: 12 von 40“ über der Liste
+
 /** Lieder in der Reihenfolge der Liste (Suche, Tag, Griff-Filter, Sortierung) – auch fürs Blättern im Spielmodus. */
 export async function listedSongs() {
   const all = await repo.list({ query: search.value, tag: activeTag });
@@ -171,7 +81,7 @@ function songButton(s) {
   btn.dataset.id = s.id;
   if (selection.active) btn.setAttribute('aria-pressed', String(selection.ids.has(s.id)));
   let artist = s.artist;
-  if (capoHint.has(s.id)) artist += `${s.artist ? ' · ' : ''}mit Capo ${capoHint.get(s.id)}`;
+  if (capoFor(s.id)) artist += `${s.artist ? ' · ' : ''}mit Capo ${capoFor(s.id)}`;
   btn.append(
     el('span', { className: 'song-item-title', textContent: s.title || 'Ohne Titel' }),
     el('span', { className: 'song-item-artist', textContent: artist }),
@@ -216,22 +126,11 @@ async function render() {
   $('#welcome').hidden = Boolean(filtered || songs.length > 1 || document.body.dataset.readonly || prefs.get('welcomeHidden'));
 }
 
-$('#filter-clear').onclick = () => {
-  cf.open = false; // Griffe bleiben gespeichert – beim nächsten Aufklappen wieder da
-  prefs.set('chordFilterOpen', false);
-  syncChordFilter();
-  refreshList();
+// Erste Schritte ausblenden (die anderen Knöpfe der Karte verbindet app.js)
+$('#welcome [data-welcome=hide]').onclick = () => {
+  prefs.set('welcomeHidden', true);
+  $('#welcome').hidden = true;
 };
-
-$('#welcome').addEventListener('click', (e) => {
-  const what = e.target.closest('[data-welcome]')?.dataset.welcome;
-  const target = { new: '#btn-new', import: '#btn-import', open: '#btn-open', cloud: '#btn-cloud' }[what];
-  if (target) $(target).click();
-  else if (what === 'hide') {
-    prefs.set('welcomeHidden', true);
-    $('#welcome').hidden = true;
-  }
-});
 
 // Neu zeichnen: mehrere Anlässe kurz hintereinander ergeben nur einen Durchlauf
 let pending = null;
@@ -244,6 +143,7 @@ export function refreshList() {
   return pending;
 }
 repo.addEventListener('change', () => refreshList());
+onChordFilterChange(refreshList);
 addEventListener('songopened', () => refreshList());
 
 /** Suche leeren (z. B. nach dem Anlegen eines Liedes, damit es sichtbar ist). */
@@ -273,69 +173,6 @@ listEl.addEventListener('click', async (e) => {
   await openSong(btn.dataset.id);
   if (isMobile()) setView('preview');
 });
-
-// ---------- Mehrfachauswahl (Leiste und Aktionen: ui/selection.js) ----------
-
-/** Ausgewählte Lieder. Ereignis „selectionchange“ auf window bei jeder Änderung. */
-export const selection = { active: false, ids: new Set(), last: null };
-
-function selectionChanged() {
-  selection.active = selection.active || selection.ids.size > 0;
-  for (const b of $$('.song-item', listEl)) {
-    if (selection.active) b.setAttribute('aria-pressed', String(selection.ids.has(b.dataset.id)));
-    else b.removeAttribute('aria-pressed');
-  }
-  listEl.classList.toggle('selecting', selection.active);
-  dispatchEvent(new Event('selectionchange'));
-}
-
-/** Auswahlmodus starten (optional gleich mit einem Lied). */
-export function startSelection(id = null) {
-  selection.active = true;
-  if (id) {
-    selection.ids.add(id);
-    selection.last = id;
-  }
-  selectionChanged();
-}
-
-/** Lied an-/abwählen. */
-export function toggleSelected(id) {
-  if (selection.ids.has(id)) selection.ids.delete(id);
-  else selection.ids.add(id);
-  selection.last = id;
-  selection.active = true;
-  selectionChanged();
-}
-
-/** Alle Lieder zwischen zwei (in der Reihenfolge der Liste) auswählen. */
-function selectRange(fromId, toId) {
-  const ids = $$('.song-item', listEl).map((b) => b.dataset.id);
-  const [a, b] = [ids.indexOf(fromId), ids.indexOf(toId)].sort((x, y) => x - y);
-  if (a < 0) return toggleSelected(toId);
-  for (const id of ids.slice(a, b + 1)) selection.ids.add(id);
-  selection.last = toId;
-  selectionChanged();
-}
-
-/** Alle sichtbaren Lieder auswählen bzw. – sind schon alle gewählt – keines. */
-export function selectAllVisible() {
-  const ids = $$('.song-item', listEl).map((b) => b.dataset.id);
-  const all = ids.every((id) => selection.ids.has(id));
-  for (const id of ids) {
-    if (all) selection.ids.delete(id);
-    else selection.ids.add(id);
-  }
-  selectionChanged();
-}
-
-/** Auswahlmodus beenden. */
-export function endSelection() {
-  selection.active = false;
-  selection.ids.clear();
-  selection.last = null;
-  selectionChanged();
-}
 
 // ---------- Kopf der Liste (Suche, Filter, Tags) weg- und hereingleiten lassen ----------
 // Runterscrollen: Kopf gleitet nach oben weg, die Liste bekommt den Platz. Ein Stück hochscrollen: Kopf

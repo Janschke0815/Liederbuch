@@ -3,15 +3,24 @@
 
 import { attachContextMenu } from '../context-menu.js';
 import { loadSettings, saveSettings } from '../settings/settings.js';
-import { personalBookName } from '../books.js';
-import { readOnly, repo, state, services } from './app-state.js';
-import { copyToPersonal } from './abo.js';
+import { getBook, PERSONAL, personalBookName } from '../books.js';
+import { readOnly, repo, state } from './app-state.js';
 import { $, isMobile } from './dom.js';
-import { listEl, selection, startSelection } from './list.js';
+import { listEl } from './list.js';
+import { selection, startSelection } from './list-select.js';
 import { getViewZoom, setViewZoom } from './preview-tools.js';
 import { editor, openSong, setViewOption } from './song.js';
-import { deleteSong, duplicateSong, editSong, printSong, setlistMenu } from './song-actions.js';
+import { copySongsTo, deleteSong, duplicateSong, editSong, playSong, printSong, setlistMenu } from './song-actions.js';
+import { openCapoHelp } from './capo-help.js';
+import { shareSong } from './share.js';
 import { setView } from './view.js';
+
+/** Abo: „In ‚Mein Liederbuch' kopieren“. */
+const copyMineItem = (song) => ({
+  label: `In „${personalBookName()}“ kopieren`, icon: 'paste', action: () => copySongsTo([song], getBook(PERSONAL.id)),
+});
+/** Lieder für das Setlisten-Menü: frisch aus der Datenbank, falls inzwischen geändert. */
+const songsById = (id) => async () => [await repo.get(id)].filter(Boolean);
 
 attachContextMenu(listEl, '.song-item', async (btn) => {
   const id = btn.dataset.id;
@@ -20,22 +29,22 @@ attachContextMenu(listEl, '.song-item', async (btn) => {
   if (readOnly) {
     return [
       { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
-      { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: async () => { await openSong(id); services.play.open(id); } },
+      { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: () => playSong(id) },
       { label: 'Auswählen', icon: 'select', hint: 'Strg+Klick', action: () => startSelection(id) },
       '-',
-      { label: `In „${personalBookName()}“ kopieren`, icon: 'paste', action: () => copyToPersonal([song]) },
+      copyMineItem(song),
       { label: 'Drucken / PDF', icon: 'print', action: () => printSong(song) },
     ];
   }
   return [
     { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
     { label: 'Bearbeiten', icon: 'edit', action: async () => { await openSong(id); editSong(); } },
-    { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: async () => { await openSong(id); services.play.open(id); } },
+    { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: () => playSong(id) },
     { label: 'Auswählen', icon: 'select', hint: 'Strg+Klick', action: () => startSelection(id) },
     '-',
-    await setlistMenu(id),
+    await setlistMenu(songsById(id)),
     { label: 'Duplizieren', icon: 'paste', action: () => duplicateSong(id) },
-    { label: 'Teilen …', icon: 'share', action: async () => { await openSong(id); $('#btn-share').click(); } },
+    { label: 'Teilen …', icon: 'share', action: async () => { await openSong(id); shareSong(); } },
     { label: 'Drucken / PDF', icon: 'print', action: () => printSong(song) },
     '-',
     { label: 'Löschen', icon: 'trash', danger: true, hint: 'Entf', action: () => deleteSong(id) },
@@ -47,8 +56,7 @@ listEl.addEventListener('dblclick', async (e) => {
   const btn = e.target.closest('.song-item');
   if (!btn || selection.active) return; // im Auswahlmodus nur markieren
   if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-  await openSong(btn.dataset.id);
-  services.play.open(btn.dataset.id);
+  playSong(btn.dataset.id);
 });
 listEl.addEventListener('keydown', (e) => {
   const btn = e.target.closest('.song-item');
@@ -80,9 +88,9 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
         label: l, checked: acc === v, action: () => setViewOption({ accidentals: v }),
       })),
     },
-    { label: 'Capo-Hilfe …', action: () => $('#btn-capo-help').click() },
+    { label: 'Capo-Hilfe …', action: openCapoHelp },
     '-',
-    { label: 'Spielen', icon: 'stage', hint: 'F', action: () => $('#btn-play').click() },
+    { label: 'Spielen', icon: 'stage', hint: 'F', action: () => playSong() },
     ...(readOnly ? [] : [{ label: 'Bearbeiten', icon: 'edit', action: editSong }]),
     {
       label: 'Anzeigen',
@@ -108,9 +116,9 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
       ],
     },
     '-',
-    await setlistMenu(current.id),
-    ...(readOnly ? [{ label: `In „${personalBookName()}“ kopieren`, icon: 'paste', action: () => copyToPersonal([current]) }] : []),
-    { label: 'Teilen …', icon: 'share', action: () => $('#btn-share').click() },
+    await setlistMenu(songsById(current.id)),
+    readOnly && copyMineItem(current),
+    { label: 'Teilen …', icon: 'share', action: shareSong },
     { label: 'Drucken / PDF', icon: 'print', action: () => printSong({ ...current, chordpro: editor.value }) },
   ];
 }, { title: () => state.current?.title || '' });

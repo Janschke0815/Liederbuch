@@ -7,7 +7,7 @@ Name eines Liederbuchs mit abgleichen. Er steht als einzelner Datensatz in der C
 Wurde der Name nie bewusst gewählt (persönliches Buch mit Standardnamen „Mein Liederbuch“), gibt es keinen Datensatz – dann übernimmt das Gerät den Namen aus der Cloud. Ein Name, der schon vor dieser Version gewählt wurde, zählt mit der ältestmöglichen Zeit: Er gewinnt gegen den Standardnamen, verliert aber gegen jede spätere Umbenennung.
 
 **Benutzt:** [`books.js`](../books.md), [`sync/google-drive.js`](google-drive.md)  
-**Benutzt von:** [`sync-ui.js`](../sync-ui.md)
+**Benutzt von:** [`books-ui.js`](../books-ui.md), [`sync-ui.js`](../sync-ui.md)
 
 ## Exportiert
 

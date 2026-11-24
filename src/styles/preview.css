@@ -1,15 +1,10 @@
-/* Vorschau: Leiste mit Tonart, Transponieren, Schreibweise; Zoom; Metronom. */
+/* Vorschau: Leiste mit Tonart, Transponieren, Schreibweise; Blatt; Zoom.
+   „Akkorde per Antippen“ steht in chord-tap.css. */
 
-/* Vorschau */
 .pane-preview { background: var(--bg); container: preview / inline-size; }
+
+/* ---------- Leiste über dem Lied ---------- */
 .view-bar { flex-wrap: wrap; row-gap: .3em; } /* letzte Sicherung – normal passt alles in eine Zeile */
-/* Schmale Vorschau-Spalte (auch durch die ziehbaren Trenner): Unwichtigeres zuerst ausblenden */
-@container preview (max-width: 640px) {
-  #time-field { display: none; }
-}
-@container preview (max-width: 520px) {
-  #tr-reset { display: none; }
-}
 /* Wert mit kleiner Überschrift darüber („TONART / G“, „TRANSPONIEREN / − 0 +“) */
 .vb-field { display: inline-flex; flex-direction: column; align-items: center; gap: .1em; line-height: 1.15; }
 .vb-field[hidden] { display: none; }
@@ -26,7 +21,20 @@
 }
 #tr-value.changed { color: var(--accent); }
 #btn-focus[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
-.preview-scroll { flex: 1; overflow: auto; padding: 1.5em; }
+.info-chip {
+  font-size: .82em; padding: .2em .6em; border-radius: 999px;
+  background: var(--hover); color: var(--text); white-space: nowrap; font-weight: 600;
+}
+/* Schmale Vorschau-Spalte (auch durch die ziehbaren Trenner): Unwichtigeres zuerst ausblenden */
+@container preview (max-width: 640px) {
+  #time-field { display: none; }
+}
+@container preview (max-width: 520px) {
+  #tr-reset { display: none; }
+}
+
+/* ---------- Blatt ---------- */
+.preview-scroll { position: relative; flex: 1; overflow: auto; padding: 1.5em; }
 .sheet {
   background: var(--sheet);
   color: #111;
@@ -38,32 +46,14 @@
   min-height: 8em;
 }
 .import-preview .sheet { flex: 1; max-height: 62vh; overflow: auto; width: 100%; padding: 1.4em 1.6em; font-size: .85em; border: 1px solid var(--border); }
-@media (max-width: 1200px) {
-  .view-bar { gap: .35em; }
-}
-@media (max-width: 760px) {
-  .workspace[data-view='list'] .pane-list,
-  .workspace[data-view='editor'] .pane-editor,
-  .workspace[data-view='preview'] .pane-preview { display: flex; }
-  #btn-focus { display: none; }
-  .view-bar { justify-content: center; gap: .4em; }
-  .view-bar .spacer { display: none; }
-  .preview-scroll { padding: 0; }
-  .sheet { border-radius: 0; box-shadow: none; padding: 1.2em 1em 2em; max-width: none; min-height: 100%; }
-  .import-preview .sheet { max-height: none; }
-}
-.info-chip {
-  font-size: .82em; padding: .2em .6em; border-radius: 999px;
-  background: var(--hover); color: var(--text); white-space: nowrap; font-weight: 600;
-}
 .song-note {
   margin: 0 0 1.2em; padding: .6em .9em; border-radius: 6px;
   background: #fff6d6; border: 1px solid #f0dc94; color: #5b4a12;
   font: .9rem/1.4 system-ui, 'Segoe UI', sans-serif; white-space: pre-wrap;
 }
 .song-note::before { content: '📝 '; }
-/* Zoom der Vorschau */
-.preview-scroll { position: relative; }
+
+/* ---------- Zoom ---------- */
 .zoom-ctl {
   position: sticky; bottom: .8em; float: right; margin-top: -2.6em; z-index: 1;
   display: inline-flex; border: 1px solid var(--border-strong); border-radius: 999px; overflow: hidden;
@@ -71,118 +61,39 @@
 }
 .zoom-ctl:hover, .zoom-ctl:focus-within { opacity: 1; }
 .zoom-ctl button { border: 0; border-radius: 0; min-height: 2rem; min-width: 2.2rem; padding: 0 .5em; background: transparent; font-weight: 600; }
-@media (max-width: 760px) {
-  .zoom-ctl { display: none; }
-}
-/* Handy: Leiste über dem Lied darf nicht überlaufen */
-@media (max-width: 760px) {
-  #time-chip { display: none !important; }
-  .view-bar { gap: .3em; padding-inline: .4em; }
-  .view-bar .stepper button { min-width: 2rem; }
-  .view-bar .segmented button { min-width: 1.9rem; padding-inline: .45em; }
-  #tr-value { min-width: 2.1em; }
-  .info-chip { padding: .2em .5em; }
+
+/* ---------- Bildschirmgrößen ---------- */
+@media (max-width: 1200px) {
+  .view-bar { gap: .35em; }
 }
 /* Fingertaugliche Knöpfe (mind. 44 px) auf Touch-Geräten */
 @media (pointer: coarse) {
   .view-bar .segmented button, .view-bar .stepper button { min-width: 2.75rem; min-height: 2.75rem; }
 }
 @media (max-width: 760px) {
-  .view-bar { flex-wrap: wrap; row-gap: .3em; }
-  .view-bar .segmented button { min-width: 2.75rem; min-height: 2.6rem; }
+  #btn-focus, .zoom-ctl { display: none; }
+  /* Leiste: eine Zeile, darf nicht überlaufen. „Original“ fällt weg (zurück: auf 0 transponieren oder
+     lang drücken), Schreibweise nur, wenn eine gewählt ist (sonst über langes Drücken auf das Lied) */
+  .view-bar { justify-content: center; gap: .3em; padding-inline: .4em; }
+  .view-bar .spacer { display: none; }
+  .view-bar .segmented button { min-width: 2.75rem; min-height: 2.6rem; padding-inline: .45em; }
   .view-bar .stepper button { min-width: 2.6rem; min-height: 2.6rem; }
-  /* Handy: eine Zeile. „Original“ fällt weg (zurück: auf 0 transponieren oder lang drücken),
-     Schreibweise nur, wenn eine gewählt ist (sonst über langes Drücken auf das Lied) */
+  #tr-value { min-width: 2.1em; }
+  .info-chip { padding: .2em .5em; }
+  #time-chip { display: none !important; }
   #tr-reset, #acc-field.acc-auto { display: none; }
   #acc-cap .cap-long { display: none; }
   #acc-cap .cap-short { display: inline; }
+  /* Blatt randlos */
+  .preview-scroll { padding: 0; }
+  .sheet { border-radius: 0; box-shadow: none; padding: 1.2em 1em 2em; max-width: none; min-height: 100%; }
+  .import-preview .sheet { max-height: none; }
 }
 @media (max-width: 360px) {
+  .view-bar { gap: .25em; padding-inline: .3em; }
   .view-bar .stepper button { min-width: 2.3rem; }
+  .view-bar .play-btn { padding-inline: .5em; gap: .3em; }
   #tr-value { min-width: 1.8em; }
   .acc-btn { padding-inline: .45em; }
-  .view-bar { gap: .25em; padding-inline: .3em; }
-  .view-bar .play-btn { padding-inline: .5em; gap: .3em; }
   .key-box { padding-inline: 0; }
-}
-
-/* Akkorde per Antippen (ui/chord-tap.js). PC: Knopf „Akkorde“ in der Leiste über der Vorschau */
-.chordtap-btn { display: inline-flex; align-items: center; gap: .4em; font-weight: 600; }
-.chordtap-btn[hidden] { display: none; }
-.chordtap-icon { font-family: ui-monospace, Consolas, monospace; color: var(--accent); font-weight: 700; }
-.chordtap-btn[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.chordtap-btn[aria-pressed='true'] .chordtap-icon { color: inherit; }
-@container preview (max-width: 560px) {
-  .chordtap-btn .label { display: none; }
-}
-/* Feste Hinweisleiste statt schwebendem Knopf/Toast */
-.chord-hint {
-  display: flex; align-items: center; gap: .6em; margin: 0; padding: .45em .9em;
-  background: var(--accent-soft); color: var(--text); font-size: .85em; font-weight: 600;
-  border-bottom: 1px solid var(--border); white-space: nowrap; overflow: hidden;
-}
-.chord-hint[hidden] { display: none; }
-.chord-hint > span { overflow: hidden; text-overflow: ellipsis; }
-.chord-hint .link-btn { margin-left: auto; min-height: 1.9rem; }
-.hint-short { display: none; }
-/* Antippbare Zeilen: immer leicht unterstrichen (Handy kennt kein Drüberfahren) */
-.chordtap-on .line[data-src], .chord-view .line[data-src] {
-  cursor: pointer; background: linear-gradient(transparent calc(100% - 2px), #b3261e30 0);
-}
-.chordtap-on .line[data-src]:hover, .chord-view .line[data-src]:hover { background-color: #b3261e0d; }
-/* Einfügestelle, solange die Auswahl offen ist */
-.chord-caret {
-  display: inline-block; width: 2px; height: 1.25em; margin: 0 -1px; vertical-align: -.2em;
-  background: var(--accent); border-radius: 1px; box-shadow: 0 0 0 2px #b3261e33;
-}
-/* Handy: Bearbeiten → „Text | Akkorde“ */
-.edit-mode, #chord-hint-edit, .chord-view { display: none; }
-@media (max-width: 760px) {
-  /* kleiner Umschalter in der Knopfleiste des Editors, gleich hinter dem „?“ – keine eigene Zeile */
-  .edit-mode:not([hidden]) {
-    display: inline-flex; flex: none; align-self: center;
-    border: 1px solid var(--border-strong); border-radius: 999px; overflow: hidden;
-  }
-  .editor-bar .snippets .edit-mode button {
-    min-width: 0; min-height: 2.2rem; padding: .1em .5em; border: 0; border-radius: 0;
-    font-size: .76em; font-weight: 600; background: var(--surface);
-  }
-  .edit-mode .lbl-short { display: none; }
-  .editor-bar .snippets .edit-mode button + button { border-left: 1px solid var(--border); }
-  .editor-bar .snippets .edit-mode button[aria-checked='true'] { background: var(--accent); color: var(--on-accent); }
-  /* Akkorde: von der Leiste bleibt nur der Umschalter (und Löschen) */
-  .pane-editor[data-edit='chords'] .snippets > :not(.edit-mode) { display: none; }
-  .pane-editor[data-edit='chords'] > :is(.song-meta, #editor) { display: none; }
-  .pane-editor[data-edit='chords'] #chord-hint-edit { display: flex; margin: 0 .6em .4em; border-radius: 8px; border: 0; }
-  .pane-editor[data-edit='chords'] .chord-view { display: block; flex: 1; min-height: 0; overflow: auto; background: var(--sheet); }
-  .chord-view .sheet { min-height: 100%; padding-bottom: 14rem; } /* Platz, damit auch die letzten Zeilen über der Auswahl stehen können */
-}
-@media (max-width: 760px) {
-  #btn-chordtap, #chord-hint-preview { display: none !important; } /* Handy: Ansehen ist nur zum Ansehen */
-}
-@media (max-width: 360px) {
-  .hint-long { display: none; }
-  .hint-short { display: inline; }
-  .editor-bar .snippets .edit-mode button { padding-inline: .45em; font-size: .74em; }
-  .edit-mode .lbl-long { display: none; }
-  .edit-mode .lbl-short { display: inline; } /* „Akk.“ wie im Spielmodus */
-}
-.chord-pick {
-  position: fixed; z-index: 30; width: min(22rem, calc(100vw - 16px));
-  display: flex; flex-direction: column; gap: .5em; padding: .6em .7em .7em;
-  background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-lg);
-}
-.cp-head { display: flex; align-items: center; gap: .2em; }
-.cp-where { flex: 1; min-width: 0; font-size: .88em; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cp-where strong { color: var(--text); font-weight: 700; }
-.cp-head .icon-btn { min-width: 2.2rem; }
-.cp-chords { display: flex; flex-wrap: wrap; gap: .35em; }
-.cp-chord { min-width: 3rem; min-height: 2.5rem; font-weight: 700; color: var(--accent); }
-.cp-chord[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-.cp-foot { display: flex; justify-content: space-between; gap: .5em; }
-.cp-custom { display: flex; gap: .4em; }
-.cp-custom input { flex: 1; min-width: 0; font-size: 16px; }
-/* Handy: als Leiste unten über den Reitern, gut mit dem Daumen erreichbar */
-@media (max-width: 760px) {
-  .chord-pick { left: 8px !important; right: 8px; top: auto !important; bottom: calc(3.6rem + env(safe-area-inset-bottom)); width: auto; }
 }

@@ -7,9 +7,13 @@
 Automatisch veröffentlichen (nur Sync-Ordner): Ändern sich Lieder oder Setlisten, wird kurz danach von selbst neu veröffentlicht – mit derselben Auswahl wie beim letzten Mal.
 
 **Benutzt:** [`books.js`](../books.md), [`formats/abo.js`](../formats/abo.md), [`formats/song-files.js`](../formats/song-files.md), [`prefs.js`](../prefs.md), [`sync/webdav-client.js`](../sync/webdav-client.md), [`sync/webdav.js`](../sync/webdav.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md), [`ui/song.js`](song.md)  
-**Benutzt von:** [`app.js`](../app.md)
+**Benutzt von:** [`app.js`](../app.md), [`ui/share-with.js`](share-with.md)
 
 ## Exportiert
+
+### `openPublish()`
+
+„Veröffentlichen …“ öffnen (schließt den Cloud-Dialog, aus dem es meist kommt).
 
 ### `async republish()`
 
