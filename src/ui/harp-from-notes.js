@@ -2,7 +2,9 @@
 // Der Dialog schlägt die passende Harp vor, zeigt das Ergebnis und fügt es als eigenen Abschnitt
 // hinter die Noten in den Liedtext ein (mit Rückgängig im Editor).
 
+import { abcChords } from '../core/abc.js';
 import { harpTabsFromAbc, rankHarpKeys } from '../core/harp-melody.js';
+import { prefs } from '../prefs.js';
 import { parseChordPro } from '../core/chordpro.js';
 import { renderSong } from '../render/song-view.js';
 import { applySettings, loadSettings } from '../settings/settings.js';
@@ -25,7 +27,8 @@ function describe(r) {
 }
 
 function result() {
-  return harpTabsFromAbc(current.abc, Number($('#harp-key').value), current.transpose);
+  const chords = !$('#harp-chords-row').hidden && $('#harp-chords').checked;
+  return harpTabsFromAbc(current.abc, Number($('#harp-key').value), current.transpose, { chords });
 }
 
 function showResult() {
@@ -34,8 +37,11 @@ function showResult() {
   const octave = { 12: ' · eine Oktave höher als notiert', 24: ' · zwei Oktaven höher als notiert', '-12': ' · eine Oktave tiefer als notiert', '-24': ' · zwei Oktaven tiefer als notiert' }[r.octave] || '';
   $('#harp-info').textContent = `${r.count} Töne auf der ${name}-Harp${octave}.${r.missing ? ' „?“ = gibt es auf dieser Harp nicht.' : ''}`;
   const box = $('#harp-preview');
-  applySettings(box, { ...loadSettings(), showHarp: true });
-  box.replaceChildren(renderSong(parseChordPro(r.text || ' ')).querySelector('.song-body'));
+  // Akkorde wie im Lied: transponiert, ♯/♭ nach Einstellung (die Tabs selbst werden nie transponiert)
+  const settings = loadSettings();
+  applySettings(box, { ...settings, showHarp: true, showChords: true });
+  const opts = { transpose: current.transpose, accidentals: state.current?.accidentals };
+  box.replaceChildren(renderSong(parseChordPro(r.text || ' '), opts).querySelector('.song-body'));
 }
 
 /** Dialog für den index-ten Notenabschnitt des geöffneten Liedes. */
@@ -47,10 +53,17 @@ function open(abc, index) {
     o.dataset.name = r.name;
     return o;
   }));
+  // „Akkorde mitnehmen“ nur, wenn über den Noten Akkorde stehen; die Wahl merkt sich die App
+  $('#harp-chords-row').hidden = !abcChords(abc).length;
+  $('#harp-chords').checked = prefs.get('harpChords');
   showResult();
   dlg.showModal();
 }
 $('#harp-key').onchange = showResult;
+$('#harp-chords').onchange = () => {
+  prefs.set('harpChords', $('#harp-chords').checked);
+  showResult();
+};
 
 /** Ende des index-ten Notenabschnitts im Liedtext (Position hinter der Zeile {end_of_abc}). */
 function afterAbcBlock(text, index) {

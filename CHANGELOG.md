@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.5.1 – 24.11.2026 · Harp-Tabs mit Akkorden
+
+- Melodie → Harp-Tabs: neuer Schalter **Akkorde mitnehmen**. Dann stehen die Akkorde aus den Noten über den
+  Tabs – an dem Ton, über dem sie in den Noten stehen, z. B. für jemanden, der dazu Gitarre spielt.
+  Die Akkorde werden wie alle Akkorde des Liedes transponiert; die Tabs bleiben, wie sie sind.
+- Der Schalter erscheint nur, wenn über den Noten Akkorde stehen; die Wahl merkt sich die App.
+
 ## 2.5.0 – 24.11.2026 · Noten holen statt abschreiben
 
 - Der Baustein **Noten** (am Handy ♪, Alt+N) öffnet jetzt den Dialog **Noten einfügen**:

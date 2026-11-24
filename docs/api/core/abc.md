@@ -4,7 +4,7 @@
 
 Noten als ABC-Notation im ChordPro-Text ({start_of_abc} … {end_of_abc}, Kurzform {soa}/{eoa}). Reine Textlogik ohne Bildschirm: fehlende Kopfzeilen ergänzen, Akkorde finden. Gezeichnet und abgespielt wird in render/abc-view.js (abcjs, nur bei Bedarf geladen).
 
-**Benutzt von:** [`formats/export-text.js`](../formats/export-text.md), [`render/song-view.js`](../render/song-view.md), [`ui/snippets.js`](../ui/snippets.md)
+**Benutzt von:** [`formats/export-text.js`](../formats/export-text.md), [`render/song-view.js`](../render/song-view.md), [`ui/harp-from-notes.js`](../ui/harp-from-notes.md), [`ui/snippets.js`](../ui/snippets.md)
 
 ## Exportiert
 

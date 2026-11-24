@@ -34,6 +34,7 @@ export const PREFS = {
   songMetaOpenMobile: { key: 'songMetaOpenMobile', def: false }, // … am Handy
   editMode: { key: 'editMode', def: 'text' }, // Handy, Bearbeiten: 'text' (ChordPro) | 'chords' (Akkorde antippen)
   viewZoom: { key: 'viewZoom', def: 1 },
+  harpChords: { key: 'harpChords', def: false }, // Noten → Harp-Tabs: Akkorde mitnehmen
   draft: { key: 'draft', def: '' }, // Entwurf aus der allerersten Version der App
   // Spielmodus
   playZoom: { key: 'playZoom', def: 0 }, // 0 = Standardgröße

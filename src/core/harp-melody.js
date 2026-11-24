@@ -71,7 +71,7 @@ export function abcSyllables(line) {
  * Pausen, Vorschlagsnoten, Akkordsymbole und Verzierungen zählen nicht; übergebundene Noten
  * (Bindebogen „-“) nur einmal; bei Akkorden aus Noten ([CEG]) zählt die erste.
  * @param {string} abc
- * @returns {{notes: number[], lyrics: string|null}[]}
+ * @returns {{notes: number[], chords: (string|null)[], lyrics: string|null}[]}  chords: Akkordsymbol vor dem Ton
  */
 export function abcMelody(abc) {
   let sig = abcKeySignature('C');
@@ -91,7 +91,7 @@ export function abcMelody(abc) {
     if (!line.trim()) continue;
     const parsed = parseMusicLine(line, sig);
     sig = parsed.sig;
-    if (parsed.notes.length) lines.push({ notes: parsed.notes, lyrics: null });
+    if (parsed.notes.length) lines.push({ notes: parsed.notes, chords: parsed.chords, lyrics: null });
   }
   return lines;
 }
@@ -100,6 +100,8 @@ function parseMusicLine(line, startSig) {
   let sig = startSig;
   let barAcc = {}; // Vorzeichen innerhalb des Takts: „C4“ -> Halbtöne
   const notes = [];
+  const chords = []; // Akkordsymbol vor dem Ton (gleicher Index wie notes) oder null
+  let chord = null; // Akkordsymbol, das auf den nächsten Ton wartet
   let tieNext = false;
   let i = 0;
   const readNote = () => {
@@ -122,13 +124,21 @@ function parseMusicLine(line, startSig) {
   const addNote = (midi) => {
     if (tieNext && notes.length && notes.at(-1) === midi) {
       // übergebunden: derselbe Ton klingt weiter
-    } else notes.push(midi);
+    } else {
+      notes.push(midi);
+      chords.push(chord);
+      chord = null;
+    }
     tieNext = false;
   };
   while (i < line.length) {
     const c = line[i];
     if (c === '"') {
-      i = line.indexOf('"', i + 1) + 1 || line.length;
+      const end = line.indexOf('"', i + 1);
+      const name = line.slice(i + 1, end < 0 ? line.length : end);
+      // Akkordsymbol (keine Anmerkung wie "^leise"): gilt für den nächsten Ton
+      if (name && !/^[\^_<>@]/.test(name)) chord = name;
+      i = end < 0 ? line.length : end + 1;
     } else if (c === '!' || c === '+') {
       const end = line.indexOf(c, i + 1);
       i = end < 0 ? i + 1 : end + 1;
@@ -182,7 +192,7 @@ function parseMusicLine(line, startSig) {
       }
     }
   }
-  return { notes, sig };
+  return { notes, chords, sig };
 }
 
 // ---------- Kanäle der Richter-Harp (C-Harp; andere Tonarten verschoben) ----------
@@ -269,19 +279,27 @@ export function rankHarpKeys(abc, transpose = 0) {
  * @param {string} abc
  * @param {number} harpKey
  * @param {number} [transpose]
- * @returns {{text: string, missing: number, bends: number, overs: number, octave: number, count: number}}
+ * @param {{chords?: boolean}} [opts]  chords: Akkordsymbole der Noten mitnehmen (stehen über den Tabs,
+ *   in der Tonart der Noten – die Vorschau transponiert sie wie alle Akkorde des Liedes)
+ * @returns {{text: string, missing: number, bends: number, overs: number, octave: number, count: number, chords: number}}
+ *   chords: Anzahl übernommener Akkorde
  */
-export function harpTabsFromAbc(abc, harpKey, transpose = 0) {
+export function harpTabsFromAbc(abc, harpKey, transpose = 0, { chords = false } = {}) {
   const r = melodyForHarp(abc, harpKey, transpose);
-  const tab = (h) => (h ? `[${h.tab}]` : '[*?]');
+  let chordCount = 0;
+  const tab = (h, line, i) => {
+    const c = chords ? line.chords?.[i] : null;
+    if (c) chordCount++;
+    return `${c ? `[${c}]` : ''}${h ? `[${h.tab}]` : '[*?]'}`;
+  };
   const out = r.lines.map((line, li) => {
     const holes = r.holes[li];
-    if (!line.lyrics) return holes.map(tab).join(' ');
+    if (!line.lyrics) return holes.map((h, i) => tab(h, line, i)).join(' ');
     const syl = abcSyllables(line.lyrics);
     let text = '';
     holes.forEach((h, i) => {
       const s = syl[i];
-      text += tab(h);
+      text += tab(h, line, i);
       if (!s || s.hold) return;
       text += s.text + (s.joined ? '' : ' ');
     });
@@ -289,5 +307,5 @@ export function harpTabsFromAbc(abc, harpKey, transpose = 0) {
     for (const s of syl.slice(holes.length)) if (!s.hold) text += s.text + (s.joined ? '' : ' ');
     return text.replace(/\s+$/, '');
   });
-  return { text: out.join('\n'), missing: r.missing, bends: r.bends, overs: r.overs, octave: r.octave, count: r.count };
+  return { text: out.join('\n'), missing: r.missing, bends: r.bends, overs: r.overs, octave: r.octave, count: r.count, chords: chordCount };
 }

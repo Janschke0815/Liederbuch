@@ -460,6 +460,9 @@ Die Tabs stehen über den Silben der ersten `w:`-Zeile; ohne Liedtext wird es ei
 Notenzeile. Liegt die Melodie zu hoch oder zu tief für die Harp, wird sie um Oktaven verschoben (steht im
 Dialog). Töne, die es auf der gewählten Harp nicht gibt, erscheinen als „?“. Ist das Lied gerade
 transponiert, gilt die Empfehlung für die neue Tonart. Rückgängig geht wie gewohnt im Editor.
+Mit **Akkorde mitnehmen** (nur da, wenn über den Noten Akkorde stehen) kommen die Akkorde mit – über
+dem Tab des Tons, über dem sie in den Noten stehen: `[C][4]Al[-4]le … [G][6]Ent…`. Sie werden wie alle
+Akkorde transponiert, die Tabs nicht.
 
 Ausblenden: **Einstellungen → Anzeigen → Noten**, per Rechtsklick auf die Vorschau → *Anzeigen* oder im
 Spielmodus mit **♪**. Unter **Einstellungen → Noten** stellst du außerdem die Größe der Noten ein, ob der

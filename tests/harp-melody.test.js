@@ -71,6 +71,19 @@ describe('Harp aus Noten: Kanäle', () => {
     expect(r.missing).toBe(2);
   });
 
+  it('Akkorde mitnehmen (wahlweise): Akkord über dem Tab des Tons, vor dem er steht', () => {
+    expect(harpTabsFromAbc(ENTCHEN, 0).chords).toBe(0);
+    const r = harpTabsFromAbc(ENTCHEN, 0, 0, { chords: true });
+    expect(r.chords).toBe(4);
+    expect(r.text).toBe('[C][4]Al[-4]le [5]mei[-5]ne [G][6]Ent[6]chen [F][-6]schwim[-6]men [-6]auf [-6]dem [C][6]See,');
+    // Anmerkungen ("^leise") sind keine Akkorde; Akkord vor einer Pause gilt für den nächsten Ton
+    expect(harpTabsFromAbc('K:C\n"^leise"c "G"z d e |', 0, 0, { chords: true }).text).toBe('[4] [G][-4] [5]');
+    // Akkorde in der Tonart der Noten – transponiert wird beim Anzeigen
+    expect(harpTabsFromAbc(ENTCHEN, 2, 2, { chords: true }).text.startsWith('[C][4]')).toBe(true);
+    const line = parseChordPro(r.text).blocks[0].lines[0];
+    expect(line.segments.filter((s) => s.chord && !s.harp).map((s) => s.chord)).toEqual(['C', 'G', 'F', 'C']);
+  });
+
   it('Ergebnis liest der Parser als Harp-Tabs', () => {
     const song = parseChordPro(harpTabsFromAbc(ENTCHEN, 0).text);
     const segs = song.blocks[0].lines[0].segments.filter((s) => s.chord);

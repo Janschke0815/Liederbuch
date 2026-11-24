@@ -41,7 +41,7 @@ Pausen, Vorschlagsnoten, Akkordsymbole und Verzierungen zählen nicht; übergebu
 |---|---|---|
 | `abc` | `string` |  |
 
-**Rückgabe:** `{notes: number[], lyrics: string|null}[]`
+**Rückgabe:** `{notes: number[], chords: (string|null)[], lyrics: string|null}[]` chords: Akkordsymbol vor dem Ton
 
 ### `harpHoleFor(midi, harpKey)`
 
@@ -72,7 +72,7 @@ Harp-Tonarten nach Eignung: wenige fehlende Töne, wenige Bendings. Bei Gleichst
 
 **Rückgabe:** `{key: number, name: string, missing: number, bends: number, overs: number, octave: number}[]`
 
-### `harpTabsFromAbc(abc, harpKey, transpose = 0)`
+### `harpTabsFromAbc(abc, harpKey, transpose = 0, { chords = false } = {})`
 
 Melodie als ChordPro-Zeilen: Tabs über den Silben der w:-Zeile, ohne Liedtext eine reine Tab-Zeile
 je Notenzeile. Töne, die es auf der Harp nicht gibt, stehen als Anmerkung [*?].
@@ -82,8 +82,9 @@ je Notenzeile. Töne, die es auf der Harp nicht gibt, stehen als Anmerkung [*?].
 | `abc` | `string` |  |
 | `harpKey` | `number` |  |
 | `[transpose]` | `number` |  |
+| `[opts]` | `{chords?: boolean}` | chords: Akkordsymbole der Noten mitnehmen (stehen über den Tabs, in der Tonart der Noten – die Vorschau transponiert sie wie alle Akkorde des Liedes) |
 
-**Rückgabe:** `{text: string, missing: number, bends: number, overs: number, octave: number, count: number}`
+**Rückgabe:** `{text: string, missing: number, bends: number, overs: number, octave: number, count: number, chords: number}` chords: Anzahl übernommener Akkorde
 
 ## Intern
 
