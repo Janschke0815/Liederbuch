@@ -63,8 +63,8 @@ export function updateControls() {
   const current = state.current;
   editor.disabled = !current;
   editor.readOnly = readOnly; // Abo: lesen, markieren, kopieren – aber nicht ändern
-  for (const b of $$('#tr-up, #tr-down, #acc-btn, #btn-delete, #btn-play, .snippets button[data-snippet]')) b.disabled = !current;
-  if (readOnly) for (const b of $$('#btn-delete, .snippets button[data-snippet]')) b.disabled = true;
+  for (const b of $$('#tr-up, #tr-down, #acc-btn, #btn-play, .snippets button[data-snippet]')) b.disabled = !current;
+  if (readOnly) for (const b of $$('.snippets button[data-snippet]')) b.disabled = true;
   const t = current?.transpose || 0;
   const out = $('#tr-value');
   out.textContent = (t > 0 ? '+' : '') + t;

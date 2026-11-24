@@ -8,8 +8,11 @@
 .snippets::-webkit-scrollbar { display: none; }
 .snippets button { flex: none; min-height: 1.9rem; padding: .15em .55em; font-size: .85em; border-color: var(--border); }
 .syntax-btn { font-weight: 700; min-width: 2rem; border-radius: 999px !important; }
-.save-status { font-size: .8em; color: var(--muted); display: inline-flex; align-items: center; gap: .35em; }
-.save-status::before { content: ''; width: .5em; height: .5em; border-radius: 50%; background: currentColor; opacity: 0; }
+/* Speicherstand: nur ein kleiner Punkt (grün gespeichert, orange ungespeichert), Text im Tooltip;
+   Fehler stehen als Text da */
+.save-status { font-size: 0; color: var(--muted); display: inline-flex; align-items: center; padding-inline: .3rem; cursor: default; }
+.save-status::before { content: ''; width: .5rem; height: .5rem; border-radius: 50%; background: currentColor; opacity: 0; }
+.save-status[data-state='error'] { font-size: .8rem; gap: .35em; }
 .save-status[data-state='saved']::before { background: #3b8c4a; opacity: 1; }
 .save-status[data-state='dirty']::before { background: #d18f1c; opacity: 1; }
 .save-status[data-state='error'] { color: var(--accent); }
@@ -41,8 +44,6 @@
 
 /* ---------- Bildschirmgrößen ---------- */
 @media (max-width: 1200px) {
-  .save-status { font-size: 0; gap: 0; }
-  .save-status::before { font-size: 1rem; }
   .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
@@ -54,7 +55,6 @@
   .editor-bar .snippets { flex: 1 1 0; flex-wrap: wrap; overflow: visible; gap: .2em; }
   .snippets button { min-height: 2.2rem; }
   .editor-bar .snippets button { min-height: 2.5rem; min-width: 2.2rem; padding-inline: .4em; font-size: .82em; }
-  #btn-delete { padding-inline: .35em; }
   #editor { font-size: 15px; padding: .8em; }
   /* Liedinfo: höchstens die halbe Höhe, Rest scrollt – der Editor bleibt sichtbar */
   .song-meta summary { min-height: 2.4rem; align-items: center; }

@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.5.2 – 24.11.2026 · Aufgeräumte Leiste über dem Editor
+
+- Der Mülleimer über dem Editor ist weg. Löschen geht weiter in der Liederliste: Rechtsklick bzw. langes
+  Antippen → **Löschen**, oder **Entf** (mit Rückgängig).
+- Der Speicherstand ist nur noch ein kleiner Punkt: grün = gespeichert, orange = noch nicht gespeichert
+  (der Text steht im Tooltip). Fehler beim Speichern stehen weiter als Text da.
+
 ## 2.5.1 – 24.11.2026 · Harp-Tabs mit Akkorden
 
 - Melodie → Harp-Tabs: neuer Schalter **Akkorde mitnehmen**. Dann stehen die Akkorde aus den Noten über den

@@ -56,7 +56,6 @@ export async function deleteSong(id) {
     },
   });
 }
-$('#btn-delete').onclick = () => state.current && deleteSong(state.current.id);
 
 /** Lied als Kopie anlegen und öffnen. */
 export async function duplicateSong(id) {
