@@ -92,7 +92,9 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
   einen Menüeintrag bzw. Knopf (*An die Leiste anheften*, *Nach links/rechts*). Wird es eng, zeigt die Leiste
   nur Symbole, dann rutschen die letzten Knöpfe zurück ins Menü.
 - **Doppelklick** auf ein Lied startet den Spielmodus, **Entf** löscht das markierte Lied (mit Rückgängig).
-- **Editor ein-/ausblenden** (Symbol links über der Vorschau): nur Liste und Lied, z. B. zum Spielen.
+- **Bereiche ein-/ausblenden** (drei Symbole oben in der Kopfleiste, am Laptop/PC): **Liederliste** (Strg+B),
+  **Editor** (Strg+E) und **Vorschau** einzeln aus- und wieder einblenden, z. B. nur Editor zum Schreiben oder nur
+  das Lied zum Spielen. Editor und Vorschau sind nie beide weg; die Wahl merkt sich die App.
 - **Spaltenbreiten** (breiter Bildschirm): die Trennlinie rechts neben der Liederliste bzw. dem Editor
   ziehen; Doppelklick stellt die Standardbreite wieder her, mit Tab angewählt geht es auch mit ← / →.
   Die Breiten bleiben auf dem Gerät gespeichert.
@@ -119,6 +121,7 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | ↑ / ↓ in der Liste | vorheriges / nächstes Lied |
 | + / − | Halbton höher / tiefer (außerhalb des Editors) |
 | Strg+E | Editor ein-/ausblenden |
+| Strg+B | Liederliste ein-/ausblenden |
 | Strg+S | sofort speichern (sonst automatisch) |
 | Strg+P | Drucken |
 | F | Spielmodus |
@@ -713,7 +716,7 @@ und fasst beim Bauen alles zu wenigen Dateien in `dist/` zusammen. Abhängigkeit
                       song.js        Lied öffnen/speichern, Vorschau, Transponieren, Liedinfo
                       list.js        Liederliste (Suche, Tags, Sortierung); chord-filter.js „Was kann
                                      ich spielen?“; list-select.js + selection.js Mehrfachauswahl
-                      view.js        Handy-Reiter, Editor ausblenden, Menü
+                      view.js        Handy-Reiter, Bereiche ausblenden, Menü
                       song-actions.js, snippets.js, preview-tools.js, paste.js, add-songs.js,
                       files.js, trash.js, share.js, capo-help.js, context-menus.js,
                       abo.js (abonnieren, nur lesen), publish.js (für eine Gruppe veröffentlichen)

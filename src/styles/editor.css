@@ -1,6 +1,5 @@
 /* Editor: Bausteine, Liedinfo, Speicherstatus. Umschalter „Text | Akkorde“ steht in chord-tap.css. */
 
-.workspace.focus .pane-editor { display: none; }
 .pane-editor { border-right: 1px solid var(--border); background: var(--surface); }
 
 /* ---------- Knopfleiste ---------- */

@@ -20,7 +20,6 @@
   border-inline: 1px solid var(--border); font-weight: 600;
 }
 #tr-value.changed { color: var(--accent); }
-#btn-focus[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 .info-chip {
   font-size: .82em; padding: .2em .6em; border-radius: 999px;
   background: var(--hover); color: var(--text); white-space: nowrap; font-weight: 600;
@@ -71,7 +70,7 @@
   .view-bar .segmented button, .view-bar .stepper button { min-width: 2.75rem; min-height: 2.75rem; }
 }
 @media (max-width: 760px) {
-  #btn-focus, .zoom-ctl { display: none; }
+  .zoom-ctl { display: none; }
   /* Leiste: eine Zeile, darf nicht überlaufen. „Original“ fällt weg (zurück: auf 0 transponieren oder
      lang drücken), Schreibweise nur, wenn eine gewählt ist (sonst über langes Drücken auf das Lied) */
   .view-bar { justify-content: center; gap: .3em; padding-inline: .4em; }

@@ -18,16 +18,46 @@ for (const b of $$('.mobile-tabs button')) {
   };
 }
 
-// Editor ausblenden (nur Liste + Vorschau), z. B. zum Spielen
-export function setFocusMode(on) {
-  $('.workspace').classList.toggle('focus', on);
-  $('#btn-focus').setAttribute('aria-pressed', String(on));
-  prefs.set('focusMode', on);
+// ---------- Bereiche ein-/ausblenden (breiter Bildschirm) ----------
+// Liste, Editor und Vorschau lassen sich einzeln ausblenden (Knöpfe oben, gedrückt = sichtbar).
+// Editor und Vorschau nie beide: wer das eine ausblendet, während das andere schon aus ist, bekommt
+// das andere zurück. Klassen am Arbeitsbereich: no-list, focus (kein Editor), no-preview.
+
+const PANES = {
+  list: { cls: 'no-list', btn: '#btn-pane-list', pref: 'listHidden' },
+  editor: { cls: 'focus', btn: '#btn-focus', pref: 'focusMode' },
+  preview: { cls: 'no-preview', btn: '#btn-pane-preview', pref: 'previewHidden' },
+};
+
+/** Ist der Bereich ('list' | 'editor' | 'preview') gerade ausgeblendet? */
+export const isPaneHidden = (pane) => $('.workspace').classList.contains(PANES[pane].cls);
+
+/**
+ * Bereich ein- oder ausblenden (und die Wahl merken).
+ * @param {'list'|'editor'|'preview'} pane
+ * @param {boolean} hidden
+ */
+export function setPaneHidden(pane, hidden) {
+  const p = PANES[pane];
+  $('.workspace').classList.toggle(p.cls, hidden);
+  $(p.btn).setAttribute('aria-pressed', String(!hidden));
+  prefs.set(p.pref, hidden);
+  // nie Editor und Vorschau zugleich weg
+  const other = { editor: 'preview', preview: 'editor' }[pane];
+  if (hidden && other && isPaneHidden(other)) setPaneHidden(other, false);
+  applyWidths();
+  dispatchEvent(new Event('resize')); // Vorschau-Zoom, Noten, Spaltenmessungen
 }
+
+// Editor ausblenden (nur Liste + Vorschau), z. B. zum Spielen
+/** Editor aus- (true) oder einblenden. */
+export const setFocusMode = (on) => setPaneHidden('editor', on);
 /** Ist der Editor gerade ausgeblendet? */
-export const isFocusMode = () => $('.workspace').classList.contains('focus');
-$('#btn-focus').onclick = () => setFocusMode(!isFocusMode());
-setFocusMode(prefs.get('focusMode'));
+export const isFocusMode = () => isPaneHidden('editor');
+
+for (const [pane, p] of Object.entries(PANES)) {
+  $(p.btn).onclick = () => setPaneHidden(pane, !isPaneHidden(pane));
+}
 
 // ---------- Spaltenbreiten (ziehbare Trenner, breiter Bildschirm) ----------
 // Liste: feste Breite in px; Editor/Vorschau: Anteil am Rest. Doppelklick = Standard.
@@ -37,20 +67,27 @@ const LIST_MIN = 180;
 const PANE_MIN = 260; // Editor und Vorschau mindestens so breit
 const SHARE_MIN = 0.2;
 
-/** Gespeicherte Breiten anwenden (0 = Standard aus dem CSS). */
+/** Gespeicherte Breiten und sichtbare Bereiche anwenden (0 = Standardbreite aus dem CSS). */
 function applyWidths() {
   const list = prefs.get('listWidth');
   const share = prefs.get('editorShare');
   // Liste nie breiter als 40 % des Fensters, auch wenn es später kleiner wird
   if (list) workspace.style.setProperty('--list-col', `min(${list}px, 40vw)`);
   else workspace.style.removeProperty('--list-col');
-  if (share) {
-    workspace.style.setProperty('--editor-fr', `${share}fr`);
-    workspace.style.setProperty('--preview-fr', `${1 - share}fr`);
-  } else {
-    workspace.style.removeProperty('--editor-fr');
-    workspace.style.removeProperty('--preview-fr');
-  }
+  // Spalten nur für die sichtbaren Bereiche (am Handy gilt eine Spalte, siehe layout.css)
+  const showList = !workspace.classList.contains('no-list');
+  const showEditor = !workspace.classList.contains('focus');
+  const showPreview = !workspace.classList.contains('no-preview');
+  const both = showEditor && showPreview;
+  const cols = [
+    showList && 'var(--list-col, var(--list-default))',
+    showEditor && `minmax(0, ${both && share ? share : 1}fr)`,
+    showPreview && `minmax(0, ${both && share ? 1 - share : 1}fr)`,
+  ].filter(Boolean);
+  workspace.style.setProperty('--cols', cols.join(' '));
+  // Trenner nur zwischen zwei sichtbaren Bereichen
+  workspace.dataset.splitList = String(showList);
+  workspace.dataset.splitEditor = String(both);
 }
 
 const clampNum = (v, lo, hi) => Math.min(Math.max(v, lo), Math.max(lo, hi));
@@ -58,12 +95,12 @@ const clampNum = (v, lo, hi) => Math.min(Math.max(v, lo), Math.max(lo, hi));
 /** Neue Breite aus der Mausposition x; which: 'list' (Liste) oder 'editor' (Editor | Vorschau). */
 function resizeTo(which, x) {
   const ws = workspace.getBoundingClientRect();
-  const list = $('.pane-list').getBoundingClientRect();
+  const listRight = isPaneHidden('list') ? workspace.getBoundingClientRect().left : $('.pane-list').getBoundingClientRect().right;
   if (which === 'list') {
     prefs.set('listWidth', Math.round(clampNum(x - ws.left, LIST_MIN, ws.width * 0.4)));
   } else {
-    const rest = ws.right - list.right; // Editor + Vorschau
-    const ed = clampNum(x - list.right, PANE_MIN, rest - PANE_MIN);
+    const rest = ws.right - listRight; // Editor + Vorschau
+    const ed = clampNum(x - listRight, PANE_MIN, rest - PANE_MIN);
     prefs.set('editorShare', Math.round(clampNum(ed / rest, SHARE_MIN, 1 - SHARE_MIN) * 1000) / 1000);
   }
   applyWidths();
@@ -110,6 +147,12 @@ function addSplitter(pane, which) {
 
 addSplitter($('.pane-list'), 'list');
 addSplitter($('.pane-editor'), 'editor');
+// gemerkte Bereiche wiederherstellen (setzt auch die Spalten)
+for (const [, p] of Object.entries(PANES)) {
+  workspace.classList.toggle(p.cls, prefs.get(p.pref));
+  $(p.btn).setAttribute('aria-pressed', String(!prefs.get(p.pref)));
+}
+if (isPaneHidden('editor') && isPaneHidden('preview')) setPaneHidden('preview', false);
 applyWidths();
 
 // Menü „⋯“ (am Handy stehen die Aktionen der Kopfleiste darin)

@@ -14,6 +14,7 @@ export const SHORTCUTS = {
     { id: 'save', keys: ['Mod+s'], show: 'Strg+S', label: 'Speichern (passiert auch automatisch)' },
     { id: 'print', keys: ['Mod+p'], show: 'Strg+P', label: 'Drucken / PDF' },
     { id: 'focus', keys: ['Mod+e'], show: 'Strg+E', label: 'Editor ein-/ausblenden' },
+    { id: 'listPane', keys: ['Mod+b'], show: 'Strg+B', label: 'Liederliste ein-/ausblenden' },
     { id: null, keys: [], show: 'Strg+V', label: 'Text einfügen (außerhalb des Editors)' },
     { id: null, keys: [], show: 'Enter', label: 'im Dialog: bestätigen (roter Knopf)' },
     { id: null, keys: [], show: 'Strg+Enter', label: 'im Dialog mit großem Textfeld: bestätigen' },

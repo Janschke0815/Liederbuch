@@ -27,6 +27,8 @@ export const PREFS = {
   openSetlist: { key: 'openSetlist', def: '' },
   // Editor und Vorschau
   focusMode: { key: 'focusMode', def: false }, // Editor ausgeblendet
+  listHidden: { key: 'listHidden', def: false }, // Liederliste ausgeblendet (breiter Bildschirm)
+  previewHidden: { key: 'previewHidden', def: false }, // Vorschau ausgeblendet (breiter Bildschirm)
   toolbarPins: { key: 'toolbarPins', def: ['btn-import', 'btn-print', 'btn-live'] }, // beschriftet in der Leiste, in dieser Reihenfolge
   listWidth: { key: 'listWidth', def: 0 }, // Breite der Liederliste in px (0 = Standard)
   editorShare: { key: 'editorShare', def: 0 }, // Anteil des Editors an Editor + Vorschau (0 = halb/halb)

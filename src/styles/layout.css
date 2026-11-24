@@ -66,11 +66,23 @@ body {
 .workspace {
   flex: 1;
   display: grid;
-  /* --list-col, --editor-fr, --preview-fr setzen die ziehbaren Trenner (ui/view.js) */
-  grid-template-columns: var(--list-col, minmax(220px, 280px)) minmax(0, var(--editor-fr, 1fr)) minmax(0, var(--preview-fr, 1fr));
+  /* --cols setzt ui/view.js aus den sichtbaren Bereichen und den gezogenen Breiten (--list-col);
+     --list-default ist die Standardbreite der Liste */
+  --list-default: minmax(220px, 280px);
+  grid-template-columns: var(--cols, var(--list-default) minmax(0, 1fr) minmax(0, 1fr));
   min-height: 0;
 }
-.workspace.focus { grid-template-columns: var(--list-col, minmax(220px, 280px)) minmax(0, 1fr); }
+/* Ausgeblendete Bereiche (Knöpfe oben, nur breiter Bildschirm – am Handy gibt es die Reiter) */
+@media (min-width: 761px) {
+  .workspace.no-list .pane-list,
+  .workspace.focus .pane-editor,
+  .workspace.no-preview .pane-preview { display: none; }
+  .workspace[data-split-list='false'] .pane-list .splitter,
+  .workspace[data-split-editor='false'] .pane-editor .splitter { display: none; }
+}
+.pane-toggles { display: inline-flex; gap: 2px; }
+.pane-toggles .icon-btn { padding-inline: .4em; color: var(--muted); }
+.pane-toggles .icon-btn[aria-pressed='true'] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
 .pane { min-height: 0; min-width: 0; display: flex; flex-direction: column; position: relative; }
 /* Ziehbarer Trenner am rechten Rand von Liste und Editor */
 .splitter {
@@ -99,8 +111,7 @@ body.resizing iframe { pointer-events: none; }
 .mobile-tabs { display: none; }
 /* Mittlere Breite: nur Symbole in der Kopfleiste */
 @media (max-width: 1200px) {
-  .workspace { grid-template-columns: var(--list-col, 210px) minmax(0, var(--editor-fr, 1fr)) minmax(0, var(--preview-fr, 1fr)); }
-  .workspace.focus { grid-template-columns: var(--list-col, 210px) minmax(0, 1fr); }
+  .workspace { --list-default: 210px; }
 }
 @media (max-width: 760px) {
   body { font-size: 16px; }
@@ -110,7 +121,8 @@ body.resizing iframe { pointer-events: none; }
   #btn-new { padding-inline: .6em; }
   .quick-actions, .toolbar-only { display: none; } /* am Handy steht alles im Menü */
   .actions button { padding: .65em .8em; min-height: 2.8rem; }
-  .workspace, .workspace.focus { grid-template-columns: 1fr; }
+  .workspace { grid-template-columns: 1fr; }
+  .pane-toggles { display: none; }
   .workspace > .pane { display: none; }
   .workspace[data-view='list'] .pane-list,
   .workspace[data-view='editor'] .pane-editor,

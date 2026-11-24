@@ -13,9 +13,22 @@ Aufteilung des Bildschirms: Handy-Reiter (Lieder / Bearbeiten / Ansehen), Editor
 
 Handy: welcher Bereich sichtbar ist ('list' | 'editor' | 'preview').
 
+### `isPaneHidden(pane)`
+
+Ist der Bereich ('list' | 'editor' | 'preview') gerade ausgeblendet?
+
+### `setPaneHidden(pane, hidden)`
+
+Bereich ein- oder ausblenden (und die Wahl merken).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `pane` | `'list'\|'editor'\|'preview'` |  |
+| `hidden` | `boolean` |  |
+
 ### `setFocusMode(on)`
 
-Editor ausblenden (nur Liste + Vorschau), z. B. zum Spielen
+Editor aus- (true) oder einblenden.
 
 ### `isFocusMode()`
 
@@ -29,6 +42,6 @@ Menü „⋯“ öffnen oder schließen.
 
 Nicht exportiert – nur innerhalb des Moduls benutzt.
 
-- `applyWidths()` – Gespeicherte Breiten anwenden (0 = Standard aus dem CSS).
+- `applyWidths()` – Gespeicherte Breiten und sichtbare Bereiche anwenden (0 = Standardbreite aus dem CSS).
 - `resizeTo(which, x)` – Neue Breite aus der Mausposition x; which: 'list' (Liste) oder 'editor' (Editor | Vorschau).
 - `addSplitter(pane, which)`

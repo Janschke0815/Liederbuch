@@ -16,6 +16,7 @@ const ACTIONS = {
     else if (!$('dialog[open]')) $('#btn-print').click();
   },
   focus: () => $('#btn-focus').click(),
+  listPane: () => $('#btn-pane-list').click(),
   play: () => $('#btn-play').click(),
   metronome: toggleMetronome,
   up: () => $('#tr-up').click(),

@@ -8,6 +8,15 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.5.4 – 24.11.2026 · Liste und Vorschau einklappen
+
+- Am Laptop/PC stehen oben in der Kopfleiste drei Symbole: **Liederliste**, **Editor** und **Vorschau**
+  lassen sich damit einzeln aus- und wieder einblenden – der Rest wird entsprechend breiter.
+  Liederliste auch mit **Strg+B**, Editor wie bisher mit **Strg+E**.
+- Editor und Vorschau sind nie beide weg: Blendest du das eine aus, während das andere schon aus ist,
+  kommt das andere zurück. Die Wahl merkt sich die App.
+- Der Editor-Knopf links über der Vorschau ist dafür in die Kopfleiste gewandert.
+
 ## 2.5.3 – 24.11.2026 · Speichern-Knopf mit Diskette
 
 - Über dem Editor steht jetzt eine **Diskette**: Antippen speichert sofort (wie Strg+S). Der Punkt daran zeigt
