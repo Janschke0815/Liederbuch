@@ -8,8 +8,9 @@ import { transposeChord, transposeNote, shouldUseFlats, parseChord } from '../co
 import { splitRepeat, formatRepeat } from '../core/repeat.js';
 import { chordDiagram } from './chord-diagram.js';
 import { harpLabel } from '../core/harp.js';
+import { abcChords, abcTempo, completeAbc } from '../core/abc.js';
 
-const DEFAULT_LABELS = { chorus: 'Refrain', bridge: 'Bridge' };
+const DEFAULT_LABELS = { chorus: 'Refrain', bridge: 'Bridge', abc: 'Melodie' };
 
 function el(tag, className, text) {
   const e = document.createElement(tag);
@@ -151,7 +152,23 @@ function renderLine(line, chordName) {
   }
 }
 
-function renderBlock(block, chordName) {
+/**
+ * Notenabschnitt: nur ein Platzhalter mit dem (vervollständigten) ABC-Text. Gezeichnet wird er
+ * danach von render/abc-view.js (abcjs wird erst dann geladen).
+ */
+function renderAbcBlock(section, block, chordName, ctx) {
+  const text = completeAbc(block.lines.map((l) => l.text).join('\n'), ctx.meta);
+  const score = el('div', 'abc-score');
+  score.dataset.abc = text;
+  score.dataset.transpose = String(ctx.steps || 0);
+  score.dataset.tempo = String(abcTempo(ctx.meta)); // zum Abspielen
+  // Akkorde über den Noten so benennen wie im Liedtext (Transponieren, ♯/♭)
+  score.dataset.chords = JSON.stringify(abcChords(text).map(chordName));
+  section.append(score);
+  return section;
+}
+
+function renderBlock(block, chordName, ctx = {}) {
   const kind = block.kind || 'none';
   const section = el('section', `block block--${kind}`);
   // Abschnitt nur aus Mundharmonika-Zeilen (z. B. Solo): verschwindet ganz, wenn Tabs aus sind
@@ -165,6 +182,8 @@ function renderBlock(block, chordName) {
   const label = labelText || DEFAULT_LABELS[block.kind];
   if (label) section.append(el('div', 'block-label', label));
   if (times) makeRepeatScope(section, 'block', times);
+
+  if (block.kind === 'abc') return renderAbcBlock(section, block, chordName, ctx);
 
   if (block.kind === 'tab' || block.kind === 'grid') {
     const pre = el('pre', 'tab');
@@ -305,7 +324,7 @@ export function renderSong(song, opts = {}) {
   article.append(header);
 
   const body = el('div', 'song-body');
-  for (const block of song.blocks) body.append(renderBlock(block, chordName));
+  for (const block of song.blocks) body.append(renderBlock(block, chordName, { meta: song.meta, steps }));
   article.append(body);
   return article;
 }

@@ -15,9 +15,12 @@ async function registerServiceWorker() {
     await navigator.serviceWorker.register('./sw.js');
     const reg = await navigator.serviceWorker.ready;
     // Alle bereits geladenen Dateien (Module, CSS, Icons) für offline vormerken
+    // dazu die Bausteine, die erst bei Bedarf geladen werden (Noten, QR-Code) – Liste aus dem Bauen
+    const lazy = await fetch('./lazy-files.json').then((r) => (r.ok ? r.json() : [])).catch(() => []);
     const urls = [
       location.href.split('#')[0],
       ...performance.getEntriesByType('resource').map((e) => e.name),
+      ...lazy.map((f) => new URL(f, location.href).href),
     ].filter((u) => new URL(u).origin === location.origin);
     reg.active?.postMessage({ type: 'cache-urls', urls });
   } catch (err) {

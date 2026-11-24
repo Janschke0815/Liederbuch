@@ -62,6 +62,12 @@
   .meta-grid input, .meta-grid select { font-size: 16px; }
   .meta-grid select { min-height: 2.4rem; }
 }
+.snippets .lbl-short { display: none; }
+@media (max-width: 400px) {
+  /* „Noten“ als ♪ – sonst rutscht „Text | Akkorde“ in eine eigene Zeile */
+  .snippets [data-snippet='abc'] .lbl-long { display: none; }
+  .snippets [data-snippet='abc'] .lbl-short { display: inline; }
+}
 @media (max-width: 360px) {
   .editor-bar { padding-inline: .2em; gap: .2em; }
   .editor-bar .snippets { gap: 2px; }

@@ -8,6 +8,27 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.4.0 – 24.11.2026 · Noten im Liederbuch
+
+- **Melodie als Noten:** Im Lied darf jetzt ein Notenabschnitt stehen – `{start_of_abc: label="Melodie"}`
+  … `{end_of_abc}` in ABC-Notation (einfache Textschreibweise für Noten). Er erscheint auf Notenlinien in
+  Vorschau, Spielmodus und Druck, mit Liedtext und Akkorden, und passt sich der Breite an (auch
+  zweispaltig und am Handy). Lieder bleiben normale .cho-Dateien.
+- **Transponieren** verschiebt die Noten mit; die Akkorde über den Noten heißen wie im Liedtext.
+  „Gitarren-Akkorde“ aus blendet sie mit aus.
+- **▶ am Abschnitt** spielt die Melodie auf dem Klavier und markiert die aktuelle Note (Tempo aus der
+  Liedinfo, sonst 100). Hält an bei Liedwechsel und beim Verlassen des Spielmodus. Der Klang liegt in der
+  App und funktioniert auch offline.
+- **Baustein „Noten“** über dem Editor (am Handy ♪): fügt ein Gerüst mit Takt und Tonart des Liedes ein.
+  Fehlen Kopfzeilen wie `K:`, ergänzt die App sie. Versteht sie eine Stelle nicht, bleiben die Noten
+  stehen und ein kleiner Hinweis erscheint. Die Übersicht **?** erklärt die Schreibweise.
+- **Druck:** nie mitten durch eine Notenzeile umbrochen.
+- **Ausblenden:** Einstellungen → Anzeigen → Noten, Rechtsklick auf die Vorschau oder ♪ im Spielmodus.
+- Das Notenprogramm wird nur geladen, wenn ein Lied Noten hat – sonst keine zusätzliche Ladezeit. Nach dem
+  ersten Besuch liegt es (wie der QR-Code für den Live-Modus) auch offline bereit.
+- Abschnittsnamen dürfen jetzt auch in der Schreibweise `label="…"` stehen (ChordPro 6).
+- Lied teilen als ChordPro mit Transposition: Tabs und Noten bleiben unverändert erhalten.
+
 ## 2.3.15 – 24.11.2026 · Aufgeräumt unter der Haube
 
 Für Nutzer sieht alles aus wie vorher – der Code ist nach vielen kleinen Erweiterungen neu geordnet:

@@ -79,6 +79,7 @@ Darstellungs-Einstellungen (settings/settings.js, DEFAULT_SETTINGS).
 | `showHarp` | `boolean` |  |
 | `harpLayout` | `'inline'\|'split'` |  |
 | `showTabs` | `boolean` |  |
+| `showAbc` | `boolean` |  |
 | `paper` | `'A4'\|'A5'\|'Letter'` |  |
 | `columns` | `1\|2` |  |
 | `margin` | `number` |  |

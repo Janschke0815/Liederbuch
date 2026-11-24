@@ -72,6 +72,7 @@
   .pane-editor[data-edit='chords'] > :is(.song-meta, #editor) { display: none; }
   .pane-editor[data-edit='chords'] #chord-hint-edit { display: flex; margin: 0 .6em .4em; border-radius: 8px; border: 0; }
   .pane-editor[data-edit='chords'] .chord-view { display: block; flex: 1; min-height: 0; overflow: auto; background: var(--sheet); }
+  .chord-view .block--abc { display: none; } /* Noten: hier setzt man keine Akkorde */
   .chord-view .sheet { min-height: 100%; padding-bottom: 14rem; } /* Platz, damit auch die letzten Zeilen über der Auswahl stehen können */
   /* Auswahl als Leiste unten über den Reitern, gut mit dem Daumen erreichbar */
   .chord-pick { left: 8px !important; right: 8px; top: auto !important; bottom: calc(3.6rem + env(safe-area-inset-bottom)); width: auto; }

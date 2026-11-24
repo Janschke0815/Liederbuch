@@ -5,6 +5,7 @@ import { parseChordPro } from '../core/chordpro.js';
 import { transposeChord } from '../core/chords.js';
 import { getAllMeta, setMeta, getTags, setTags } from '../core/meta-edit.js';
 import { renderSong, songKey } from '../render/song-view.js';
+import { renderScores, stopAbc } from '../render/abc-view.js';
 import { prefs } from '../prefs.js';
 import { showMenu } from '../context-menu.js';
 import { readOnly, repo, state } from './app-state.js';
@@ -42,6 +43,7 @@ export function renderPreview() {
   const song = parseChordPro(editor.value);
   const opts = { transpose: current.transpose, accidentals: current.accidentals };
   preview.replaceChildren(renderSong(song, opts));
+  renderScores(preview); // Noten ({start_of_abc}) – lädt abcjs nur, wenn es welche gibt
   if (current.note) preview.prepend(Object.assign(document.createElement('div'), { className: 'song-note', textContent: current.note }));
   const k = songKey(song, opts);
   dispatchEvent(new Event('previewrendered')); // z. B. Akkord-Ansicht am Handy (chord-tap.js) zieht nach
@@ -86,6 +88,7 @@ export async function openSong(id) {
   setStatus('');
   updateControls();
   renderPreview();
+  stopAbc(); // Melodie des vorigen Liedes nicht weiterspielen
   dispatchEvent(new CustomEvent('songopened', { detail: state.current?.id || null }));
 }
 

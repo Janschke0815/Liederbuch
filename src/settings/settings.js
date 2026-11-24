@@ -44,6 +44,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   harpColor: '#1565c0', // Blau: auch bei Rot-Grün-Schwäche gut vom Rot der Akkorde zu unterscheiden
   harpLayout: 'inline', // Akkorde und Harp-Tabs: 'inline' = eine Zeile, 'split' = zwei Zeilen
   showTabs: true, // Gitarren-Tabs ({start_of_tab})
+  showAbc: true, // Noten ({start_of_abc})
   lineSpacing: 'normal',
   // Liedkopf: Titel und Interpret
   titleFont: '', // '' = wie Liedtext
@@ -90,6 +91,7 @@ export function sanitize(input = {}) {
     harpColor: color(s.harpColor, d.harpColor),
     harpLayout: oneOf(s.harpLayout, ['inline', 'split'], d.harpLayout),
     showTabs: typeof s.showTabs === 'boolean' ? s.showTabs : d.showTabs,
+    showAbc: typeof s.showAbc === 'boolean' ? s.showAbc : d.showAbc,
     lineSpacing: oneOf(s.lineSpacing, Object.keys(LINE_SPACING), d.lineSpacing),
     titleFont: oneOf(s.titleFont, ['', ...Object.keys(FONTS)], d.titleFont),
     titleSize: clamp(s.titleSize, 10, 40, d.titleSize),
@@ -140,6 +142,7 @@ export function applySettings(el, settings) {
   el.dataset.harp = s.showHarp ? 'show' : 'hide';
   el.dataset.harpLayout = s.harpLayout;
   el.dataset.tabs = s.showTabs ? 'show' : 'hide';
+  el.dataset.abc = s.showAbc ? 'show' : 'hide';
   el.dataset.pageNumbers = s.pageNumbers ? 'show' : 'hide';
 }
 

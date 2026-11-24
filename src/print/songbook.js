@@ -2,6 +2,7 @@
 
 import { parseChordPro } from '../core/chordpro.js';
 import { renderSong } from '../render/song-view.js';
+import { renderScores } from '../render/abc-view.js';
 import { Paginator } from './paginate.js';
 
 export const PAPER = {
@@ -129,6 +130,12 @@ export async function buildSongbook(root, songs, options = {}) {
       head.append(header);
     }
     pag.newPage({ className: 'page--song', columns, head });
+    // Noten in der Spaltenbreite zeichnen, bevor gemessen wird; jede Notenzeile bleibt ganz
+    if (article.querySelector('.abc-score')) {
+      pag.col.append(article);
+      await renderScores(article, { follow: false });
+      article.remove();
+    }
     const from = pag.pages.length - 1;
     firstSongPage.set(s.id, pag.pages.length);
     pag.flow(article);

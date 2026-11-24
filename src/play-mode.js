@@ -6,6 +6,7 @@
 
 import { parseChordPro } from './core/chordpro.js';
 import { renderSong } from './render/song-view.js';
+import { renderScores, stopAbc } from './render/abc-view.js';
 import { applySettings, loadSettings, saveSettings } from './settings/settings.js';
 import { metronome, beatsPerBar } from './metronome.js';
 import { prefs } from './prefs.js';
@@ -160,7 +161,9 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     meta = parsed.meta;
     applySettings(sheet, loadSettings());
     const transpose = entry.transpose ?? song.transpose;
+    stopAbc(); // Melodie des vorigen Liedes nicht weiterspielen
     sheet.replaceChildren(renderSong(parsed, { transpose, accidentals: song.accidentals }));
+    await renderScores(sheet); // Noten erst zeichnen, dann Spalten und Seiten messen
     syncDiagramButton();
     if (song.note) {
       const n = document.createElement('div');
@@ -410,6 +413,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     }
     setPlaying(false);
     setExtra(false);
+    stopAbc();
     metronome.stop();
     syncMetro();
     clearTimeout(hideTimer);
@@ -453,13 +457,14 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   $('#pl-metro').onclick = toggleMetro;
 
   // Griffbilder, Mundharmonika- und Gitarren-Tabs ein/aus – dieselben Einstellungen wie im
-  // Einstellungsdialog. Die Tab-Knöpfe erscheinen nur, wenn das Lied solche Tabs enthält.
-  const TOGGLES = { showChords: '#pl-chords', showDiagrams: '#pl-diagrams', showHarp: '#pl-harp', showTabs: '#pl-tabs' };
+  // Einstellungsdialog. Die Knöpfe für Tabs und Noten erscheinen nur, wenn das Lied welche enthält.
+  const TOGGLES = { showChords: '#pl-chords', showDiagrams: '#pl-diagrams', showHarp: '#pl-harp', showTabs: '#pl-tabs', showAbc: '#pl-abc' };
   function syncDiagramButton() {
     const s = loadSettings();
     for (const [key, sel] of Object.entries(TOGGLES)) $(sel).setAttribute('aria-pressed', String(s[key]));
     $('#pl-harp').hidden = !sheet.querySelector('.chord.harp');
     $('#pl-tabs').hidden = !sheet.querySelector('.block--tab');
+    $('#pl-abc').hidden = !sheet.querySelector('.block--abc');
   }
   function toggleSetting(key) {
     const rel = pos() / Math.max(1, maxPos());
@@ -475,6 +480,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
   $('#pl-chords').onclick = () => toggleSetting('showChords');
   $('#pl-harp').onclick = () => toggleSetting('showHarp');
   $('#pl-tabs').onclick = () => toggleSetting('showTabs');
+  $('#pl-abc').onclick = () => toggleSetting('showAbc');
   addEventListener('resize', () => {
     if (view.hidden) return;
     const rel = pos() / Math.max(1, maxPos());

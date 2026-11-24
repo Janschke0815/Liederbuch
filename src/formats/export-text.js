@@ -4,6 +4,7 @@
 import { parseChordPro } from '../core/chordpro.js';
 import { transposeChord, shouldUseFlats, parseChord } from '../core/chords.js';
 import { harpLabel } from '../core/harp.js';
+import { completeAbc } from '../core/abc.js';
 
 const DEFAULT_LABELS = { verse: 'Strophe', chorus: 'Refrain', bridge: 'Bridge', tab: 'Tab', grid: 'Grid' };
 
@@ -21,19 +22,44 @@ function chordMapper(song, steps, accidentals = 'auto') {
   return (c) => transposeChord(c, steps, useFlats);
 }
 
-/** ChordPro-Text mit transponierten Akkorden und angepasster {key:}. */
+/** Anfang bzw. Ende eines Abschnitts, dessen Zeilen unverändert bleiben (Tab, Grid, Noten). */
+const VERBATIM_START = /^\s*\{\s*(start_of_(tab|grid|abc)|so[tga])\b/i;
+const VERBATIM_END = /^\s*\{\s*(end_of_\w+|eo[tga])\s*\}/i;
+const ABC_START = /^\s*\{\s*(start_of_abc|soa)\b/i;
+
+/**
+ * ChordPro-Text mit transponierten Akkorden und angepasster {key:}. Tabs und Noten bleiben, wie sie
+ * sind; Noten ohne eigene Tonart (K:) bekommen die ursprüngliche ausdrücklich dazu – sonst läsen sie
+ * sich nach der geänderten {key:} in der falschen Tonart.
+ */
 export function transposeChordPro(text, steps = 0, accidentals = 'auto') {
   const song = parseChordPro(text);
   const map = chordMapper(song, steps, accidentals);
-  return String(text)
-    .split('\n')
-    .map((line) => {
-      const key = /^(\s*\{\s*key\s*:\s*)([^}]*?)(\s*\}\s*)$/i.exec(line);
-      if (key) return key[1] + map(key[2]) + key[3];
-      if (/^\s*\{/.test(line)) return line;
-      return line.replace(/\[([^\]*][^\]]*)\]/g, (m, c) => (parseChord(c) ? `[${map(c)}]` : m));
-    })
-    .join('\n');
+  const out = [];
+  let verbatim = null; // { abc, lines } innerhalb eines unveränderten Abschnitts
+  for (const line of String(text).split('\n')) {
+    if (verbatim) {
+      if (!VERBATIM_END.test(line)) {
+        verbatim.lines.push(line);
+        continue;
+      }
+      const body = verbatim.abc && steps ? completeAbc(verbatim.lines.join('\n'), song.meta).split('\n') : verbatim.lines;
+      out.push(...body, line);
+      verbatim = null;
+      continue;
+    }
+    if (VERBATIM_START.test(line)) {
+      verbatim = { abc: ABC_START.test(line), lines: [] };
+      out.push(line);
+      continue;
+    }
+    const key = /^(\s*\{\s*key\s*:\s*)([^}]*?)(\s*\}\s*)$/i.exec(line);
+    if (key) out.push(key[1] + map(key[2]) + key[3]);
+    else if (/^\s*\{/.test(line)) out.push(line);
+    else out.push(line.replace(/\[([^\]*][^\]]*)\]/g, (m, c) => (parseChord(c) ? `[${map(c)}]` : m)));
+  }
+  if (verbatim) out.push(...verbatim.lines); // Abschnitt ohne Ende: unverändert lassen
+  return out.join('\n');
 }
 
 /**
@@ -100,6 +126,7 @@ export function chordproToText(text, steps = 0, accidentals = 'auto', { harpLayo
   if (m.tempo) info.push(`${m.tempo} bpm`);
   if (info.length) out.push(info.join(' · '));
   for (const block of song.blocks) {
+    if (block.kind === 'abc') continue; // Noten lassen sich als Text nicht zeigen
     out.push('');
     const label = block.label || DEFAULT_LABELS[block.kind];
     if (label) out.push(`[${label}]`);

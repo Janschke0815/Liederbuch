@@ -4,7 +4,7 @@
 
 Druckfertiges Liederbuch: Deckblatt, Inhaltsverzeichnis, ein Lied pro neuer Seite.
 
-**Benutzt:** [`core/chordpro.js`](../core/chordpro.md), [`print/paginate.js`](paginate.md), [`render/song-view.js`](../render/song-view.md)  
+**Benutzt:** [`core/chordpro.js`](../core/chordpro.md), [`print/paginate.js`](paginate.md), [`render/abc-view.js`](../render/abc-view.md), [`render/song-view.js`](../render/song-view.md)  
 **Benutzt von:** [`print-ui.js`](../print-ui.md)
 
 ## Exportiert

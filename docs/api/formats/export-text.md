@@ -4,14 +4,16 @@
 
 Lied exportieren: transponierter ChordPro-Text und "Akkorde über dem Text" (z. B. für Nachrichten oder Foren). Reine Funktionen, kein DOM.
 
-**Benutzt:** [`core/chordpro.js`](../core/chordpro.md), [`core/chords.js`](../core/chords.md), [`core/harp.js`](../core/harp.md)  
+**Benutzt:** [`core/abc.js`](../core/abc.md), [`core/chordpro.js`](../core/chordpro.md), [`core/chords.js`](../core/chords.md), [`core/harp.js`](../core/harp.md)  
 **Benutzt von:** [`ui/share.js`](../ui/share.md)
 
 ## Exportiert
 
 ### `transposeChordPro(text, steps = 0, accidentals = 'auto')`
 
-ChordPro-Text mit transponierten Akkorden und angepasster {key:}.
+ChordPro-Text mit transponierten Akkorden und angepasster {key:}. Tabs und Noten bleiben, wie sie
+sind; Noten ohne eigene Tonart (K:) bekommen die ursprüngliche ausdrücklich dazu – sonst läsen sie
+sich nach der geänderten {key:} in der falschen Tonart.
 
 ### `chordproToText(text, steps = 0, accidentals = 'auto', { harpLayout = 'inline' } = {})`
 

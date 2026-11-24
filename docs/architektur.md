@@ -172,3 +172,30 @@ export function transposeNote(note, steps, useFlats) { … }
 ```
 
 Oben in jeder Datei erklären ein paar `//`-Zeilen, wofür das Modul da ist – daraus entsteht die Übersicht.
+
+## Noten (ABC-Notation)
+
+Noten stehen als Abschnitt `{start_of_abc}` … `{end_of_abc}` im ChordPro-Text. Der Parser behandelt ihn
+wie einen Tab-Abschnitt: Blocktyp `abc`, Zeilen `{type: 'abc', text}` unverändert. `core/abc.js` ist reine
+Textlogik ohne Bildschirm: fehlende Kopfzeilen ergänzen (`completeAbc`: `X:1`, Takt und Tonart aus der
+Liedinfo), Akkorde finden (`abcChords`), Tempo (`abcTempo`), Gerüst für den Baustein (`abcSkeleton`).
+
+`renderSong` legt nur einen Platzhalter an (`.abc-score` mit `data-abc`, `data-transpose`, `data-chords`,
+`data-tempo`). `render/abc-view.js` füllt ihn mit `renderScores(root)`: lädt abcjs per `import()` (eigener
+Baustein, nur bei Bedarf), zeichnet je Notenzeile ein SVG (`oneSvgPerLine`, Klasse `atomic`, damit
+`print/paginate.js` zwischen Notenzeilen umbricht) und benennt die Akkorde über den Noten wie im Liedtext
+(`chordNamer`, also mit derselben Transposition und ♯/♭-Wahl). abcjs misst beim Zeichnen; das geht nur
+im Dokument, deshalb wird unsichtbar außerhalb des Bildschirms gezeichnet und dann umgehängt. Ein
+`ResizeObserver` bricht bei geänderter Breite neu um; unveränderte Abschnitte übernehmen beim Tippen
+ihr fertiges Bild. Aufrufer: Vorschau (`ui/song.js`), Spielmodus (wartet vor dem Messen der Spalten),
+Druck (zeichnet in der Spaltenbreite, bevor der Seitenumbruch misst).
+
+Abspielen: abcjs-Synth mit Klavier-Samples aus `public/soundfont/` (kein fremder Server), nur Melodie
+(`chordsOff`), Markierung der klingenden Note über `TimingCallbacks`; `stopAbc()` beim Liedwechsel und
+beim Verlassen des Spielmodus. Offline: `vite.config.js` schreibt beim Bauen `lazy-files.json` (alle per
+`import()` geladenen Bausteine), `pwa.js` meldet sie dem Service Worker mit – so liegt abcjs nach dem
+ersten Besuch bereit, auch wenn noch nie Noten gezeigt wurden. Die Samples landen beim ersten ▶ im Cache.
+
+Export: `transposeChordPro` lässt Tab- und Notenabschnitte unverändert; Noten ohne eigenes `K:` bekommen
+beim Transponieren die ursprüngliche Tonart ausdrücklich (sonst läsen sie sich mit der neuen `{key}`
+falsch). Der Text-Export („Akkorde über dem Text“) lässt Noten weg.

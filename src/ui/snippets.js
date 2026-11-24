@@ -1,6 +1,8 @@
-// Bausteine über dem Editor: Akkord, Strophe, Refrain, Bridge, Tab, Wiederholung, Hinweis –
+// Bausteine über dem Editor: Akkord, Strophe, Refrain, Bridge, Tab, Noten, Wiederholung, Hinweis –
 // und die Übersicht der ChordPro-Syntax („?“).
 
+import { abcSkeleton } from '../core/abc.js';
+import { parseChordPro } from '../core/chordpro.js';
 import { bumpRepeat } from '../core/repeat.js';
 import { state } from './app-state.js';
 import { $, closeOnBackdrop, toast } from './dom.js';
@@ -64,6 +66,13 @@ function insertSnippet(kind) {
     const body = sel.replace(/\n$/, '') || empty;
     const head = `${nl}{start_of_tab: Tab}\n`;
     return insertText(`${head}${body}\n{end_of_tab}\n`, head.length, head.length + body.length);
+  }
+  if (kind === 'abc') {
+    // Noten: Gerüst mit Takt und Tonart des Liedes; die Beispielzeilen sind markiert zum Überschreiben
+    const lines = abcSkeleton(parseChordPro(editor.value).meta).split('\n');
+    const head = `${nl}${lines.slice(0, 5).join('\n')}\n`;
+    const body = lines.slice(5, -1).join('\n');
+    return insertText(`${head}${body}\n${lines.at(-1)}\n`, head.length, head.length + body.length);
   }
   // Abschnitte: markierter Text kommt hinein
   const verses = (editor.value.match(/\{(start_of_verse|sov)\b/g) || []).length;

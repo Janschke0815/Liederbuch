@@ -58,6 +58,7 @@
  * @property {boolean} showHarp
  * @property {'inline'|'split'} harpLayout
  * @property {boolean} showTabs
+ * @property {boolean} showAbc
  * @property {'A4'|'A5'|'Letter'} paper
  * @property {1|2} columns
  * @property {number} margin

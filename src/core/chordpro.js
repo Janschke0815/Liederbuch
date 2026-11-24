@@ -11,6 +11,7 @@
 //     harp: Mundharmonika-Tab wie [-4] statt Akkord (siehe harp.js)
 //   { type: 'comment', text, style: 'normal'|'italic'|'box' }
 //   { type: 'tab', text }            – Zeile in Tab/Grid-Block, unverändert
+//   { type: 'abc', text }            – Zeile in einem Notenabschnitt {start_of_abc} (kind 'abc'), unverändert
 //   { type: 'chorus-ref', label }    – {chorus} = Refrain wiederholen
 //   { type: 'repeat-start', label } | { type: 'repeat-end' }  – {start_of_repeat: 2×} … {end_of_repeat}
 //   { type: 'empty' } | { type: 'new-page' } | { type: 'column-break' }
@@ -22,7 +23,7 @@ const ALIASES = {
   soc: 'start_of_chorus', eoc: 'end_of_chorus', sov: 'start_of_verse', eov: 'end_of_verse',
   sob: 'start_of_bridge', eob: 'end_of_bridge', sot: 'start_of_tab', eot: 'end_of_tab',
   sog: 'start_of_grid', eog: 'end_of_grid', np: 'new_page', npp: 'new_physical_page',
-  colb: 'column_break', highlight: 'comment', col: 'columns',
+  colb: 'column_break', highlight: 'comment', col: 'columns', soa: 'start_of_abc', eoa: 'end_of_abc',
 };
 
 const MULTI_META = new Set(['subtitle', 'artist', 'composer', 'lyricist', 'arranger', 'tag']);
@@ -30,7 +31,7 @@ const SINGLE_META = new Set([
   'title', 'sorttitle', 'album', 'year', 'key', 'capo', 'tempo', 'time', 'duration', 'copyright', 'columns',
 ]);
 
-const VERBATIM_KINDS = new Set(['tab', 'grid']);
+const VERBATIM_KINDS = new Set(['tab', 'grid', 'abc']);
 const FILLER_TEXT = /^[\s|/%.:\-()x×\d*]*$/i;
 
 /**
@@ -72,6 +73,12 @@ function parseDirective(line) {
   return { name: ALIASES[name] || name, value: m[2] ?? '' };
 }
 
+/** Abschnittsname: „Refrain 2“ oder – Schreibweise ab ChordPro 6 – label="Refrain 2". */
+function blockLabel(value) {
+  const m = /^label\s*=\s*(?:"([^"]*)"|'([^']*)'|(\S+))\s*$/i.exec(value || '');
+  return (m ? (m[1] ?? m[2] ?? m[3]) : value) || null;
+}
+
 function envKind(name) {
   // start_of_chorus -> chorus, start_of_xyz -> xyz
   return name.replace(/^(start|end)_of_/, '');
@@ -109,7 +116,7 @@ export function parseChordPro(src) {
         current = null;
         loose = null;
       } else {
-        current.lines.push({ type: 'tab', text: line });
+        current.lines.push({ type: current.kind === 'abc' ? 'abc' : 'tab', text: line });
       }
       continue;
     }
@@ -135,7 +142,7 @@ export function parseChordPro(src) {
     } else if (name === 'end_of_repeat') {
       pushLine({ type: 'repeat-end' });
     } else if (name.startsWith('start_of_')) {
-      current = { kind: envKind(name), label: value || null, lines: [] };
+      current = { kind: envKind(name), label: blockLabel(value), lines: [] };
       loose = null;
       song.blocks.push(current);
     } else if (name.startsWith('end_of_')) {

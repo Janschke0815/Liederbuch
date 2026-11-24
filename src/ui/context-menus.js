@@ -105,6 +105,7 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
           action: () => saveSettings({ ...s, harpLayout: s.harpLayout === 'split' ? 'inline' : 'split' }),
         },
         toggleItem(s, 'Gitarren-Tabs', 'showTabs'),
+        toggleItem(s, 'Noten', 'showAbc'),
       ],
     },
     {

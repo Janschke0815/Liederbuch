@@ -129,7 +129,7 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 ## ChordPro-Syntax (Kurzüberblick)
 
 Die vollständige Übersicht öffnet der Knopf **?** über dem Editor. Die Knöpfe daneben
-(Akkord, Strophe, Refrain, Bridge, **Tab**, Refrain-Verweis, 2×, Hinweis) fügen das Meiste ein.
+(Akkord, Strophe, Refrain, Bridge, **Tab**, **Noten**, Refrain-Verweis, 2×, Hinweis) fügen das Meiste ein.
 
     {title: Clementine}          {artist: …}   {key: C}   {capo: 2}   {time: 3/4}   {tempo: 96}
     In a [C]cavern, [G]canyon    Akkord vor der Silbe; [*Riff] = Anmerkung; [-4] = Mundharmonika
@@ -137,6 +137,7 @@ Die vollständige Übersicht öffnet der Knopf **?** über dem Editor. Die Knöp
     {chorus}                     Refrain hier wiederholen
     Zeile (2×)   {start_of_chorus: Refrain 2×}   {start_of_repeat: 3×} … {end_of_repeat}
     {comment: leise}   {new_page}   {column_break}   # Notiz (nur im Editor)
+    {start_of_abc: label="Melodie"} … {end_of_abc}   Noten in ABC-Notation (kurz {soa} / {eoa})
 
 Der Knopf **Tab** rahmt markierten Text als Gitarren-Tab ein; ohne Markierung fügt er ein leeres
 Griffbrett ein, das schon markiert ist – ein kopierter Tab ersetzt es direkt mit Strg+V.
@@ -402,6 +403,46 @@ Rechtsklick auf die Vorschau → *Anzeigen* oder im Spielmodus mit **Harp** / **
 Das gilt auch für den Druck. Ein Abschnitt, der nur aus Mundharmonika-Tönen besteht (z. B. ein
 Solo), verschwindet dann ganz.
 
+## Noten (Melodie)
+
+Die Melodie eines Liedes kann als Noten im Lied stehen – in **ABC-Notation**, einer einfachen
+Textschreibweise für Noten, im Standard-Abschnitt von ChordPro. Das Lied bleibt eine normale
+`.cho`-Datei (Cloud, WebDAV, Sicherung, Abo funktionieren unverändert):
+
+    {start_of_abc: label="Melodie"}
+    L:1/4
+    "C"C D E F | "G"G2 G2 | "F"A A A A | "C"G4 |
+    w: Al-le mei-ne Ent-chen schwim-men auf dem See,
+    {end_of_abc}
+
+- **Tonhöhen:** `C D E F G A B` (ab dem c′), `c d e … b` eine Oktave höher, `c'` noch höher, `C,` tiefer;
+  `^F` Kreuz, `_B` b, `=F` Auflösung.
+- **Längen:** `A2` doppelt, `A4` vierfach, `A/2` halb, `A3/2` punktiert; `z` ist eine Pause.
+- **Takte:** `|`, Schluss `|]`, Wiederholung `|:` … `:|`.
+- **Akkorde** in Anführungszeichen vor der Note (`"G"G2`), **Liedtext** in einer `w:`-Zeile unter der
+  Notenzeile (`-` trennt Silben).
+- Kopfzeilen `M:` (Takt), `L:` (Grundlänge) und `K:` (Tonart) darf man weglassen: Fehlt `K:`, nimmt die
+  App Takt und Tonart aus der Liedinfo, sonst C-Dur.
+
+Der Knopf **Noten** über dem Editor fügt ein Gerüst mit Takt und Tonart des Liedes ein (am Handy ♪);
+die Übersicht **?** erklärt die Schreibweise. Die Vorschau zeichnet die Noten beim Tippen; versteht sie
+eine Stelle nicht, bleiben die Noten stehen und darunter erscheint ein kleiner Hinweis.
+
+Die Noten stehen in **Vorschau, Spielmodus und Druck**, passen sich der Breite an (auch zweispaltig und
+am Handy) und werden mit **transponiert** – die Akkorde darüber heißen genau wie im Liedtext (♯/♭ nach
+deiner Wahl; die Vorzeichen der Tonart wählt das Notenprogramm selbst). „Gitarren-Akkorde“ aus blendet
+auch die Akkorde über den Noten aus. Im Druck wird nie mitten durch eine Notenzeile umbrochen.
+
+**▶ am Abschnittsnamen** spielt die Melodie auf dem Klavier und markiert die aktuelle Note – im Tempo
+der Liedinfo (sonst 100). Sie hält an, wenn du ein anderes Lied öffnest oder den Spielmodus verlässt.
+Der Klang liegt in der App (Klavier-Samples aus dem FluidR3-Soundfont, CC BY 3.0, siehe
+`public/soundfont/LIESMICH.md`; ca. 1,2 MB, erst beim ersten ▶ geladen) und klingt danach
+auch offline.
+
+Ausblenden: **Einstellungen → Anzeigen → Noten**, per Rechtsklick auf die Vorschau → *Anzeigen* oder im
+Spielmodus mit **♪**. Das Notenprogramm ([abcjs](https://www.abcjs.net), MIT-Lizenz) wird nur geladen,
+wenn ein Lied Noten hat; nach dem ersten Besuch liegt es für offline bereit.
+
 ## Wiederholungen
 
 Eine Klammer rechts zeigt, **worauf** sich die Anzahl bezieht – sie umfasst genau den
@@ -633,7 +674,7 @@ und fasst beim Bauen alles zu wenigen Dateien in `dist/` zusammen. Abhängigkeit
                     Textfunktionen (text.js)
     src/formats/    Dateiformate: .cho-Dateien und Dateinamen, ZIP, Sicherung, Text-/UG-Import,
                     Lesezeichen „Ins Liederbuch“, Export als Text
-    src/render/     Lied -> HTML (Vorschau, Spielmodus, Druck), Griffbilder
+    src/render/     Lied -> HTML (Vorschau, Spielmodus, Druck), Griffbilder, Noten (abc-view.js, abcjs)
     src/print/      Seitenumbruch, Deckblatt, Inhaltsverzeichnis, Druck-CSS, Druckschriften
     src/settings/   Darstellungs-Einstellungen (prüfen, speichern, als CSS-Variablen anwenden)
     src/storage/    IndexedDB hinter einer Schnittstelle: Lieder, Setlisten
@@ -660,6 +701,7 @@ und fasst beim Bauen alles zu wenigen Dateien in `dist/` zusammen. Abhängigkeit
     src/pwa.js      Service Worker anmelden, Offline-Hinweis, Installieren
     public/         wird unverändert nach dist/ kopiert:
                       sw.js                 Service Worker (Cache „Netz zuerst“)
+                      soundfont/            Klavier-Samples für „Melodie abspielen“ (CC BY 3.0, siehe LIESMICH)
                       manifest.webmanifest  App-Name, Icons, Dateitypen
                       icons/                App-Icons (icon.svg ist die Vorlage)
     tests/          Browser-Tests (tests/index.html öffnen oder `npm test`, siehe tools/run-tests.mjs)
@@ -713,6 +755,12 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
 24. ✅ Live-Modus fürs Lagerfeuer (2.3): ein Gerät wählt das Lied, alle anderen sehen es sofort; Beitritt
     per QR-Code/Link ohne Konto, Lied wird verschlüsselt über öffentliche MQTT-Server mitgeschickt
     (statt Peer-to-Peer: das scheitert im Mobilfunk oft); Mitsinger transponieren zusätzlich für sich
-25. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
+25. ✅ Noten im Liederbuch, Stufe 1 (2.4): Melodie als ABC-Notation im Lied (`{start_of_abc}`), gezeichnet
+    mit abcjs (nur bei Bedarf geladen) in Vorschau, Spielmodus und Druck, transponierbar, mit ▶ abspielbar
+    (Klavier-Samples in der App, offline); Baustein „Noten“, ABC-Hilfe in der Syntax-Übersicht.
+    Später: Stufe 2 – MusicXML-Datei (z. B. aus MuseScore oder einer Notenscan-App) importieren und im
+    Browser mit xml2abc in einen ABC-Abschnitt umwandeln; Harp-Tabs automatisch aus den Noten erzeugen
+    (`core/harp.js`); Stufe 3 – Scan/Foto direkt in Noten, sobald es brauchbare Lösungen im Browser gibt
+26. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
     zuerst Englisch; Sprache folgt dem Browser und ist unter Einstellungen → App umstellbar. Schrittweise nach
     Bereichen umbauen (Kopfleiste, Liste, Menü → Dialoge → Hilfetexte); ein Test meldet fehlende Übersetzungen

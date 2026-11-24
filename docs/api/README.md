@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-91 Module, 349 exportierte Funktionen, Konstanten und Klassen.
+93 Module, 356 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -51,7 +51,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/share-with.js`](ui/share-with.md) | „Mit anderen teilen“: ein Einstieg, der zuerst fragt, ob die anderen mitbearbeiten (gemeinsames Liederbuch über Google Drive) oder nur lesen sollen (Abo) – und dann in den passenden bestehenden Ablauf führt (Cloud-Dialog „Mitglieder“, „Neues Liederbuch“, „Veröffentlichen …“). |
 | [`ui/share.js`](ui/share.md) | Lied teilen: über das Teilen-Menü des Geräts, als ChordPro-Datei, als Text oder als PDF – jeweils in der aktuellen Transposition. |
 | [`ui/shortcuts.js`](ui/shortcuts.md) | Alle Tastenkürzel an einer Stelle: Daraus entstehen die Tasten-Abfrage (app-keys.js, play-mode.js) und die Übersicht im Dialog „Tastenkürzel“. |
-| [`ui/snippets.js`](ui/snippets.md) | Bausteine über dem Editor: Akkord, Strophe, Refrain, Bridge, Tab, Wiederholung, Hinweis – und die Übersicht der ChordPro-Syntax („?“). |
+| [`ui/snippets.js`](ui/snippets.md) | Bausteine über dem Editor: Akkord, Strophe, Refrain, Bridge, Tab, Noten, Wiederholung, Hinweis – und die Übersicht der ChordPro-Syntax („?“). |
 | [`ui/song-actions.js`](ui/song-actions.md) | Was man mit ganzen Liedern tun kann: anlegen, löschen, duplizieren, zu einer Setliste hinzufügen, in ein anderes Liederbuch kopieren. |
 | [`ui/song.js`](ui/song.md) | Das geöffnete Lied: öffnen, automatisch speichern, Vorschau, Transponieren und die Liedinfo (Titel, Capo, Takt … über dem Editor). |
 | [`ui/toolbar.js`](ui/toolbar.md) | Kopfleiste: angeheftete Aktionen beschriftet neben dem Menü „⋯“ (breiter Bildschirm). |
@@ -62,6 +62,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 
 | Modul | Inhalt |
 |---|---|
+| [`core/abc.js`](core/abc.md) | Noten als ABC-Notation im ChordPro-Text ({start_of_abc} … {end_of_abc}, Kurzform {soa}/{eoa}). |
 | [`core/capo.js`](core/capo.md) | Capo-Hilfe: In welchem Bund liegt das Lied mit möglichst einfachen Griffen? |
 | [`core/chord-place.js`](core/chord-place.md) | Akkorde per Antippen setzen: eine Stelle im sichtbaren Liedtext (Zeile + Spalte) wird in den ChordPro-Text übersetzt. |
 | [`core/chord-shapes.js`](core/chord-shapes.md) | Gitarrengriffe (Standardstimmung EADGBE) für Griffbilder und die Capo-Hilfe. |
@@ -98,6 +99,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 
 | Modul | Inhalt |
 |---|---|
+| [`render/abc-view.js`](render/abc-view.md) | Notenabschnitte zeichnen und abspielen (abcjs). |
 | [`render/chord-diagram.js`](render/chord-diagram.md) | Griffbild als SVG: 6 Saiten, 4–5 Bünde, ○ leer, × nicht anschlagen, Barré als Balken. |
 | [`render/song-view.js`](render/song-view.md) | Song-Modell -> DOM. |
 
