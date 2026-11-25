@@ -15,7 +15,7 @@ Nachrichten (verschlüsselt):
 ```
 
 **Benutzt:** [`live/live-crypto.js`](live-crypto.md), [`live/mqtt.js`](mqtt.md)  
-**Benutzt von:** [`live-ui.js`](../live-ui.md)
+**Benutzt von:** [`live-ui.js`](../live-ui.md), [`sync/invite-box.js`](../sync/invite-box.md)
 
 ## Exportiert
 

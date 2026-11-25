@@ -53,9 +53,12 @@ function webdavFolderFor(baseUrl, name) {
  * @param {(b: object) => boolean} [opts.leaveAbo]   Abo beenden (ui/abo.js)
  * @param {(o: {quiet: boolean}) => Promise<void>} [opts.refreshAbo]  Abo aktualisieren (ui/abo.js)
  * @param {{openDialog: Function, leaveBook: Function, renamed: (name: string) => void, stop: Function,
- *          join: (fileId?: string) => void, pendingJoin: () => string|null, googleReady: () => boolean}} opts.cloud
+ *          join: (fileId?: string) => void, pendingJoin: () => string|null, googleReady: () => boolean,
+ *          pendingInvite?: () => {fileId: string, name: string, from: string, email: string}|null,
+ *          declineInvite?: () => void}} opts.cloud
  *   Cloud-Teil (sync-ui.js): Dialog öffnen, gemeinsames Buch verlassen, Umbenennung abgleichen, Abgleich
- *   anhalten, Einladung öffnen, offene Einladung, Google eingerichtet?
+ *   anhalten, Einladung öffnen, offene Einladung, Google eingerichtet?, Einladung aus dem Briefkasten
+ *   (sync/invite-box.js) und ablehnen
  * @returns {{open: (o?: {create?: boolean}) => void, openNew: (o?: {where?: string, copy?: boolean}) => void,
  *            refresh: () => void, switchTo: (id: string) => Promise<void>}}
  */
@@ -176,6 +179,13 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
     $('#book-new-from').textContent = book.name;
     $('#book-actions').hidden = !cloud.googleReady();
     $('#drive-invite').hidden = !cloud.pendingJoin();
+    // Einladung aus dem Briefkasten: Name, Absender und Konto dazuschreiben, Ablehnen anbieten
+    const inv = cloud.pendingInvite?.();
+    $('#drive-invite-title').textContent = inv
+      ? `Einladung zum Liederbuch „${inv.name || 'Gemeinsames Liederbuch'}“${inv.from ? ` von ${inv.from}` : ''}`
+      : 'Einladung zu einem geteilten Liederbuch';
+    $('#drive-invite-account').textContent = inv ? ` (${inv.email})` : '';
+    $('#drive-invite-no').hidden = !inv;
   }
 
   function rename(b) {
@@ -271,6 +281,10 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
 
   $('#book-join').onclick = () => cloud.join();
   $('#drive-invite-ok').onclick = () => cloud.join(cloud.pendingJoin());
+  $('#drive-invite-no').onclick = () => {
+    cloud.declineInvite?.();
+    renderList();
+  };
   $('#btn-books-cloud').onclick = () => {
     dlg.close();
     cloud.openDialog();

@@ -38,6 +38,8 @@ export const PREFS = {
   viewZoom: { key: 'viewZoom', def: 1 },
   harpChords: { key: 'harpChords', def: false }, // Noten → Harp-Tabs: Akkorde mitnehmen
   draft: { key: 'draft', def: '' }, // Entwurf aus der allerersten Version der App
+  // Gemeinsame Liederbücher
+  invitesDeclined: { key: 'invitesDeclined', def: [] }, // abgelehnte Einladungen (Datei-IDs, sync/invite-box.js)
   // Spielmodus
   playZoom: { key: 'playZoom', def: 0 }, // 0 = Standardgröße
   playZoomSong: { key: 'playZoomSong', def: {} }, // Lied-ID -> Schriftgröße

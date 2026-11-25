@@ -23,7 +23,7 @@ Liederbuch-Auswahl und -Verwaltung einrichten.
 | `[opts.beforeSwitch]` | `() => Promise<void>` | Ungespeichertes sichern (vor dem Wechsel) |
 | `[opts.leaveAbo]` | `(b: object) => boolean` | Abo beenden (ui/abo.js) |
 | `[opts.refreshAbo]` | `(o: {quiet: boolean}) => Promise<void>` | Abo aktualisieren (ui/abo.js) |
-| `{{openDialog: Function, leaveBook: Function, renamed: (name: string) => void, stop: Function,` |  | join: (fileId?: string) => void, pendingJoin: () => string\|null, googleReady: () => boolean}} opts.cloud Cloud-Teil (sync-ui.js): Dialog öffnen, gemeinsames Buch verlassen, Umbenennung abgleichen, Abgleich anhalten, Einladung öffnen, offene Einladung, Google eingerichtet? |
+| `{{openDialog: Function, leaveBook: Function, renamed: (name: string) => void, stop: Function,` |  | join: (fileId?: string) => void, pendingJoin: () => string\|null, googleReady: () => boolean, pendingInvite?: () => {fileId: string, name: string, from: string, email: string}\|null, declineInvite?: () => void}} opts.cloud Cloud-Teil (sync-ui.js): Dialog öffnen, gemeinsames Buch verlassen, Umbenennung abgleichen, Abgleich anhalten, Einladung öffnen, offene Einladung, Google eingerichtet?, Einladung aus dem Briefkasten (sync/invite-box.js) und ablehnen |
 
 **Rückgabe:** `{open: (o?: {create?: boolean}) => void, openNew: (o?: {where?: string, copy?: boolean}) => void` refresh: () => void, switchTo: (id: string) => Promise<void>}}
 

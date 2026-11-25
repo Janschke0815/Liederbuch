@@ -1042,9 +1042,12 @@
           <h3><svg class="icon"><use href="#i-note"/></svg>Liederbücher auf diesem Gerät</h3>
           <div class="cloud-card-body">
             <div id="drive-invite" class="drive-invite" hidden>
-              <strong>Einladung zu einem geteilten Liederbuch</strong>
-              <p class="hint">Mit dem Google-Konto anmelden, an das die Einladung ging, und die Datei in der Google-Auswahl bestätigen.</p>
-              <div class="row-end"><button type="button" id="drive-invite-ok" class="primary">Mit Google anmelden und öffnen</button></div>
+              <strong id="drive-invite-title">Einladung zu einem geteilten Liederbuch</strong>
+              <p class="hint">Mit dem Google-Konto anmelden, an das die Einladung ging<span id="drive-invite-account"></span>, und die Datei in der Google-Auswahl bestätigen.</p>
+              <div class="row-end">
+                <button type="button" id="drive-invite-no" hidden>Ablehnen</button>
+                <button type="button" id="drive-invite-ok" class="primary">Mit Google anmelden und öffnen</button>
+              </div>
             </div>
             <ul id="book-list" class="book-list"></ul>
             <p class="hint">Wechseln geht auch oben über den Namen des Liederbuchs. Abgleich, Mitglieder und Veröffentlichen des geöffneten Buchs stehen unter <b>Cloud</b>.</p>

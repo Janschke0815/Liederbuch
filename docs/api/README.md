@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-98 Module, 383 exportierte Funktionen, Konstanten und Klassen.
+99 Module, 391 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -142,6 +142,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`sync/dropbox.js`](sync/dropbox.md) | Cloud-Anbieter Dropbox: jedes Liederbuch ist eine JSON-Datei im App-Ordner (Dropbox → Apps → <Name der Dropbox-App> → Liederbuch.json, weitere Bücher „Liederbuch – Name.json“). |
 | [`sync/google-auth.js`](sync/google-auth.md) | Anmeldung bei Google (OAuth 2) – ganz im Browser, ohne eigenen Server. |
 | [`sync/google-drive.js`](sync/google-drive.md) | Speicherschicht Google Drive: jedes Liederbuch ist eine JSON-Datei in Drive (Format liederbuch-sync). |
+| [`sync/invite-box.js`](sync/invite-box.md) | Einladungs-Briefkasten: Wer jemanden zu einem gemeinsamen Liederbuch (Google Drive) einlädt, legt zusätzlich eine kleine Nachricht auf den Vermittlungs-Servern des Live-Modus ab. |
 | [`sync/sync-engine.js`](sync/sync-engine.md) | Abgleich der lokalen Datenbank mit einer gemeinsamen Datei in der Cloud. |
 | [`sync/webdav-client.js`](sync/webdav-client.md) | WebDAV über HTTP: Anmeldung, Ordnerliste (PROPFIND), Dateien lesen, schreiben, löschen. |
 | [`sync/webdav.js`](sync/webdav.md) | Cloud-Anbieter WebDAV (z. |

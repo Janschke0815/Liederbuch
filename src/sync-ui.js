@@ -24,6 +24,8 @@ import { setupBooks } from './books-ui.js';
 import { $, el, textButton, textSpan } from './ui/dom.js';
 import { BookNameStore, driveFileName, slimName } from './sync/book-name.js';
 import { connectedVia, syncKindOf, webdavOf } from './sync/book-settings.js';
+import { clearInvite, fetchInvites, postInvite } from './sync/invite-box.js';
+import { prefs } from './prefs.js';
 
 const TITLES = {
   off: 'Nicht verbunden',
@@ -445,6 +447,67 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   }
   let pendingJoin = null;
 
+  // ---------- Einladungs-Briefkasten (sync/invite-box.js) ----------
+  // Beim Start für alle Google-Adressen dieses Geräts nachsehen; eine Einladung erscheint als Meldung
+  // und im Dialog Liederbücher (oben, mit Öffnen und Ablehnen).
+
+  let pendingInvite = null; // { fileId, name, from, email, role, at }
+  let moreInvites = [];
+
+  /** Google-Adressen, mit denen auf diesem Gerät schon angemeldet wurde. */
+  function knownAccounts() {
+    const out = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (/^gdrive\.account(:|$)/.test(k) && localStorage.getItem(k)) out.push(localStorage.getItem(k));
+    }
+    return out;
+  }
+
+  /** Nächste offene Einladung zeigen (falls keine andere gerade ansteht). */
+  function showNextInvite() {
+    if (pendingJoin || !moreInvites.length) return;
+    pendingInvite = moreInvites.shift();
+    pendingJoin = pendingInvite.fileId;
+    books.refresh();
+    const who = pendingInvite.from ? `${pendingInvite.from} hat dich` : 'Du wurdest';
+    toast(`${who} zum Liederbuch „${pendingInvite.name || 'Gemeinsames Liederbuch'}“ eingeladen`, {
+      action: 'Ansehen', ms: 15000, onAction: () => books.open(),
+    });
+  }
+
+  async function checkInvites() {
+    const emails = knownAccounts();
+    if (!emails.length || !clientId()) return;
+    let found;
+    try {
+      found = await fetchInvites(emails);
+    } catch (err) {
+      console.warn('Einladungen nachsehen:', err);
+      return;
+    }
+    const known = new Set(listBooks().map((b) => b.fileId).filter(Boolean));
+    const declined = new Set(prefs.get('invitesDeclined'));
+    for (const inv of found) {
+      // schon angenommen (auch auf diesem Gerät über den Link): wegräumen
+      if (known.has(inv.fileId)) clearInvite(inv.email, inv.fileId).catch(() => {});
+    }
+    moreInvites = found.filter((inv) => !known.has(inv.fileId) && !declined.has(inv.fileId));
+    showNextInvite();
+  }
+
+  /** Einladung ablehnen: nicht mehr zeigen und aus dem Briefkasten nehmen. */
+  function declineInvite() {
+    if (!pendingInvite) return;
+    const inv = pendingInvite;
+    prefs.set('invitesDeclined', [...prefs.get('invitesDeclined'), inv.fileId].slice(-50));
+    clearInvite(inv.email, inv.fileId).catch(() => {});
+    pendingInvite = null;
+    pendingJoin = null;
+    toast(`Einladung zu „${inv.name || 'Gemeinsames Liederbuch'}“ abgelehnt`);
+    showNextInvite();
+  }
+
   /**
    * Geteiltes Liederbuch öffnen: anmelden (falls nötig), Datei in der Google-Dateiauswahl bestätigen
    * (erst dann darf die App sie lesen), Rechte abfragen, als Liederbuch eintragen.
@@ -473,6 +536,10 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         return;
       }
       pendingJoin = null;
+      if (pendingInvite?.fileId === file.id) {
+        clearInvite(pendingInvite.email, file.id).catch(() => {});
+        pendingInvite = null;
+      }
       const meta = await driveFor({ shared: true, fileId: file.id }, ja).info();
       const readOnly = !meta?.capabilities?.canEdit;
       const joined = addSharedBook({ fileId: file.id, name: driveBookName(file.name, meta?.owners?.[0]?.displayName), readOnly, ownAuth: true });
@@ -663,6 +730,9 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       await provider.invite(email, message, role);
       $('#invite-email').value = '';
       toast(`Einladung an ${email} verschickt`);
+      // zusätzlich in den Briefkasten: die App der Person zeigt die Einladung beim nächsten Start
+      postInvite({ email, fileId: provider.fileId, name: book.name, from: auth.account || '', role })
+        .catch((err) => console.warn('Einladung in den Briefkasten legen:', err));
       renderMembers();
     } catch (err) {
       toast(`Einladen fehlgeschlagen: ${err.message}`);
@@ -743,6 +813,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       },
       join: joinDrive,
       pendingJoin: () => pendingJoin,
+      pendingInvite: () => pendingInvite,
+      declineInvite,
       googleReady: () => Boolean(clientId()),
     },
   });
@@ -760,6 +832,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
   finishDropbox();
   finishGoogle();
   checkDriveHash();
+  setTimeout(checkInvites, 3000); // nach dem Start, ohne ihn aufzuhalten
   addEventListener('hashchange', checkDriveHash);
   if (localStorage.getItem('openSyncDialog')) {
     localStorage.removeItem('openSyncDialog');

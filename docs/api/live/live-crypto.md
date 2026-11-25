@@ -6,7 +6,7 @@ Raum-Code und Verschlüsselung für den Live-Modus.
 
 Der Raum-Code (8 Zeichen, z. B. „K7MQ-2XPA“) ist zugleich das Geheimnis: Aus ihm werden das Thema auf dem Vermittlungs-Server und der AES-Schlüssel abgeleitet. Der Server sieht nur ein zufällig wirkendes Thema und verschlüsselte Bytes – weder Code noch Lied.
 
-**Benutzt von:** [`live-ui.js`](../live-ui.md), [`live/live.js`](live.md)
+**Benutzt von:** [`live-ui.js`](../live-ui.md), [`live/live.js`](live.md), [`sync/invite-box.js`](../sync/invite-box.md)
 
 ## Exportiert
 

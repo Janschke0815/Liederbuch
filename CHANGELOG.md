@@ -8,6 +8,17 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.5.5 – 25.11.2026 · Einladungen ohne Link
+
+- Wer zu einem gemeinsamen Liederbuch eingeladen wird, sieht das jetzt direkt in der App: Beim Start
+  erscheint „… hat dich zum Liederbuch „Band“ eingeladen“ – mit **Ansehen**. Unter **Liederbücher** steht
+  die Einladung dann oben mit **Öffnen** (Datei einmal in der Google-Auswahl bestätigen – das verlangt
+  Google) oder **Ablehnen**.
+- Voraussetzung: Die eingeladene Person hat sich in ihrer App schon einmal mit dem Google-Konto angemeldet,
+  an das die Einladung ging. Die Mail mit dem Link kommt weiterhin.
+- Die Einladung liegt verschlüsselt auf den Servern des Live-Modus; sie verschwindet nach dem Öffnen oder
+  Ablehnen, spätestens nach 60 Tagen wird sie nicht mehr gezeigt.
+
 ## 2.5.4 – 24.11.2026 · Liste, Editor und Vorschau einklappen
 
 - Am Laptop/PC sitzen auf den Trennlinien zwischen den Bereichen kleine Pfeile **‹ ›**: Damit klappst du die

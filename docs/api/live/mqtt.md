@@ -6,7 +6,7 @@ Kleiner MQTT-3.1.1-Client über WebSocket – genau so viel, wie der Live-Modus 
 
 Die Paket-Funktionen (encode…/parse…) sind rein und getestet (tests/live.test.js).
 
-**Benutzt von:** [`live/live.js`](live.md)
+**Benutzt von:** [`live/live.js`](live.md), [`sync/invite-box.js`](../sync/invite-box.md)
 
 ## Exportiert
 

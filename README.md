@@ -589,6 +589,13 @@ weitergespeichert).
   Link zur App (`#drive=<Datei-ID>`); wer ihn öffnet, meldet sich an, bestätigt die vorgewählte Datei
   in der Google-Auswahl und hat das Liederbuch. Leserechte setzt Google selbst durch; die App sperrt
   dann das Bearbeiten und holt nur ab. Rechte lassen sich jederzeit ändern oder entziehen.
+- **Einladung ohne Link (Briefkasten, ab 2.5.5)** – zusätzlich zur Mail legt die App die Einladung auf den
+  Vermittlungs-Servern des Live-Modus ab. Hat sich die eingeladene Person in ihrer App schon einmal mit
+  diesem Google-Konto angemeldet, zeigt die App beim nächsten Start „… hat dich zum Liederbuch „Band“
+  eingeladen“ – unter *Liederbücher* mit **Öffnen** (Datei einmal in der Google-Auswahl bestätigen) oder
+  **Ablehnen**. Thema und Schlüssel kommen aus der E-Mail-Adresse (`sync/invite-box.js`): Der Server sieht
+  weder Adresse noch Liederbuch; wer die Adresse kennt, könnte Name, Absender und Datei-ID lesen. Die
+  öffentlichen Server heben Nachrichten nicht garantiert auf – dann bleibt der Link aus der Mail.
 - **Weitere Liederbücher** (z. B. „Band“) – siehe „Mehrere Liederbücher“: Mit Speicherort Google Drive
   wird daraus `Liederbuch – Band.json`, eine eigene Datei, die sich ebenso teilen lässt.
 
@@ -727,7 +734,7 @@ und fasst beim Bauen alles zu wenigen Dateien in `dist/` zusammen. Abhängigkeit
     src/prefs.js    alles, was pro Gerät gemerkt wird (localStorage), mit Standardwerten
     src/types.js    Beschreibung der Datensätze (nur für den Editor)
     src/play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js   größere Bereiche
-    src/sync-ui.js  Cloud: Abgleich, Mitglieder, Einladungen; books-ui.js: Liederbücher (Auswahl, Verwaltung)
+    src/sync-ui.js  Cloud: Abgleich, Mitglieder, Einladungen (Briefkasten: sync/invite-box.js); books-ui.js: Liederbücher (Auswahl, Verwaltung)
     src/pwa.js      Service Worker anmelden, Offline-Hinweis, Installieren
     public/         wird unverändert nach dist/ kopiert:
                       sw.js                 Service Worker (Cache „Netz zuerst“)
