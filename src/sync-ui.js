@@ -21,15 +21,16 @@ import {
   listBooks, addSharedBook, removeBook, driveBookName, bookKey, personalBookName, unknownDriveBooks, adoptDriveBook,
 } from './books.js';
 import { setupBooks } from './books-ui.js';
-import { $, el, textButton, textSpan } from './ui/dom.js';
+import { $, askConfirm, askText, el, textButton, textSpan } from './ui/dom.js';
+import { aboLink } from './formats/abo.js';
 import { BookNameStore, driveFileName, slimName } from './sync/book-name.js';
 import { connectedVia, syncKindOf, webdavOf } from './sync/book-settings.js';
-import { clearInvite, fetchInvites, postInvite } from './sync/invite-box.js';
+import { clearInvite, fetchInvites, normalizeEmail, postInvite } from './sync/invite-box.js';
 import { prefs } from './prefs.js';
 
 const TITLES = {
   off: 'Nicht verbunden',
-  idle: 'Synchron',
+  idle: 'Abgeglichen',
   syncing: 'Gleiche ab …',
   offline: 'Offline',
   auth: 'Anmeldung nötig',
@@ -41,12 +42,14 @@ const fmtTime = (d) => d?.toLocaleTimeString('de', { hour: '2-digit', minute: '2
  * Cloud-Dialog und Abgleich einrichten (Google Drive, Dropbox oder WebDAV, gemeinsame Liederbücher).
  * @param {{repo, book, beforeSync: () => Promise<void>, beforeConnect?: () => Promise<void>,
  *          beforeSwitch: () => Promise<void>, toast: Function,
- *          leaveAbo?: (entry: object) => boolean, refreshAbo?: (o: {quiet: boolean}) => Promise<void>}} opts
- *   leaveAbo/refreshAbo: Abo beenden bzw. aktualisieren (aus ui/abo.js)
+ *          leaveAbo?: (entry: object) => Promise<boolean>, refreshAbo?: (o: {quiet: boolean}) => Promise<void>,
+ *          openSubscribe?: () => void}} opts
+ *   leaveAbo/refreshAbo/openSubscribe: Abo beenden, aktualisieren, hinzufügen (aus ui/abo.js)
  */
-export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, beforeSwitch, toast, leaveAbo, refreshAbo }) {
-  const dlg = $('#sync-dialog'); // Cloud: Abgleich, Mitglieder, Veröffentlichen des geöffneten Buchs
-  const booksDlg = $('#books-dialog'); // Liederbücher (books-ui.js) – hier nur für die Google-Dateiauswahl
+export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, beforeSwitch, toast, leaveAbo, refreshAbo, openSubscribe }) {
+  // Ein Dialog „Liederbücher“: oben die Liste (books-ui.js), darunter Abgleich und Teilen des geöffneten Buchs
+  const dlg = $('#books-dialog');
+  const booksDlg = dlg;
   const btn = $('#btn-cloud');
   $('#sync-origin').textContent = location.origin;
   $('#sync-redirect').textContent = googleRedirectUri();
@@ -161,20 +164,38 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     toast(`${names} hinzugefügt – oben in der Liederbuch-Auswahl`, { ms: 6000 });
   }
 
-  // Knopf „In Google Drive suchen“ im Dialog Liederbücher
-  $('#book-find').onclick = async () => {
+  /**
+   * „Hinzufügen → Aus meinem Google Drive“: eigene Liederbücher im Google-Konto des geöffneten Buchs,
+   * die dieses Gerät noch nicht kennt – einzeln zum Hinzufügen aufgelistet.
+   */
+  async function findInDrive() {
+    const box = $('#drive-found');
+    const show = (text, files = []) => {
+      $('#drive-found-text').textContent = text;
+      $('#drive-found-list').replaceChildren(...files.map((f) => {
+        const li = el('li', {}, textSpan('book-name', driveBookName(f.name), f.shared ? 'gemeinsames Liederbuch' : 'eigenes Liederbuch'));
+        li.append(textButton('Hinzufügen', () => {
+          adoptAll([f]);
+          li.remove();
+          if (!$('#drive-found-list').children.length) box.hidden = true;
+        }));
+        return li;
+      }));
+      box.hidden = false;
+    };
     if (kind() !== 'gdrive' || !connectedFlag()) {
-      return toast('Erst das geöffnete Liederbuch mit Google Drive verbinden (Cloud) – gesucht wird in dessen Google-Konto', { ms: 6000 });
+      return show('Gesucht wird im Google-Konto des geöffneten Liederbuchs – das ist noch nicht mit Google Drive verbunden (unten „Mit Google anmelden“).');
     }
     if (!auth.signedIn && !(await connect({ silent: true }))) return;
+    show('Suche in Google Drive …');
     try {
       const found = await unknownInDrive();
-      if (found.length) adoptAll(found);
-      else toast(`Keine weiteren Liederbücher in Google Drive${auth.account ? ` (${auth.account})` : ''}`, { ms: 6000 });
+      show(found.length ? `Gefunden in Google Drive${auth.account ? ` (${auth.account})` : ''}:`
+        : `Keine weiteren Liederbücher in Google Drive${auth.account ? ` (${auth.account})` : ''}.`, found);
     } catch (err) {
-      toast(`Suche in Google Drive fehlgeschlagen: ${err.message}`, { ms: 8000 });
+      show(`Suche in Google Drive fehlgeschlagen: ${err.message}`);
     }
-  };
+  }
 
   // ---------- Rechte eines geteilten Liederbuchs ----------
 
@@ -219,11 +240,11 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         : `Die ${dbx ? 'Dropbox' : 'Google'}-Anmeldung${account ? ` (${account})` : ''} ist abgelaufen. „Neu anmelden“ tippen – deine Lieder bleiben erhalten.`;
     } else if (state === 'error') text = engine.error?.message || '';
     else if (book.abo) text = 'Abonniertes Liederbuch – wird über das Abo aktualisiert, nicht über die Cloud.';
-    else if (book.readOnly) text = 'Geteiltes Liederbuch, nur lesen – mit Google anmelden, um den neuesten Stand zu holen.';
+    else if (book.readOnly) text = 'Gemeinsames Liederbuch, nur lesen – mit Google anmelden, um den neuesten Stand zu holen.';
     else if (book.shared) text = 'Dieses gemeinsame Liederbuch braucht die Verbindung zu Google Drive.';
     else if (dav) text = 'Adresse und Zugangsdaten eintragen, dann „Verbinden“.';
     else if (dbx) text = appKey() ? 'Mit Dropbox verbinden, um alle Geräte abzugleichen.' : 'Zuerst die Dropbox-Einrichtung unten erledigen.';
-    else text = clientId() ? 'Mit Google anmelden, um alle Geräte über Google Drive abzugleichen.' : 'Zuerst die Google-Einrichtung unten erledigen.';
+    else text = clientId() ? 'Mit Google anmelden, um deine Geräte über Google Drive abzugleichen.' : 'Zuerst die Google-Einrichtung unten erledigen.';
     if (state === 'idle' && book.readOnly) text += ' · nur lesen';
 
     btn.dataset.state = state;
@@ -243,7 +264,6 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     // Abo: wird nie mit der Cloud abgeglichen – keine Einstellungen zum Abgleich zeigen
     $('#sync-config').hidden = Boolean(book.abo);
     $('#sync-card').classList.toggle('muted', Boolean(book.abo));
-    $('#publish-from').textContent = book.name;
     for (const id of ['#sync-client-id', '#sync-api-key', '#sync-app-id']) $(id).disabled = usable;
     for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).disabled = usable;
     $('#dropbox-app-key').disabled = usable;
@@ -259,26 +279,35 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#webdav-setup').hidden = !dav;
     $('#sync-setup').hidden = !gd || googleBuiltIn;
     $('#dropbox-setup').hidden = !dbx;
-    $('#sync-foot-hint').textContent = dav
-      ? 'Schrift- und Druckeinstellungen bleiben pro Gerät.'
-      : dbx
-        ? 'Die App sieht in deiner Dropbox nur ihren eigenen Ordner (unter „Apps“). Schrift- und Druckeinstellungen bleiben pro Gerät.'
-        : 'Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien. Schrift- und Druckeinstellungen bleiben pro Gerät.';
+    $('#sync-foot-hint').textContent = `${dav ? 'Die App legt Lieder und Setlisten als Dateien in den Ordner.'
+      : dbx ? 'Die App sieht in deiner Dropbox nur ihren eigenen Ordner (unter „Apps“).'
+        : 'Die App sieht in deinem Drive nur ihre eigenen Liederbuch-Dateien.'} `
+      + 'Abgeglichen werden Lieder, Setlisten und der Name des Buchs; Schrift- und Druckeinstellungen bleiben pro Gerät. '
+      + 'Gespeichert wird immer zuerst auf dem Gerät – ohne Netz geht nichts verloren.';
   }
 
+  /**
+   * Mitglieder des gemeinsamen Buchs (Google Drive). Wer bearbeiten darf, lädt ein und ändert Rechte;
+   * alle anderen sehen die Liste nur. Bei Eingeladenen, die noch nicht geöffnet haben, steht „Einladung offen“
+   * (die Einladung liegt noch im Briefkasten).
+   */
   async function renderMembers() {
     const box = $('#members');
     box.hidden = true;
+    updateShareStart();
     if (kind() !== 'gdrive' || !provider.signedIn || engine.state === 'off') return;
     try {
       info = await provider.info();
-      if (!info?.capabilities?.canShare) return;
-      const members = await provider.members();
-      $('#members-book').textContent = book.name;
-      $('#member-list').replaceChildren(...members.map((m) => {
+      if (!info) return;
+      const canShare = Boolean(info.capabilities?.canShare);
+      const members = await provider.members().catch(() => null);
+      $('#members-readonly').hidden = canShare;
+      $('#invite-box').hidden = !canShare;
+      $('#member-list').replaceChildren(...(members || []).map((m) => {
         const owner = m.role === 'owner';
         const row = el('li', {}, textSpan('member-name', m.displayName || m.emailAddress, owner ? 'Besitzer' : m.emailAddress));
-        if (!owner) {
+        row.dataset.email = m.emailAddress || '';
+        if (!owner && canShare) {
           const role = document.createElement('select');
           role.title = 'Rechte';
           role.append(new Option('liest', 'reader'), new Option('bearbeitet', 'writer'));
@@ -294,9 +323,12 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
           };
           row.append(role);
           row.append(textButton('Entfernen', async () => {
-            if (!confirm(`${m.displayName || m.emailAddress} aus „${book.name}“ entfernen?`)) return;
+            const who = m.displayName || m.emailAddress;
+            if (!(await askConfirm(`${who} entfernen?`, { text: `${who} hat danach keinen Zugriff mehr auf „${book.name}“.`, ok: 'Entfernen', danger: true }))) return;
             try {
               await provider.removeMember(m.id);
+              // noch nicht angenommene Einladung aus dem Briefkasten nehmen
+              if (m.emailAddress) clearInvite(m.emailAddress, provider.fileId).catch(() => {});
               toast('Mitglied entfernt');
             } catch (err) {
               toast(err.message);
@@ -306,11 +338,53 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         }
         return row;
       }));
-      box.hidden = false;
+      box.hidden = !members && !canShare;
+      updateShareStart();
+      if (canShare && members) markOpenInvites(members);
     } catch (err) {
       console.warn(err);
     }
   }
+
+  /** Eingeladene, deren Einladung noch im Briefkasten liegt: „Einladung offen“ an die Zeile. */
+  async function markOpenInvites(members) {
+    const emails = members.filter((m) => m.role !== 'owner' && m.emailAddress).map((m) => m.emailAddress);
+    if (!emails.length) return;
+    const open = await fetchInvites(emails, { lingerMs: 1500 }).catch(() => []);
+    const pending = new Set(open.filter((i) => i.fileId === provider.fileId).map((i) => normalizeEmail(i.email)));
+    for (const li of $('#member-list').children) {
+      if (!pending.has(normalizeEmail(li.dataset.email)) || li.querySelector('.invite-open')) continue;
+      li.querySelector('.member-name')?.append(el('span', { className: 'invite-open', textContent: 'Einladung offen', title: 'Hat das Liederbuch noch nicht geöffnet' }));
+    }
+  }
+
+  /** Abo-Stand des geöffneten Buchs (zuletzt veröffentlicht, Link) – nur, wenn es eins gibt. */
+  function renderAboState() {
+    const s = prefs.get('aboPublished')[book.id];
+    $('#abo-state').hidden = !s?.url;
+    if (s?.url) {
+      const when = s.publishedAt ? new Date(s.publishedAt).toLocaleString('de', { day: 'numeric', month: 'numeric', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+      $('#abo-state-text').textContent = `„${s.name || book.name}“ ist als Abo veröffentlicht${when ? ` (Stand ${when})` : ''}${s.auto ? ' und wird automatisch aktualisiert' : ''}.`;
+    }
+    updateShareStart();
+  }
+  $('#abo-state-copy').onclick = async () => {
+    const s = prefs.get('aboPublished')[book.id];
+    const link = s?.url ? aboLink(location.origin + location.pathname.replace(/index\.html$/, ''), s.url) : '';
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast('Abo-Link kopiert');
+    } catch {
+      await askText('Abo-Link zum Kopieren', link, { ok: 'Fertig' });
+    }
+  };
+
+  /** „Mit anderen teilen …“ nur, solange es weder Mitglieder noch ein Abo gibt. */
+  function updateShareStart() {
+    $('#publish-card').hidden = !$('#members').hidden || !$('#abo-state').hidden || Boolean(book.abo) || Boolean(book.readOnly);
+  }
+
 
   // ---------- Verbinden / Trennen ----------
 
@@ -442,17 +516,30 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       if (known.id !== book.id) switchTo(known.id);
       return;
     }
-    pendingJoin = fileId;
+    addInvite({ fileId, link: true });
     books.open();
   }
-  let pendingJoin = null;
 
-  // ---------- Einladungs-Briefkasten (sync/invite-box.js) ----------
-  // Beim Start für alle Google-Adressen dieses Geräts nachsehen; eine Einladung erscheint als Meldung
-  // und im Dialog Liederbücher (oben, mit Öffnen und Ablehnen).
+  // ---------- Offene Einladungen: per Link geöffnet oder aus dem Briefkasten (sync/invite-box.js) ----------
+  // Beim Start sieht die App für alle Google-Adressen dieses Geräts im Briefkasten nach. Offene Einladungen
+  // stehen oben im Dialog „Liederbücher“, jede mit Öffnen und Ablehnen.
 
-  let pendingInvite = null; // { fileId, name, from, email, role, at }
-  let moreInvites = [];
+  /** @type {{fileId: string, name?: string, from?: string, email?: string, link?: boolean}[]} */
+  let invites = [];
+
+  function addInvite(inv) {
+    invites = [inv, ...invites.filter((x) => x.fileId !== inv.fileId)];
+    books.refresh();
+  }
+
+  /** Einladung aus der Liste nehmen (angenommen oder abgelehnt) und den Briefkasten aufräumen. */
+  function dropInvite(fileId) {
+    const inv = invites.find((x) => x.fileId === fileId);
+    invites = invites.filter((x) => x.fileId !== fileId);
+    if (inv?.email) clearInvite(inv.email, fileId).catch(() => {});
+    books.refresh();
+    return inv;
+  }
 
   /** Google-Adressen, mit denen auf diesem Gerät schon angemeldet wurde. */
   function knownAccounts() {
@@ -462,18 +549,6 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       if (/^gdrive\.account(:|$)/.test(k) && localStorage.getItem(k)) out.push(localStorage.getItem(k));
     }
     return out;
-  }
-
-  /** Nächste offene Einladung zeigen (falls keine andere gerade ansteht). */
-  function showNextInvite() {
-    if (pendingJoin || !moreInvites.length) return;
-    pendingInvite = moreInvites.shift();
-    pendingJoin = pendingInvite.fileId;
-    books.refresh();
-    const who = pendingInvite.from ? `${pendingInvite.from} hat dich` : 'Du wurdest';
-    toast(`${who} zum Liederbuch „${pendingInvite.name || 'Gemeinsames Liederbuch'}“ eingeladen`, {
-      action: 'Ansehen', ms: 15000, onAction: () => books.open(),
-    });
   }
 
   async function checkInvites() {
@@ -492,20 +567,22 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       // schon angenommen (auch auf diesem Gerät über den Link): wegräumen
       if (known.has(inv.fileId)) clearInvite(inv.email, inv.fileId).catch(() => {});
     }
-    moreInvites = found.filter((inv) => !known.has(inv.fileId) && !declined.has(inv.fileId));
-    showNextInvite();
+    const fresh = found.filter((inv) => !known.has(inv.fileId) && !declined.has(inv.fileId));
+    if (!fresh.length) return;
+    for (const inv of fresh.reverse()) addInvite(inv);
+    const first = invites[0];
+    const text = invites.length > 1
+      ? `Du hast ${invites.length} Einladungen zu gemeinsamen Liederbüchern`
+      : `${first.from ? `${first.from} hat dich` : 'Du wurdest'} zum Liederbuch „${first.name || 'Gemeinsames Liederbuch'}“ eingeladen`;
+    toast(text, { action: 'Ansehen', ms: 15000, onAction: () => books.open() });
   }
 
   /** Einladung ablehnen: nicht mehr zeigen und aus dem Briefkasten nehmen. */
-  function declineInvite() {
-    if (!pendingInvite) return;
-    const inv = pendingInvite;
-    prefs.set('invitesDeclined', [...prefs.get('invitesDeclined'), inv.fileId].slice(-50));
-    clearInvite(inv.email, inv.fileId).catch(() => {});
-    pendingInvite = null;
-    pendingJoin = null;
-    toast(`Einladung zu „${inv.name || 'Gemeinsames Liederbuch'}“ abgelehnt`);
-    showNextInvite();
+  function declineInvite(fileId) {
+    const inv = dropInvite(fileId);
+    if (!inv) return;
+    if (!inv.link) prefs.set('invitesDeclined', [...prefs.get('invitesDeclined'), fileId].slice(-50));
+    toast(`Einladung${inv.name ? ` zu „${inv.name}“` : ''} abgelehnt`);
   }
 
   /**
@@ -535,11 +612,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         if (reopen) reopenDialog(reopen);
         return;
       }
-      pendingJoin = null;
-      if (pendingInvite?.fileId === file.id) {
-        clearInvite(pendingInvite.email, file.id).catch(() => {});
-        pendingInvite = null;
-      }
+      dropInvite(fileId);
+      dropInvite(file.id);
       const meta = await driveFor({ shared: true, fileId: file.id }, ja).info();
       const readOnly = !meta?.capabilities?.canEdit;
       const joined = addSharedBook({ fileId: file.id, name: driveBookName(file.name, meta?.owners?.[0]?.displayName), readOnly, ownAuth: true });
@@ -680,8 +754,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   $('#sync-connect').onclick = () => connect({ silent: engine?.state === 'auth' });
   $('#sync-now').onclick = () => engine.sync();
-  $('#webdav-forget').onclick = () => {
-    if (!confirm(`Gespeicherte WebDAV-Adresse und Zugangsdaten auf diesem Gerät löschen?\n${webdav().url}`)) return;
+  $('#webdav-forget').onclick = async () => {
+    if (!(await askConfirm('WebDAV-Zugangsdaten löschen?', { text: `Adresse, Benutzername und Passwort für ${webdav().url} werden auf diesem Gerät gelöscht.`, ok: 'Löschen', danger: true }))) return;
     for (const k of ['webdav.url', 'webdav.user', 'webdav.pass']) localStorage.removeItem(K(k));
     for (const id of ['#webdav-url', '#webdav-user', '#webdav-pass']) $(id).value = '';
     build();
@@ -689,7 +763,12 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     toast('WebDAV-Zugangsdaten gelöscht');
   };
 
-  $('#sync-disconnect').onclick = () => {
+  $('#sync-disconnect').onclick = async () => {
+    const where = { webdav: 'WebDAV', dropbox: 'Dropbox' }[kind()] || 'Google Drive';
+    if (!(await askConfirm(`Von ${where} trennen?`, {
+      text: `„${book.name}“ wird dann nicht mehr abgeglichen. Die Lieder bleiben auf diesem Gerät und in der Cloud; verbinden kannst du jederzeit wieder.`,
+      ok: 'Trennen', danger: true,
+    }))) return;
     provider.signOut();
     engine.stop();
     localStorage.removeItem(K('sync.provider'));
@@ -701,16 +780,17 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       render();
     }
     $('#members').hidden = true;
-    toast('Cloud-Sync getrennt – die Lieder bleiben auf diesem Gerät');
+    updateShareStart();
+    toast('Abgleich getrennt – die Lieder bleiben auf diesem Gerät');
   };
 
   /** Gemeinsames Liederbuch auf diesem Gerät entfernen. */
   async function leaveBook() {
     const owner = info?.ownedByMe || (await provider.info().catch(() => null))?.ownedByMe;
-    const msg = owner
-      ? `„${book.name}“ auf diesem Gerät entfernen? Die Datei bleibt in deinem Drive, die Mitglieder behalten Zugriff.`
-      : `„${book.name}“ auf diesem Gerät entfernen? Die anderen Mitglieder behalten das Liederbuch.`;
-    if (!confirm(msg)) return;
+    const text = owner
+      ? 'Die Datei bleibt in deinem Drive, die Mitglieder behalten Zugriff.'
+      : 'Die anderen Mitglieder behalten das Liederbuch.';
+    if (!(await askConfirm(`„${book.name}“ auf diesem Gerät entfernen?`, { text, ok: 'Entfernen', danger: true }))) return;
     removeBook(book.id);
     indexedDB.deleteDatabase(book.dbName);
     await switchTo('personal');
@@ -747,7 +827,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       await navigator.clipboard.writeText(inviteLink(provider.fileId));
       toast('Einladungslink kopiert – öffnet nur für eingeladene Google-Konten', { ms: 5000 });
     } catch {
-      prompt('Einladungslink zum Kopieren:', inviteLink(provider.fileId));
+      await askText('Einladungslink zum Kopieren', inviteLink(provider.fileId), { ok: 'Fertig' });
     }
   };
   $('#invite-share').hidden = !navigator.share;
@@ -788,7 +868,8 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   // ---------- Dialog ----------
 
-  function openDialog() {
+  /** Abgleich- und Teilen-Teil des Dialogs füllen (bei jedem Öffnen des Dialogs „Liederbücher“). */
+  function prepareCloud() {
     $('#sync-client-id').value = clientId();
     $('#sync-api-key').value = apiKey();
     $('#sync-app-id').value = appId();
@@ -801,15 +882,15 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     $('#webdav-pass').value = w.password;
     render();
     renderMembers();
-    dlg.showModal();
+    renderAboState();
   }
 
-  const reopenDialog = (d) => (d === booksDlg ? books.open() : openDialog());
+  /** Dialog „Liederbücher“ beim geöffneten Buch (Abgleich und Teilen) öffnen. */
+  function openDialog() {
+    books.open({ cloud: true });
+  }
 
-  $('#btn-books').onclick = () => {
-    dlg.close();
-    books.open();
-  };
+  const reopenDialog = () => openDialog();
 
   // Abgelaufene Anmeldung: Klick auf den Cloud-Knopf erneuert sie direkt
   btn.onclick = async () => {
@@ -820,7 +901,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   // Liederbücher (books-ui.js): bekommt vom Cloud-Teil nur, was es braucht
   const books = setupBooks({
-    book, repo, toast, beforeSync, beforeSwitch, leaveAbo, refreshAbo,
+    book, repo, toast, beforeSync, beforeSwitch, leaveAbo, refreshAbo, openSubscribe,
     cloud: {
       openDialog,
       leaveBook,
@@ -833,9 +914,10 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
         provider?.signOut?.();
       },
       join: joinDrive,
-      pendingJoin: () => pendingJoin,
-      pendingInvite: () => pendingInvite,
+      invites: () => invites,
       declineInvite,
+      findInDrive,
+      prepare: prepareCloud,
       googleReady: () => Boolean(clientId()),
     },
   });

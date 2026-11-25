@@ -58,6 +58,47 @@ export function ask(dialog) {
   return new Promise((resolve) => d.addEventListener('close', () => resolve(d.returnValue || 'cancel'), { once: true }));
 }
 
+/** Gemeinsamer kleiner Dialog für askConfirm/askText vorbereiten und auf die Antwort warten. */
+function askDialog({ title, text = '', ok = 'OK', input = null }) {
+  const d = $('#ask-dialog');
+  $('#ask-title').textContent = title;
+  $('#ask-text').textContent = text;
+  $('#ask-text').hidden = !text;
+  $('#ask-ok').textContent = ok;
+  $('#ask-ok').className = 'primary'; // Hauptknopf ist schon rot – auch bei „gefährlichen“ Aktionen
+  const field = $('#ask-input');
+  field.hidden = input === null;
+  field.value = input ?? '';
+  const answer = ask(d);
+  if (input !== null) {
+    field.focus();
+    field.select();
+  } else $('#ask-ok').focus();
+  return answer;
+}
+
+/**
+ * Rückfrage im Stil der App (statt confirm()).
+ * @param {string} title  z. B. „„Band“ entfernen?“
+ * @param {{text?: string, ok?: string, danger?: boolean}} [opts]  ok: Beschriftung des Knopfs
+ * @returns {Promise<boolean>}
+ */
+export async function askConfirm(title, opts = {}) {
+  return (await askDialog({ title, ...opts })) === 'ok';
+}
+
+/**
+ * Text abfragen im Stil der App (statt prompt()).
+ * @param {string} title
+ * @param {string} [value]  Vorgabe
+ * @param {{text?: string, ok?: string}} [opts]
+ * @returns {Promise<string|null>}  null bei Abbrechen
+ */
+export async function askText(title, value = '', opts = {}) {
+  const r = await askDialog({ title, input: value, ...opts });
+  return r === 'ok' ? $('#ask-input').value : null;
+}
+
 /**
  * Der Hauptknopf (.primary), der zu einem Element im Dialog gehört: der nächstgelegene sichtbare
  * und nicht gesperrte – im Cloud-Dialog z. B. „Anlegen“ beim Namensfeld, sonst „Verbinden“ unten.
@@ -94,6 +135,7 @@ export function closeOnBackdrop(...dialogs) {
     d.addEventListener('click', (e) => e.target === d && d.close('cancel'));
   }
 }
+if ($('#ask-dialog')) closeOnBackdrop('#ask-dialog');
 
 /** Datei herunterladen (Text oder Blob). */
 export function download(name, data, type = 'text/plain') {

@@ -8,6 +8,25 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.6.0 – 25.11.2026 · Liederbücher und Cloud in einem Dialog
+
+- **Ein Dialog statt zwei:** *Liederbücher verwalten …* und der **Cloud**-Knopf öffnen jetzt denselben Dialog.
+  Oben stehen alle Liederbücher, darunter das geöffnete Buch mit **Abgleich** und **Mit anderen teilen**.
+- **Liste:** Jedes Buch zeigt Speicherort und Konto, das geöffnete einen Statuspunkt (grün = abgeglichen).
+  Rechts **Öffnen** und **⋯** mit Umbenennen, Abgleich & Teilen, Entfernen bzw. Verlassen oder Abo beenden.
+- **Hinzufügen …** bündelt *Neues Liederbuch*, *Einladung öffnen*, *Abo hinzufügen* und *Aus meinem Google
+  Drive* – gefundene Bücher lassen sich dort einzeln hinzufügen.
+- **Abgleich:** „Mit Google anmelden“ bzw. „Jetzt abgleichen“ steht direkt im Status-Kasten; *Trennen …* fragt
+  vorher nach. Hintergrundinfos stehen unter „Mehr dazu“.
+- **Teilen:** Mitglieder sehen jetzt auch Leser (einladen kann, wer bearbeiten darf). Eingeladene, die das
+  Buch noch nicht geöffnet haben, sind mit „Einladung offen“ markiert. Wer ein Mitglied entfernt, räumt auch
+  dessen offene Einladung weg. Ist ein Abo veröffentlicht, steht sein Stand da – mit **Link kopieren** und
+  **Neu veröffentlichen …**. „Mit anderen teilen …“ erscheint nur noch, solange es beides nicht gibt.
+- **Mehrere Einladungen** stehen als Liste oben im Dialog, jede mit Öffnen und Ablehnen.
+- Rückfragen (Umbenennen, Entfernen, Trennen, Abo beenden …) kommen jetzt als eigene kleine Dialoge statt
+  als Fenster des Browsers.
+- Behoben: Am Handy brach „Lieder aus … übernehmen“ beim neuen Liederbuch seltsam um.
+
 ## 2.5.6 – 25.11.2026 · Einladungslink kopieren
 
 - Unter **Cloud → Mitglieder** gibt es jetzt **Link kopieren** (und am Handy **Link teilen …**), um den

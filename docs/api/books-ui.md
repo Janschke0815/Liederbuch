@@ -9,7 +9,7 @@ Liederbücher: Auswahl in der Kopfleiste (mit Optionen per Rechtsklick), Dialog 
 
 ## Exportiert
 
-### `setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveAbo, refreshAbo, cloud })`
+### `setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveAbo, refreshAbo, openSubscribe, cloud })`
 
 Liederbuch-Auswahl und -Verwaltung einrichten.
 
@@ -21,11 +21,12 @@ Liederbuch-Auswahl und -Verwaltung einrichten.
 | `opts.toast` | `Function` |  |
 | `[opts.beforeSync]` | `() => Promise<void>` | Ungespeichertes sichern (vor „Neues Liederbuch“) |
 | `[opts.beforeSwitch]` | `() => Promise<void>` | Ungespeichertes sichern (vor dem Wechsel) |
-| `[opts.leaveAbo]` | `(b: object) => boolean` | Abo beenden (ui/abo.js) |
+| `[opts.leaveAbo]` | `(b: object) => Promise<boolean>` | Abo beenden (ui/abo.js) |
 | `[opts.refreshAbo]` | `(o: {quiet: boolean}) => Promise<void>` | Abo aktualisieren (ui/abo.js) |
-| `{{openDialog: Function, leaveBook: Function, renamed: (name: string) => void, stop: Function,` |  | join: (fileId?: string) => void, pendingJoin: () => string\|null, googleReady: () => boolean, pendingInvite?: () => {fileId: string, name: string, from: string, email: string}\|null, declineInvite?: () => void}} opts.cloud Cloud-Teil (sync-ui.js): Dialog öffnen, gemeinsames Buch verlassen, Umbenennung abgleichen, Abgleich anhalten, Einladung öffnen, offene Einladung, Google eingerichtet?, Einladung aus dem Briefkasten (sync/invite-box.js) und ablehnen |
+| `[opts.openSubscribe]` | `() => void` | „Abo hinzufügen“ (ui/abo.js) |
+| `{{openDialog: Function, leaveBook: Function, renamed: (name: string) => void, stop: Function,` |  | join: (fileId?: string) => void, googleReady: () => boolean, prepare?: () => void, invites?: () => {fileId: string, name?: string, from?: string, email?: string}[], declineInvite?: (fileId: string) => void, findInDrive?: () => void}} opts.cloud Cloud-Teil (sync-ui.js): Dialog beim geöffneten Buch öffnen, gemeinsames Buch verlassen, Umbenennung abgleichen, Abgleich anhalten, Einladung öffnen, Google eingerichtet?, Abgleich-/Teilen-Teil füllen, offene Einladungen (Link oder Briefkasten) und ablehnen, Liederbücher in Google Drive suchen |
 
-**Rückgabe:** `{open: (o?: {create?: boolean}) => void, openNew: (o?: {where?: string, copy?: boolean}) => void` refresh: () => void, switchTo: (id: string) => Promise<void>}}
+**Rückgabe:** `{open: (o?: {create?: boolean, cloud?: boolean}) => void, openNew: (o?: {where?: string, copy?: boolean}) => void` refresh: () => void, switchTo: (id: string) => Promise<void>}}
 
 ## Intern
 

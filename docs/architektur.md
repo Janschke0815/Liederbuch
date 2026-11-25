@@ -95,9 +95,11 @@ geändert (`ConflictError`), liest sie neu und versucht es noch einmal.
 `books.js` führt die Liederbücher eines Geräts: das persönliche (`PERSONAL`), eigene (`own`, ab 2.2),
 geteilte (`shared`, Drive-Datei eines anderen) und Abos. Jedes hat eine eigene IndexedDB (`dbName`);
 `ui/app-state.js` öffnet nur die des aktiven Buchs, ein Wechsel lädt die Seite neu. Das persönliche
-lässt sich umbenennen (`personalName`, `personalBookName()`). Oberfläche: Dialog `#books-dialog`
-(Liste, anlegen, Einladung, Abo) in `books-ui.js` und `#sync-dialog` (Abgleich des geöffneten Buchs) in
-`sync-ui.js`; `setupSync` richtet beide ein und reicht dem Liederbuch-Teil nur, was er von der Cloud braucht. Speicherort,
+lässt sich umbenennen (`personalName`, `personalBookName()`). Oberfläche (ab 2.6 ein Dialog `#books-dialog`):
+oben Liste, Einladungen und „Hinzufügen …“ aus `books-ui.js`, darunter Abgleich und Teilen des geöffneten
+Buchs aus `sync-ui.js`; `setupSync` richtet beides ein und reicht dem Liederbuch-Teil nur, was er von der
+Cloud braucht (`cloud.prepare` füllt den Cloud-Teil bei jedem Öffnen). Rückfragen: `askConfirm`/`askText`
+(ui/dom.js, Dialog `#ask-dialog`) statt `confirm()`/`prompt()`. Speicherort,
 Zugangsdaten und Anmeldung liegen je Buch unter `bookKey(book, 'webdav.url')` usw. (gelesen über
 `sync/book-settings.js`) – für das
 persönliche und vor 2.2 geteilte Bücher sind das die alten, globalen Schlüssel (keine Umstellung),

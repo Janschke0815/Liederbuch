@@ -10,7 +10,7 @@ import { SetlistRepository } from '../storage/setlists.js';
 import { openIdbStore } from '../storage/stores.js';
 import { fetchAbo, LoginNeeded } from '../sync/abo-client.js';
 import { book, readOnly, repo, sets, services } from './app-state.js';
-import { $, toast } from './dom.js';
+import { $, askConfirm, toast } from './dom.js';
 
 const CHECK_EVERY_MS = 30 * 60 * 1000; // alle 30 Minuten nachsehen, solange die App offen ist
 
@@ -67,6 +67,7 @@ async function check() {
  * @param {string} [link]  Einladungslink (sonst trägt man ihn ein)
  */
 export function openSubscribe(link = '') {
+  $('#books-dialog').close();
   pending = null;
   $('#abo-link').value = link;
   $('#abo-link-row').hidden = Boolean(link);
@@ -99,10 +100,6 @@ $('#abo-ok').onclick = async () => {
     setStatus(err.message, true);
     $('#abo-ok').disabled = false;
   }
-};
-$('#btn-subscribe').onclick = () => {
-  $('#books-dialog').close();
-  openSubscribe();
 };
 
 // Einladungslink geöffnet: <App>#abo=…
@@ -159,11 +156,11 @@ export function refreshAbo({ quiet = true } = {}) {
  * Abo auf diesem Gerät beenden (nach Rückfrage): Eintrag, Stand und Lieder löschen. War es geöffnet,
  * geht es zurück zu „Mein Liederbuch“.
  * @param {object} [entry]  Liederbuch-Eintrag aus books.js (sonst das geöffnete Abo)
- * @returns {boolean} beendet?
+ * @returns {Promise<boolean>} beendet?
  */
-export function leaveAbo(entry = book) {
+export async function leaveAbo(entry = book) {
   if (!entry?.abo) return false;
-  if (!confirm(`Abo „${entry.name}“ auf diesem Gerät beenden? Die Lieder verschwinden hier; das Original bleibt, wo es ist.`)) return false;
+  if (!(await askConfirm(`Abo „${entry.name}“ beenden?`, { text: 'Die Lieder verschwinden auf diesem Gerät; das Original bleibt, wo es ist.', ok: 'Beenden', danger: true }))) return false;
   removeBook(entry.id);
   const st = prefs.get('aboState');
   delete st[entry.id];

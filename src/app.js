@@ -34,7 +34,7 @@ import { flushSave, openSong, preview } from './ui/song.js';
 import { listedSongs, refreshList } from './ui/list.js';
 import { setView } from './ui/view.js';
 import { checkBookmarkHash, openImport } from './ui/paste.js';
-import { leaveAbo, refreshAbo, startAbo } from './ui/abo.js';
+import { leaveAbo, openSubscribe, refreshAbo, startAbo } from './ui/abo.js';
 import './ui/publish.js';
 import { newSong, playSong } from './ui/song-actions.js';
 import './ui/snippets.js';
@@ -103,6 +103,7 @@ services.sync = setupSync({
   beforeSwitch: flushSave,
   leaveAbo,
   refreshAbo,
+  openSubscribe,
   // Neues Gerät: das unveränderte Beispiellied nicht in das gemeinsame Liederbuch tragen
   beforeConnect: async () => {
     const all = await repo.list();

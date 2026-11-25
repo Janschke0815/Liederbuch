@@ -184,7 +184,7 @@ $('#pub-copy').onclick = async () => {
 $('#pub-share').onclick = () => navigator.share?.({ title: $('#pub-name').value, url: $('#pub-link').value }).catch(() => {});
 /** „Veröffentlichen …“ öffnen (schließt den Cloud-Dialog, aus dem es meist kommt). */
 export function openPublish() {
-  $('#sync-dialog').close();
+  $('#books-dialog').close();
   open();
 }
 $('#btn-publish').onclick = openPublish;

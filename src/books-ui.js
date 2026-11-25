@@ -9,7 +9,7 @@ import { openIdbStore } from './storage/stores.js';
 import { rememberRename } from './sync/book-name.js';
 import { connectedVia, syncKindOf, webdavOf } from './sync/book-settings.js';
 import { showMenu } from './context-menu.js';
-import { $, el, textButton, textSpan } from './ui/dom.js';
+import { $, askConfirm, askText, el, textButton, textSpan } from './ui/dom.js';
 
 const fmtWhen = (iso) => (iso ? new Date(iso).toLocaleString('de', { day: 'numeric', month: 'numeric', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '–');
 
@@ -20,7 +20,7 @@ const bookLabel = (b) => (b.abo || b.readOnly ? `${b.name} (nur lesen)` : b.shar
 function whereOf(b) {
   if (b.abo) return 'abonniert · nur lesen';
   const account = localStorage.getItem(bookKey(b, 'gdrive.account'));
-  if (b.shared) return `geteilt · Google Drive${b.readOnly ? ' · nur lesen' : ''}${account ? ` · ${account}` : ''}`;
+  if (b.shared) return `gemeinsam · Google Drive${b.readOnly ? ' · nur lesen' : ''}${account ? ` · ${account}` : ''}`;
   const k = connectedVia(b);
   if (k !== syncKindOf(b)) return 'nur auf diesem Gerät';
   if (k === 'webdav') {
@@ -50,19 +50,20 @@ function webdavFolderFor(baseUrl, name) {
  * @param {Function} opts.toast
  * @param {() => Promise<void>} [opts.beforeSync]    Ungespeichertes sichern (vor „Neues Liederbuch“)
  * @param {() => Promise<void>} [opts.beforeSwitch]  Ungespeichertes sichern (vor dem Wechsel)
- * @param {(b: object) => boolean} [opts.leaveAbo]   Abo beenden (ui/abo.js)
+ * @param {(b: object) => Promise<boolean>} [opts.leaveAbo]   Abo beenden (ui/abo.js)
  * @param {(o: {quiet: boolean}) => Promise<void>} [opts.refreshAbo]  Abo aktualisieren (ui/abo.js)
+ * @param {() => void} [opts.openSubscribe]  „Abo hinzufügen“ (ui/abo.js)
  * @param {{openDialog: Function, leaveBook: Function, renamed: (name: string) => void, stop: Function,
- *          join: (fileId?: string) => void, pendingJoin: () => string|null, googleReady: () => boolean,
- *          pendingInvite?: () => {fileId: string, name: string, from: string, email: string}|null,
- *          declineInvite?: () => void}} opts.cloud
- *   Cloud-Teil (sync-ui.js): Dialog öffnen, gemeinsames Buch verlassen, Umbenennung abgleichen, Abgleich
- *   anhalten, Einladung öffnen, offene Einladung, Google eingerichtet?, Einladung aus dem Briefkasten
- *   (sync/invite-box.js) und ablehnen
- * @returns {{open: (o?: {create?: boolean}) => void, openNew: (o?: {where?: string, copy?: boolean}) => void,
+ *          join: (fileId?: string) => void, googleReady: () => boolean, prepare?: () => void,
+ *          invites?: () => {fileId: string, name?: string, from?: string, email?: string}[],
+ *          declineInvite?: (fileId: string) => void, findInDrive?: () => void}} opts.cloud
+ *   Cloud-Teil (sync-ui.js): Dialog beim geöffneten Buch öffnen, gemeinsames Buch verlassen, Umbenennung
+ *   abgleichen, Abgleich anhalten, Einladung öffnen, Google eingerichtet?, Abgleich-/Teilen-Teil füllen,
+ *   offene Einladungen (Link oder Briefkasten) und ablehnen, Liederbücher in Google Drive suchen
+ * @returns {{open: (o?: {create?: boolean, cloud?: boolean}) => void, openNew: (o?: {where?: string, copy?: boolean}) => void,
  *            refresh: () => void, switchTo: (id: string) => Promise<void>}}
  */
-export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveAbo, refreshAbo, cloud }) {
+export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveAbo, refreshAbo, openSubscribe, cloud }) {
   const dlg = $('#books-dialog');
 
   async function switchTo(id) {
@@ -85,11 +86,11 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
     return [
       !isActive && { label: 'Öffnen', icon: 'open', action: () => switchTo(b.id) },
       !b.abo && { label: 'Umbenennen …', icon: 'edit', action: () => rename(b) },
-      isActive && { label: 'Cloud: Abgleich & Teilen …', icon: 'cloud', action: () => cloud.openDialog() },
+      isActive && { label: 'Abgleich & Teilen …', icon: 'cloud', action: () => cloud.openDialog() },
       '-',
       b.own && { label: 'Entfernen …', icon: 'trash', danger: true, action: () => removeOwnBook(b) },
       b.shared && isActive && { label: 'Verlassen …', icon: 'trash', danger: true, action: () => cloud.leaveBook() },
-      b.abo && leaveAbo && { label: 'Abo beenden …', icon: 'trash', danger: true, action: () => leaveAbo(b) && refresh() },
+      b.abo && leaveAbo && { label: 'Abo beenden …', icon: 'trash', danger: true, action: async () => (await leaveAbo(b)) && refresh() },
       '-',
       { label: 'Liederbücher verwalten …', action: () => open() },
     ];
@@ -156,40 +157,64 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
         renderList();
       }));
     }
-    if (leaveAbo) actions.append(textButton('Abo beenden', () => leaveAbo(b) && refresh(), 'danger'));
+    if (leaveAbo) actions.append(textButton('Abo beenden', async () => (await leaveAbo(b)) && refresh(), 'danger'));
     return el('div', { className: 'abo-details' }, el('div', { className: 'abo-url-row' }, url, copy), info, actions);
   }
 
-  function renderList() {
-    $('#book-list').replaceChildren(...listBooks().map((b) => {
-      const isActive = b.id === book.id;
-      const row = el('li', {}, textSpan('book-name', b.name, whereOf(b)));
-      if (isActive) {
-        row.classList.add('active');
-        row.append(textSpan('hint', 'geöffnet'));
-      } else {
-        row.append(textButton('Öffnen', () => switchTo(b.id)));
-      }
-      if (!b.abo) row.append(textButton('Umbenennen', () => rename(b)));
-      if (b.own) row.append(textButton('Entfernen', () => removeOwnBook(b), 'danger'));
-      if (b.shared && isActive) row.append(textButton('Verlassen', () => cloud.leaveBook(), 'danger'));
-      if (b.abo) row.append(aboDetails(b, isActive));
-      return row;
-    }));
-    $('#book-new-from').textContent = book.name;
-    $('#book-actions').hidden = !cloud.googleReady();
-    $('#drive-invite').hidden = !cloud.pendingJoin();
-    // Einladung aus dem Briefkasten: Name, Absender und Konto dazuschreiben, Ablehnen anbieten
-    const inv = cloud.pendingInvite?.();
-    $('#drive-invite-title').textContent = inv
-      ? `Einladung zum Liederbuch „${inv.name || 'Gemeinsames Liederbuch'}“${inv.from ? ` von ${inv.from}` : ''}`
-      : 'Einladung zu einem geteilten Liederbuch';
-    $('#drive-invite-account').textContent = inv ? ` (${inv.email})` : '';
-    $('#drive-invite-no').hidden = !inv;
+  /** Zeile der Liste: Name mit Speicherort darunter, Statuspunkt (geöffnetes Buch), Öffnen und ⋯. */
+  function bookRow(b) {
+    const isActive = b.id === book.id;
+    const row = el('li', {}, textSpan('book-name', b.name, whereOf(b)));
+    if (isActive) {
+      row.classList.add('active');
+      // Stand des Abgleichs wie am Cloud-Knopf oben (sync-ui.js setzt data-state)
+      const state = $('#btn-cloud')?.dataset.state || 'off';
+      row.prepend(el('span', { className: 'book-dot', title: $('#btn-cloud')?.title || '' }));
+      row.dataset.state = state;
+      row.append(textSpan('hint', 'geöffnet'));
+    } else {
+      row.append(textButton('Öffnen', () => switchTo(b.id)));
+    }
+    const more = el('button', { type: 'button', className: 'icon-btn book-more', title: `Weitere Aktionen für „${b.name}“` });
+    more.setAttribute('aria-label', more.title);
+    more.innerHTML = '<svg class="icon"><use href="#i-more"/></svg>';
+    more.onclick = (e) => {
+      e.preventDefault();
+      const r = more.getBoundingClientRect();
+      showMenu(bookOptions(b).filter((o) => !(o && o.label === 'Liederbücher verwalten …')), { x: r.left, y: r.bottom + 4, title: b.name }).focusFirst();
+    };
+    row.append(more);
+    if (b.abo) row.append(aboDetails(b, isActive));
+    return row;
   }
 
-  function rename(b) {
-    const name = prompt('Neuer Name für das Liederbuch:', b.name)?.trim();
+  /** Offene Einladungen (Link oder Briefkasten) oben in der Liste, je mit Öffnen und Ablehnen. */
+  function renderInvites() {
+    const list = cloud.invites?.() || [];
+    $('#drive-invites').hidden = !list.length;
+    $('#drive-invites').replaceChildren(...list.map((inv) => {
+      const title = inv.name ? `Einladung zum Liederbuch „${inv.name}“${inv.from ? ` von ${inv.from}` : ''}` : 'Einladung zu einem gemeinsamen Liederbuch';
+      const hint = `Mit dem Google-Konto anmelden, an das die Einladung ging${inv.email ? ` (${inv.email})` : ''}, und die Datei in der Google-Auswahl bestätigen.`;
+      const li = el('li', { className: 'drive-invite' }, el('strong', { textContent: title }), el('p', { className: 'hint', textContent: hint }));
+      const actions = el('div', { className: 'row-end' });
+      actions.append(textButton('Ablehnen', () => cloud.declineInvite(inv.fileId)));
+      const ok = textButton('Öffnen', () => cloud.join(inv.fileId));
+      ok.classList.add('primary');
+      actions.append(ok);
+      li.append(actions);
+      return li;
+    }));
+  }
+
+  function renderList() {
+    renderInvites();
+    $('#book-list').replaceChildren(...listBooks().map(bookRow));
+    $('#book-new-from').textContent = book.name;
+    $('#sync-dlg-book').textContent = book.name;
+  }
+
+  async function rename(b) {
+    const name = (await askText('Liederbuch umbenennen', b.name, { ok: 'Umbenennen' }))?.trim();
     if (!name || name === b.name) return;
     if (listBooks().some((x) => x.id !== b.id && x.name.toLowerCase() === name.toLowerCase())) {
       toast('Ein Liederbuch mit diesem Namen gibt es schon');
@@ -207,10 +232,14 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
 
   /** Eigenes Liederbuch von diesem Gerät entfernen (die Datei in der Cloud bleibt). */
   async function removeOwnBook(b) {
-    const msg = connectedVia(b)
-      ? `„${b.name}“ von diesem Gerät entfernen? Die Lieder hier werden gelöscht – was in der Cloud liegt, bleibt erhalten.`
-      : `„${b.name}“ löschen? Es ist mit keiner Cloud verbunden – seine Lieder sind dann weg.`;
-    if (!confirm(msg)) return;
+    const cloudy = connectedVia(b);
+    const ok = await askConfirm(cloudy ? `„${b.name}“ von diesem Gerät entfernen?` : `„${b.name}“ löschen?`, {
+      text: cloudy ? 'Die Lieder hier werden gelöscht – was in der Cloud liegt, bleibt erhalten.'
+        : 'Es ist mit keiner Cloud verbunden – seine Lieder sind dann weg.',
+      ok: cloudy ? 'Entfernen' : 'Löschen',
+      danger: true,
+    });
+    if (!ok) return;
     if (b.id === book.id) cloud.stop();
     removeBook(b.id);
     indexedDB.deleteDatabase(b.dbName);
@@ -219,11 +248,19 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
     toast(`„${b.name}“ entfernt`);
   }
 
-  /** Liederbücher-Dialog öffnen; create: gleich das Formular „Neues Liederbuch“. */
-  function open({ create = false } = {}) {
+  /**
+   * Dialog „Liederbücher“ öffnen. create: gleich das Formular „Neues Liederbuch“;
+   * cloud: zum geöffneten Buch (Abgleich und Teilen) springen.
+   */
+  function open({ create = false, cloud: toCloud = false } = {}) {
+    cloud.prepare?.();
     renderList();
-    $('#book-new').open = create || $('#book-new').open;
-    dlg.showModal();
+    $('#drive-found').hidden = true;
+    // Formular „Neues Liederbuch“ nur über „Hinzufügen … → Neues Liederbuch“
+    $('#book-new').hidden = !create;
+    $('#book-new').open = create;
+    if (!dlg.open) dlg.showModal();
+    if (toCloud) $('#book-detail-head').scrollIntoView({ block: 'start' });
     if (create) {
       $('#book-new-name').focus();
       $('#book-new').scrollIntoView({ block: 'center' });
@@ -277,17 +314,16 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
     $('#book-new-copy').checked = copy;
   }
 
-  // ---------- Einladung öffnen, Wechsel zum Cloud-Dialog ----------
+  // ---------- Hinzufügen: neu, Einladung, Abo, aus Google Drive ----------
 
-  $('#book-join').onclick = () => cloud.join();
-  $('#drive-invite-ok').onclick = () => cloud.join(cloud.pendingJoin());
-  $('#drive-invite-no').onclick = () => {
-    cloud.declineInvite?.();
-    renderList();
-  };
-  $('#btn-books-cloud').onclick = () => {
-    dlg.close();
-    cloud.openDialog();
+  $('#book-add').onclick = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    showMenu([
+      { label: 'Neues Liederbuch …', icon: 'plus', action: () => open({ create: true }) },
+      cloud.googleReady() && { label: 'Einladung öffnen …', icon: 'open', action: () => cloud.join() },
+      { label: 'Abo hinzufügen …', icon: 'paste', action: () => openSubscribe?.() },
+      cloud.googleReady() && { label: 'Aus meinem Google Drive …', icon: 'cloud', action: () => cloud.findInDrive() },
+    ], { x: r.left, y: r.bottom + 4, title: 'Hinzufügen' }).focusFirst();
   };
   dlg.addEventListener('click', (e) => e.target === dlg && dlg.close());
 

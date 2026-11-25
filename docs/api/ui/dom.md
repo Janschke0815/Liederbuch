@@ -50,6 +50,29 @@ Dialog öffnen und auf die Antwort warten: den `value` des gedrückten Knopfes
 (<button value="…"> in <form method="dialog">), bei Esc/Abbruch 'cancel'.
   const wahl = await ask('#dup-dialog');
 
+### `async askConfirm(title, opts = {})`
+
+Rückfrage im Stil der App (statt confirm()).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `title` | `string` | z. B. „„Band“ entfernen?“ |
+| `[opts]` | `{text?: string, ok?: string, danger?: boolean}` | ok: Beschriftung des Knopfs |
+
+**Rückgabe:** `Promise<boolean>`
+
+### `async askText(title, value = '', opts = {})`
+
+Text abfragen im Stil der App (statt prompt()).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `title` | `string` |  |
+| `[value]` | `string` | Vorgabe |
+| `[opts]` | `{text?: string, ok?: string}` |  |
+
+**Rückgabe:** `Promise<string|null>` null bei Abbrechen
+
 ### `primaryButtonFor(node)`
 
 Der Hauptknopf (.primary), der zu einem Element im Dialog gehört: der nächstgelegene sichtbare
@@ -62,3 +85,9 @@ Klick auf den abgedunkelten Rand neben dem Dialog schließt ihn.
 ### `download(name, data, type = 'text/plain')`
 
 Datei herunterladen (Text oder Blob).
+
+## Intern
+
+Nicht exportiert – nur innerhalb des Moduls benutzt.
+
+- `askDialog({ title, text = '', ok = 'OK', input = null })` – Gemeinsamer kleiner Dialog für askConfirm/askText vorbereiten und auf die Antwort warten.

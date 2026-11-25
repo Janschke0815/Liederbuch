@@ -8,15 +8,15 @@ Google Drive: Anmeldung mit google-auth.js (Fenster, auf iPhone/iPad per Weiterl
 
 Mehrere Liederbücher (ab 2.2): Jedes hat seinen eigenen Speicherort und sein eigenes Konto. Alle Einstellungen und Anmeldungen des geöffneten Buchs liegen unter bookKey(book, …); abgeglichen wird nur das geöffnete Liederbuch.
 
-**Benutzt:** [`books-ui.js`](books-ui.md), [`books.js`](books.md), [`prefs.js`](prefs.md), [`sync/book-name.js`](sync/book-name.md), [`sync/book-settings.js`](sync/book-settings.md), [`sync/config.js`](sync/config.md), [`sync/dropbox.js`](sync/dropbox.md), [`sync/google-auth.js`](sync/google-auth.md), [`sync/google-drive.js`](sync/google-drive.md), [`sync/invite-box.js`](sync/invite-box.md), [`sync/sync-engine.js`](sync/sync-engine.md), [`sync/webdav.js`](sync/webdav.md), [`ui/dom.js`](ui/dom.md)  
+**Benutzt:** [`books-ui.js`](books-ui.md), [`books.js`](books.md), [`formats/abo.js`](formats/abo.md), [`prefs.js`](prefs.md), [`sync/book-name.js`](sync/book-name.md), [`sync/book-settings.js`](sync/book-settings.md), [`sync/config.js`](sync/config.md), [`sync/dropbox.js`](sync/dropbox.md), [`sync/google-auth.js`](sync/google-auth.md), [`sync/google-drive.js`](sync/google-drive.md), [`sync/invite-box.js`](sync/invite-box.md), [`sync/sync-engine.js`](sync/sync-engine.md), [`sync/webdav.js`](sync/webdav.md), [`ui/dom.js`](ui/dom.md)  
 **Benutzt von:** [`app.js`](app.md)
 
 ## Exportiert
 
-### `setupSync({ repo, extra = [], book, beforeSync, beforeConnect, beforeSwitch, toast, leaveAbo, refreshAbo })`
+### `setupSync({ repo, extra = [], book, beforeSync, beforeConnect, beforeSwitch, toast, leaveAbo, refreshAbo, openSubscribe })`
 
 Cloud-Dialog und Abgleich einrichten (Google Drive, Dropbox oder WebDAV, gemeinsame Liederbücher).
 
 | Parameter | Typ | Bedeutung |
 |---|---|---|
-| `{{repo, book, beforeSync: () => Promise<void>, beforeConnect?: () => Promise<void>,` |  | beforeSwitch: () => Promise<void>, toast: Function, leaveAbo?: (entry: object) => boolean, refreshAbo?: (o: {quiet: boolean}) => Promise<void>}} opts leaveAbo/refreshAbo: Abo beenden bzw. aktualisieren (aus ui/abo.js) |
+| `{{repo, book, beforeSync: () => Promise<void>, beforeConnect?: () => Promise<void>,` |  | beforeSwitch: () => Promise<void>, toast: Function, leaveAbo?: (entry: object) => Promise<boolean>, refreshAbo?: (o: {quiet: boolean}) => Promise<void>, openSubscribe?: () => void}} opts leaveAbo/refreshAbo/openSubscribe: Abo beenden, aktualisieren, hinzufügen (aus ui/abo.js) |

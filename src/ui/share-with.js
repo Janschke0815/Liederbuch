@@ -80,7 +80,7 @@ $('#sw-live').onclick = () => {
 };
 $('#btn-sharewith').onclick = open;
 $('#sync-sharewith').onclick = () => {
-  $('#sync-dialog').close();
+  $('#books-dialog').close();
   open();
 };
 closeOnBackdrop('#sharewith-dialog');

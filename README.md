@@ -491,7 +491,7 @@ zählt hoch. Beim Import aus Ultimate Guitar werden „[Chorus x2]“ und „x2�
 
 ## Mit anderen teilen – welcher Weg?
 
-**⋯ → Mit anderen teilen …** (auch im Cloud-Dialog, Karte *Mit anderen teilen*) fragt zuerst, was die anderen können sollen:
+**⋯ → Mit anderen teilen …** (auch unter *Liederbücher* beim geöffneten Buch, Karte *Mit anderen teilen*) fragt zuerst, was die anderen können sollen:
 
 - **Mitbearbeiten – gemeinsames Liederbuch:** Alle ändern mit, jeder braucht ein Google-Konto. Liegt das Buch
   schon in Google Drive, geht es direkt zu *Mitglieder* (E-Mail eingeben, einladen). Sonst bietet die App an,
@@ -506,7 +506,7 @@ Eine Person pflegt ein Liederbuch, die anderen **abonnieren** es: Sie sehen es a
 Liederbuch, **nur zum Lesen**, und bekommen Änderungen automatisch (beim Öffnen und alle
 30 Minuten). Gedacht für einen **privaten Kreis** – Band, Familie, Freunde.
 
-**Veröffentlichen** (⋯ → *Mit anderen teilen …* → *Nur lesen – Abo*, oder Cloud → *Mit anderen teilen* → *Abo veröffentlichen …*):
+**Veröffentlichen** (⋯ → *Mit anderen teilen …* → *Nur lesen – Abo*, oder – ist schon ein Abo veröffentlicht – Cloud → *Abo* → *Neu veröffentlichen …*):
 alle Lieder, Lieder mit einem Tag oder eine Setliste. Die App legt die Abo-Datei in euren
 **Sync-Ordner** (WebDAV, Unterordner `Abo/`; nur, wenn die App gerade darüber abgleicht) – Abonnenten
 melden sich dort mit ihrem eigenen Benutzer an –
@@ -517,7 +517,7 @@ Weitergeben. Erneut veröffentlichen ersetzt die Datei, der Link bleibt gleich. 
 an diesen Liedern (auch solche, die über den Sync-Ordner von anderen Geräten kommen) etwa 20 Sekunden
 später von selbst – solange sie auf deinem Gerät geöffnet ist.
 
-**Abonnieren:** Einladungslink öffnen – oder Cloud → *Abo hinzufügen …* und den Link einfügen.
+**Abonnieren:** Einladungslink öffnen – oder *Liederbücher* → *Hinzufügen …* → *Abo hinzufügen …* und den Link einfügen.
 Verlangt der Ordner eine Anmeldung, fragt die App nach Benutzername und Passwort (bleiben auf
 diesem Gerät). Im Abo kann man transponieren, eigene Notizen schreiben, spielen und drucken;
 **Rechtsklick → In „Mein Liederbuch“ kopieren** macht aus einem Lied eine eigene, bearbeitbare
@@ -541,7 +541,7 @@ Oben links in der Liederbuch-Auswahl **＋ Neues Liederbuch …** legt man belie
 Liederbücher an – jedes mit eigener Datenbank auf dem Gerät und **eigenem Speicherort**: nur auf diesem
 Gerät, Google Drive, Dropbox oder WebDAV. Auch das **Konto** ist pro Buch frei: Das Band-Liederbuch
 kann im Drive des Band-Kontos liegen, das private in der eigenen Dropbox. Bei der ersten Anmeldung
-fragt Google bzw. Dropbox nach dem Konto (auch bei „Mein Liederbuch“); der Cloud-Dialog zeigt, welches
+fragt Google bzw. Dropbox nach dem Konto (auch bei „Mein Liederbuch“); der Dialog *Liederbücher* zeigt, welches
 Google-Konto das geöffnete Buch nutzt. Ein anderes Konto: *Trennen*, dann neu verbinden. Optional werden
 die Lieder des geöffneten Buchs übernommen.
 
@@ -558,12 +558,16 @@ die Lieder des geöffneten Buchs übernommen.
   Alle Geräte brauchen dafür Version 2.3.10 oder neuer.
 - **Google Drive / Dropbox:** Datei `Liederbuch – <Name>.json` (im Drive bzw. App-Ordner).
   **WebDAV:** eigener Ordner, vorbelegt neben dem Ordner des geöffneten Buchs.
-- **Liederbücher verwalten …** (ebenfalls in der Auswahl oben, oder im Cloud-Dialog unten
-  *Liederbücher …*) zeigt alle Bücher mit ihrem Speicherort; dort auch Abos und Einladungen.
-  Abgleich, Mitglieder und Veröffentlichen des geöffneten Buchs stehen unter **Cloud**.
+- **Ein Dialog für alles (ab 2.6):** *Liederbücher verwalten …* (Auswahl oben) und der **Cloud**-Knopf öffnen
+  denselben Dialog. Oben die Liste – jedes Buch mit Speicherort und Konto, beim geöffneten ein Statuspunkt
+  wie am Cloud-Knopf, dazu **Öffnen** und **⋯** (Umbenennen, Abgleich & Teilen, Entfernen/Verlassen/Abo beenden).
+  Offene Einladungen stehen darüber, je mit **Öffnen** und **Ablehnen**. **Hinzufügen …** bündelt *Neues
+  Liederbuch*, *Einladung öffnen*, *Abo hinzufügen* und *Aus meinem Google Drive* (gefundene Bücher einzeln
+  hinzufügen). Darunter das geöffnete Buch: **Abgleich** (Verbinden bzw. Jetzt abgleichen direkt im
+  Status-Kasten) und **Mit anderen teilen** (Mitglieder, Stand des Abos).
 - **Umbenennen** (auch „Mein Liederbuch“) ändert nur den Namen in der App, die Datei behält ihren
   Namen. **Entfernen** löscht das Buch auf diesem Gerät; was in der Cloud liegt, bleibt.
-- **Umziehen** zu einem anderen Speicherort: unter **Cloud** *Trennen*, anderen Speicherort wählen,
+- **Umziehen** zu einem anderen Speicherort: unter **Abgleich** *Trennen …*, anderen Speicherort wählen,
   *Verbinden* – das Gerät hat alle Lieder und lädt sie dort hoch (liegen dort schon welche, wird
   zusammengeführt). Die alte Datei bleibt, wo sie war.
 - „Mein Liederbuch“ behält seine Einstellungen (`Liederbuch.json`); geteilte Bücher (Einladung)
@@ -584,7 +588,7 @@ Stunde ab; dann zeigt der Cloud-Knopf „Anmelden“, ein Tipp genügt (bis dahi
 weitergespeichert).
 
 - **Mein Liederbuch** – `Liederbuch.json` im eigenen Drive, für alle eigenen Geräte.
-- **Teilen per E-Mail-Einladung** – unter **Cloud → Mitglieder** E-Mail-Adresse eintragen und Rechte
+- **Teilen per E-Mail-Einladung** – unter **Cloud → Mit anderen teilen → Mitglieder** E-Mail-Adresse eintragen und Rechte
   wählen: **nur lesen** (Abonnenten) oder **darf bearbeiten**. Google schickt eine Mail mit einem
   Link zur App (`#drive=<Datei-ID>`); wer ihn öffnet, meldet sich an, bestätigt die vorgewählte Datei
   in der Google-Auswahl und hat das Liederbuch. Leserechte setzt Google selbst durch; die App sperrt
@@ -803,6 +807,11 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     ABC aus dem Internet wird aufgeräumt, mehrere Stücke zur Auswahl (`core/abc-import.js`); Vorschau,
     fehlende Liedinfo (Titel, Tonart, Takt, Tempo) wird übernommen; ganzes Notenstück in den Editor
     eingefügt → Dialog öffnet sich
-27. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
+27. ✅ Liederbücher und Cloud in einem Dialog (2.6): Liste mit Speicherort, Statuspunkt und ⋯-Menü,
+    „Hinzufügen …“ (neu, Einladung, Abo, aus Google Drive einzeln), darunter Abgleich und Teilen des geöffneten
+    Buchs; Mitglieder auch für Leser, „Einladung offen“ an noch nicht angenommenen Einladungen, Briefkasten wird
+    beim Entfernen eines Mitglieds geleert; Abo-Stand mit Link; mehrere Einladungen als Liste; eigene Rückfragen
+    statt Browser-Fenstern (`askConfirm`/`askText` in ui/dom.js)
+28. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
     zuerst Englisch; Sprache folgt dem Browser und ist unter Einstellungen → App umstellbar. Schrittweise nach
     Bereichen umbauen (Kopfleiste, Liste, Menü → Dialoge → Hilfetexte); ein Test meldet fehlende Übersetzungen

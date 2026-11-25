@@ -100,3 +100,38 @@
 .field small { font-weight: 400; }
 /* Cloud: fehlerhaftes Feld markieren */
 .sync-dialog input.invalid { border-color: #d18f1c; box-shadow: 0 0 0 2px rgba(209, 143, 28, .25); }
+/* Ein Dialog „Liederbücher“ (2.6): Liste, darunter das geöffnete Buch */
+.invite-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5em; }
+.invite-list[hidden] { display: none; }
+.invite-list .drive-invite { margin: 0; }
+.book-dot { width: .6rem; height: .6rem; border-radius: 50%; flex-shrink: 0; background: var(--border-strong); }
+li[data-state='idle'] > .book-dot { background: #3b8c4a; }
+li[data-state='syncing'] > .book-dot { background: #3a7bd5; }
+li[data-state='auth'] > .book-dot, li[data-state='error'] > .book-dot { background: #d18f1c; }
+.book-list .book-more { padding: .15em .35em; }
+.drive-found { display: flex; flex-direction: column; gap: .5em; }
+.drive-found[hidden] { display: none; }
+.drive-found .hint { margin: 0; }
+.book-detail-head { margin: .6em 0 0; font-size: .95em; color: var(--muted); font-weight: 600; }
+.sync-status { flex-wrap: wrap; }
+.sync-status > button { flex-shrink: 0; }
+#sync-now { display: inline-flex; align-items: center; gap: .35em; }
+@media (max-width: 520px) {
+  #sync-now .label { display: none; }
+}
+.more-info { border: 0; padding: 0; }
+.more-info summary { font-weight: 400; font-size: .85em; color: var(--muted); }
+.members-head { margin: 0 0 .4em; font-weight: 600; }
+.members[hidden], .abo-state[hidden], .share-start[hidden], #invite-box[hidden] { display: none; }
+#invite-box { display: flex; flex-direction: column; gap: .6em; margin-top: .6em; }
+#invite-box .hint { margin: 0; }
+.invite-open {
+  display: inline-block; margin-left: .5em; padding: .05em .5em; border-radius: 999px; font-size: .72em; font-weight: 600;
+  color: #8a5a00; background: #fbecc9; vertical-align: middle;
+}
+.abo-state { display: flex; flex-direction: column; gap: .4em; }
+.abo-state .hint { margin: 0; }
+/* Rückfrage (ui/dom.js askConfirm/askText) */
+.ask-dialog { width: min(26rem, calc(100vw - 2rem)); }
+.ask-text { margin: 0; line-height: 1.45; }
+#ask-input { width: 100%; box-sizing: border-box; font-size: 1rem; }

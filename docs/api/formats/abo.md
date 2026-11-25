@@ -21,7 +21,7 @@ Datei (JSON, lesbar):
 Reine Funktionen, kein DOM.
 
 **Benutzt:** [`formats/file-format.js`](file-format.md)  
-**Benutzt von:** [`sync/abo-client.js`](../sync/abo-client.md), [`ui/abo.js`](../ui/abo.md), [`ui/publish.js`](../ui/publish.md)
+**Benutzt von:** [`sync-ui.js`](../sync-ui.md), [`sync/abo-client.js`](../sync/abo-client.md), [`ui/abo.js`](../ui/abo.md), [`ui/publish.js`](../ui/publish.md)
 
 ## Exportiert
 
