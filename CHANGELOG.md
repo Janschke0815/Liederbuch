@@ -26,6 +26,7 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 - Rückfragen (Umbenennen, Entfernen, Trennen, Abo beenden …) kommen jetzt als eigene kleine Dialoge statt
   als Fenster des Browsers.
 - Behoben: Am Handy brach „Lieder aus … übernehmen“ beim neuen Liederbuch seltsam um.
+- Behoben: Menüs (z. B. ⋯ an einem Liederbuch) öffneten sich hinter einem offenen Dialog – jetzt liegen sie immer obenauf.
 
 ## 2.5.6 – 25.11.2026 · Einladungslink kopieren
 

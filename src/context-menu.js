@@ -134,6 +134,11 @@ export function showMenu(items, { x, y, title, parentMenu = null } = {}) {
   if (menu.lastElementChild?.classList.contains('ctx-sep')) menu.lastElementChild.remove();
 
   document.body.append(menu);
+  // Oberste Ebene (Popover): sonst läge das Menü unter einem offenen Dialog (z. B. ⋯ in „Liederbücher“)
+  if (menu.showPopover) {
+    menu.popover = 'manual';
+    menu.showPopover();
+  }
   // im Fenster halten
   const r = menu.getBoundingClientRect();
   const vw = innerWidth;

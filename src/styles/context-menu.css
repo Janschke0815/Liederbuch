@@ -9,6 +9,8 @@
   font-size: .92rem; outline: none;
   animation: ctx-in .1s ease-out;
 }
+/* als Popover (oberste Ebene, über Dialogen): Vorgaben des Browsers zurücksetzen, Lage setzt context-menu.js */
+.ctx-menu[popover] { inset: auto; margin: 0; overflow: visible; }
 .ctx-title {
   padding: .35em .7em .3em; font-size: .78em; font-weight: 700; color: var(--muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 18em;
