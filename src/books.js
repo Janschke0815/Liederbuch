@@ -1,6 +1,8 @@
 // Mehrere Liederbücher auf einem Gerät. Jedes hat eine eigene lokale Datenbank.
 //
-//   persönlich (immer da):  PERSONAL – Speicherort und Anmeldung wie vor 2.2 (globale Schlüssel)
+//   persönlich:              PERSONAL – Speicherort und Anmeldung wie vor 2.2 (globale Schlüssel). Lässt
+//                            sich entfernen, sobald es weitere gibt (ab 2.6, removePersonal); ohne andere
+//                            Bücher ist es immer da.
 //   eigenes Liederbuch:      { id: 'book-…', name, dbName, own: true, file }
 //                            eigener Speicherort und eigenes Konto (Schlüssel mit „:<id>“, siehe bookKey);
 //                            file: Dateiname in Google Drive bzw. Dropbox („Liederbuch – Name.json“)
@@ -19,6 +21,7 @@ export const PERSONAL = Object.freeze({
 const KEY = 'books';
 const ACTIVE = 'activeBook';
 const PERSONAL_NAME = 'personalName'; // eigener Name für das persönliche Liederbuch (ab 2.2.4)
+const PERSONAL_HIDDEN = 'personalHidden'; // persönliches Liederbuch entfernt (ab 2.6)
 
 function read(storage) {
   try {
@@ -38,9 +41,45 @@ function personal(storage) {
 /** Name des persönlichen Liederbuchs (Standard „Mein Liederbuch“, umbenennbar). */
 export const personalBookName = (storage = localStorage) => personal(storage).name;
 
-/** Alle Liederbücher, das persönliche zuerst. */
+/** Ist das persönliche Liederbuch entfernt (und gibt es andere)? */
+export function isPersonalHidden(storage = localStorage) {
+  return storage.getItem(PERSONAL_HIDDEN) === '1' && read(storage).length > 0;
+}
+
+/** Alle Liederbücher, das persönliche zuerst (sofern nicht entfernt). */
 export function listBooks(storage = localStorage) {
-  return [personal(storage), ...read(storage)];
+  return [...(isPersonalHidden(storage) ? [] : [personal(storage)]), ...read(storage)];
+}
+
+/** Das erste Liederbuch, in das man selbst schreiben darf (für „zu deinen Liedern“, „hierhin kopieren“). */
+export function myBook(storage = localStorage) {
+  return listBooks(storage).find((b) => !b.abo && !b.readOnly) || homeBook(storage);
+}
+
+/** Wohin die App zurückfällt (nach Entfernen, Abo beenden …): das erste Liederbuch der Liste. */
+export function homeBook(storage = localStorage) {
+  return listBooks(storage)[0];
+}
+
+/**
+ * Persönliches Liederbuch entfernen – nur, wenn es weitere gibt. Seine Einstellungen auf diesem Gerät
+ * (Speicherort, Zugangsdaten, Name) werden gelöscht; die globale Google-Anmeldung bleibt (sie gilt auch
+ * für ältere gemeinsame Bücher und den Einladungs-Briefkasten). Die lokale Datenbank löscht der Aufrufer.
+ * @returns {boolean} entfernt
+ */
+export function removePersonal(storage = localStorage) {
+  if (!read(storage).length) return false;
+  for (const k of ['sync.kind', 'sync.provider', 'webdav.url', 'webdav.user', 'webdav.pass', 'gdrive.fileId', 'dropbox.token', PERSONAL_NAME]) {
+    storage.removeItem(k);
+  }
+  storage.setItem(PERSONAL_HIDDEN, '1');
+  if (storage.getItem(ACTIVE) === PERSONAL.id || !storage.getItem(ACTIVE)) storage.setItem(ACTIVE, read(storage)[0].id);
+  return true;
+}
+
+/** Entferntes persönliches Liederbuch wieder anlegen (leer; verbunden wird es wie ein neues). */
+export function restorePersonal(storage = localStorage) {
+  storage.removeItem(PERSONAL_HIDDEN);
 }
 
 /** Liederbuch mit dieser ID oder null. */
@@ -48,9 +87,9 @@ export function getBook(id, storage = localStorage) {
   return listBooks(storage).find((b) => b.id === id) || null;
 }
 
-/** Das Liederbuch, das gerade geöffnet ist (sonst das persönliche). */
+/** Das Liederbuch, das gerade geöffnet ist (sonst das erste der Liste). */
 export function activeBook(storage = localStorage) {
-  return getBook(storage.getItem(ACTIVE), storage) || personal(storage);
+  return getBook(storage.getItem(ACTIVE), storage) || homeBook(storage);
 }
 
 /** Liederbuch für den nächsten Start merken (nur bekannte IDs). */
@@ -203,6 +242,8 @@ export function removeBook(id, storage = localStorage) {
   const book = read(storage).find((b) => b.id === id);
   storage.setItem(KEY, JSON.stringify(read(storage).filter((b) => b.id !== id)));
   if (storage.getItem(ACTIVE) === id) storage.removeItem(ACTIVE);
+  // letztes weiteres Buch weg: das persönliche ist wieder da (und bleibt es, wenn neue dazukommen)
+  if (!read(storage).length) storage.removeItem(PERSONAL_HIDDEN);
   if (book) for (const k of BOOK_KEYS) if (bookKey(book, k) !== k) storage.removeItem(bookKey(book, k));
 }
 

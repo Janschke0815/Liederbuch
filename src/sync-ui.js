@@ -18,7 +18,7 @@ import { WebDavProvider, webdavUrlProblem } from './sync/webdav.js';
 import { DropboxProvider, dropboxRedirectUri } from './sync/dropbox.js';
 import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID, DROPBOX_APP_KEY } from './sync/config.js';
 import {
-  listBooks, addSharedBook, removeBook, driveBookName, bookKey, personalBookName, unknownDriveBooks, adoptDriveBook,
+  listBooks, addSharedBook, removeBook, driveBookName, bookKey, unknownDriveBooks, adoptDriveBook, homeBook, myBook,
 } from './books.js';
 import { setupBooks } from './books-ui.js';
 import { $, askConfirm, askText, el, textButton, textSpan } from './ui/dom.js';
@@ -423,7 +423,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
 
   async function connect({ silent = false } = {}) {
     if (book.abo) {
-      if (!silent) toast(`Ein Abo wird nicht mit der Cloud abgeglichen – oben zu „${personalBookName()}“ wechseln`);
+      if (!silent) toast(`Ein Abo wird nicht mit der Cloud abgeglichen – oben zu „${myBook().name}“ wechseln`);
       return false;
     }
     if (kind() === 'webdav') return connectWebdav();
@@ -793,7 +793,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     if (!(await askConfirm(`„${book.name}“ auf diesem Gerät entfernen?`, { text, ok: 'Entfernen', danger: true }))) return;
     removeBook(book.id);
     indexedDB.deleteDatabase(book.dbName);
-    await switchTo('personal');
+    await switchTo(homeBook().id);
   }
 
   $('#invite-ok').onclick = async () => {
@@ -863,7 +863,7 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     status();
     $('#abo-refresh').onclick = () => (engine.state === 'auth' || engine.state === 'off' ? connect({ silent: true }) : engine.sync());
     $('#abo-leave').onclick = () => leaveBook();
-    $('#abo-home').onclick = () => switchTo('personal');
+    $('#abo-home').onclick = () => switchTo(myBook().id);
   }
 
   // ---------- Dialog ----------

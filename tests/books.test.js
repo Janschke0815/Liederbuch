@@ -1,7 +1,7 @@
 import { describe, it, expect } from './runner.js';
 import {
   PERSONAL, listBooks, activeBook, setActiveBook, addSharedBook, removeBook, bookNameFromFile, fileNameForBook,
-  addBook, renameBook, bookKey, BOOK_KEYS, addAboBook,
+  addBook, renameBook, bookKey, BOOK_KEYS, addAboBook, removePersonal, restorePersonal, isPersonalHidden, homeBook, myBook,
 } from '../src/books.js';
 
 function memoryStorage() {
@@ -121,5 +121,42 @@ describe('Liederbücher: mehrere eigene (2.2)', () => {
   it('Dateiname ohne Zeichen, die Dropbox/Drive stören', () => {
     expect(fileNameForBook('AC/DC: Best?')).toBe('Liederbuch – AC-DC- Best-.json');
     expect(fileNameForBook('a\\b')).toBe('Liederbuch – a-b.json');
+  });
+});
+
+describe('„Mein Liederbuch“ entfernen (2.6)', () => {
+  it('nur, wenn es weitere gibt; danach ist das erste andere Buch die Heimat', () => {
+    const st = memoryStorage();
+    expect(removePersonal(st)).toBe(false);
+    const band = addBook({ name: 'Band' }, st);
+    st.setItem('sync.kind', 'webdav');
+    st.setItem('webdav.url', 'https://x.de/');
+    st.setItem('gdrive.token', 'bleibt');
+    setActiveBook('personal', st);
+    expect(removePersonal(st)).toBe(true);
+    expect(listBooks(st).map((b) => b.id)).toEqual([band.id]);
+    expect([isPersonalHidden(st), activeBook(st).id, homeBook(st).id]).toEqual([true, band.id, band.id]);
+    expect([st.getItem('sync.kind'), st.getItem('webdav.url'), st.getItem('gdrive.token')]).toEqual([null, null, 'bleibt']);
+  });
+
+  it('„Zu deinen Liedern“ und „hierhin kopieren“ nehmen das erste beschreibbare Buch, nicht ein Abo', () => {
+    const st = memoryStorage();
+    addAboBook({ url: 'https://x.de/a.json', name: 'Abo' }, st);
+    const band = addBook({ name: 'Band' }, st);
+    removePersonal(st);
+    expect(myBook(st).id).toBe(band.id);
+  });
+
+  it('wieder anlegen; ist das letzte andere Buch weg, ist es von selbst wieder da', () => {
+    const st = memoryStorage();
+    const band = addBook({ name: 'Band' }, st);
+    removePersonal(st);
+    restorePersonal(st);
+    expect(listBooks(st).map((b) => b.id)).toEqual(['personal', band.id]);
+    removePersonal(st);
+    removeBook(band.id, st);
+    expect(listBooks(st).map((b) => b.id)).toEqual(['personal']);
+    addBook({ name: 'Neu' }, st); // bleibt da, auch wenn wieder ein Buch dazukommt
+    expect(listBooks(st)[0].id).toBe('personal');
   });
 });

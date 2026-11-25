@@ -570,6 +570,10 @@ die Lieder des geöffneten Buchs übernommen.
 - **Umziehen** zu einem anderen Speicherort: unter **Abgleich** *Trennen …*, anderen Speicherort wählen,
   *Verbinden* – das Gerät hat alle Lieder und lädt sie dort hoch (liegen dort schon welche, wird
   zusammengeführt). Die alte Datei bleibt, wo sie war.
+- **„Mein Liederbuch“ entfernen** (ab 2.6): Gibt es weitere Liederbücher, steht im ⋯ auch beim ersten Buch
+  *Entfernen …*. Die Lieder auf diesem Gerät werden gelöscht, was in der Cloud liegt bleibt; die App fällt
+  dann auf das nächste Buch zurück. *Hinzufügen … → „Mein Liederbuch“ wieder anlegen* holt es leer zurück
+  (verbunden mit Google Drive findet es seine alte `Liederbuch.json` wieder). Ohne andere Bücher ist es immer da.
 - „Mein Liederbuch“ behält seine Einstellungen (`Liederbuch.json`); geteilte Bücher (Einladung)
   laufen immer über Google Drive. Neue Bücher starten leer (ohne Beispiellied).
 

@@ -2,7 +2,10 @@
 // (Liste, Umbenennen, Entfernen, Abo-Angaben) und „Neues Liederbuch“. Der Abgleich mit der Cloud steht
 // in sync-ui.js – das richtet diesen Teil ein und reicht über `cloud` herein, was es dafür braucht.
 
-import { listBooks, setActiveBook, addBook, renameBook, removeBook, bookKey } from './books.js';
+import {
+  listBooks, setActiveBook, addBook, renameBook, removeBook, bookKey, homeBook, isPersonalHidden, PERSONAL,
+  removePersonal, restorePersonal,
+} from './books.js';
 import { prefs } from './prefs.js';
 import { SongRepository } from './storage/repository.js';
 import { openIdbStore } from './storage/stores.js';
@@ -89,6 +92,7 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
       isActive && { label: 'Abgleich & Teilen …', icon: 'cloud', action: () => cloud.openDialog() },
       '-',
       b.own && { label: 'Entfernen …', icon: 'trash', danger: true, action: () => removeOwnBook(b) },
+      b.id === PERSONAL.id && listBooks().length > 1 && { label: 'Entfernen …', icon: 'trash', danger: true, action: () => removePersonalBook(b) },
       b.shared && isActive && { label: 'Verlassen …', icon: 'trash', danger: true, action: () => cloud.leaveBook() },
       b.abo && leaveAbo && { label: 'Abo beenden …', icon: 'trash', danger: true, action: async () => (await leaveAbo(b)) && refresh() },
       '-',
@@ -243,7 +247,28 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
     if (b.id === book.id) cloud.stop();
     removeBook(b.id);
     indexedDB.deleteDatabase(b.dbName);
-    if (b.id === book.id) return switchTo('personal');
+    if (b.id === book.id) return switchTo(homeBook().id);
+    refresh();
+    toast(`„${b.name}“ entfernt`);
+  }
+
+  /**
+   * Das erste Liederbuch („Mein Liederbuch“) entfernen – nur, wenn es weitere gibt. Über
+   * „Hinzufügen … → … wieder anlegen“ kommt es (leer) zurück; was in der Cloud liegt, bleibt.
+   */
+  async function removePersonalBook(b) {
+    const cloudy = connectedVia(b);
+    const ok = await askConfirm(`„${b.name}“ entfernen?`, {
+      text: `${cloudy ? 'Die Lieder auf diesem Gerät werden gelöscht – was in der Cloud liegt, bleibt erhalten.'
+        : 'Es ist mit keiner Cloud verbunden – seine Lieder sind dann weg.'} Mit „Hinzufügen …“ lässt es sich später leer wieder anlegen.`,
+      ok: 'Entfernen',
+      danger: true,
+    });
+    if (!ok) return;
+    if (b.id === book.id) cloud.stop();
+    if (!removePersonal()) return;
+    indexedDB.deleteDatabase(b.dbName);
+    if (b.id === book.id) return switchTo(homeBook().id);
     refresh();
     toast(`„${b.name}“ entfernt`);
   }
@@ -320,6 +345,14 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
     const r = e.currentTarget.getBoundingClientRect();
     showMenu([
       { label: 'Neues Liederbuch …', icon: 'plus', action: () => open({ create: true }) },
+      isPersonalHidden() && {
+        label: `„${PERSONAL.name}“ wieder anlegen`, icon: 'plus',
+        action: () => {
+          restorePersonal();
+          refresh();
+          toast(`„${PERSONAL.name}“ ist wieder da (leer – zum Abgleichen öffnen und verbinden)`);
+        },
+      },
       cloud.googleReady() && { label: 'Einladung öffnen …', icon: 'open', action: () => cloud.join() },
       { label: 'Abo hinzufügen …', icon: 'paste', action: () => openSubscribe?.() },
       cloud.googleReady() && { label: 'Aus meinem Google Drive …', icon: 'cloud', action: () => cloud.findInDrive() },

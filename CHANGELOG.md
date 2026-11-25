@@ -22,6 +22,8 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
   Buch noch nicht geöffnet haben, sind mit „Einladung offen“ markiert. Wer ein Mitglied entfernt, räumt auch
   dessen offene Einladung weg. Ist ein Abo veröffentlicht, steht sein Stand da – mit **Link kopieren** und
   **Neu veröffentlichen …**. „Mit anderen teilen …“ erscheint nur noch, solange es beides nicht gibt.
+- **„Mein Liederbuch“ lässt sich entfernen**, sobald es weitere Liederbücher gibt (⋯ → *Entfernen …*). Die App
+  öffnet dann das nächste Buch; über *Hinzufügen … → „Mein Liederbuch“ wieder anlegen* kommt es leer zurück.
 - **Mehrere Einladungen** stehen als Liste oben im Dialog, jede mit Öffnen und Ablehnen.
 - Rückfragen (Umbenennen, Entfernen, Trennen, Abo beenden …) kommen jetzt als eigene kleine Dialoge statt
   als Fenster des Browsers.

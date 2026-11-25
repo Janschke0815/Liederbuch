@@ -2,7 +2,7 @@
 // eigene Liederbuch kopieren: copySongsTo in song-actions.js. Ein Abo ist ein eigenes Liederbuch (eigene
 // Datenbank), nur zum Lesen (siehe readOnly in app-state.js).
 
-import { addAboBook, listBooks, removeBook, setActiveBook, PERSONAL, personalBookName } from '../books.js';
+import { addAboBook, homeBook, listBooks, myBook, removeBook, setActiveBook } from '../books.js';
 import { parseAboLink } from '../formats/abo.js';
 import { prefs } from '../prefs.js';
 import { SongRepository } from '../storage/repository.js';
@@ -167,7 +167,7 @@ export async function leaveAbo(entry = book) {
   prefs.set('aboState', st);
   indexedDB.deleteDatabase(entry.dbName);
   if (entry.id === book.id) {
-    setActiveBook(PERSONAL.id);
+    setActiveBook(homeBook().id);
     location.reload();
   }
   return true;
@@ -178,13 +178,14 @@ if (book.abo) {
   $('#abo-bar').hidden = false;
   $('#abo-refresh').onclick = () => refreshAbo({ quiet: false });
   $('#abo-leave').onclick = () => leaveAbo();
+  $('#abo-home').textContent = myBook().name;
   $('#abo-home').onclick = () => {
-    setActiveBook(PERSONAL.id);
+    setActiveBook(myBook().id);
     location.reload();
   };
   if (sessionStorage.getItem('aboJustAdded')) {
     sessionStorage.removeItem('aboJustAdded');
-    toast(`Abo „${book.name}“ geöffnet. Deine eigenen Lieder: oben auf den Namen tippen oder „${personalBookName()}“`, { ms: 8000 });
+    toast(`Abo „${book.name}“ geöffnet. Deine eigenen Lieder: oben auf den Namen tippen oder „${myBook().name}“`, { ms: 8000 });
   }
   $('#publish-card').hidden = true; // ein Abo veröffentlicht man nicht weiter
   renderBar();

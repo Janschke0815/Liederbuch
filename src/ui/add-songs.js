@@ -3,7 +3,7 @@
 
 import { findDuplicates } from '../core/song-list.js';
 import { deriveSummary } from '../storage/repository.js';
-import { personalBookName } from '../books.js';
+import { myBook } from '../books.js';
 import { readOnly, repo } from './app-state.js';
 import { $, el, ask, toast } from './dom.js';
 import { clearSearch } from './list.js';
@@ -35,7 +35,7 @@ function askDuplicates(dups) {
  */
 export async function addSongs(items) {
   if (readOnly) {
-    toast(`Ein abonniertes Liederbuch ist nur zum Lesen – zum Anlegen oben zu „${personalBookName()}“ wechseln`);
+    toast(`Ein abonniertes Liederbuch ist nur zum Lesen – zum Anlegen oben zu „${myBook().name}“ wechseln`);
     return null;
   }
   await flushSave();

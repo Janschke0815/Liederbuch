@@ -5,7 +5,9 @@
 Mehrere Liederbücher auf einem Gerät. Jedes hat eine eigene lokale Datenbank.
 
 ```text
-  persönlich (immer da):  PERSONAL – Speicherort und Anmeldung wie vor 2.2 (globale Schlüssel)
+  persönlich:              PERSONAL – Speicherort und Anmeldung wie vor 2.2 (globale Schlüssel). Lässt
+                           sich entfernen, sobald es weitere gibt (ab 2.6, removePersonal); ohne andere
+                           Bücher ist es immer da.
   eigenes Liederbuch:      { id: 'book-…', name, dbName, own: true, file }
                            eigener Speicherort und eigenes Konto (Schlüssel mit „:<id>“, siehe bookKey);
                            file: Dateiname in Google Drive bzw. Dropbox („Liederbuch – Name.json“)
@@ -26,9 +28,33 @@ Mehrere Liederbücher auf einem Gerät. Jedes hat eine eigene lokale Datenbank.
 
 Name des persönlichen Liederbuchs (Standard „Mein Liederbuch“, umbenennbar).
 
+### `isPersonalHidden(storage = localStorage)`
+
+Ist das persönliche Liederbuch entfernt (und gibt es andere)?
+
 ### `listBooks(storage = localStorage)`
 
-Alle Liederbücher, das persönliche zuerst.
+Alle Liederbücher, das persönliche zuerst (sofern nicht entfernt).
+
+### `myBook(storage = localStorage)`
+
+Das erste Liederbuch, in das man selbst schreiben darf (für „zu deinen Liedern“, „hierhin kopieren“).
+
+### `homeBook(storage = localStorage)`
+
+Wohin die App zurückfällt (nach Entfernen, Abo beenden …): das erste Liederbuch der Liste.
+
+### `removePersonal(storage = localStorage)`
+
+Persönliches Liederbuch entfernen – nur, wenn es weitere gibt. Seine Einstellungen auf diesem Gerät
+(Speicherort, Zugangsdaten, Name) werden gelöscht; die globale Google-Anmeldung bleibt (sie gilt auch
+für ältere gemeinsame Bücher und den Einladungs-Briefkasten). Die lokale Datenbank löscht der Aufrufer.
+
+**Rückgabe:** `boolean` entfernt
+
+### `restorePersonal(storage = localStorage)`
+
+Entferntes persönliches Liederbuch wieder anlegen (leer; verbunden wird es wie ein neues).
 
 ### `getBook(id, storage = localStorage)`
 
@@ -36,7 +62,7 @@ Liederbuch mit dieser ID oder null.
 
 ### `activeBook(storage = localStorage)`
 
-Das Liederbuch, das gerade geöffnet ist (sonst das persönliche).
+Das Liederbuch, das gerade geöffnet ist (sonst das erste der Liste).
 
 ### `setActiveBook(id, storage = localStorage)`
 

@@ -3,7 +3,7 @@
 
 import { attachContextMenu } from '../context-menu.js';
 import { loadSettings, saveSettings } from '../settings/settings.js';
-import { getBook, PERSONAL, personalBookName } from '../books.js';
+import { myBook } from '../books.js';
 import { readOnly, repo, state } from './app-state.js';
 import { $, isMobile } from './dom.js';
 import { listEl } from './list.js';
@@ -17,7 +17,7 @@ import { setView } from './view.js';
 
 /** Abo: „In ‚Mein Liederbuch' kopieren“. */
 const copyMineItem = (song) => ({
-  label: `In „${personalBookName()}“ kopieren`, icon: 'paste', action: () => copySongsTo([song], getBook(PERSONAL.id)),
+  label: `In „${myBook().name}“ kopieren`, icon: 'paste', action: () => copySongsTo([song], myBook()),
 });
 /** Lieder für das Setlisten-Menü: frisch aus der Datenbank, falls inzwischen geändert. */
 const songsById = (id) => async () => [await repo.get(id)].filter(Boolean);
