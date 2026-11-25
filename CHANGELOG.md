@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.5.6 – 25.11.2026 · Einladungslink kopieren
+
+- Unter **Cloud → Mitglieder** gibt es jetzt **Link kopieren** (und am Handy **Link teilen …**), um den
+  Einladungslink z. B. per WhatsApp zu schicken. Er öffnet das Liederbuch nur für Personen, die vorher per
+  E-Mail eingeladen wurden – für alle anderen bleibt es zu (Google lässt sonst niemanden an die Datei).
+
 ## 2.5.5 – 25.11.2026 · Einladungen ohne Link
 
 - Wer zu einem gemeinsamen Liederbuch eingeladen wird, sieht das jetzt direkt in der App: Beim Start

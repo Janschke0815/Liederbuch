@@ -738,6 +738,27 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
       toast(`Einladen fehlgeschlagen: ${err.message}`);
     }
   };
+  // Einladungslink kopieren oder teilen (Messenger) – öffnet nur für per E-Mail Eingeladene
+  const inviteText = () => `Du bist zum Liederbuch „${book.name}“ eingeladen. Öffne den Link und melde dich mit dem `
+    + `Google-Konto an, an das die Einladung ging: ${inviteLink(provider.fileId)}`;
+  $('#invite-copy').onclick = async () => {
+    if (!provider?.fileId) return toast('Das Liederbuch liegt noch nicht in Google Drive');
+    try {
+      await navigator.clipboard.writeText(inviteLink(provider.fileId));
+      toast('Einladungslink kopiert – öffnet nur für eingeladene Google-Konten', { ms: 5000 });
+    } catch {
+      prompt('Einladungslink zum Kopieren:', inviteLink(provider.fileId));
+    }
+  };
+  $('#invite-share').hidden = !navigator.share;
+  $('#invite-share').onclick = async () => {
+    if (!provider?.fileId) return toast('Das Liederbuch liegt noch nicht in Google Drive');
+    try {
+      await navigator.share({ title: `Liederbuch „${book.name}“`, text: inviteText() });
+    } catch (err) {
+      if (err?.name !== 'AbortError') toast(`Teilen fehlgeschlagen: ${err.message}`);
+    }
+  };
   $('#invite-email').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
