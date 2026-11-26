@@ -330,10 +330,12 @@ export class GoogleDriveProvider {
   /**
    * Google-Dateiauswahl für Liederbücher, die mit mir geteilt wurden.
    * Erst durch die Auswahl darf die App (Berechtigung drive.file) die Datei öffnen.
-   * @param {{fileId?: string}} [opts]  fileId: genau diese Datei vorauswählen (aus dem Einladungslink)
+   * @param {{fileId?: string, onForcedClose?: () => void}} [opts]  fileId: genau diese Datei vorauswählen
+   *   (aus dem Einladungslink); onForcedClose: wird aufgerufen, wenn die Auswahl über den eigenen
+   *   „✕ Schließen“-Knopf geschlossen wurde – meist, weil Google darin einen Fehler zeigt
    * @returns {Promise<{id, name} | null>}
    */
-  async pickShared({ fileId = '' } = {}) {
+  async pickShared({ fileId = '', onForcedClose = null } = {}) {
     if (!this.apiKey || !this.appId) {
       throw new Error('Für „Einladung öffnen“ fehlen API-Schlüssel und Projektnummer (Einrichtung)');
     }
@@ -366,6 +368,9 @@ export class GoogleDriveProvider {
         .setOAuthToken(token)
         .setDeveloperKey(this.apiKey)
         .setAppId(this.appId)
+        // Eigene Adresse ausdrücklich angeben: Manche Browser (z. B. Chrome auf Android) melden Google
+        // sonst eine andere Herkunft, und der Schlüssel gilt als „ungültig“.
+        .setOrigin(location.origin)
         .setLocale('de')
         .setTitle(fileId ? 'Liederbuch bestätigen' : 'Gemeinsames Liederbuch wählen')
         .setCallback((d) => {
@@ -383,7 +388,10 @@ export class GoogleDriveProvider {
       closeBtn = Object.assign(document.createElement('button'), {
         type: 'button', className: 'picker-close', textContent: '✕ Schließen', title: 'Google-Dateiauswahl schließen (Esc)',
       });
-      closeBtn.onclick = () => finish(null);
+      closeBtn.onclick = () => {
+        finish(null);
+        onForcedClose?.();
+      };
       document.body.append(closeBtn);
       addEventListener('keydown', onKey, true);
     });

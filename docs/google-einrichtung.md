@@ -70,10 +70,12 @@ nur von den Adressen an, die du unten einträgst.
 
 **APIs & Dienste → Anmeldedaten → Anmeldedaten erstellen → API-Schlüssel**, dann **Schlüssel bearbeiten**:
 
-- **Anwendungseinschränkungen:** *Websites* mit nur **`https://docs.google.com/*`**. Die App selbst
-  benutzt den Schlüssel nicht, nur die Dateiauswahl – und die läuft in einem Google-Rahmen auf
-  docs.google.com und fragt von dort aus an. Die Adressen der App (GitHub Pages, localhost, NAS) sind
-  hier daher nicht nötig; fehlt docs.google.com, meldet die Dateiauswahl „API-Entwicklerschlüssel ist ungültig“.
+- **Anwendungseinschränkungen:** *Websites* mit **`https://docs.google.com/*`** **und** allen Adressen,
+  unter denen die App läuft: `https://janschke0815.github.io/*`, `http://localhost:5173/*` und ggf. die
+  NAS-Adresse (z. B. `https://DEIN-NAS.myqnapcloud.com/*`). Die App selbst benutzt den Schlüssel nicht,
+  nur die Dateiauswahl. Die läuft in einem Google-Rahmen auf docs.google.com – je nach Browser meldet
+  sie Google aber docs.google.com (Safari) oder die Adresse der App (z. B. Chrome auf Android). Fehlt die
+  gemeldete Adresse, zeigt die Dateiauswahl „API-Entwicklerschlüssel ist ungültig“ – nur auf manchen Geräten.
 - **API-Einschränkungen:** **Google Picker API** und **Google Drive API** (die Dateiauswahl fragt
   Drive mit dem Schlüssel ab; fehlt die Drive API hier, meldet sie „API-Entwicklerschlüssel ist
   ungültig“). Der Schlüssel allein gibt keinen Zugriff auf Dateien – dafür braucht es immer die Anmeldung.
@@ -126,7 +128,7 @@ eintragen kann (praktisch zum Ausprobieren, z. B. mit einem eigenen Projekt für
 | `origin_mismatch` / „Zugriff blockiert“ | Adresse fehlt unter *JavaScript-Quellen* (Schritt 3) |
 | „Zugriff auf Google Drive wurde nicht erlaubt“ | Bei Google das Häkchen für Drive nicht gesetzt – noch einmal anmelden |
 | `access_denied` in der Testphase | Konto ist nicht als Testnutzer eingetragen (Schritt 2) |
-| „Der API-Entwicklerschlüssel ist ungültig“ (in der Dateiauswahl; schließen mit „✕ Schließen“ oben rechts oder Esc) | Beim API-Schlüssel fehlt unter *API-Einschränkungen* die Drive API oder Picker API, die Picker API ist nicht aktiviert (Schritt 1) oder unter *Websites* fehlt `https://docs.google.com/*` (Schritt 4) |
+| „Der API-Entwicklerschlüssel ist ungültig“ (in der Dateiauswahl; schließen mit „✕ Schließen“ oben rechts oder Esc) | Beim API-Schlüssel fehlt unter *API-Einschränkungen* die Drive API oder Picker API, die Picker API ist nicht aktiviert (Schritt 1) oder unter *Websites* fehlt `https://docs.google.com/*` bzw. die Adresse der App (Schritt 4). Tritt es nur auf manchen Geräten auf: erst die Websites prüfen; hilft das nicht, blockiert dort der Tracking-Schutz des Browsers (Safari, Firefox streng, Brave, Samsung Internet) die Cookies der Google-Auswahl – Google meldet das irreführend ebenfalls als ungültigen Schlüssel |
 | „Für ‚Einladung öffnen‘ fehlen API-Schlüssel …“ | API-Schlüssel oder Projektnummer fehlen (Schritte 4–6) |
 | „Die Google-Anmeldung ist abgelaufen oder wurde widerrufen“ | normal nach etwa einer Stunde oder nach Entzug unter <https://myaccount.google.com/permissions> – neu anmelden |
 | „Nur lesen: … keine Schreibrechte“ | Der Besitzer hat dir nur Leserechte gegeben |

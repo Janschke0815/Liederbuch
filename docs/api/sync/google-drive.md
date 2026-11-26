@@ -121,14 +121,14 @@ Rechte einer Person ändern ('reader' oder 'writer').
 
 Zugriff einer Person entfernen.
 
-#### `async pickShared({ fileId = '' } = {})`
+#### `async pickShared({ fileId = '', onForcedClose = null } = {})`
 
 Google-Dateiauswahl für Liederbücher, die mit mir geteilt wurden.
 Erst durch die Auswahl darf die App (Berechtigung drive.file) die Datei öffnen.
 
 | Parameter | Typ | Bedeutung |
 |---|---|---|
-| `[opts]` | `{fileId?: string}` | fileId: genau diese Datei vorauswählen (aus dem Einladungslink) |
+| `[opts]` | `{fileId?: string, onForcedClose?: () => void}` | fileId: genau diese Datei vorauswählen (aus dem Einladungslink); onForcedClose: wird aufgerufen, wenn die Auswahl über den eigenen „✕ Schließen“-Knopf geschlossen wurde – meist, weil Google darin einen Fehler zeigt |
 
 **Rückgabe:** `Promise<{id, name} | null>`
 

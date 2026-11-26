@@ -607,7 +607,14 @@ export function setupSync({ repo, extra = [], book, beforeSync, beforeConnect, b
     reopen?.close();
     try {
       const picker = driveFor({ shared: true, fileId }, ja);
-      const file = await picker.pickShared({ fileId });
+      // Mit „✕ Schließen“ geschlossen: meist zeigte Google darin einen Fehler – kurz erklären, was hilft
+      const onForcedClose = () => toast(
+        'Zeigte die Google-Auswahl einen Fehler wie „API-Schlüssel ungültig“? Dann die Einladung in einem '
+          + 'anderen Browser oder auf einem anderen Gerät öffnen – oder den Tracking-Schutz des Browsers '
+          + 'für Google lockern.',
+        { ms: 15000 },
+      );
+      const file = await picker.pickShared({ fileId, onForcedClose });
       if (!file) {
         if (reopen) reopenDialog(reopen);
         return;

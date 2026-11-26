@@ -8,6 +8,15 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.6.3 – 26.11.2026 · Einladung öffnen auf Android
+
+- **„API-Entwicklerschlüssel ist ungültig“ beim Öffnen einer Einladung** (vor allem auf Android): Die
+  Google-Dateiauswahl meldet Google jetzt ausdrücklich die Adresse der App. Zusätzlich müssen beim
+  API-Schlüssel neben docs.google.com auch die Adressen der App erlaubt sein – die Anleitung
+  (docs/google-einrichtung.md) ist entsprechend korrigiert.
+- Schließt man die Google-Auswahl mit **„✕ Schließen“**, weil sie einen Fehler zeigt, erklärt ein Hinweis,
+  was hilft (anderer Browser oder anderes Gerät, Tracking-Schutz lockern).
+
 ## 2.6.2 – 26.11.2026 · Menüs im Dialog bedienbar
 
 - Behoben: Im Dialog **Liederbücher** ließen sich die Einträge unter **Hinzufügen …** und **⋯** zwar sehen,
