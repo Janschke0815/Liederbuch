@@ -18,6 +18,7 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 - Behoben: Am Handy fehlte in der Vorschau die Wahl **♯/♭**, auch wenn transponiert war. Sie steht jetzt da,
   sobald transponiert ist; „Spielen“ zeigt dann auf schmalen Handys nur das Symbol, damit alles in eine Zeile passt.
 - Nach dem Spielmodus zeigt die Vorschau gleich die dort gewählte Tonart.
+- **♯/♭ in der Vorschau** wie im Spielmodus: ein Knopf, jeder Tipp wechselt automatisch → ♯ → ♭ (statt Aufklappmenü).
 
 ## 2.6.0 – 25.11.2026 · Liederbücher und Cloud in einem Dialog
 

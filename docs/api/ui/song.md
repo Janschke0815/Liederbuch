@@ -4,7 +4,7 @@
 
 Das geöffnete Lied: öffnen, automatisch speichern, Vorschau, Transponieren und die Liedinfo (Titel, Capo, Takt … über dem Editor).
 
-**Benutzt:** [`context-menu.js`](../context-menu.md), [`core/chordpro.js`](../core/chordpro.md), [`core/chords.js`](../core/chords.md), [`core/meta-edit.js`](../core/meta-edit.md), [`prefs.js`](../prefs.md), [`render/abc-view.js`](../render/abc-view.md), [`render/song-view.js`](../render/song-view.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md)  
+**Benutzt:** [`core/chordpro.js`](../core/chordpro.md), [`core/chords.js`](../core/chords.md), [`core/meta-edit.js`](../core/meta-edit.md), [`prefs.js`](../prefs.md), [`render/abc-view.js`](../render/abc-view.md), [`render/song-view.js`](../render/song-view.md), [`ui/app-state.js`](app-state.md), [`ui/dom.js`](dom.md)  
 **Benutzt von:** [`app.js`](../app.md), [`ui/add-songs.js`](add-songs.md), [`ui/app-keys.js`](app-keys.md), [`ui/capo-help.js`](capo-help.md), [`ui/chord-tap.js`](chord-tap.md), [`ui/context-menus.js`](context-menus.md), [`ui/files.js`](files.md), [`ui/harp-from-notes.js`](harp-from-notes.md), [`ui/list.js`](list.md), [`ui/notes-import.js`](notes-import.md), [`ui/preview-tools.js`](preview-tools.md), [`ui/publish.js`](publish.md), [`ui/selection.js`](selection.md), [`ui/share.js`](share.md), [`ui/snippets.js`](snippets.md), [`ui/song-actions.js`](song-actions.md), [`ui/trash.js`](trash.md), [`ui/view.js`](view.md)
 
 ## Exportiert

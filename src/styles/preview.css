@@ -11,7 +11,8 @@
 .vb-cap { font-size: .62rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
 .key-box { padding-inline: .3em; }
 .acc-btn { display: inline-flex; align-items: center; gap: .45em; min-height: 2rem; padding: .1em .65em; font-weight: 600; }
-.acc-btn .book-caret { width: .38em; height: .38em; }
+.acc-btn { min-width: 2.6rem; justify-content: center; }
+.acc-btn[aria-pressed='true'] { color: var(--accent); border-color: var(--accent); }
 .cap-short { display: none; }
 .stepper { display: inline-flex; border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
 .stepper button { border: 0; border-radius: 0; min-width: 2.4rem; font-size: 1.15em; font-weight: 600; }

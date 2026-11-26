@@ -7,12 +7,13 @@ import { getAllMeta, setMeta, getTags, setTags } from '../core/meta-edit.js';
 import { renderSong, songKey } from '../render/song-view.js';
 import { renderScores, stopAbc } from '../render/abc-view.js';
 import { prefs } from '../prefs.js';
-import { showMenu } from '../context-menu.js';
 import { readOnly, repo, state } from './app-state.js';
 import { $, $$, isMobile, toast } from './dom.js';
 
 /** Schreibweise kurz (Knopf über der Vorschau). */
-const ACC_SHORT = { auto: 'auto', sharp: '♯', flat: '♭' };
+const ACC_SHORT = { auto: '♯/♭', sharp: '♯', flat: '♭' };
+const ACC_NEXT = { auto: 'sharp', sharp: 'flat', flat: 'auto' };
+const ACC_TITLE = { auto: 'automatisch mit ♯ oder ♭', sharp: 'immer mit ♯', flat: 'immer mit ♭' };
 
 export const editor = $('#editor');
 export const preview = $('#preview');
@@ -81,6 +82,8 @@ export function updateControls() {
   const acc = current?.accidentals || 'auto';
   // Schreibweise erst zeigen, wenn transponiert wird oder eine gewählt ist (sonst über Rechtsklick)
   $('#acc-value').textContent = ACC_SHORT[acc];
+  $('#acc-btn').title = `Akkorde ${ACC_TITLE[acc]} – tippen zum Wechseln (wird mit dem Lied gespeichert)`;
+  $('#acc-btn').setAttribute('aria-pressed', String(acc !== 'auto'));
   $('#acc-field').hidden = t === 0 && acc === 'auto';
   $('#acc-field').classList.toggle('acc-auto', acc === 'auto');
 }
@@ -137,15 +140,8 @@ export async function setViewOption(changes) {
 $('#tr-up').onclick = () => setViewOption({ transpose: state.current.transpose + 1 });
 $('#tr-down').onclick = () => setViewOption({ transpose: state.current.transpose - 1 });
 $('#tr-reset').onclick = () => setViewOption({ transpose: 0 });
-// Schreibweise: Aufklappmenü statt dreier Knöpfe
-$('#acc-btn').onclick = () => {
-  const acc = state.current?.accidentals || 'auto';
-  const r = $('#acc-btn').getBoundingClientRect();
-  showMenu([
-    ['auto', 'automatisch (nach Tonart)'], ['sharp', 'immer mit ♯ (Kreuz)'], ['flat', 'immer mit ♭ (b)'],
-  ].map(([v, label]) => ({ label, checked: acc === v, action: () => setViewOption({ accidentals: v }) })),
-  { x: r.left, y: r.bottom + 4, title: 'Schreibweise der Akkorde' }).focusFirst();
-};
+// Schreibweise: ein Knopf, jeder Tipp wechselt (automatisch → ♯ → ♭), wie im Spielmodus
+$('#acc-btn').onclick = () => setViewOption({ accidentals: ACC_NEXT[state.current?.accidentals || 'auto'] });
 
 // Änderungen von anderen Geräten (Abgleich)
 repo.addEventListener('remote-change', async (e) => {
