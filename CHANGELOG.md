@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.6.2 – 26.11.2026 · Menüs im Dialog bedienbar
+
+- Behoben: Im Dialog **Liederbücher** ließen sich die Einträge unter **Hinzufügen …** und **⋯** zwar sehen,
+  aber nicht antippen – das Menü lag außerhalb des Dialogs, und ein offener Dialog sperrt alles außerhalb.
+  Jetzt gehört das Menü zum Dialog.
+
 ## 2.6.1 – 26.11.2026 · Spielmodus und Handy
 
 - **Transponieren im Spielmodus:** unter **⋯** stehen jetzt **− / +** für die Tonart (Tipp auf die Zahl:

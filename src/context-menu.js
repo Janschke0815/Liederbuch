@@ -133,7 +133,10 @@ export function showMenu(items, { x, y, title, parentMenu = null } = {}) {
   }
   if (menu.lastElementChild?.classList.contains('ctx-sep')) menu.lastElementChild.remove();
 
-  document.body.append(menu);
+  // Ist ein Dialog offen, gehört das Menü in ihn hinein: Ein modaler Dialog sperrt alles außerhalb für
+  // Klicks und Tippen – ein Menü daneben ließe sich sehen, aber nicht bedienen.
+  const host = [...document.querySelectorAll('dialog[open]')].filter((d) => d.matches(':modal')).at(-1) || document.body;
+  host.append(menu);
   // Oberste Ebene (Popover): sonst läge das Menü unter einem offenen Dialog (z. B. ⋯ in „Liederbücher“)
   if (menu.showPopover) {
     menu.popover = 'manual';
