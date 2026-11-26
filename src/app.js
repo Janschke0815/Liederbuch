@@ -72,9 +72,10 @@ services.play = setupPlayMode({
   repo,
   // Blättern in der Reihenfolge der (ggf. gefilterten und sortierten) Liste
   getSongIds: async () => (await listedSongs()).map((s) => s.id),
-  onClose: (id) => {
-    if (id && id !== state.current?.id) openSong(id);
-    else refreshList(); // „zuletzt gespielt“ hat sich geändert
+  onClose: async (id) => {
+    // auch dasselbe Lied neu öffnen: Tonart/♯♭ kann im Spielmodus geändert worden sein
+    if (id) await openSong(id);
+    refreshList(); // „zuletzt gespielt“ hat sich geändert
   },
 });
 $('#btn-play').onclick = () => playSong();

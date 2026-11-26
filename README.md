@@ -189,6 +189,10 @@ ein/aus. Am Handy stehen nur Schließen, Liedwechsel, Titel und Start/Stopp in d
 Weitere unter **⋯**. Bei einer Setliste steht unter dem Titel die Position und das nächste Lied
 („3 / 12 · Nächstes: …“).
 
+**Transponieren im Spielmodus** (2.6.1, unter **⋯**): **− / +** ändert die Tonart, ein Tipp auf die Zahl führt
+zurück zur Originaltonart, **♯/♭** schaltet die Schreibweise (automatisch → ♯ → ♭). Gespeichert wird wie in
+der Vorschau mit dem Lied; kommt die Tonart aus einer Setliste, gilt die Änderung nur für diesen Durchgang.
+
 | Taste / Pedal | Wirkung |
 |---|---|
 | Bild↓ / ↓ | eine Seite weiter, am Ende: nächstes Lied |

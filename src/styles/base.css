@@ -61,9 +61,7 @@ button {
   white-space: nowrap;
   transition: background .12s, border-color .12s, color .12s;
 }
-button:hover:not(:disabled) { background: var(--hover); }
 button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
-button.primary:hover:not(:disabled) { background: var(--accent-hover); }
 button:disabled, select:disabled { opacity: .4; cursor: default; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offset: 0; }
@@ -71,7 +69,12 @@ input[type=checkbox] { accent-color: var(--accent); width: 1.1em; height: 1.1em;
 .icon { width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .icon-btn { padding: .35em .55em; }
 button.danger { color: var(--accent); }
-button.danger:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--accent); }
+/* Hover-Farben nur mit echter Maus: auf dem Handy bliebe der Knopf nach dem Antippen sonst grau hängen */
+@media (hover: hover) {
+  button:hover:not(:disabled) { background: var(--hover); }
+  button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+  button.danger:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--accent); }
+}
 .link-btn { border-color: transparent; background: transparent; color: var(--accent); padding-inline: .5em; }
 #key-value { font-size: 1.1em; min-width: 2.2em; }
 #key-value.guessed::after { content: '?'; color: var(--muted); font-weight: 400; font-size: .8em; margin-left: .1em; }

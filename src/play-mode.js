@@ -150,18 +150,13 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     if (persist && song?.id) prefs.setIn('playSpeed', song.id, speed);
   }
 
-  async function show(i) {
-    if (!entries.length) return;
-    index = clamp(i, 0, entries.length - 1);
+  /** Lied ins Blatt zeichnen (Tonart wie gewählt), Notiz und Setlisten-Hinweis dazu. @returns Transposition */
+  async function renderSheet() {
     const entry = entries[index];
-    // entry.song: mitgeschicktes Lied (Live-Modus), nicht im eigenen Liederbuch
-    song = entry.song || (await repo.get(entry.id));
-    if (!song) return;
     const parsed = parseChordPro(song.chordpro);
     meta = parsed.meta;
     applySettings(sheet, loadSettings());
-    const transpose = entry.transpose ?? song.transpose;
-    stopAbc(); // Melodie des vorigen Liedes nicht weiterspielen
+    const transpose = entry.transpose ?? song.transpose ?? 0;
     sheet.replaceChildren(renderSong(parsed, { transpose, accidentals: song.accidentals }));
     await renderScores(sheet); // Noten erst zeichnen, dann Spalten und Seiten messen
     syncDiagramButton();
@@ -177,6 +172,59 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
       note.textContent = entry.note;
       sheet.querySelector('.song-header')?.append(note);
     }
+    syncKeyControls(transpose);
+    return transpose;
+  }
+
+  // ---------- Transponieren und ♯/♭ im Spielmodus ----------
+  // Gespeichert wird wie in der Vorschau mit dem Lied; kommt die Tonart aus einer Setliste, gilt die
+  // Änderung nur hier. Mitgeschickte Lieder (Live-Modus) haben eigene Knöpfe (pl-live).
+
+  const ACC_NEXT = { auto: 'sharp', sharp: 'flat', flat: 'auto' };
+  const ACC_LABEL = { auto: '♯/♭', sharp: '♯', flat: '♭' };
+
+  function syncKeyControls(transpose) {
+    const live = Boolean(entries[index]?.song);
+    $('#pl-key').hidden = live;
+    const t = transpose || 0;
+    $('#pl-tr').textContent = (t > 0 ? '+' : '') + t;
+    $('#pl-tr').classList.toggle('changed', t !== 0);
+    const acc = song?.accidentals || 'auto';
+    $('#pl-acc').textContent = ACC_LABEL[acc];
+    $('#pl-acc').title = `Akkorde ${{ auto: 'automatisch mit ♯ oder ♭', sharp: 'immer mit ♯', flat: 'immer mit ♭' }[acc]} – tippen zum Wechseln`;
+    $('#pl-acc').setAttribute('aria-pressed', String(acc !== 'auto'));
+  }
+
+  /** Tonart oder Schreibweise ändern, an derselben Stelle im Lied bleiben. */
+  async function changeKey({ transpose, accidentals }) {
+    const entry = entries[index];
+    if (!song || entry.song) return;
+    const rel = pos() / Math.max(1, maxPos());
+    if (transpose !== undefined && entry.transpose !== undefined) entry.transpose = transpose;
+    else if (song.id) song = await repo.update(song.id, { ...(transpose !== undefined ? { transpose } : {}), ...(accidentals ? { accidentals } : {}) });
+    const t = await renderSheet();
+    applyZoom();
+    layout();
+    setPos(cols ? snap(rel * maxPos()) : rel * maxPos());
+    updateProgress();
+    // Live-Modus (Vorsinger): neue Tonart an alle
+    dispatchEvent(new CustomEvent('playsong', { detail: { chordpro: song.chordpro, transpose: t, accidentals: song.accidentals || 'auto' } }));
+  }
+  const currentTranspose = () => entries[index]?.transpose ?? song?.transpose ?? 0;
+  $('#pl-tr-down').onclick = () => changeKey({ transpose: currentTranspose() - 1 });
+  $('#pl-tr-up').onclick = () => changeKey({ transpose: currentTranspose() + 1 });
+  $('#pl-tr').onclick = () => currentTranspose() && changeKey({ transpose: 0 });
+  $('#pl-acc').onclick = () => changeKey({ accidentals: ACC_NEXT[song?.accidentals || 'auto'] });
+
+  async function show(i) {
+    if (!entries.length) return;
+    index = clamp(i, 0, entries.length - 1);
+    const entry = entries[index];
+    // entry.song: mitgeschicktes Lied (Live-Modus), nicht im eigenen Liederbuch
+    song = entry.song || (await repo.get(entry.id));
+    if (!song) return;
+    stopAbc(); // Melodie des vorigen Liedes nicht weiterspielen
+    const transpose = await renderSheet();
     // zuletzt gespielt (für die Sortierung der Liste)
     if (song.id) prefs.setIn('playedAt', song.id, new Date().toISOString());
     songZoom = song.id ? Number(prefs.get('playZoomSong')[song.id]) || 0 : 0;

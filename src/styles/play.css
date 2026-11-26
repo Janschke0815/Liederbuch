@@ -26,6 +26,11 @@
 .play-group { display: inline-flex; border: 1px solid #cdc6ba; border-radius: 8px; overflow: hidden; }
 .play-group button { border: 0; border-radius: 0; min-width: 2.5rem; font-weight: 600; }
 .play-group button + button, .play-group output + button, .play-group button + output { border-left: 1px solid #e2ddd4; }
+.play-key[hidden] { display: none; }
+.play-key .pl-tr { min-width: 2.6rem; font-variant-numeric: tabular-nums; }
+.play-key .pl-tr.changed { color: var(--accent); }
+.play-key .pl-acc { min-width: 2.6rem; }
+.play-key .pl-acc[aria-pressed='true'] { color: var(--accent); }
 #pl-speed { display: grid; place-items: center; min-width: 3.4em; font-variant-numeric: tabular-nums; font-weight: 600; background: #fff; font-size: .9em; }
 #pl-toggle .icon { width: 1.1em; height: 1.1em; }
 #pl-night[aria-pressed='true'] { background: #22201c; color: #fff; border-color: #22201c; }
@@ -70,7 +75,11 @@
   background: var(--surface); border: 1px solid var(--border-strong); color: var(--text);
   opacity: .35; transition: opacity .15s; box-shadow: var(--shadow);
 }
-.pl-edge:hover, .pl-edge:focus-visible { opacity: 1; }
+.pl-edge:focus-visible { opacity: 1; }
+@media (hover: hover) { .pl-edge:hover { opacity: 1; } }
+/* Antippen: kurz deutlich, danach wieder zurückhaltend (kein Grau, das hängen bleibt) */
+.pl-edge:active { opacity: 1; background: var(--surface); }
+.play-view.night .pl-edge:active { background: #2a2826; }
 .pl-edge-prev { left: .3rem; }
 .pl-edge-next { right: .3rem; }
 .play-view.cols2 .pl-edge { display: inline-grid; place-items: center; }

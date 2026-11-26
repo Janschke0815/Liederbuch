@@ -72,7 +72,7 @@
 @media (max-width: 760px) {
   .zoom-ctl { display: none; }
   /* Leiste: eine Zeile, darf nicht überlaufen. „Original“ fällt weg (zurück: auf 0 transponieren oder
-     lang drücken), Schreibweise nur, wenn eine gewählt ist (sonst über langes Drücken auf das Lied) */
+     lang drücken); die Schreibweise ♯/♭ steht da, sobald transponiert ist (wie am PC) */
   .view-bar { justify-content: center; gap: .3em; padding-inline: .4em; }
   .view-bar .spacer { display: none; }
   .view-bar .segmented button { min-width: 2.75rem; min-height: 2.6rem; padding-inline: .45em; }
@@ -80,13 +80,18 @@
   #tr-value { min-width: 2.1em; }
   .info-chip { padding: .2em .5em; }
   #time-chip { display: none !important; }
-  #tr-reset, #acc-field.acc-auto { display: none; }
+  #tr-reset { display: none; }
   #acc-cap .cap-long { display: none; }
   #acc-cap .cap-short { display: inline; }
   /* Blatt randlos */
   .preview-scroll { padding: 0; }
   .sheet { border-radius: 0; box-shadow: none; padding: 1.2em 1em 2em; max-width: none; min-height: 100%; }
   .import-preview .sheet { max-height: none; }
+}
+/* Schmales Handy mit ♯/♭-Wahl (transponiert): „Spielen“ nur als Symbol, damit alles in eine Zeile passt */
+@media (max-width: 420px) {
+  .view-bar:has(#acc-field:not([hidden])) .play-btn .label { display: none; }
+  .view-bar:has(#acc-field:not([hidden])) .play-btn { padding-inline: .6em; }
 }
 @media (max-width: 360px) {
   .view-bar { gap: .25em; padding-inline: .3em; }

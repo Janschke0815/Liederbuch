@@ -8,6 +8,17 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.6.1 – 26.11.2026 · Spielmodus und Handy
+
+- **Transponieren im Spielmodus:** unter **⋯** stehen jetzt **− / +** für die Tonart (Tipp auf die Zahl:
+  Originaltonart) und **♯/♭** für die Schreibweise. Gespeichert wird mit dem Lied wie in der Vorschau; bei
+  einer Setliste gilt die Tonart nur für diesen Durchgang. Im Live-Modus bekommen alle die neue Tonart.
+- Behoben: Am Handy blieben Knöpfe nach dem Antippen grau – im Spielmodus (heller Modus) die Pfeile zum
+  Umblättern. Die graue „Maus darüber“-Farbe gibt es jetzt nur noch mit echter Maus.
+- Behoben: Am Handy fehlte in der Vorschau die Wahl **♯/♭**, auch wenn transponiert war. Sie steht jetzt da,
+  sobald transponiert ist; „Spielen“ zeigt dann auf schmalen Handys nur das Symbol, damit alles in eine Zeile passt.
+- Nach dem Spielmodus zeigt die Vorschau gleich die dort gewählte Tonart.
+
 ## 2.6.0 – 25.11.2026 · Liederbücher und Cloud in einem Dialog
 
 - **Ein Dialog statt zwei:** *Liederbücher verwalten …* und der **Cloud**-Knopf öffnen jetzt denselben Dialog.
