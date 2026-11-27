@@ -343,6 +343,14 @@ Deckblatt); ändert man sie per Schnellwahl, gilt das nur für diese Vorschau.
 Ohne **Seitenzahlen** bleibt der Seitenumbruch gleich, das Inhaltsverzeichnis nennt die Seiten
 weiterhin.
 
+## Druck: Lieder auswählen
+
+Im Druckdialog filtert das Suchfeld nach **Titel, Interpret oder Tag**; beim Tippen werden passende
+**Tags vorgeschlagen**. Steht genau ein Tag im Feld (z. B. „Lagerfeuer“), erscheinen nur Lieder mit
+diesem Tag. **Nur diese** wählt genau die gefilterten Lieder aus und alle anderen ab –
+so druckt man schnell ein Liederbuch für einen Anlass. **Alle** nimmt die gefilterten zur Auswahl dazu,
+**Keine** wählt alles ab.
+
 ## Druck: Doppelseiten und Reihenfolge
 
 **Doppelseiten** (Option im Druckdialog, auch als 📌-Schnellwahl): Gedruckt wird wie ein Buch – Seite 1

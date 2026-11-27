@@ -401,7 +401,9 @@
         <fieldset>
           <legend>Lieder</legend>
           <div class="row">
-            <input id="pr-search" type="search" placeholder="Filtern …" autocomplete="off">
+            <input id="pr-search" type="search" list="pr-tags" placeholder="Filtern: Titel, Interpret, Tag …" title="Nach Titel, Interpret oder Tag filtern – Tags werden beim Tippen vorgeschlagen" autocomplete="off">
+            <datalist id="pr-tags"></datalist>
+            <button type="button" id="pr-only" hidden title="Genau die gefilterten Lieder auswählen, alle anderen abwählen">Nur diese</button>
             <button type="button" id="pr-all">Alle</button>
             <button type="button" id="pr-none">Keine</button>
             <button type="button" id="pr-az" title="Reihenfolge wieder alphabetisch">A–Z</button>

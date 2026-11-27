@@ -153,9 +153,30 @@ export function setupPrint({ repo, beforeOpen }) {
 
   // ---------- Dialog ----------
 
-  function renderList() {
+  /**
+   * Filter aus dem Suchfeld: Titel, Interpret oder Tag. Steht dort genau ein Tag (z. B. aus den
+   * Vorschlägen gewählt), zählen nur Lieder mit diesem Tag.
+   */
+  function filtered() {
     const q = normalize($('#pr-search').value.trim());
-    const visible = songs.filter((s) => !q || normalize(`${s.title} ${s.artist}`).includes(q));
+    if (!q) return songs;
+    const isTag = songs.some((s) => (s.tags || []).some((t) => normalize(t) === q));
+    if (isTag) return songs.filter((s) => (s.tags || []).some((t) => normalize(t) === q));
+    return songs.filter((s) => normalize(`${s.title} ${s.artist} ${(s.tags || []).join(' ')}`).includes(q));
+  }
+
+  /** Tags der Lieder als Vorschläge im Suchfeld (mit Anzahl). */
+  function fillTags() {
+    const count = new Map();
+    for (const s of songs) for (const t of s.tags || []) count.set(t, (count.get(t) || 0) + 1);
+    const tags = [...count].sort((a, b) => a[0].localeCompare(b[0], 'de', { sensitivity: 'base' }));
+    $('#pr-tags').replaceChildren(...tags.map(([t, n]) => Object.assign(new Option(t), { label: `Tag · ${n} ${n === 1 ? 'Lied' : 'Lieder'}` })));
+  }
+
+  function renderList() {
+    const q = $('#pr-search').value.trim();
+    const visible = filtered();
+    $('#pr-only').hidden = !q;
     $('#pr-list').replaceChildren(
       ...visible.map((s) => {
         const li = document.createElement('li');
@@ -269,12 +290,17 @@ export function setupPrint({ repo, beforeOpen }) {
     if (!keepSelection) selected = new Set(ids);
     else selected = new Set([...selected].filter((id) => ids.has(id)));
     $('#pr-search').value = '';
+    fillTags();
     fillForm();
     renderList();
     dlg.showModal();
   }
 
   $('#pr-search').addEventListener('input', renderList);
+  $('#pr-only').onclick = () => {
+    selected = new Set(filtered().map((s) => s.id));
+    renderList();
+  };
   $('#pr-spreads').onchange = () => ($('#pr-blankPages').disabled = !$('#pr-spreads').checked);
   $('#pr-az').onclick = () => {
     const az = [...songs].sort(byTitle);
@@ -284,8 +310,7 @@ export function setupPrint({ repo, beforeOpen }) {
   };
   $('#pr-all').onclick = () => {
     for (const li of $('#pr-list').querySelectorAll('input')) li.checked = true;
-    const q = normalize($('#pr-search').value.trim());
-    songs.filter((s) => !q || normalize(`${s.title} ${s.artist}`).includes(q)).forEach((s) => selected.add(s.id));
+    filtered().forEach((s) => selected.add(s.id));
     updateCount();
   };
   $('#pr-none').onclick = () => {

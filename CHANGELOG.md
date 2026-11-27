@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.8.2 – 27.11.2026 · Druck: nach Tags filtern
+
+- **Liederbuch drucken – nach Tags filtern:** Das Filterfeld findet jetzt auch Tags und schlägt sie beim
+  Tippen vor. Steht genau ein Tag im Feld, erscheinen nur Lieder mit diesem Tag. **Nur diese** wählt genau die gefilterten Lieder aus –
+  z. B. alle Lieder mit Tag „Lagerfeuer“ auf einen Klick.
+
 ## 2.8.1 – 27.11.2026 · Automatisch anordnen
 
 - **Automatisch anordnen** (Druckvorschau mit Doppelseiten, statt „Lücken füllen“): Die Lieder kommen
