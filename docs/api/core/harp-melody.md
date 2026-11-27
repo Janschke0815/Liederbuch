@@ -4,7 +4,7 @@
 
 Melodie (ABC-Notation) → Mundharmonika-Tabs für eine diatonische 10-Kanal-Harp (Richter-Stimmung). Reine Funktionen, kein DOM: Töne und Silben aus dem ABC-Text lesen, jedem Ton einen Kanal geben (blasen/ziehen zuerst, dann Bending, dann Overblow), die passende Harp-Tonart vorschlagen und das Ergebnis als ChordPro-Zeilen mit Tabs über den Silben schreiben (Schreibweise wie in harp.js).
 
-**Benutzt von:** [`ui/harp-from-notes.js`](../ui/harp-from-notes.md)
+**Benutzt von:** [`core/harp-transpose.js`](harp-transpose.md), [`ui/harp-from-notes.js`](../ui/harp-from-notes.md)
 
 ## Exportiert
 
@@ -53,6 +53,18 @@ Kanal für einen Ton auf einer Harp in einer Tonart.
 | `harpKey` | `number` | Tonklasse der Harp (0 = C-Harp) |
 
 **Rückgabe:** `{tab: string, kind: 'plain'|'bend'|'over'} | null` null: gibt es auf dieser Harp nicht
+
+### `harpTabMidi(tab, harpKey)`
+
+Umkehrung zu harpHoleFor: welcher Ton ein Tab auf einer Harp in dieser Tonart ist.
+Versteht auch „+4“, „-3b“ (= -3'), „6°“ (= 6o) und „-7o“ (= 7o).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `tab` | `string` | einzelner Ton, z. B. "-4" oder "3'" |
+| `harpKey` | `number` | Tonklasse der Harp (0 = C-Harp) |
+
+**Rückgabe:** `number | null` MIDI-Ton; null: kein Ton einer 10-Kanal-Harp
 
 ### `melodyForHarp(abc, harpKey, transpose = 0)`
 

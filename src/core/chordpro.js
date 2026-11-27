@@ -29,6 +29,7 @@ const ALIASES = {
 const MULTI_META = new Set(['subtitle', 'artist', 'composer', 'lyricist', 'arranger', 'tag']);
 const SINGLE_META = new Set([
   'title', 'sorttitle', 'album', 'year', 'key', 'capo', 'tempo', 'time', 'duration', 'copyright', 'columns',
+  'harp', // Harp-Tonart, für die die Mundharmonika-Tabs geschrieben sind (core/harp-transpose.js)
 ]);
 
 const VERBATIM_KINDS = new Set(['tab', 'grid', 'abc']);

@@ -4,7 +4,7 @@
 
 Akkord-Erkennung und Transposition. Reine Funktionen, kein DOM.
 
-**Benutzt von:** [`core/capo.js`](capo.md), [`core/chord-shapes.js`](chord-shapes.md), [`core/playable.js`](playable.md), [`formats/export-text.js`](../formats/export-text.md), [`formats/file-import.js`](../formats/file-import.md), [`formats/ug-import.js`](../formats/ug-import.md), [`render/song-view.js`](../render/song-view.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/chord-filter.js`](../ui/chord-filter.md), [`ui/chord-tap.js`](../ui/chord-tap.md), [`ui/song.js`](../ui/song.md)
+**Benutzt von:** [`core/capo.js`](capo.md), [`core/chord-shapes.js`](chord-shapes.md), [`core/harp-transpose.js`](harp-transpose.md), [`core/playable.js`](playable.md), [`formats/export-text.js`](../formats/export-text.md), [`formats/file-import.js`](../formats/file-import.md), [`formats/ug-import.js`](../formats/ug-import.md), [`render/song-view.js`](../render/song-view.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/chord-filter.js`](../ui/chord-filter.md), [`ui/chord-tap.js`](../ui/chord-tap.md), [`ui/song.js`](../ui/song.md)
 
 ## Exportiert
 

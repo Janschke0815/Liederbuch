@@ -280,6 +280,7 @@
             </select>
           </label>
           <button type="button" id="btn-capo-help" class="link-btn capo-help" title="Capo-Lage mit möglichst einfachen Griffen vorschlagen">Capo-Hilfe …</button>
+          <button type="button" id="btn-harp-help" class="link-btn capo-help" hidden title="Mundharmonika-Tabs auf einer Harp in anderer Tonart spielen">Harp-Hilfe …</button>
           <label>Takt <input data-meta="time" list="dl-times" autocomplete="off" placeholder="z. B. 4/4"></label>
           <label>Tempo <input data-meta="tempo" type="number" min="20" max="320" step="1" placeholder="bpm"></label>
           <label title="Liedlänge in Minuten:Sekunden – so schnell scrollt der Spielmodus (ohne Angabe: 3 Minuten)">Dauer
@@ -320,6 +321,7 @@
           <strong id="key-value">–</strong>
         </div>
         <span id="capo-chip" class="info-chip" hidden></span>
+        <button type="button" id="harp-chip" class="info-chip harp-chip" hidden title="Harp-Hilfe: Tabs auf einer anderen Mundharmonika spielen"></button>
         <div class="vb-field" id="time-field" hidden>
           <span class="vb-cap">Takt · Tempo</span>
           <button type="button" id="time-chip" class="info-chip time-chip" title="Metronom im Liedtempo an/aus (M)"></button>
@@ -807,6 +809,7 @@
             <tr><td><code>{artist: Percy Montrose}</code></td><td>Interpret (mehrfach möglich); ebenso <code>composer</code>, <code>lyricist</code>, <code>arranger</code></td></tr>
             <tr><td><code>{key: C}</code></td><td>Tonart – wird beim Transponieren mitgeändert</td></tr>
             <tr><td><code>{capo: 2}</code></td><td>Capo-Bund</td></tr>
+            <tr><td><code>{harp: C}</code></td><td>Harp, für die die Mundharmonika-Tabs geschrieben sind (Harp-Hilfe)</td></tr>
             <tr><td><code>{time: 3/4}</code></td><td>Takt (für das Metronom)</td></tr>
             <tr><td><code>{tempo: 96}</code></td><td>Tempo in Schlägen pro Minute</td></tr>
             <tr><td><code>{duration: 3:20}</code></td><td>Dauer – danach richtet sich das automatische Scrollen im Spielmodus</td></tr>
@@ -1158,6 +1161,26 @@
         <ul id="capo-options" class="capo-options"></ul>
       </div>
       <footer class="dialog-foot">
+        <button value="cancel" formnovalidate>Schließen</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="harp-help-dialog" class="capo-dialog">
+    <form method="dialog" class="dialog-form">
+      <header class="dialog-head">
+        <h2>Harp-Hilfe</h2>
+        <p class="hint">Keine Mundharmonika in der passenden Tonart? Spiel die Tabs auf einer, die du hast.</p>
+      </header>
+      <div class="dialog-body">
+        <label class="harp-key-row"><span>Tabs sind für</span><select id="hh-from"></select><small id="hh-guess" class="hh-guess">geschätzt</small></label>
+        <div class="hh-mine"><span class="hh-mine-label">Meine Harps</span><div id="hh-mine" class="hh-chips" role="group" aria-label="Meine Harps"></div></div>
+        <label class="harp-key-row"><span>Ich spiele auf</span><select id="hh-to"></select></label>
+        <ul id="hh-options" class="capo-options hh-options"></ul>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" id="hh-write" hidden title="Die umgeschriebenen Tabs fest in den Liedtext schreiben">In den Liedtext übernehmen</button>
+        <span class="spacer"></span>
         <button value="cancel" formnovalidate>Schließen</button>
       </footer>
     </form>

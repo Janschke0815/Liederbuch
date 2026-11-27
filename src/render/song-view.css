@@ -93,6 +93,7 @@
 .chord.annotation { color: var(--label-color); font-weight: normal; font-style: italic; }
 /* Mundharmonika-Tabs: eigene Farbe, damit sie nicht mit Akkorden verwechselt werden */
 .chord.harp { color: var(--harp-color, #1565c0); font-weight: 600; font-variant-numeric: tabular-nums; }
+.chord.harp.harp-missing { text-decoration: underline wavy; } /* Ton gibt es auf der eigenen Harp nicht */
 .songbook[data-harp='hide'] .chord.harp,
 .songbook[data-harp='hide'] .line--harp-only,
 .songbook[data-harp='hide'] .block--harp-only { display: none; }

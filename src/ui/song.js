@@ -4,6 +4,7 @@
 import { parseChordPro } from '../core/chordpro.js';
 import { transposeChord } from '../core/chords.js';
 import { getAllMeta, setMeta, getTags, setTags } from '../core/meta-edit.js';
+import { harpView, songHarpTabs } from '../core/harp-transpose.js';
 import { renderSong, songKey } from '../render/song-view.js';
 import { renderScores, stopAbc } from '../render/abc-view.js';
 import { prefs } from '../prefs.js';
@@ -50,8 +51,10 @@ export function renderPreview() {
     return;
   }
   const song = parseChordPro(editor.value);
-  const opts = { transpose: current.transpose, accidentals: current.accidentals };
+  const harp = harpView(song, current.transpose, prefs.get('harpPlayAs')[current.id]);
+  const opts = { transpose: current.transpose, accidentals: current.accidentals, harp };
   preview.replaceChildren(renderSong(song, opts));
+  showHarpChip(harp);
   renderScores(preview); // Noten ({start_of_abc}) – lädt abcjs nur, wenn es welche gibt
   if (current.note) preview.prepend(Object.assign(document.createElement('div'), { className: 'song-note', textContent: current.note }));
   const k = songKey(song, opts);
@@ -66,6 +69,22 @@ export function renderPreview() {
     : 'Tonart (Transposition wird mit dem Lied gespeichert)') +
     (k && capo > 0 ? `\nGriffe in ${k.key}, klingt mit Capo ${capo} in ${transposeChord(k.key, capo)}` : '');
 }
+
+/** „Harp C“ in der Leiste über der Vorschau (öffnet die Harp-Hilfe, ui/harp-help.js) – nur bei Liedern mit Tabs. */
+function showHarpChip(harp) {
+  const chip = $('#harp-chip');
+  chip.hidden = !harp;
+  $('#btn-harp-help').hidden = !harp;
+  if (!harp) return;
+  chip.textContent = `Harp ${harp.harp}`;
+  chip.classList.toggle('changed', Boolean(harp.map));
+  chip.title = harp.map
+    ? `Tabs umgeschrieben für die ${harp.harp}-Harp – Harp-Hilfe`
+    : `Die Tabs passen zur ${harp.harp}-Harp – andere Harp? Harp-Hilfe`;
+}
+
+/** Hat das geöffnete Lied Mundharmonika-Tabs? (für Menüs) */
+export const songHasHarp = () => songHarpTabs(parseChordPro(editor.value)).length > 0;
 
 /** Knöpfe passend zum geöffneten Lied (Transposition, Schreibweise, gesperrt ohne Lied). */
 export function updateControls() {

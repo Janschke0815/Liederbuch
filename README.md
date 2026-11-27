@@ -406,6 +406,22 @@ Ton nebeneinander stehen oder untereinander – Akkorde oben, Tabs direkt über 
 für Vorschau, Spielmodus und Druck, und **Lied teilen → als Text** schreibt die Tabs dann ebenfalls
 in eine eigene Zeile (die sich wieder einfügen lässt).
 
+**Harp-Hilfe – andere Mundharmonika:** Hat ein Lied Tabs, steht über der Vorschau „Harp C“ – die Harp,
+auf der die Tabs gerade passen (auch unter *Liedinfo → Harp-Hilfe …* und per Rechtsklick auf die Vorschau).
+Für welche Harp die Tabs geschrieben sind, sagt `{harp: C}` im Lied; fehlt die Angabe, schätzt die App sie
+aus Tonart und Tabs (meist 2. Lage, z. B. G-Lied auf der C-Harp) – im Dialog lässt sie sich korrigieren.
+Unter *Meine Harps* kreuzt du an, welche du hast. Für die gewählte Harp gibt es zwei Wege:
+
+- **Gleiche Tabs:** Das ganze Lied wird transponiert (z. B. G → A für eine D- statt C-Harp). Keine Bendings
+  dazu; die Capo-Hilfe macht die Gitarrengriffe danach wieder einfach.
+- **Gleiche Tonart:** Die Tabs werden für deine Harp umgeschrieben – nur in der Ansicht (Vorschau und
+  Spielmodus, auf diesem Gerät). Der Dialog sagt vorher, wie viele Bendings oder Overblows nötig sind; Töne,
+  die es auf der Harp nicht gibt, stehen als „?“. Liegt die Melodie zu hoch oder tief, wandert sie um ganze
+  Oktaven. *In den Liedtext übernehmen* schreibt die umgeschriebenen Tabs fest in den Text.
+
+Wird das Lied transponiert, wandert die passende Harp mit („Harp D“ statt „Harp C“). Nur für die normale
+10-Kanal-Harp (Richter-Stimmung).
+
 Gitarren-Tabs stehen wie bisher in `{start_of_tab}` … `{end_of_tab}`.
 
 Beide lassen sich getrennt ausblenden – unter **Einstellungen → Anzeigen**, per
@@ -822,6 +838,9 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
     Buchs; Mitglieder auch für Leser, „Einladung offen“ an noch nicht angenommenen Einladungen, Briefkasten wird
     beim Entfernen eines Mitglieds geleert; Abo-Stand mit Link; mehrere Einladungen als Liste; eigene Rückfragen
     statt Browser-Fenstern (`askConfirm`/`askText` in ui/dom.js)
-28. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
+28. ✅ Harp-Hilfe (2.7): Mundharmonika-Tabs auf einer Harp in anderer Tonart spielen – gleiche Tabs und das
+    Lied wandert mit, oder gleiche Tonart und die Tabs werden umgeschrieben (Bendings/fehlende Töne angezeigt);
+    `{harp: C}` im Lied, sonst geschätzt; eigene Harps merken; „Harp C“ über der Vorschau öffnet den Dialog
+29. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
     zuerst Englisch; Sprache folgt dem Browser und ist unter Einstellungen → App umstellbar. Schrittweise nach
     Bereichen umbauen (Kopfleiste, Liste, Menü → Dialoge → Hilfetexte); ein Test meldet fehlende Übersetzungen

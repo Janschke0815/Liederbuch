@@ -224,6 +224,20 @@ export function harpHoleFor(midi, harpKey) {
   return hit ? { tab: hit.tab, kind: hit.kind } : null;
 }
 
+/**
+ * Umkehrung zu harpHoleFor: welcher Ton ein Tab auf einer Harp in dieser Tonart ist.
+ * Versteht auch „+4“, „-3b“ (= -3'), „6°“ (= 6o) und „-7o“ (= 7o).
+ * @param {string} tab  einzelner Ton, z. B. "-4" oder "3'"
+ * @param {number} harpKey  Tonklasse der Harp (0 = C-Harp)
+ * @returns {number | null}  MIDI-Ton; null: kein Ton einer 10-Kanal-Harp
+ */
+export function harpTabMidi(tab, harpKey) {
+  let t = String(tab).trim().replace(/^\+/, '').replace(/°/g, 'o').replace(/O/g, 'o');
+  t = t.replace(/b{1,3}$/, (b) => "'".repeat(b.length));
+  const hit = C_HARP.find((h) => h.tab === t) || C_HARP.find((h) => h.tab === t.replace(/^-(?=\d+o$)/, ''));
+  return hit ? hit.midi + harpOffset(harpKey) : null;
+}
+
 const COST = { plain: 0, bend: 3, over: 5 };
 
 function convertNotes(lines, harpKey, shift) {

@@ -4,7 +4,8 @@
 import { parseChordPro } from '../core/chordpro.js';
 import { transposeChord } from '../core/chords.js';
 import { capoOptions } from '../core/capo.js';
-import { setMeta } from '../core/meta-edit.js';
+import { getMeta, setMeta } from '../core/meta-edit.js';
+import { harpKeyName, parseHarpKey } from '../core/harp-transpose.js';
 import { usedChords } from '../render/song-view.js';
 import { state } from './app-state.js';
 import { $, el, closeOnBackdrop, toast } from './dom.js';
@@ -26,7 +27,11 @@ function optionButton(o, capoOld) {
     dialog.close();
     if (o.capo === capoOld) return;
     const transpose = state.current.transpose + capoOld - o.capo;
-    setEditorText(setMeta(editor.value, 'capo', o.capo ? String(o.capo) : ''), false);
+    let text = setMeta(editor.value, 'capo', o.capo ? String(o.capo) : '');
+    // {harp:} gilt für das untransponierte Lied – mit der Transposition verschiebt sie sich mit, der Klang bleibt
+    const harp = parseHarpKey(getMeta(text, 'harp'));
+    if (harp >= 0) text = setMeta(text, 'harp', harpKeyName(harp + o.capo - capoOld));
+    setEditorText(text, false);
     await setViewOption({ transpose });
     toast(o.capo ? `Capo in den ${o.capo}. Bund – Griffe angepasst, Klang bleibt gleich` : 'Ohne Capo – Griffe angepasst');
   };

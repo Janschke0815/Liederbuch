@@ -7,7 +7,7 @@
 import { transposeChord, transposeNote, shouldUseFlats, parseChord } from '../core/chords.js';
 import { splitRepeat, formatRepeat } from '../core/repeat.js';
 import { chordDiagram } from './chord-diagram.js';
-import { harpLabel } from '../core/harp.js';
+import { harpLabel, harpNotes } from '../core/harp.js';
 import { abcChords, abcTempo, completeAbc } from '../core/abc.js';
 
 const DEFAULT_LABELS = { chorus: 'Refrain', bridge: 'Bridge', abc: 'Melodie' };
@@ -65,10 +65,24 @@ function renderLyricsLine(original, chordName) {
   return makeRepeatScope(scope, 'line', times);
 }
 
+/**
+ * Mundharmonika-Tab: wird nie transponiert (mehrere Löcher als „(7 8)“). Mit map (Harp-Hilfe, Weg B)
+ * stehen die Töne für die eigene Harp da; was es dort nicht gibt, als „?“.
+ */
+function harpSpan(raw, map) {
+  const notes = map && harpNotes(raw);
+  if (!notes) return el('span', 'chord harp', harpLabel(raw));
+  const out = notes.map((n) => (map.has(n) ? map.get(n) || '?' : n));
+  const span = el('span', 'chord harp harp-rewritten', out.length > 1 ? `(${out.join(' ')})` : out[0]);
+  span.title = `geschrieben: ${harpLabel(raw)}`;
+  if (out.includes('?')) span.classList.add('harp-missing');
+  return span;
+}
+
 /** Akkord, Anmerkung oder Mundharmonika-Tab über dem Text. */
 function chordSpan(s, chordName) {
   if (s.annotation) return el('span', 'chord annotation', s.chord);
-  if (s.harp) return el('span', 'chord harp', harpLabel(s.chord)); // wird nie transponiert; mehrere Löcher als (7 8)
+  if (s.harp) return harpSpan(s.chord, chordName.harpMap);
   return el('span', 'chord', chordName(s.chord));
 }
 
@@ -288,11 +302,14 @@ export function chordWriter(song, opts = {}) {
 /**
  * Ein Lied als HTML darstellen (Vorschau, Spielmodus, Druck).
  * @param {object} song  Ergebnis von parseChordPro
- * @param {{transpose?: number, accidentals?: 'auto'|'sharp'|'flat'}} [opts]
+ * @param {{transpose?: number, accidentals?: 'auto'|'sharp'|'flat', harp?: {harp: string, map: Map<string, string|null>|null}|null}} [opts]
+ *   harp: Harp-Hilfe (core/harp-transpose.js harpView) – Harp im Kopf, ggf. umgeschriebene Tabs
  * @returns {HTMLElement}
  */
 export function renderSong(song, opts = {}) {
-  const chordName = chordNamer(song, opts);
+  // umgeschriebene Tabs reisen an der Namensfunktion mit bis zu chordSpan
+  const namer = chordNamer(song, opts);
+  const chordName = Object.assign((c) => namer(c), { harpMap: opts.harp?.map || null });
   const steps = opts.transpose || 0;
   const key = song.meta.key;
   const untouched = steps === 0 && (opts.accidentals || 'auto') === 'auto';
@@ -308,6 +325,7 @@ export function renderSong(song, opts = {}) {
   if (key) info.push(`Tonart: ${untouched ? key : transposeKey(key, steps, useFlats)}`);
   if (song.meta.capo && Number(song.meta.capo) > 0) info.push(`Capo ${song.meta.capo}. Bund`);
   else if (song.meta.capo && !/^0*$/.test(song.meta.capo)) info.push(`Capo ${song.meta.capo}`);
+  if (opts.harp && (song.meta.harp || opts.harp.map)) info.push(`Harp: ${opts.harp.harp}${opts.harp.map ? ' (Tabs umgeschrieben)' : ''}`);
   if (steps) info.push(`transponiert ${steps > 0 ? '+' : ''}${steps}`);
   if (song.meta.time) info.push(`${song.meta.time}-Takt`);
   if (song.meta.tempo) info.push(/^\d+$/.test(song.meta.tempo) ? `♩ = ${song.meta.tempo}` : song.meta.tempo);

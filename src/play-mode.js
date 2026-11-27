@@ -6,6 +6,7 @@
 
 import { parseChordPro } from './core/chordpro.js';
 import { renderSong } from './render/song-view.js';
+import { harpView } from './core/harp-transpose.js';
 import { renderScores, stopAbc } from './render/abc-view.js';
 import { applySettings, loadSettings, saveSettings } from './settings/settings.js';
 import { metronome, beatsPerBar } from './metronome.js';
@@ -157,7 +158,8 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     meta = parsed.meta;
     applySettings(sheet, loadSettings());
     const transpose = entry.transpose ?? song.transpose ?? 0;
-    sheet.replaceChildren(renderSong(parsed, { transpose, accidentals: song.accidentals }));
+    const harp = harpView(parsed, transpose, prefs.get('harpPlayAs')[song.id]); // Harp-Hilfe: ggf. umgeschriebene Tabs
+    sheet.replaceChildren(renderSong(parsed, { transpose, accidentals: song.accidentals, harp }));
     await renderScores(sheet); // Noten erst zeichnen, dann Spalten und Seiten messen
     syncDiagramButton();
     if (song.note) {

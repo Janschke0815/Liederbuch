@@ -37,6 +37,8 @@ export const PREFS = {
   editMode: { key: 'editMode', def: 'text' }, // Handy, Bearbeiten: 'text' (ChordPro) | 'chords' (Akkorde antippen)
   viewZoom: { key: 'viewZoom', def: 1 },
   harpChords: { key: 'harpChords', def: false }, // Noten → Harp-Tabs: Akkorde mitnehmen
+  myHarps: { key: 'myHarps', def: [] }, // Harp-Hilfe: eigene Mundharmonikas, z. B. ['C', 'G', 'A']
+  harpPlayAs: { key: 'harpPlayAs', def: {} }, // Harp-Hilfe: Lied-ID -> eigene Harp, für die die Tabs umgeschrieben angezeigt werden
   draft: { key: 'draft', def: '' }, // Entwurf aus der allerersten Version der App
   // Gemeinsame Liederbücher
   invitesDeclined: { key: 'invitesDeclined', def: [] }, // abgelehnte Einladungen (Datei-IDs, sync/invite-box.js)

@@ -8,6 +8,19 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.7.0 – 27.11.2026 · Harp-Hilfe
+
+- **Tabs auf einer anderen Mundharmonika spielen:** Bei Liedern mit Harp-Tabs steht über der Vorschau
+  „Harp C“ – antippen öffnet die Harp-Hilfe (auch unter Liedinfo und per Rechtsklick auf die Vorschau).
+  Du wählst die Harp, die du hast, und bekommst zwei Wege:
+  - **Gleiche Tabs:** Das Lied wird passend transponiert, die Tabs bleiben, keine Bendings dazu.
+  - **Gleiche Tonart:** Die Tabs werden für deine Harp umgeschrieben (nur in der Ansicht). Vorher steht da,
+    wie viele Bendings nötig sind; fehlende Töne erscheinen als „?“. Auf Wunsch fest in den Liedtext.
+- **Meine Harps:** Im Dialog ankreuzen, welche Mundharmonikas du hast – sie stehen dann oben und werden
+  vorgeschlagen.
+- **Für welche Harp sind die Tabs?** Neue Angabe `{harp: C}` im Lied. Fehlt sie, schätzt die App sie aus Tonart
+  und Tabs und füllt sie im Dialog vor; beim Transponieren wandert die passende Harp mit.
+
 ## 2.6.4 – 27.11.2026 · Tags am Lied, Tag-Leiste einzeilig
 
 - **Tags rechts an jedem Lied** in der Liederliste – je nach Breite der Liste bis zu drei, der Rest als

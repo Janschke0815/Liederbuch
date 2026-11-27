@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-99 Module, 399 exportierte Funktionen, Konstanten und Klassen.
+101 Module, 412 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -42,6 +42,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/dom.js`](ui/dom.md) | Kleine Hilfen für die Oberfläche – von allen ui-Modulen gemeinsam genutzt. |
 | [`ui/files.js`](ui/files.md) | Dateien öffnen (Sicherung als ZIP oder JSON, ChordPro- und Textdateien) und Sichern als ZIP. |
 | [`ui/harp-from-notes.js`](ui/harp-from-notes.md) | „Harp“ am Notenabschnitt der Vorschau: Melodie in Mundharmonika-Tabs umwandeln (core/harp-melody.js). |
+| [`ui/harp-help.js`](ui/harp-help.md) | Harp-Hilfe: Mundharmonika-Tabs auf einer Harp in anderer Tonart spielen (core/harp-transpose.js). |
 | [`ui/install-help.js`](ui/install-help.md) | Installieren-Hilfe: Welche Schritte passen zu diesem Gerät und Browser? |
 | [`ui/list-select.js`](ui/list-select.md) | Mehrfachauswahl in der Liederliste: welche Lieder markiert sind und wie sich das ändert (Klick im Auswahlmodus, Strg/⌘+Klick, Umschalt+Klick für einen Bereich, „Alle“). |
 | [`ui/list.js`](ui/list.md) | Liederliste links: Suche, Tag-Filter, Sortierung, Einträge, Kopf weggleiten lassen. |
@@ -72,6 +73,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`core/chordpro.js`](core/chordpro.md) | ChordPro-Parser: Text -> Song-Modell. |
 | [`core/chords.js`](core/chords.md) | Akkord-Erkennung und Transposition. |
 | [`core/harp-melody.js`](core/harp-melody.md) | Melodie (ABC-Notation) → Mundharmonika-Tabs für eine diatonische 10-Kanal-Harp (Richter-Stimmung). |
+| [`core/harp-transpose.js`](core/harp-transpose.md) | Harp-Hilfe: Mundharmonika-Tabs auf einer Harp in einer anderen Tonart spielen. |
 | [`core/harp.js`](core/harp.md) | Mundharmonika-Tabs (Harp-Tabs): Kanalnummern über dem Text, wie Akkorde in eckigen Klammern. |
 | [`core/meta-edit.js`](core/meta-edit.md) | Kopfangaben ({title:}, {capo:}, {time:} …) direkt im ChordPro-Text lesen und setzen. |
 | [`core/musicxml.js`](core/musicxml.md) | MusicXML → ABC: Noten aus MuseScore, Sibelius, Finale, Notenscan-Apps oder Downloads (musescore.com, IMSLP …) als Notenabschnitt ins Lied holen. |

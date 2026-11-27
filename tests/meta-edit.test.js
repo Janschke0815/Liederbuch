@@ -7,7 +7,7 @@ const SONG = '{title: Clementine}\n{artist: Traditional}\n{key: C}\n\n{start_of_
 describe('Liedinfo: lesen', () => {
   it('liest Kopfangaben inkl. Kurzform {t:}', () => {
     expect(getAllMeta('{t: Hallo}\n{capo: 2}\n{time: 3/4}')).toEqual({
-      title: 'Hallo', artist: '', key: '', capo: '2', time: '3/4', tempo: '', duration: '', columns: '',
+      title: 'Hallo', artist: '', key: '', capo: '2', harp: '', time: '3/4', tempo: '', duration: '', columns: '',
     });
   });
   it('liest die Dauer', () => {

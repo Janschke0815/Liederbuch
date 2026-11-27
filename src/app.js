@@ -13,7 +13,7 @@
 //   ui/add-songs.js     Anlegen mit Nachfrage bei doppelten Liedern
 //   ui/files.js         Dateien öffnen, ZIP-Sicherung
 //   ui/abo.js, ui/publish.js   Liederbuch abonnieren bzw. für eine Gruppe veröffentlichen
-//   ui/trash.js, share.js, capo-help.js, context-menus.js
+//   ui/trash.js, share.js, capo-help.js, harp-help.js, context-menus.js
 //   ui/app-keys.js, ui/shortcuts.js   Tastenkürzel
 //   play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js, sync-ui.js (+ books-ui.js)   größere Bereiche
 
@@ -45,6 +45,7 @@ import { chooseFiles } from './ui/files.js';
 import './ui/trash.js';
 import './ui/share.js';
 import './ui/capo-help.js';
+import './ui/harp-help.js';
 import './ui/context-menus.js';
 import './ui/app-keys.js';
 import './ui/toolbar.js';

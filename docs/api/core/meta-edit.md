@@ -4,7 +4,7 @@
 
 Kopfangaben ({title:}, {capo:}, {time:} …) direkt im ChordPro-Text lesen und setzen. Für das Liedinfo-Formular: der Text bleibt die einzige Quelle der Wahrheit.
 
-**Benutzt von:** [`print-ui.js`](../print-ui.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/song-actions.js`](../ui/song-actions.md), [`ui/song.js`](../ui/song.md)
+**Benutzt von:** [`print-ui.js`](../print-ui.md), [`ui/capo-help.js`](../ui/capo-help.md), [`ui/harp-help.js`](../ui/harp-help.md), [`ui/song-actions.js`](../ui/song-actions.md), [`ui/song.js`](../ui/song.md)
 
 ## Exportiert
 

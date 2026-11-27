@@ -9,9 +9,10 @@ import { $, isMobile } from './dom.js';
 import { listEl } from './list.js';
 import { selection, startSelection } from './list-select.js';
 import { getViewZoom, setViewZoom } from './preview-tools.js';
-import { editor, openSong, setViewOption } from './song.js';
+import { editor, openSong, setViewOption, songHasHarp } from './song.js';
 import { copySongsTo, deleteSong, duplicateSong, editSong, playSong, printSong, setlistMenu } from './song-actions.js';
 import { openCapoHelp } from './capo-help.js';
+import { openHarpHelp } from './harp-help.js';
 import { shareSong } from './share.js';
 import { setView } from './view.js';
 
@@ -89,6 +90,7 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
       })),
     },
     { label: 'Capo-Hilfe …', action: openCapoHelp },
+    ...(songHasHarp() ? [{ label: 'Harp-Hilfe …', action: openHarpHelp }] : []),
     '-',
     { label: 'Spielen', icon: 'stage', hint: 'F', action: () => playSong() },
     ...(readOnly ? [] : [{ label: 'Bearbeiten', icon: 'edit', action: editSong }]),
