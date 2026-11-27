@@ -83,6 +83,39 @@ describe('Wiederholungen: Darstellung (Klammer zeigt den Umfang)', () => {
   });
 });
 
+describe('Refrain-Verweis {chorus}: in Vorschau und Spielmodus ausgeschrieben', () => {
+  const SONG = `{sov}
+[G]Strophe eins
+{eov}
+{soc: Refrain}
+[C]Oh my [G]darling
+{eoc}
+{sov}
+Strophe zwei
+{eov}
+{chorus}
+{chorus: 2x}`;
+  const full = (src) => {
+    const host = document.createElement('div');
+    host.append(renderSong(parseChordPro(src), { expandChorus: true }));
+    return host;
+  };
+  it('der letzte Refrain steht noch einmal ganz da, mit Name und Anzahl', () => {
+    const h = full(SONG);
+    const again = [...h.querySelectorAll('.block--chorus.block--again')];
+    expect(again.length).toBe(2);
+    expect(again[0].querySelector('.line').textContent.replace(/​/g, '')).toBe('COh my Gdarling');
+    expect(again[0].querySelector('.block-label').textContent).toBe('Refrain');
+    expect(again[1].querySelector('.repeat').textContent).toBe('2×');
+    expect(h.querySelector('.chorus-ref')).toBe(null);
+  });
+  it('ohne Refrain davor bleibt der kurze Verweis; Druck (ohne Option) auch', () => {
+    expect(full('{chorus}\n{soc}\nla\n{eoc}').querySelector('.chorus-ref')).toBeTruthy();
+    expect(render(SONG).querySelectorAll('.chorus-ref').length).toBe(2);
+    expect(render(SONG).querySelector('.block--again')).toBe(null);
+  });
+});
+
 describe('Wiederholungen: Import', () => {
   it('Abschnitt mit Wiederholung und x2 hinter dem Text', () => {
     const cp = ugToChordPro('[Chorus x2]\nC        G\nOh my darling   x2\n\nVerse 1 (2x):\nAm\nLight she was');

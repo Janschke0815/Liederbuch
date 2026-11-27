@@ -46,7 +46,7 @@ Ein Lied als HTML darstellen (Vorschau, Spielmodus, Druck).
 | Parameter | Typ | Bedeutung |
 |---|---|---|
 | `song` | `object` | Ergebnis von parseChordPro |
-| `[opts]` | `{transpose?: number, accidentals?: 'auto'\|'sharp'\|'flat', harp?: {harp: string, map: Map<string, string\|null>\|null}\|null}` | harp: Harp-Hilfe (core/harp-transpose.js harpView) – Harp im Kopf, ggf. umgeschriebene Tabs |
+| `[opts]` | `{transpose?: number, accidentals?: 'auto'\|'sharp'\|'flat', expandChorus?: boolean, harp?: {harp: string, map: Map<string, string\|null>\|null}\|null}` | harp: Harp-Hilfe (core/harp-transpose.js harpView) – Harp im Kopf, ggf. umgeschriebene Tabs expandChorus: {chorus} schreibt den letzten Refrain noch einmal ganz aus (sonst nur „→ Refrain“, z. B. im Druck) |
 
 **Rückgabe:** `HTMLElement`
 
@@ -65,5 +65,6 @@ Nicht exportiert – nur innerhalb des Moduls benutzt.
 - `renderLyricsLineBody(line, chordName)`
 - `renderLine(line, chordName)`
 - `renderAbcBlock(section, block, chordName, ctx)` – Notenabschnitt: nur ein Platzhalter mit dem (vervollständigten) ABC-Text. Gezeichnet wird er
+- `chorusAgain(ref, chordName, ctx)` – {chorus} ausgeschrieben: der letzte Refrain noch einmal ganz (Vorschau, Spielmodus). Name aus dem
 - `renderBlock(block, chordName, ctx = {})`
 - `firstChord(song)`

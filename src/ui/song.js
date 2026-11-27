@@ -52,7 +52,7 @@ export function renderPreview() {
   }
   const song = parseChordPro(editor.value);
   const harp = harpView(song, current.transpose, prefs.get('harpPlayAs')[current.id]);
-  const opts = { transpose: current.transpose, accidentals: current.accidentals, harp };
+  const opts = { transpose: current.transpose, accidentals: current.accidentals, harp, expandChorus: true };
   preview.replaceChildren(renderSong(song, opts));
   showHarpChip(harp);
   renderScores(preview); // Noten ({start_of_abc}) – lädt abcjs nur, wenn es welche gibt

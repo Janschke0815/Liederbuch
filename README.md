@@ -138,7 +138,7 @@ Die vollständige Übersicht öffnet der Knopf **?** über dem Editor. Die Knöp
     {title: Clementine}          {artist: …}   {key: C}   {capo: 2}   {time: 3/4}   {tempo: 96}
     In a [C]cavern, [G]canyon    Akkord vor der Silbe; [*Riff] = Anmerkung; [-4] = Mundharmonika
     {start_of_verse: Strophe 1} … {end_of_verse}     ebenso chorus, bridge, part, tab, grid
-    {chorus}                     Refrain hier wiederholen
+    {chorus}                     Refrain hier wiederholen (Vorschau/Spielmodus: ganz, Druck: Verweis)
     Zeile (2×)   {start_of_chorus: Refrain 2×}   {start_of_repeat: 3×} … {end_of_repeat}
     {comment: leise}   {new_page}   {column_break}   # Notiz (nur im Editor)
     {start_of_abc: label="Melodie"} … {end_of_abc}   Noten in ABC-Notation (kurz {soa} / {eoa})
@@ -505,7 +505,7 @@ wiederholten Teil:
 | `[C]Oh my darling (2×)` – „2×“, „x2“, „(2x)“, „2 mal“ am Zeilenende | diese eine Zeile |
 | `{start_of_repeat: 2×}` … `{end_of_repeat}` | die Zeilen dazwischen |
 | `{start_of_chorus: Refrain 2×}` (bei jedem Abschnitt) | den ganzen Abschnitt |
-| `{chorus: 3×}` | – („→ Refrain 3×“) |
+| `{chorus: 3×}` | den wiederholten Refrain (im Druck nur „→ Refrain 3×“) |
 
 Im Editor setzt der Knopf **2×** die Angabe passend: an die Zeile mit dem Cursor, um mehrere
 markierte Zeilen, oder – auf der Abschnittszeile – an den ganzen Abschnitt. Nochmal klicken

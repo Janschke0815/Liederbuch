@@ -159,7 +159,7 @@ export function setupPlayMode({ repo, getSongIds, onClose }) {
     applySettings(sheet, loadSettings());
     const transpose = entry.transpose ?? song.transpose ?? 0;
     const harp = harpView(parsed, transpose, prefs.get('harpPlayAs')[song.id]); // Harp-Hilfe: ggf. umgeschriebene Tabs
-    sheet.replaceChildren(renderSong(parsed, { transpose, accidentals: song.accidentals, harp }));
+    sheet.replaceChildren(renderSong(parsed, { transpose, accidentals: song.accidentals, harp, expandChorus: true }));
     await renderScores(sheet); // Noten erst zeichnen, dann Spalten und Seiten messen
     syncDiagramButton();
     if (song.note) {

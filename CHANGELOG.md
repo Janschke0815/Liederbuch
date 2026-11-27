@@ -8,6 +8,12 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.7.1 – 27.11.2026 · Refrain wiederholt ausgeschrieben
+
+- **Refrain-Wiederholung ganz sichtbar:** Wo im Lied `{chorus}` („↻ Refrain“) steht, zeigen Vorschau und
+  Spielmodus jetzt den ganzen Refrain noch einmal mit Text und Akkorden – statt nur „→ Refrain“. Eine Anzahl
+  wie „2×“ bleibt dran. Im Druck bleibt es beim kurzen Verweis, damit das Liederbuch nicht länger wird.
+
 ## 2.7.0 – 27.11.2026 · Harp-Hilfe
 
 - **Tabs auf einer anderen Mundharmonika spielen:** Bei Liedern mit Harp-Tabs steht über der Vorschau

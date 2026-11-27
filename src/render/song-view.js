@@ -182,6 +182,20 @@ function renderAbcBlock(section, block, chordName, ctx) {
   return section;
 }
 
+/**
+ * {chorus} ausgeschrieben: der letzte Refrain noch einmal ganz (Vorschau, Spielmodus). Name aus dem
+ * Verweis, sonst der des Refrains; „2×“ am Verweis gilt vor dem des Refrains.
+ */
+function chorusAgain(ref, chordName, ctx) {
+  const own = splitRepeat(ctx.lastChorus.label || '');
+  const asked = splitRepeat(ref.label || '');
+  const times = asked.times || own.times;
+  const label = [asked.text || own.text, times ? formatRepeat(times) : ''].filter(Boolean).join(' ');
+  const section = renderBlock({ ...ctx.lastChorus, label }, chordName, { ...ctx, expandChorus: false });
+  section.classList.add('block--again');
+  return section;
+}
+
 function renderBlock(block, chordName, ctx = {}) {
   const kind = block.kind || 'none';
   const section = el('section', `block block--${kind}`);
@@ -224,6 +238,11 @@ function renderBlock(block, chordName, ctx = {}) {
     }
     if (line.type === 'repeat-end') {
       target = section;
+      para = null;
+      continue;
+    }
+    if (line.type === 'chorus-ref' && ctx.expandChorus && ctx.lastChorus) {
+      target.append(chorusAgain(line, chordName, ctx));
       para = null;
       continue;
     }
@@ -302,8 +321,9 @@ export function chordWriter(song, opts = {}) {
 /**
  * Ein Lied als HTML darstellen (Vorschau, Spielmodus, Druck).
  * @param {object} song  Ergebnis von parseChordPro
- * @param {{transpose?: number, accidentals?: 'auto'|'sharp'|'flat', harp?: {harp: string, map: Map<string, string|null>|null}|null}} [opts]
+ * @param {{transpose?: number, accidentals?: 'auto'|'sharp'|'flat', expandChorus?: boolean, harp?: {harp: string, map: Map<string, string|null>|null}|null}} [opts]
  *   harp: Harp-Hilfe (core/harp-transpose.js harpView) – Harp im Kopf, ggf. umgeschriebene Tabs
+ *   expandChorus: {chorus} schreibt den letzten Refrain noch einmal ganz aus (sonst nur „→ Refrain“, z. B. im Druck)
  * @returns {HTMLElement}
  */
 export function renderSong(song, opts = {}) {
@@ -342,7 +362,11 @@ export function renderSong(song, opts = {}) {
   article.append(header);
 
   const body = el('div', 'song-body');
-  for (const block of song.blocks) body.append(renderBlock(block, chordName, { meta: song.meta, steps }));
+  const ctx = { meta: song.meta, steps, expandChorus: Boolean(opts.expandChorus), lastChorus: null };
+  for (const block of song.blocks) {
+    body.append(renderBlock(block, chordName, ctx));
+    if (block.kind === 'chorus') ctx.lastChorus = block; // {chorus} wiederholt den letzten Refrain
+  }
   article.append(body);
   return article;
 }
