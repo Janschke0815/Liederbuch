@@ -13,6 +13,13 @@
 .pr-list li label { display: flex; gap: .6em; align-items: center; padding: .4em .6em; border-bottom: 1px solid var(--border); cursor: pointer; }
 .pr-list li label:hover { background: var(--hover); }
 .pr-list li label small { color: var(--muted); margin-left: auto; }
+/* Reihenfolge: ↑ ↓ rechts am Eintrag */
+.pr-list li { display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+.pr-list li label { flex: 1; min-width: 0; border-bottom: 0; }
+.pr-move { min-width: 2rem; min-height: 2rem; padding: 0; border-color: transparent; background: transparent; color: var(--muted); }
+.pr-move:hover:not(:disabled) { color: var(--text); background: var(--hover); }
+.pr-move:disabled { visibility: hidden; }
+.opt-sub { padding-left: 1.6em; }
 .print-view { background: #6f6b65 !important; }
 .print-bar { background: var(--surface) !important; border-color: var(--border) !important; padding: .5em .8em !important; }
 .print-info { color: var(--muted) !important; }

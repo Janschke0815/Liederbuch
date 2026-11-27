@@ -276,7 +276,7 @@ beim Import aus Ultimate Guitar werden „Capo“, „Time“ und „Tempo“ er
 wählen (ChordPro `{columns: 1}` bzw. `{columns: 2}`). Das geht im Druck vor der allgemeinen
 Einstellung *Einstellungen → Druck → Spalten*, auch auf den Folgeseiten eines langen Liedes;
 „wie Einstellung“ entfernt die Angabe wieder. Dasselbe geht direkt in der **Druck-Vorschau**: Rechtsklick
-bzw. lang drücken auf eine Seite des Liedes → *wie eingestellt / einspaltig / zweispaltig* – die Vorschau
+bzw. lang drücken auf eine Seite des Liedes → *Spalten → wie eingestellt / einspaltig / zweispaltig* – die Vorschau
 setzt sofort neu. Deckblatt und Inhaltsverzeichnis bleiben einspaltig.
 Bei zweispaltigen Liedern steht der Liedkopf (Titel, Interpret, Infozeile, Griffbilder) über
 beiden Spalten – beide Spalten beginnen erst darunter.
@@ -342,6 +342,28 @@ Deckblatt); ändert man sie per Schnellwahl, gilt das nur für diese Vorschau.
 
 Ohne **Seitenzahlen** bleibt der Seitenumbruch gleich, das Inhaltsverzeichnis nennt die Seiten
 weiterhin.
+
+## Druck: Doppelseiten und Reihenfolge
+
+**Doppelseiten** (Option im Druckdialog, auch als 📌-Schnellwahl): Gedruckt wird wie ein Buch – Seite 1
+liegt rechts, gerade Seiten links. Lieder über mehrere Seiten sollen **links beginnen**, damit man
+sie aufgeschlagen ganz vor sich hat. Die Vorschau zeigt die Seiten dann nebeneinander wie aufgeschlagen.
+
+- **Leerseiten einfügen** (an, Standard): Würde ein mehrseitiges Lied rechts beginnen, kommt davor
+  eine leere Seite (ohne Seitenzahl).
+- Aus: Solche Lieder werden in der Vorschau **orange markiert** („beginnt rechts“) – Reihenfolge selbst
+  anpassen.
+- **Automatisch anordnen** (Knopf in der Leiste, sobald es etwas bringt): ordnet von A–Z ausgehend so,
+  dass mehrseitige Lieder links beginnen – mit möglichst kleinen Umstellungen statt Leerseiten. Würde ein
+  mehrseitiges Lied rechts beginnen, rückt das nächste einseitige Lied davor oder das einseitige direkt
+  davor dahinter (der kürzere Sprung gewinnt). Eine Leerseite bleibt nur, wenn kein einseitiges Lied mehr
+  übrig ist. Die Meldung danach hat **Rückgängig**.
+
+**Reihenfolge:** Im Druckdialog mit ↑ ↓ an jedem Lied, oder in der Vorschau per Rechtsklick bzw.
+lang drücken auf ein Lied → *Lied nach vorn / nach hinten*. Die Seiten werden sofort neu gesetzt;
+**Seitenzahlen und Inhaltsverzeichnis passen sich an**. Die Reihenfolge wird auf dem Gerät gemerkt
+(neue Lieder kommen ans Ende); **A–Z** im Druckdialog sortiert wieder alphabetisch. Beim Drucken einer
+Setliste gilt deren Reihenfolge; Umstellen in der Vorschau gilt dann nur für diesen Ausdruck.
 
 ## Zoom, Metronom, Lied teilen
 
@@ -841,6 +863,9 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
 28. ✅ Harp-Hilfe (2.7): Mundharmonika-Tabs auf einer Harp in anderer Tonart spielen – gleiche Tabs und das
     Lied wandert mit, oder gleiche Tonart und die Tabs werden umgeschrieben (Bendings/fehlende Töne angezeigt);
     `{harp: C}` im Lied, sonst geschätzt; eigene Harps merken; „Harp C“ über der Vorschau öffnet den Dialog
-29. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
+29. ✅ Doppelseiten im Druck (2.8): mehrseitige Lieder beginnen links (Seite 1 = rechts), Vorschau
+    aufgeschlagen nebeneinander; Leerseiten automatisch oder Markierung „beginnt rechts“; „Automatisch anordnen“ (A–Z mit kleinsten Umstellungen statt Leerseiten);
+    eigene Reihenfolge (↑ ↓ im Druckdialog, Rechtsklick in der Vorschau), Seitenzahlen und Verzeichnis passen sich an
+30. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
     zuerst Englisch; Sprache folgt dem Browser und ist unter Einstellungen → App umstellbar. Schrittweise nach
     Bereichen umbauen (Kopfleiste, Liste, Menü → Dialoge → Hilfetexte); ein Test meldet fehlende Übersetzungen

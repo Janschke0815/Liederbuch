@@ -1,6 +1,7 @@
 import { describe, it, expect } from './runner.js';
 import { Paginator } from '../src/print/paginate.js';
 import { buildSongbook } from '../src/print/songbook.js';
+import { applyOrder, arrangeSpreads, moveId, reorderSubset } from '../src/print/spreads.js';
 
 // Kleine Testseite: 100 x 60 mm, Rand 5 mm -> Inhalt 90 x 50 mm
 const SPEC = { width: 100, height: 60, margin: { top: 5, right: 5, bottom: 5, left: 5 }, columns: 1, columnGap: 4 };
@@ -168,6 +169,60 @@ describe('Liederbuch drucken', () => {
     expect(first.querySelector('.page-footer').textContent).toBe('1');
     expect(r.pages >= 1).toBe(true);
     assertNoCutLines(root);
+    root.remove();
+  });
+});
+
+describe('Druck: Doppelseiten', () => {
+  const long = Array.from({ length: 70 }, (_, i) => `Zeile [G]Nummer [C]${i + 1} mit etwas [D]Text`).join('\n');
+  const one = (id) => ({ id, title: id, artist: '', chordpro: `{title: ${id}}\n[G]kurz` });
+  const two = (id) => ({ id, title: id, artist: '', chordpro: `{title: ${id}}\n${long}` });
+
+  it('automatisch anordnen: kleinster Eingriff, Leerseite nur ohne einseitige Lieder', () => {
+    const A = (list, first) => arrangeSpreads(list.map(([id, pages]) => ({ id, pages })), first);
+    // Seite 3 ist rechts: B (einseitig) rückt vor A, dann beginnen A (4) und C (6) links
+    expect(A([['A', 2], ['B', 1], ['C', 3]], 3)).toEqual({ order: ['B', 'A', 'C'], moved: 1, blanks: 0 });
+    // C würde auf 7 beginnen, dahinter kein einseitiges Lied: B davor rückt dahinter
+    expect(A([['A', 2], ['B', 1], ['C', 2]], 4)).toEqual({ order: ['A', 'C', 'B'], moved: 1, blanks: 0 });
+    // kürzerer Sprung gewinnt: S zurück statt T zwei Plätze vor; danach rückt T vor N
+    expect(A([['S', 1], ['M', 2], ['N', 2], ['T', 1]], 2)).toEqual({ order: ['M', 'S', 'T', 'N'], moved: 2, blanks: 0 });
+    // passt schon / geht nicht anders
+    expect(A([['A', 1], ['B', 2]], 3)).toEqual({ order: ['A', 'B'], moved: 0, blanks: 0 });
+    expect(A([['A', 2]], 1)).toEqual({ order: ['A'], moved: 0, blanks: 1 });
+  });
+
+  it('Reihenfolge: speichern, verschieben, neue Lieder ans Ende', () => {
+    expect(reorderSubset(['a', 'b', 'c', 'd'], ['d', 'b'])).toEqual(['a', 'd', 'c', 'b']);
+    expect(applyOrder([{ id: 'a' }, { id: 'b' }, { id: 'c' }], ['c', 'a']).map((s) => s.id)).toEqual(['c', 'a', 'b']);
+    expect(moveId(['a', 'b', 'c'], 'b', -1)).toEqual(['b', 'a', 'c']);
+    const same = ['a', 'b'];
+    expect(moveId(same, 'a', -1)).toBe(same);
+  });
+
+  it('mehrseitiges Lied beginnt links: Leerseite davor, Verzeichnis stimmt', async () => {
+    const root = makeRoot();
+    // Deckblatt 1, Verzeichnis 2, „eins“ 3, „lang“ würde auf 4 (links) beginnen – passt; „lang2“ danach
+    const list = [one('eins'), two('lang'), two('lang2')];
+    const r = await buildSongbook(root, list, { paper: 'A5', margin: 12, spreads: true, blankPages: true });
+    for (const id of ['lang', 'lang2']) expect(r.songPages.get(id) % 2).toBe(0);
+    expect(r.blanks).toBe(r.pageCounts.get('lang') % 2 === 1 ? 1 : 0);
+    expect(root.classList.contains('spreads')).toBe(true);
+    for (const entry of root.querySelectorAll('.toc-entry')) {
+      const page = root.querySelector(`#song-${entry.dataset.song}`).closest('.page');
+      expect(entry.querySelector('.toc-page').textContent).toBe(page.dataset.page);
+    }
+    for (const blank of root.querySelectorAll('.page--blank')) expect(blank.querySelector('.page-footer').textContent).toBe('');
+
+    // ohne Deckblatt: „lang“ läge auf Seite 1 (rechts) -> Leerseite, beginnt auf 2
+    const r2 = await buildSongbook(root, [two('lang')], { paper: 'A5', cover: false, toc: false, spreads: true, blankPages: true });
+    expect([r2.blanks, r2.songPages.get('lang')]).toEqual([1, 2]);
+    // ohne Leerseiten nur markiert
+    const r3 = await buildSongbook(root, [two('lang')], { paper: 'A5', cover: false, toc: false, spreads: true, blankPages: false });
+    expect([r3.blanks, r3.startsRight, r3.songPages.get('lang')]).toEqual([0, ['lang'], 1]);
+    expect(root.querySelectorAll('.page--starts-right').length).toBe(1);
+    // aus: wie bisher
+    const r4 = await buildSongbook(root, [two('lang')], { paper: 'A5', cover: false, toc: false });
+    expect([r4.blanks, r4.startsRight.length, root.classList.contains('spreads')]).toEqual([0, 0, false]);
     root.remove();
   });
 });

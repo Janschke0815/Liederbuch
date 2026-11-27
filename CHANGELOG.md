@@ -8,6 +8,25 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.8.1 – 27.11.2026 · Automatisch anordnen
+
+- **Automatisch anordnen** (Druckvorschau mit Doppelseiten, statt „Lücken füllen“): Die Lieder kommen
+  möglichst alphabetisch, aber so umgestellt, dass mehrseitige Lieder links beginnen – mit möglichst kleinen
+  Änderungen statt Leerseiten. Meist reicht es, ein kurzes Lied mit dem Nachbarn zu tauschen. Leerseiten
+  bleiben nur, wenn kein einseitiges Lied mehr übrig ist. Mit **Rückgängig** in der Meldung.
+
+## 2.8.0 – 27.11.2026 · Doppelseiten im Druck
+
+- **Doppelseiten:** Neue Druck-Option – Lieder über mehrere Seiten beginnen immer auf einer linken Seite,
+  damit man sie aufgeschlagen ganz sieht (Seite 1 liegt rechts, wie in einem Buch). Die Vorschau zeigt
+  die Seiten dann nebeneinander wie ein aufgeschlagenes Liederbuch.
+- **Leerseiten automatisch** – oder selbst sortieren: Ohne Leerseiten werden Lieder, die rechts beginnen
+  würden, orange markiert. **Lücken füllen** zieht dafür jeweils ein einseitiges Lied davor (ab 2.8.1:
+  „Automatisch anordnen“).
+- **Reihenfolge der Lieder ändern:** im Druckdialog mit ↑ ↓, in der Vorschau per Rechtsklick bzw. lang
+  drücken auf ein Lied (nach vorn / nach hinten). **A–Z** sortiert wieder alphabetisch. Seitenzahlen und
+  Inhaltsverzeichnis passen sich automatisch an.
+
 ## 2.7.1 – 27.11.2026 · Refrain wiederholt ausgeschrieben
 
 - **Refrain-Wiederholung ganz sichtbar:** Wo im Lied `{chorus}` („↻ Refrain“) steht, zeigen Vorschau und

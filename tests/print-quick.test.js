@@ -9,7 +9,7 @@ const memory = () => {
 describe('Druck: Schnellwahl (📌)', () => {
   it('alle Optionen sind anheftbar, jede genau einmal', () => {
     const keys = QUICK_OPTIONS.map((o) => o.key);
-    expect(keys).toEqual(['paper', 'columns', 'margin', 'pageNumbers', 'cover', 'toc', 'useSavedTranspose', 'lyricFont', 'lyricSize', 'chordFont', 'chordSize']);
+    expect(keys).toEqual(['paper', 'columns', 'margin', 'pageNumbers', 'cover', 'toc', 'spreads', 'blankPages', 'useSavedTranspose', 'lyricFont', 'lyricSize', 'chordFont', 'chordSize']);
     expect(new Set(keys).size).toBe(keys.length);
   });
 

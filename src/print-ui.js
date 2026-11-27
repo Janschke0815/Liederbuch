@@ -9,10 +9,12 @@ import { normalize } from './storage/repository.js';
 import { loadSettings, saveSettings, applySettings, FONTS } from './settings/settings.js';
 import { withPrintFonts, loadPrintFonts, savePrintFonts } from './print/print-fonts.js';
 import { QUICK_OPTIONS, loadPins, togglePin, formatValue } from './print/print-quick.js';
-import { $ } from './ui/dom.js';
+import { $, toast } from './ui/dom.js';
 import { attachContextMenu } from './context-menu.js';
 import { getMeta, setMeta } from './core/meta-edit.js';
 import { readOnly } from './ui/app-state.js';
+import { prefs } from './prefs.js';
+import { applyOrder, arrangeSpreads, moveId, reorderSubset } from './print/spreads.js';
 
 const OWN_KEY = 'printOptions';
 
@@ -48,6 +50,34 @@ export function setupPrint({ repo, beforeOpen }) {
   let selected = new Set();
   let overrides = {}; // Vorgaben eines Aufrufs (einzelnes Lied, Setliste) – gelten nur für diese Vorschau
   let options = loadOptions();
+  let fixedList = false; // Setliste: eigene Reihenfolge, wird nicht gespeichert
+  let last = null; // Ergebnis des letzten Setzens (Seiten je Lied, für „Lücken füllen“)
+
+  // ---------- Reihenfolge ----------
+
+  const byTitle = (a, b) => (a.title || '').localeCompare(b.title || '', 'de', { sensitivity: 'base' });
+
+  /** Vorschlag für Doppelseiten: von A–Z ausgehend, mit möglichst kleinen Umstellungen (print/spreads.js). */
+  function arranged(chosen, result) {
+    const az = [...chosen].sort(byTitle);
+    return arrangeSpreads(az.map((s) => ({ id: s.id, pages: result.pageCounts.get(s.id) })), result.firstSongPage);
+  }
+
+  /** Reihenfolge aller Lieder setzen (ids) – gespeichert, außer bei einer Setliste. */
+  function setOrder(ids) {
+    const rank = new Map(ids.map((id, i) => [id, i]));
+    songs = [...songs].sort((a, b) => rank.get(a.id) - rank.get(b.id));
+    if (!fixedList) prefs.set('printOrder', ids);
+  }
+
+  /** Ein gewähltes Lied einen Platz nach vorn/hinten (unter den gewählten). */
+  function moveSong(id, dir) {
+    const chosen = songs.filter((s) => selected.has(s.id)).map((s) => s.id);
+    const moved = moveId(chosen, id, dir);
+    if (moved === chosen) return false;
+    setOrder(reorderSubset(songs.map((s) => s.id), moved));
+    return true;
+  }
 
   // ---------- Werte lesen und ändern (für Dialog und Schnellwahl) ----------
 
@@ -141,6 +171,20 @@ export function setupPrint({ repo, beforeOpen }) {
         small.textContent = s.artist;
         label.append(cb, s.title || 'Ohne Titel', small);
         li.append(label);
+        // Reihenfolge (nicht beim Filtern – dann wären die Nachbarn unsichtbar)
+        if (!q) {
+          const i = songs.indexOf(s);
+          const move = (text, dir, title) => el('button', {
+            type: 'button', className: 'pr-move', textContent: text, title, disabled: i + dir < 0 || i + dir >= songs.length,
+            onclick: () => {
+              const ids = songs.map((x) => x.id);
+              setOrder(moveId(ids, s.id, dir));
+              renderList();
+              $('#pr-list').querySelectorAll('li')[songs.indexOf(s)]?.querySelector(`.pr-move:nth-of-type(${dir < 0 ? 1 : 2})`)?.focus();
+            },
+          });
+          li.append(move('↑', -1, 'Nach vorn'), move('↓', 1, 'Nach hinten'));
+        }
         return li;
       }),
     );
@@ -172,6 +216,9 @@ export function setupPrint({ repo, beforeOpen }) {
     $('#pr-subtitle').value = options.subtitle;
     $('#pr-cover').checked = options.cover;
     $('#pr-toc').checked = options.toc;
+    $('#pr-spreads').checked = options.spreads;
+    $('#pr-blankPages').checked = options.blankPages;
+    $('#pr-blankPages').disabled = !options.spreads;
     $('#pr-transpose').checked = options.useSavedTranspose;
     $('#pr-paper').value = options.paper;
     $('#pr-columns').value = String(options.columns);
@@ -187,6 +234,8 @@ export function setupPrint({ repo, beforeOpen }) {
       subtitle: $('#pr-subtitle').value.trim(),
       cover: $('#pr-cover').checked,
       toc: $('#pr-toc').checked,
+      spreads: $('#pr-spreads').checked,
+      blankPages: $('#pr-blankPages').checked,
       useSavedTranspose: $('#pr-transpose').checked,
     };
     localStorage.setItem(OWN_KEY, JSON.stringify(own));
@@ -213,7 +262,8 @@ export function setupPrint({ repo, beforeOpen }) {
     if (!keepSelection) {
       overrides = {};
       options = loadOptions();
-      songs = await repo.list();
+      songs = applyOrder(await repo.list(), prefs.get('printOrder'));
+      fixedList = false;
     }
     const ids = new Set(songs.map((s) => s.id));
     if (!keepSelection) selected = new Set(ids);
@@ -225,6 +275,13 @@ export function setupPrint({ repo, beforeOpen }) {
   }
 
   $('#pr-search').addEventListener('input', renderList);
+  $('#pr-spreads').onchange = () => ($('#pr-blankPages').disabled = !$('#pr-spreads').checked);
+  $('#pr-az').onclick = () => {
+    const az = [...songs].sort(byTitle);
+    setOrder(az.map((s) => s.id));
+    if (!fixedList) prefs.set('printOrder', []);
+    renderList();
+  };
   $('#pr-all').onclick = () => {
     for (const li of $('#pr-list').querySelectorAll('input')) li.checked = true;
     const q = normalize($('#pr-search').value.trim());
@@ -258,7 +315,7 @@ export function setupPrint({ repo, beforeOpen }) {
     const page = root.querySelector('.page');
     if (!page) return;
     const avail = root.parentElement.clientWidth - 24;
-    const zoom = Math.min(1, avail / page.offsetWidth);
+    const zoom = Math.min(1, avail / (page.offsetWidth * (root.classList.contains('spreads') ? 2 : 1)));
     root.style.setProperty('--preview-zoom', zoom.toFixed(3));
   }
 
@@ -296,11 +353,17 @@ export function setupPrint({ repo, beforeOpen }) {
     applySettings(root, printSettings());
     renderQuick();
     $('#pv-info').textContent = 'Seiten werden gesetzt …';
-    const chosen = songs.filter((s) => selected.has(s.id)); // bereits alphabetisch
+    const chosen = songs.filter((s) => selected.has(s.id)); // in gewählter Reihenfolge
     const result = await buildSongbook(root, chosen, options);
+    last = { chosen, result };
     fitZoom();
     const warn = result.overflows ? ` · ${result.overflows}× zu groß für eine Seite (abgeschnitten)` : '';
-    $('#pv-info').textContent = `${chosen.length} ${chosen.length === 1 ? 'Lied' : 'Lieder'}, ${result.pages} Seiten (${options.paper})${warn}`;
+    const blanks = result.blanks ? ` · ${result.blanks} ${result.blanks === 1 ? 'Leerseite' : 'Leerseiten'}` : '';
+    const right = result.startsRight.length ? ` · ${result.startsRight.length}× beginnt rechts` : '';
+    $('#pv-info').textContent = `${chosen.length} ${chosen.length === 1 ? 'Lied' : 'Lieder'}, ${result.pages} Seiten (${options.paper})${blanks}${right}${warn}`;
+    // „Automatisch anordnen“ nur, wenn es eine andere Reihenfolge ergäbe
+    const auto = options.spreads && arranged(chosen, result).order;
+    $('#pv-fill').hidden = !auto || auto.join() === chosen.map((s) => s.id).join();
     setPageSize();
     const target = root.querySelectorAll('.page')[Math.min(page, result.pages - 1)];
     if (page && target) target.scrollIntoView({ block: 'start' });
@@ -329,16 +392,49 @@ export function setupPrint({ repo, beforeOpen }) {
     await showPreview({ keepPlace: true });
   }
 
+  const reorder = async (id, dir) => {
+    if (moveSong(id, dir)) await showPreview({ keepPlace: true });
+  };
+
   attachContextMenu(root, '.page[data-song]', (page) => {
     const s = songs.find((x) => x.id === page.dataset.song);
-    if (!s || readOnly) return null;
+    if (!s) return null;
+    const chosen = songs.filter((x) => selected.has(x.id));
+    const i = chosen.indexOf(s);
+    const items = [
+      { label: 'Lied nach vorn', disabled: i <= 0, action: () => reorder(s.id, -1) },
+      { label: 'Lied nach hinten', disabled: i < 0 || i >= chosen.length - 1, action: () => reorder(s.id, 1) },
+    ];
+    if (readOnly) return items;
     const own = getMeta(s.chordpro, 'columns');
     const general = Number(options.columns) === 2 ? 'zweispaltig' : 'einspaltig';
-    return [
-      ['', `wie eingestellt (${general})`], ['1', 'einspaltig'], ['2', 'zweispaltig'],
-    ].map(([v, label]) => ({ label, checked: (own === '1' || own === '2' ? own : '') === v, action: () => setSongColumns(s, v) }));
-  }, { title: (page) => `Spalten: „${songs.find((x) => x.id === page.dataset.song)?.title || 'Lied'}“` });
-  root.title = readOnly ? '' : 'Rechtsklick bzw. lang drücken auf ein Lied: ein- oder zweispaltig nur für dieses Lied';
+    return [...items, '-', {
+      label: 'Spalten',
+      items: [
+        ['', `wie eingestellt (${general})`], ['1', 'einspaltig'], ['2', 'zweispaltig'],
+      ].map(([v, label]) => ({ label, checked: (own === '1' || own === '2' ? own : '') === v, action: () => setSongColumns(s, v) })),
+    }];
+  }, { title: (page) => `„${songs.find((x) => x.id === page.dataset.song)?.title || 'Lied'}“` });
+  root.title = 'Rechtsklick bzw. lang drücken auf ein Lied: Reihenfolge ändern' + (readOnly ? '' : ', ein- oder zweispaltig nur für dieses Lied');
+
+  // Automatisch anordnen: A–Z, mehrseitige Lieder links – mit möglichst kleinen Umstellungen statt Leerseiten
+  $('#pv-fill').onclick = async () => {
+    if (!last) return;
+    const before = songs.map((s) => s.id);
+    const savedBefore = prefs.get('printOrder');
+    const r = arranged(last.chosen, last.result);
+    setOrder(reorderSubset(before, r.order));
+    await showPreview({ keepPlace: true });
+    const blanks = r.blanks ? ` – ${r.blanks} ${r.blanks === 1 ? 'Leerseite bleibt' : 'Leerseiten bleiben'}` : ' – keine Leerseite nötig';
+    toast(`Alphabetisch angeordnet, ${r.moved} ${r.moved === 1 ? 'Umstellung' : 'Umstellungen'}${blanks}`, {
+      action: 'Rückgängig',
+      onAction: async () => {
+        setOrder(before);
+        if (!fixedList) prefs.set('printOrder', savedBefore);
+        await showPreview({ keepPlace: true });
+      },
+    });
+  };
 
   addEventListener('resize', () => !view.hidden && fitZoom());
   $('#pv-back').onclick = () => {
@@ -359,7 +455,8 @@ export function setupPrint({ repo, beforeOpen }) {
     await beforeOpen?.();
     overrides = { ...opts };
     options = { ...loadOptions(), ...overrides };
-    songs = list;
+    songs = [...list];
+    fixedList = true;
     selected = new Set(list.map((s) => s.id));
     await showPreview();
   }

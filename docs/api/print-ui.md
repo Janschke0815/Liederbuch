@@ -6,7 +6,7 @@ Druckdialog (Auswahl + Optionen) und Druckvorschau.
 
 Alle Optionen stehen im Dialog „Optionen …“. Mit 📌 lässt sich jede davon als Schnellwahl in die Leiste über der Vorschau heften (siehe print/print-quick.js); Änderungen dort setzen die Vorschau sofort neu.
 
-**Benutzt:** [`context-menu.js`](context-menu.md), [`core/meta-edit.js`](core/meta-edit.md), [`print/print-fonts.js`](print/print-fonts.md), [`print/print-quick.js`](print/print-quick.md), [`print/songbook.js`](print/songbook.md), [`settings/settings.js`](settings/settings.md), [`storage/repository.js`](storage/repository.md), [`ui/app-state.js`](ui/app-state.md), [`ui/dom.js`](ui/dom.md)  
+**Benutzt:** [`context-menu.js`](context-menu.md), [`core/meta-edit.js`](core/meta-edit.md), [`prefs.js`](prefs.md), [`print/print-fonts.js`](print/print-fonts.md), [`print/print-quick.js`](print/print-quick.md), [`print/songbook.js`](print/songbook.md), [`print/spreads.js`](print/spreads.md), [`settings/settings.js`](settings/settings.md), [`storage/repository.js`](storage/repository.md), [`ui/app-state.js`](ui/app-state.md), [`ui/dom.js`](ui/dom.md)  
 **Benutzt von:** [`app.js`](app.md)
 
 ## Exportiert

@@ -51,6 +51,11 @@ In der nächsten Spalte weiterschreiben; nach der letzten Spalte auf einer neuen
 
 Setzt node (wird geklont, Original bleibt unverändert) in den Seitenfluss.
 
+#### `insertBlankBefore(index)`
+
+Leere Seite vor die Seite mit diesem Index schieben (Doppelseiten: Lied soll links beginnen).
+Sie zählt mit, trägt aber keine Seitenzahl.
+
 #### `finish({ numberFrom = 1, skipNumbers = 0 } = {})`
 
 Aufräumen: Messseite entfernen, Seitenzahlen eintragen.

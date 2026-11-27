@@ -4,6 +4,7 @@ import { parseChordPro } from '../core/chordpro.js';
 import { renderSong } from '../render/song-view.js';
 import { renderScores } from '../render/abc-view.js';
 import { Paginator } from './paginate.js';
+import { isLeftPage } from './spreads.js';
 
 export const PAPER = {
   A4: { width: 210, height: 297 },
@@ -20,6 +21,8 @@ export const DEFAULT_PRINT_OPTIONS = {
   paper: 'A4',
   columns: 1,
   margin: 15, // mm
+  spreads: false, // Doppelseiten: Lieder über mehrere Seiten beginnen links
+  blankPages: true, // … dafür bei Bedarf eine Leerseite einfügen (sonst nur markieren)
 };
 
 function el(tag, className, text) {
@@ -75,7 +78,10 @@ function prepareSong(article, id) {
  * @param {HTMLElement} root
  * @param {Array<{id, title, artist, chordpro, transpose, accidentals}>} songs  bereits sortiert
  * @param {typeof DEFAULT_PRINT_OPTIONS} options
- * @returns {Promise<{pages: number, songPages: Map<string, number>, overflows: number}>}
+ * @returns {Promise<{pages: number, songPages: Map<string, number>, pageCounts: Map<string, number>,
+ *   firstSongPage: number, blanks: number, startsRight: string[], overflows: number}>}
+ *   pageCounts: Seiten je Lied; blanks: eingefügte Leerseiten; startsRight: mehrseitige Lieder, die rechts beginnen
+ *   (nur mit Doppelseiten ohne Leerseiten)
  */
 export async function buildSongbook(root, songs, options = {}) {
   const opts = { ...DEFAULT_PRINT_OPTIONS, ...options };
@@ -91,6 +97,7 @@ export async function buildSongbook(root, songs, options = {}) {
   root.replaceChildren();
   root.classList.add('songbook', 'print-root');
   root.dataset.paper = opts.paper;
+  root.classList.toggle('spreads', Boolean(opts.spreads));
   if (document.fonts?.ready) await document.fonts.ready;
 
   const pag = new Paginator(root, spec);
@@ -108,7 +115,11 @@ export async function buildSongbook(root, songs, options = {}) {
     pag.flow(buildToc(songs));
   }
 
-  const firstSongPage = new Map();
+  const startPage = new Map(); // Lied -> Seite (Objekt), auf der es beginnt; Nummern erst am Ende
+  const pageCounts = new Map();
+  const startsRight = [];
+  let blanks = 0;
+  const firstSongIndex = pag.pages.length;
   for (const s of songs) {
     const song = parseChordPro(s.chordpro);
     const view = opts.useSavedTranspose
@@ -137,17 +148,32 @@ export async function buildSongbook(root, songs, options = {}) {
       article.remove();
     }
     const from = pag.pages.length - 1;
-    firstSongPage.set(s.id, pag.pages.length);
     pag.flow(article);
-    // Jede Seite weiß, zu welchem Lied sie gehört (Rechtsklick in der Druck-Vorschau: Spalten dieses Liedes)
+    const count = pag.pages.length - from;
+    pageCounts.set(s.id, count);
+    startPage.set(s.id, pag.pages[from]);
+    // Jede Seite weiß, zu welchem Lied sie gehört (Rechtsklick in der Druck-Vorschau: Spalten, Reihenfolge)
     for (const p of pag.pages.slice(from)) p.el.dataset.song = s.id;
+    // Doppelseiten: mehrseitiges Lied auf einer rechten Seite (Seite 1 = rechts) -> Leerseite davor bzw. markieren
+    if (opts.spreads && count > 1 && !isLeftPage(from + 1)) {
+      if (opts.blankPages) {
+        pag.insertBlankBefore(from);
+        blanks++;
+      } else {
+        pag.pages[from].el.classList.add('page--starts-right');
+        startsRight.push(s.id);
+      }
+    }
   }
 
   const pages = pag.finish({ numberFrom: 1, skipNumbers: frontPages });
+  const songPages = new Map([...startPage].map(([id, p]) => [id, p.number]));
 
   // Seitenzahlen ins Inhaltsverzeichnis eintragen
   tocEl = root.querySelectorAll('.toc-entry');
-  for (const entry of tocEl) entry.querySelector('.toc-page').textContent = String(firstSongPage.get(entry.dataset.song));
+  for (const entry of tocEl) entry.querySelector('.toc-page').textContent = String(songPages.get(entry.dataset.song));
 
-  return { pages: pages.length, songPages: firstSongPage, overflows: pag.overflows };
+  return {
+    pages: pages.length, songPages, pageCounts, firstSongPage: firstSongIndex + 1, blanks, startsRight, overflows: pag.overflows,
+  };
 }

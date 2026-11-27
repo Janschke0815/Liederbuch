@@ -404,9 +404,11 @@
             <input id="pr-search" type="search" placeholder="Filtern …" autocomplete="off">
             <button type="button" id="pr-all">Alle</button>
             <button type="button" id="pr-none">Keine</button>
+            <button type="button" id="pr-az" title="Reihenfolge wieder alphabetisch">A–Z</button>
           </div>
           <ul id="pr-list" class="pr-list"></ul>
           <p id="pr-count" class="hint"></p>
+          <p class="hint">Reihenfolge mit ↑ ↓ ändern – oder in der Vorschau per Rechtsklick bzw. lang drücken auf ein Lied. Seitenzahlen und Inhaltsverzeichnis passen sich an.</p>
         </fieldset>
         <div class="pr-right">
         <fieldset>
@@ -415,6 +417,8 @@
           <label>Untertitel <input id="pr-subtitle" placeholder="z. B. Name, Jahr"></label>
           <div class="opt-row"><label class="check"><input type="checkbox" id="pr-cover"> Deckblatt</label><button type="button" class="pin" data-pin="cover" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <div class="opt-row"><label class="check"><input type="checkbox" id="pr-toc"> Inhaltsverzeichnis</label><button type="button" class="pin" data-pin="toc" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row"><label class="check" title="Seite 1 liegt rechts. In der Vorschau stehen die Seiten aufgeschlagen nebeneinander."><input type="checkbox" id="pr-spreads"> Doppelseiten: Lieder über mehrere Seiten beginnen links</label><button type="button" class="pin" data-pin="spreads" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row opt-sub"><label class="check"><input type="checkbox" id="pr-blankPages"> dafür Leerseiten einfügen <small>(sonst markiert – Reihenfolge selbst anpassen)</small></label><button type="button" class="pin" data-pin="blankPages" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <div class="opt-row"><label class="check"><input type="checkbox" id="pr-transpose"> gespeicherte Transposition verwenden</label><button type="button" class="pin" data-pin="useSavedTranspose" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <legend class="sub">Seite</legend>
           <div class="opt-row"><label>Papier <select id="pr-paper"><option>A4</option><option>A5</option><option>Letter</option></select></label><button type="button" class="pin" data-pin="paper" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
@@ -1427,6 +1431,7 @@
       <button type="button" id="pv-settings">Optionen …</button>
       <div id="pv-quick" class="pv-quick" role="group" aria-label="Schnellwahl (in den Optionen mit 📌 festlegen)"></div>
       <span id="pv-info" class="print-info"></span>
+      <button type="button" id="pv-fill" hidden title="Möglichst alphabetisch – mehrseitige Lieder beginnen links, mit möglichst kleinen Umstellungen statt Leerseiten">Automatisch anordnen</button>
       <span class="spacer"></span>
       <button type="button" id="pv-print" class="primary">Drucken / als PDF speichern</button>
     </div>

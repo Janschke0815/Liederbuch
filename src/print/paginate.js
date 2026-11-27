@@ -214,13 +214,26 @@ export class Paginator {
     this.stack.pop();
   }
 
+  /**
+   * Leere Seite vor die Seite mit diesem Index schieben (Doppelseiten: Lied soll links beginnen).
+   * Sie zählt mit, trägt aber keine Seitenzahl.
+   */
+  insertBlankBefore(index) {
+    const page = this.#makePageElement(1);
+    page.classList.add('page--blank');
+    this.pages[index].el.before(page);
+    this.pages.splice(index, 0, { el: page, cols: [] });
+    return page;
+  }
+
   /** Aufräumen: Messseite entfernen, Seitenzahlen eintragen. */
   finish({ numberFrom = 1, skipNumbers = 0 } = {}) {
     this.probePage.remove();
     this.pages.forEach((p, i) => {
       p.number = i + numberFrom;
       p.el.dataset.page = String(p.number);
-      if (i >= skipNumbers) p.el.querySelector('.page-footer').textContent = String(p.number);
+      const blank = p.el.classList.contains('page--blank');
+      if (i >= skipNumbers && !blank) p.el.querySelector('.page-footer').textContent = String(p.number);
     });
     return this.pages;
   }

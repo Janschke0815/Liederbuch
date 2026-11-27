@@ -19,6 +19,8 @@ export const QUICK_OPTIONS = [
   { key: 'pageNumbers', label: 'Seitenzahlen', kind: 'toggle', store: 'settings' },
   { key: 'cover', label: 'Deckblatt', kind: 'toggle', store: 'print' },
   { key: 'toc', label: 'Inhaltsverzeichnis', kind: 'toggle', store: 'print' },
+  { key: 'spreads', label: 'Doppelseiten', title: 'Doppelseiten: Lieder über mehrere Seiten beginnen links', kind: 'toggle', store: 'print' },
+  { key: 'blankPages', label: 'Leerseiten', title: 'Bei Doppelseiten Leerseiten einfügen, damit mehrseitige Lieder links beginnen', kind: 'toggle', store: 'print' },
   { key: 'useSavedTranspose', label: 'Transposition', title: 'Gespeicherte Transposition der Lieder verwenden', kind: 'toggle', store: 'print' },
   { key: 'lyricFont', label: 'Textschrift', kind: 'font', store: 'fonts' },
   { key: 'lyricSize', label: 'Text', title: 'Schriftgröße Text', kind: 'stepper', store: 'fonts', unit: 'pt', step: (v, d) => stepSize('lyricSize', v, d) },

@@ -4,7 +4,7 @@
 
 Druckfertiges Liederbuch: Deckblatt, Inhaltsverzeichnis, ein Lied pro neuer Seite.
 
-**Benutzt:** [`core/chordpro.js`](../core/chordpro.md), [`print/paginate.js`](paginate.md), [`render/abc-view.js`](../render/abc-view.md), [`render/song-view.js`](../render/song-view.md)  
+**Benutzt:** [`core/chordpro.js`](../core/chordpro.md), [`print/paginate.js`](paginate.md), [`print/spreads.js`](spreads.md), [`render/abc-view.js`](../render/abc-view.md), [`render/song-view.js`](../render/song-view.md)  
 **Benutzt von:** [`print-ui.js`](../print-ui.md)
 
 ## Exportiert
@@ -27,7 +27,7 @@ Baut das Liederbuch in root auf.
 | `songs` | `Array<{id, title, artist, chordpro, transpose, accidentals}>` | bereits sortiert |
 | `options` | `typeof DEFAULT_PRINT_OPTIONS` |  |
 
-**Rückgabe:** `Promise<{pages: number, songPages: Map<string, number>, overflows: number}>`
+**Rückgabe:**  {Promise<{pages: number, songPages: Map<string, number>, pageCounts: Map<string, number>, firstSongPage: number, blanks: number, startsRight: string[], overflows: number}>} pageCounts: Seiten je Lied; blanks: eingefügte Leerseiten; startsRight: mehrseitige Lieder, die rechts beginnen (nur mit Doppelseiten ohne Leerseiten)
 
 ## Intern
 

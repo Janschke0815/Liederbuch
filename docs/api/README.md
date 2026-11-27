@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-101 Module, 412 exportierte Funktionen, Konstanten und Klassen.
+102 Module, 417 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -118,6 +118,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`print/print-fonts.js`](print/print-fonts.md) | Eigene Schrift nur für den Druck (in der Druckvorschau einstellbar). |
 | [`print/print-quick.js`](print/print-quick.md) | Druck-Optionen als Schnellwahl: Jede Option im Dialog „Optionen …“ lässt sich mit 📌 in die Leiste über der Druckvorschau heften. |
 | [`print/songbook.js`](print/songbook.md) | Druckfertiges Liederbuch: Deckblatt, Inhaltsverzeichnis, ein Lied pro neuer Seite. |
+| [`print/spreads.js`](print/spreads.md) | Doppelseiten im Druck: Seite 1 ist eine rechte Seite, gerade Seitenzahlen liegen links. |
 
 ## `src/settings/` – Darstellungs-Einstellungen
 

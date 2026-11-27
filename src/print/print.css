@@ -88,6 +88,21 @@
 .print-scroll { flex: 1; overflow: auto; padding: 1.5em 0; }
 .print-scroll .print-root { zoom: var(--preview-zoom, 1); display: flex; flex-direction: column; align-items: center; gap: 1.2em; }
 .print-scroll .page { box-shadow: 0 2px 12px #0005; }
+/* Doppelseiten: aufgeschlagen nebeneinander, Seite 1 allein rechts */
+.print-scroll .print-root.spreads {
+  display: grid; grid-template-columns: repeat(2, var(--page-w)); justify-content: center; column-gap: 0; row-gap: 1.2em;
+}
+.print-scroll .print-root.spreads > .page:first-child { grid-column: 2; }
+.print-scroll .print-root.spreads > .page:nth-child(even) { box-shadow: -4px 2px 12px #0005; border-right: 1px solid #ddd; }
+.print-scroll .page--blank::after {
+  content: 'Leerseite'; position: absolute; inset: 0; display: grid; place-items: center; color: #bbb; font: 10pt var(--chord-font);
+}
+/* Mehrseitiges Lied beginnt rechts (Doppelseiten ohne Leerseiten) – nur am Bildschirm */
+.print-scroll .page--starts-right { outline: 3px solid #d98a00; outline-offset: -3px; }
+.print-scroll .page--starts-right::before {
+  content: 'beginnt rechts – umsortieren oder Leerseiten einschalten'; position: absolute; top: 0; left: 0; right: 0;
+  padding: 0.2em 0.6em; background: #d98a00; color: #fff; font: 8pt var(--chord-font); text-align: center; z-index: 1;
+}
 
 /* ---------- Drucken ---------- */
 @media print {
@@ -97,6 +112,8 @@
   body.printing .print-bar { display: none; }
   body.printing .print-scroll { overflow: visible; padding: 0; }
   body.printing .print-scroll .print-root { zoom: 1; display: block; }
+  body.printing .page--blank::after, body.printing .page--starts-right::before { content: none; }
+  body.printing .page--starts-right { outline: none; }
   body.printing .page { box-shadow: none; break-after: page; margin: 0; }
   body.printing .page:last-child { break-after: auto; }
   .print-root { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

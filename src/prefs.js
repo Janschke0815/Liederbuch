@@ -42,6 +42,8 @@ export const PREFS = {
   draft: { key: 'draft', def: '' }, // Entwurf aus der allerersten Version der App
   // Gemeinsame Liederbücher
   invitesDeclined: { key: 'invitesDeclined', def: [] }, // abgelehnte Einladungen (Datei-IDs, sync/invite-box.js)
+  // Druck
+  printOrder: { key: 'printOrder', def: [] }, // eigene Reihenfolge der Lieder im Druck (IDs; leer = alphabetisch)
   // Spielmodus
   playZoom: { key: 'playZoom', def: 0 }, // 0 = Standardgröße
   playZoomSong: { key: 'playZoomSong', def: {} }, // Lied-ID -> Schriftgröße
