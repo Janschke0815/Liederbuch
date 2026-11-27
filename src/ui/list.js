@@ -3,7 +3,7 @@
 // „Was kann ich spielen?“ steht in chord-filter.js, die Mehrfachauswahl in list-select.js (Zustand)
 // und selection.js (Leiste, Aktionen).
 
-import { SORT_MODES, sortSongs, sortDirectionLabel, letterOf } from '../core/song-list.js';
+import { SORT_MODES, sortSongs, sortDirectionLabel, letterOf, listTags } from '../core/song-list.js';
 import { prefs } from '../prefs.js';
 import { book, repo, state } from './app-state.js';
 import { applyChordFilter, capoFor, chordFilterActive, onChordFilterChange } from './chord-filter.js';
@@ -25,6 +25,7 @@ async function renderTagFilter() {
   if (activeTag && !tags.some((t) => t.tag === activeTag)) activeTag = '';
   const box = $('#tag-filter');
   box.hidden = !tags.length;
+  const scrolled = box.scrollLeft; // Neuaufbau setzt die Leiste sonst an den Anfang zurück
   box.replaceChildren(...tags.map(({ tag, count }) => {
     const b = el('button', { type: 'button', className: 'tag-chip' }, tag, el('small', { textContent: count }));
     b.setAttribute('aria-pressed', String(tag === activeTag));
@@ -36,7 +37,25 @@ async function renderTagFilter() {
     return b;
   }));
   $('#dl-tags').replaceChildren(...tags.map((t) => new Option(t.tag)));
+  // Gewählten Tag in der einzeiligen Leiste sichtbar halten
+  // (nur seitwärts – scrollIntoView würde auch die Liste verschieben)
+  box.scrollLeft = scrolled;
+  const chip = box.querySelector('[aria-pressed="true"]');
+  if (chip) {
+    const left = chip.offsetLeft - box.offsetLeft;
+    if (left < box.scrollLeft) box.scrollLeft = left - 8;
+    else if (left + chip.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollLeft = left + chip.offsetWidth - box.clientWidth + 8;
+  }
 }
+
+// Mausrad über der Tag-Leiste blättert seitwärts (Touch und Touchpad scrollen ohnehin seitwärts)
+$('#tag-filter').addEventListener('wheel', (e) => {
+  const box = e.currentTarget;
+  if (e.deltaX || e.ctrlKey || box.scrollWidth <= box.clientWidth) return;
+  const before = box.scrollLeft;
+  box.scrollLeft += e.deltaY;
+  if (box.scrollLeft !== before) e.preventDefault(); // am Rand angekommen: Liste normal weiterscrollen
+}, { passive: false });
 
 // ---------- Sortierung (gilt ohne Suchbegriff; Suchtreffer bleiben nach Relevanz) ----------
 
@@ -76,16 +95,38 @@ export async function listedSongs() {
   return search.value ? songs : sortSongs(songs, sortSelect.value, prefs.get('playedAt'), prefs.get('listSortReverse'));
 }
 
+/** Wie viele Tags neben einem Lied Platz haben – je nach Breite der Liste 1 bis 3. */
+const tagRoom = () => {
+  const w = listEl.clientWidth || 300;
+  return w < 260 ? 1 : w < 440 ? 2 : 3;
+};
+// Wird die Liste breiter oder schmaler (Trenner ziehen, Fenster), passt sich die Zahl der Tags an
+let lastRoom = 0;
+new ResizeObserver(() => {
+  const room = tagRoom();
+  if (lastRoom && room !== lastRoom) refreshList();
+  lastRoom = room;
+}).observe(listEl);
+
 function songButton(s) {
   const btn = el('button', { type: 'button', className: 'song-item' + (s.id === state.current?.id ? ' active' : '') });
   btn.dataset.id = s.id;
   if (selection.active) btn.setAttribute('aria-pressed', String(selection.ids.has(s.id)));
   let artist = s.artist;
   if (capoFor(s.id)) artist += `${s.artist ? ' · ' : ''}mit Capo ${capoFor(s.id)}`;
-  btn.append(
+  btn.append(el('span', { className: 'song-item-text' },
     el('span', { className: 'song-item-title', textContent: s.title || 'Ohne Titel' }),
     el('span', { className: 'song-item-artist', textContent: artist }),
-  );
+  ));
+  // Tags rechts am Eintrag (der gewählte Filter-Tag zuerst, Rest als „+2“)
+  const { shown, more } = listTags(s.tags, { active: activeTag, max: tagRoom() });
+  if (shown.length) {
+    const box = el('span', { className: 'song-item-tags' }, ...shown.map((t) =>
+      el('span', { className: 'song-tag' + (t === activeTag ? ' active' : ''), textContent: t })));
+    if (more) box.append(el('span', { className: 'song-tag more', textContent: `+${more}` }));
+    box.title = `Tags: ${s.tags.join(', ')}`;
+    btn.append(box);
+  }
   return el('li', {}, btn);
 }
 

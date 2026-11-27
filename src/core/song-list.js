@@ -52,6 +52,19 @@ function sortForward(songs, mode, played) {
   }
 }
 
+/**
+ * Tags für die rechte Seite eines Listeneintrags: der gewählte Filter-Tag zuerst, dann die übrigen
+ * in ihrer Reihenfolge; höchstens `max` sichtbar, der Rest wird gezählt („+2“).
+ * @param {string[]} tags
+ * @param {{max?: number, active?: string}} [opts]
+ * @returns {{shown: string[], more: number}}
+ */
+export function listTags(tags = [], { max = 3, active = '' } = {}) {
+  const ordered = active && tags.includes(active) ? [active, ...tags.filter((t) => t !== active)] : [...tags];
+  const shown = ordered.slice(0, max);
+  return { shown, more: ordered.length - shown.length };
+}
+
 /** Anfangsbuchstabe für Zwischenüberschriften der Liste ("#" für Ziffern, Zeichen, leer). */
 export function letterOf(text) {
   const first = String(text || '').trim().charAt(0).toLocaleUpperCase('de');

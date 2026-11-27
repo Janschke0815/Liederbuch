@@ -30,6 +30,18 @@ Beschriftung der Sortierrichtung: „A–Z“/„Z–A“ (Titel, Interpret) bzw
 
 **Rückgabe:** `string`
 
+### `listTags(tags = [], { max = 3, active = '' } = {})`
+
+Tags für die rechte Seite eines Listeneintrags: der gewählte Filter-Tag zuerst, dann die übrigen
+in ihrer Reihenfolge; höchstens `max` sichtbar, der Rest wird gezählt („+2“).
+
+| Parameter | Typ | Bedeutung |
+|---|---|---|
+| `tags` | `string[]` |  |
+| `[opts]` | `{max?: number, active?: string}` |  |
+
+**Rückgabe:** `{shown: string[], more: number}`
+
 ### `letterOf(text)`
 
 Anfangsbuchstabe für Zwischenüberschriften der Liste ("#" für Ziffern, Zeichen, leer).

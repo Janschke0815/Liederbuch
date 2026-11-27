@@ -8,6 +8,13 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.6.4 – 27.11.2026 · Tags am Lied, Tag-Leiste einzeilig
+
+- **Tags rechts an jedem Lied** in der Liederliste – je nach Breite der Liste bis zu drei, der Rest als
+  „+2“ (alle Tags beim Drüberfahren). Ist ein Tag-Filter gewählt, steht dieser Tag vorne und hervorgehoben.
+- **Tag-Leiste über der Liste nur noch eine Zeile hoch:** Bei vielen Tags seitwärts wischen bzw. am PC mit
+  dem Mausrad über der Leiste blättern. Der gewählte Tag bleibt dabei im Blick.
+
 ## 2.6.3 – 26.11.2026 · Einladung öffnen auf Android
 
 - **„API-Entwicklerschlüssel ist ungültig“ beim Öffnen einer Einladung** (vor allem auf Android): Die

@@ -1,5 +1,18 @@
 import { describe, it, expect } from './runner.js';
-import { sortSongs, sortDirectionLabel, letterOf, songKey, findDuplicates, SORT_MODES } from '../src/core/song-list.js';
+import { sortSongs, sortDirectionLabel, letterOf, songKey, findDuplicates, listTags, SORT_MODES } from '../src/core/song-list.js';
+
+describe('Tags am Listeneintrag', () => {
+  it('höchstens drei, Rest gezählt', () => {
+    expect(listTags(['a', 'b', 'c', 'd', 'e'])).toEqual({ shown: ['a', 'b', 'c'], more: 2 });
+  });
+  it('gewählter Filter-Tag zuerst', () => {
+    expect(listTags(['a', 'b', 'c', 'd'], { active: 'd' })).toEqual({ shown: ['d', 'a', 'b'], more: 1 });
+  });
+  it('ohne Tags leer, unbekannter Filter-Tag ändert nichts', () => {
+    expect(listTags([])).toEqual({ shown: [], more: 0 });
+    expect(listTags(['a'], { active: 'x' })).toEqual({ shown: ['a'], more: 0 });
+  });
+});
 
 const songs = [
   { id: 'a', title: 'Zebra', artist: 'Abba', sortTitle: 'Zebra', updatedAt: '2026-01-01T00:00:00Z' },

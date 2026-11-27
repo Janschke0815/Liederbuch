@@ -284,7 +284,9 @@ beiden Spalten – beide Spalten beginnen erst darunter.
 ## Tags, Notizen, Papierkorb
 
 - **Tags** (Liedinfo → Tags, mit Komma trennen) werden als ChordPro-Standard `{tag: Advent}`
-  gespeichert. Über der Liederliste erscheinen sie als Filter; die Suche findet sie auch.
+  gespeichert. Über der Liederliste erscheinen sie als Filter in einer Zeile (seitwärts wischen bzw.
+  Mausrad); rechts an jedem Lied stehen seine Tags (je nach Breite bis zu drei, sonst „+2“).
+  Die Suche findet sie auch.
 - **Notiz** (Liedinfo → Notiz): privater Hinweis zum Lied, sichtbar in Vorschau und Spielmodus,
   nicht im Druck; wird mit gesichert und synchronisiert.
 - **Papierkorb** (Menü): gelöschte Lieder wiederherstellen oder endgültig löschen.
