@@ -55,10 +55,10 @@ describe('Mundharmonika: im Lied', () => {
 });
 
 describe('Mundharmonika/Gitarren-Tabs: Schalter', () => {
-  it('Standard an, Werte werden geprüft, als data-Attribut gesetzt', () => {
-    expect(sanitize({}).showHarp).toBe(true);
+  it('Harp-Tabs standardmäßig aus, Gitarren-Tabs an; Werte werden geprüft, als data-Attribut gesetzt', () => {
+    expect(sanitize({}).showHarp).toBe(false);
     expect(sanitize({}).showTabs).toBe(true);
-    expect(sanitize({ showHarp: 'nein' }).showHarp).toBe(true);
+    expect(sanitize({ showHarp: 'nein' }).showHarp).toBe(false);
     const el = document.createElement('div');
     applySettings(el, { showHarp: false, showTabs: false });
     expect([el.dataset.harp, el.dataset.tabs]).toEqual(['hide', 'hide']);
@@ -102,7 +102,7 @@ describe('Mundharmonika: eine oder zwei Zeilen', () => {
     document.body.append(root);
     const box = (sel, text) => [...root.querySelectorAll(sel)].find((e) => e.textContent === text).getBoundingClientRect();
     try {
-      applySettings(root, { harpLayout: 'split' });
+      applySettings(root, { harpLayout: 'split', showHarp: true });
       let c = box('.chord:not(.harp)', 'C');
       let h = box('.chord.harp', '4');
       expect(h.top >= c.bottom - 1).toBe(true); // darunter
@@ -111,7 +111,7 @@ describe('Mundharmonika: eine oder zwei Zeilen', () => {
       expect(Math.abs(box('.chord.harp', '-4').top - h.top) < 1).toBe(true);
       expect(Math.abs(box('.chord:not(.harp)', 'G').top - c.top) < 1).toBe(true);
 
-      applySettings(root, { harpLayout: 'inline' });
+      applySettings(root, { harpLayout: 'inline', showHarp: true });
       c = box('.chord:not(.harp)', 'C');
       h = box('.chord.harp', '4');
       expect(Math.abs(h.top - c.top) < 1).toBe(true); // nebeneinander

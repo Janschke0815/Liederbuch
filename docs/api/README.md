@@ -4,7 +4,7 @@ Automatisch erzeugt aus den Kommentaren im Quelltext – **nicht von Hand bearbe
 Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusammenhängt, steht in
 [../architektur.md](../architektur.md).
 
-102 Module, 417 exportierte Funktionen, Konstanten und Klassen.
+105 Module, 429 exportierte Funktionen, Konstanten und Klassen.
 
 ## `src/` – Einstieg und größere Bereiche der Oberfläche
 
@@ -16,6 +16,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`context-menu.js`](context-menu.md) | Kontextmenü: Rechtsklick (Maus), langes Drücken (Touch) oder Menütaste / Umschalt+F10. |
 | [`live-ui.js`](live-ui.md) | Live-Modus: Dialog (Vorsingen / Mitsingen), „LIVE“-Anzeige in der Kopfleiste, Mitsinger-Ansicht im Spielmodus. |
 | [`metronome.js`](metronome.md) | Metronom mit Web Audio: genaue Zeitplanung (vorausplanen statt setInterval-Klicks), betonte Eins je nach Taktart. |
+| [`modes.js`](modes.md) | Funktionsumfang: einfache Ansicht oder Expertenmodus, Mundharmonika-Werkzeuge an oder aus. |
 | [`play-mode.js`](play-mode.md) | Spielmodus: Vollbild nur mit dem Lied, automatisches Scrollen, Bildschirm bleibt an, Blättern per Tastatur oder Bluetooth-Fußpedal (die senden Bild-/Pfeiltasten). |
 | [`prefs.js`](prefs.md) | Alles, was sich die App pro Gerät im Browser merkt (localStorage) – an einer Stelle. |
 | [`print-ui.js`](print-ui.md) | Druckdialog (Auswahl + Optionen) und Druckvorschau. |
@@ -46,6 +47,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`ui/install-help.js`](ui/install-help.md) | Installieren-Hilfe: Welche Schritte passen zu diesem Gerät und Browser? |
 | [`ui/list-select.js`](ui/list-select.md) | Mehrfachauswahl in der Liederliste: welche Lieder markiert sind und wie sich das ändert (Klick im Auswahlmodus, Strg/⌘+Klick, Umschalt+Klick für einen Bereich, „Alle“). |
 | [`ui/list.js`](ui/list.md) | Liederliste links: Suche, Tag-Filter, Sortierung, Einträge, Kopf weggleiten lassen. |
+| [`ui/modes-ui.js`](ui/modes-ui.md) | Bedienung des Funktionsumfangs (src/modes.js): Schalter unter Einstellungen → App, Hinweise in „So geht's los“, ⋯ → „Mehr Funktionen …“. |
 | [`ui/notes-import.js`](ui/notes-import.md) | Dialog „Noten einfügen“ (Baustein „Noten“ über dem Editor): MusicXML-Datei oder ABC aus dem Internet als Notenabschnitt ins Lied holen (core/abc-import.js, core/musicxml.js), mit Vorschau. |
 | [`ui/paste.js`](ui/paste.md) | Text einfügen: Akkorde-über-Text (z. |
 | [`ui/preview-tools.js`](ui/preview-tools.md) | Werkzeuge an der Vorschau: Vergrößern/Verkleinern und Metronom (Klick auf Takt/Tempo). |
@@ -76,6 +78,7 @@ Kommentare ändern und `python tools/make-docs.py` ausführen. Wie alles zusamme
 | [`core/harp-transpose.js`](core/harp-transpose.md) | Harp-Hilfe: Mundharmonika-Tabs auf einer Harp in einer anderen Tonart spielen. |
 | [`core/harp.js`](core/harp.md) | Mundharmonika-Tabs (Harp-Tabs): Kanalnummern über dem Text, wie Akkorde in eckigen Klammern. |
 | [`core/meta-edit.js`](core/meta-edit.md) | Kopfangaben ({title:}, {capo:}, {time:} …) direkt im ChordPro-Text lesen und setzen. |
+| [`core/modes.js`](core/modes.md) | Einfache Ansicht oder Expertenmodus, Mundharmonika-Werkzeuge an oder aus: Startwerte beim ersten Start einer Version, die das kennt. |
 | [`core/musicxml.js`](core/musicxml.md) | MusicXML → ABC: Noten aus MuseScore, Sibelius, Finale, Notenscan-Apps oder Downloads (musescore.com, IMSLP …) als Notenabschnitt ins Lied holen. |
 | [`core/play-scroll.js`](core/play-scroll.md) | Rechnungen für den Spielmodus – ohne Bildschirmzugriff, damit sie sich testen lassen. |
 | [`core/playable.js`](core/playable.md) | "Was kann ich spielen?": Lieder, die nur aus bekannten Griffen bestehen (optional mit Capo). |

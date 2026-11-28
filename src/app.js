@@ -15,9 +15,10 @@
 //   ui/abo.js, ui/publish.js   Liederbuch abonnieren bzw. für eine Gruppe veröffentlichen
 //   ui/trash.js, share.js, capo-help.js, harp-help.js, context-menus.js
 //   ui/app-keys.js, ui/shortcuts.js   Tastenkürzel
+//   ui/modes-ui.js      Expertenmodus und Mundharmonika an/aus (Logik: modes.js, core/modes.js)
 //   play-mode.js, print-ui.js, setlist-ui.js, settings-ui.js, sync-ui.js (+ books-ui.js)   größere Bereiche
 
-import { bookKey, PERSONAL } from './books.js';
+import { bookKey, listBooks, PERSONAL } from './books.js';
 import { prefs } from './prefs.js';
 import { SAMPLE_SONG } from './sample.js';
 import { slimSetlist } from './storage/setlists.js';
@@ -53,6 +54,9 @@ import './ui/chord-tap.js';
 import './ui/share-with.js';
 import './ui/selection.js';
 import './ui/harp-from-notes.js';
+import './ui/modes-ui.js';
+import { initialModes } from './core/modes.js';
+import { modesChosen, setModes } from './modes.js';
 
 if (book.shared) document.title = `${book.name} – Liederbuch`;
 navigator.storage?.persist?.(); // Browser bitten, die Daten nicht automatisch zu löschen
@@ -121,8 +125,29 @@ $('#welcome').addEventListener('click', (e) => welcomeActions[e.target.closest('
 
 // ---------- Start ----------
 
+/**
+ * Funktionsumfang beim ersten Start festlegen (core/modes.js): Wer die App schon nutzt, behält alle
+ * Funktionen; wer neu anfängt, bekommt die einfache Ansicht. Danach entscheidet nur noch der Schalter.
+ */
+async function chooseModes(songs) {
+  if (modesChosen()) return;
+  const m = initialModes({
+    songs: songs.map((s) => s.chordpro),
+    sample: SAMPLE_SONG,
+    setlists: (await sets.list()).length,
+    books: listBooks().length,
+    synced: Boolean(localStorage.getItem(bookKey(book, 'sync.provider'))),
+    harps: prefs.get('myHarps').length,
+  });
+  setModes({
+    expert: prefs.get('uiLevel') ? undefined : m.expert,
+    harp: prefs.get('harpTools') ? undefined : m.harp,
+  });
+}
+
 async function start() {
   let songs = await repo.list();
+  await chooseModes(songs);
   // Beispiellied nur im persönlichen Liederbuch beim allerersten Start – weitere Bücher bleiben leer
   if (!songs.length && book.id === PERSONAL.id && !localStorage.getItem(bookKey(book, 'sync.provider'))) {
     // Entwurf aus der allerersten Version (localStorage) übernehmen, sonst Beispiel anlegen

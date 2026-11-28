@@ -129,11 +129,16 @@
       <button id="btn-settings" type="button" title="Schrift, Farben, Druck">
         <svg class="icon"><use href="#i-gear"/></svg><span class="label">Einstellungen</span>
       </button>
-      <button id="btn-keys" type="button" class="keys-btn" title="Tastenkürzel (?)">
+      <button id="btn-keys" type="button" data-expert class="keys-btn" title="Tastenkürzel (?)">
         <span class="icon kbd-icon" aria-hidden="true">?</span><span class="label">Tastenkürzel</span>
       </button>
-      <hr class="menu-sep toolbar-only">
-      <button id="btn-toolbar" type="button" class="toolbar-only" data-fixed title="Festlegen, welche Aktionen beschriftet oben in der Leiste stehen, und ihre Reihenfolge">
+      <!-- Nur in der einfachen Ansicht: führt zum Schalter Expertenmodus (ui/modes-ui.js) -->
+      <hr class="menu-sep" data-simple-only>
+      <button id="btn-more-features" type="button" class="more-features" data-fixed data-simple-only title="Expertenmodus: Setlisten, Noten, Metronom und weitere Funktionen einschalten">
+        <span class="icon more-features-icon" aria-hidden="true">✦</span><span class="label">Mehr Funktionen …</span>
+      </button>
+      <hr class="menu-sep toolbar-only" data-expert>
+      <button id="btn-toolbar" type="button" data-expert class="toolbar-only" data-fixed title="Festlegen, welche Aktionen beschriftet oben in der Leiste stehen, und ihre Reihenfolge">
         <svg class="icon"><use href="#i-panel"/></svg><span class="label">Leiste anpassen …</span>
       </button>
     </nav>
@@ -149,7 +154,7 @@
         <button type="button" id="abo-refresh" class="icon-btn" title="Jetzt aktualisieren"><svg class="icon"><use href="#i-sync"/></svg></button>
         <button type="button" id="abo-leave" class="link-btn danger" title="Abo auf diesem Gerät beenden">Beenden</button>
       </div>
-      <div class="list-tabs" role="tablist">
+      <div class="list-tabs" role="tablist" data-expert>
         <button type="button" role="tab" data-tab="songs" aria-selected="true">Lieder</button>
         <button type="button" role="tab" data-tab="sets" aria-selected="false">Setlisten</button>
       </div>
@@ -167,7 +172,7 @@
             <button type="button" id="cf-toggle" class="link-btn" aria-expanded="false" aria-controls="cf-panel" title="Nur Lieder zeigen, die aus Griffen bestehen, die du kannst – ein-/ausklappen">
               <span class="cf-label">🎸 Was kann ich spielen?</span><span class="cf-chevron" aria-hidden="true"></span>
             </button>
-            <button type="button" id="sel-start" class="icon-btn sel-start" title="Mehrere Lieder auswählen (auch Strg+Klick)" aria-label="Mehrere Lieder auswählen"><svg class="icon"><use href="#i-select"/></svg></button>
+            <button type="button" id="sel-start" data-expert class="icon-btn sel-start" title="Mehrere Lieder auswählen (auch Strg+Klick)" aria-label="Mehrere Lieder auswählen"><svg class="icon"><use href="#i-select"/></svg></button>
             <div class="sort-box" title="Reihenfolge der Liste">
               <select id="sort-select" aria-label="Sortieren nach"></select>
               <button type="button" id="sort-dir" class="link-btn sort-dir" title="Reihenfolge umkehren">A–Z</button>
@@ -188,9 +193,17 @@
         <!-- Erste Schritte: solange das Buch höchstens ein Lied hat (list.js) -->
         <div id="welcome" class="welcome" hidden>
           <h3>So geht's los</h3>
+          <!-- Funktionsumfang (ui/modes-ui.js): gleich oben deutlich zeigen, wo die weiteren Funktionen sind -->
+          <div class="welcome-modes" data-simple-only>
+            <p class="welcome-modes-head"><span class="welcome-modes-icon" aria-hidden="true">✦</span>Einfache Ansicht</p>
+            <p class="welcome-modes-text">Du siehst erst das Wichtigste. <b>Setlisten, Noten, Metronom</b> und mehr gibt es im <b>Expertenmodus</b> – auch später unter <b>⋯ → Einstellungen → App</b>.</p>
+            <button type="button" class="welcome-modes-btn" data-welcome="expert">Expertenmodus an</button>
+          </div>
           <button type="button" data-welcome="new"><svg class="icon"><use href="#i-plus"/></svg><span><strong>Lied schreiben</strong><small>Text tippen, Akkorde in [eckige Klammern]</small></span></button>
           <button type="button" data-welcome="import"><svg class="icon"><use href="#i-paste"/></svg><span><strong>Lied aus dem Netz einfügen</strong><small>Akkorde über dem Text, z. B. von Ultimate Guitar</small></span></button>
           <button type="button" data-welcome="open"><svg class="icon"><use href="#i-open"/></svg><span><strong>Datei oder Sicherung öffnen</strong><small>ChordPro, Text oder eine Liederbuch-Sicherung</small></span></button>
+          <!-- Nur solange „Mundharmonika“ aus ist (ui/modes-ui.js) -->
+          <button type="button" data-welcome="harp" data-harp-off-only><span class="icon welcome-harp-icon" aria-hidden="true">♪</span><span><strong>Mit Mundharmonika starten</strong><small>Harp-Tabs wie [4] [-4] anzeigen, Harp-Hilfe und Harp-Einstellungen einschalten</small></span></button>
           <button type="button" data-welcome="cloud"><svg class="icon"><use href="#i-cloud"/></svg><span><strong>Mit anderen Geräten abgleichen</strong><small>Google Drive, Dropbox oder WebDAV</small></span></button>
           <button type="button" class="link-btn welcome-hide" data-welcome="hide">Ausblenden</button>
         </div>
@@ -238,16 +251,16 @@
       <!-- Handy: Text bearbeiten oder Akkorde per Antippen setzen (ui/chord-tap.js); am PC immer Text -->
       <div class="pane-bar editor-bar">
         <div class="snippets" role="toolbar" aria-label="Einfügen">
-          <button type="button" data-snippet="chord" title="Akkord einfügen: [ ]">[A]</button>
+          <button type="button" data-snippet="chord" title="Akkord einfügen: [ ] – den Akkordnamen in die Klammer schreiben, z. B. [G]"><span class="lbl-long">[A] Akkord</span><span class="lbl-short">[A]</span></button>
           <button type="button" data-snippet="verse" title="Strophe einfügen">Strophe</button>
           <button type="button" data-snippet="chorus" title="Refrain einfügen">Refrain</button>
           <button type="button" data-snippet="bridge" title="Bridge einfügen">Bridge</button>
-          <button type="button" data-snippet="tab" title="Gitarren-Tab einfügen (markierter Text wird zum Tab; sonst leeres Griffbrett zum Überschreiben)">Tab</button>
-          <button type="button" data-snippet="abc" title="Noten einfügen: MusicXML-Datei, ABC aus dem Internet oder leeres Gerüst" aria-label="Noten"><span class="lbl-long">Noten</span><span class="lbl-short">♪</span></button>
-          <button type="button" data-snippet="repeat" title="Refrain wiederholen ({chorus})">↻ Refrain</button>
-          <button type="button" data-snippet="times" title="Wiederholen: Zeile mit dem Cursor, markierte Zeilen oder – auf der Abschnittszeile – den ganzen Abschnitt. Nochmal klicken = öfter.">2×</button>
+          <button type="button" data-snippet="tab" data-expert title="Gitarren-Tab einfügen (markierter Text wird zum Tab; sonst leeres Griffbrett zum Überschreiben)">Tab</button>
+          <button type="button" data-snippet="abc" data-expert title="Noten einfügen: MusicXML-Datei, ABC aus dem Internet oder leeres Gerüst" aria-label="Noten"><span class="lbl-long">Noten</span><span class="lbl-short">♪</span></button>
+          <button type="button" data-snippet="repeat" data-expert title="Den Refrain an dieser Stelle noch einmal einsetzen ({chorus}) – ohne ihn abzuschreiben">↻ Refrain</button>
+          <button type="button" data-snippet="times" data-expert title="Wiederholen: Zeile mit dem Cursor, markierte Zeilen oder – auf der Abschnittszeile – den ganzen Abschnitt. Nochmal klicken = öfter.">2×</button>
           <button type="button" data-snippet="comment" title="Kommentar / Hinweis">Hinweis</button>
-          <button type="button" id="btn-syntax" class="syntax-btn" title="ChordPro-Syntax: Übersicht aller Angaben">?</button>
+          <button type="button" id="btn-syntax" class="syntax-btn" title="Hilfe: so schreibst du Lieder (ChordPro – Übersicht aller Angaben)" aria-label="Hilfe zum Schreiben">?</button>
           <!-- Handy: Text bearbeiten oder Akkorde per Antippen setzen (ui/chord-tap.js); am PC ausgeblendet -->
           <div class="edit-mode" role="radiogroup" aria-label="Bearbeiten">
             <button type="button" role="radio" data-edit="text" aria-checked="true">Text</button>
@@ -280,12 +293,12 @@
             </select>
           </label>
           <button type="button" id="btn-capo-help" class="link-btn capo-help" title="Capo-Lage mit möglichst einfachen Griffen vorschlagen">Capo-Hilfe …</button>
-          <button type="button" id="btn-harp-help" class="link-btn capo-help" hidden title="Mundharmonika-Tabs auf einer Harp in anderer Tonart spielen">Harp-Hilfe …</button>
-          <label>Takt <input data-meta="time" list="dl-times" autocomplete="off" placeholder="z. B. 4/4"></label>
-          <label>Tempo <input data-meta="tempo" type="number" min="20" max="320" step="1" placeholder="bpm"></label>
-          <label title="Liedlänge in Minuten:Sekunden – so schnell scrollt der Spielmodus (ohne Angabe: 3 Minuten)">Dauer
+          <button type="button" id="btn-harp-help" data-harp-tool class="link-btn capo-help" hidden title="Mundharmonika-Tabs auf einer Harp in anderer Tonart spielen">Harp-Hilfe …</button>
+          <label data-expert>Takt <input data-meta="time" list="dl-times" autocomplete="off" placeholder="z. B. 4/4"></label>
+          <label data-expert>Tempo <input data-meta="tempo" type="number" min="20" max="320" step="1" placeholder="bpm"></label>
+          <label data-expert title="Liedlänge in Minuten:Sekunden – so schnell scrollt der Spielmodus (ohne Angabe: 3 Minuten)">Dauer
             <input data-meta="duration" autocomplete="off" placeholder="z. B. 3:20" pattern="\d{1,3}(:[0-5]?\d)?"></label>
-          <label title="Spalten dieses Liedes im Druck – geht vor Einstellungen → Druck → Spalten">Spalten
+          <label data-expert title="Spalten dieses Liedes im Druck – geht vor Einstellungen → Druck → Spalten">Spalten
             <select data-meta="columns">
               <option value="">wie Einstellung</option>
               <option value="1">einspaltig</option>
@@ -321,8 +334,8 @@
           <strong id="key-value">–</strong>
         </div>
         <span id="capo-chip" class="info-chip" hidden></span>
-        <button type="button" id="harp-chip" class="info-chip harp-chip" hidden title="Harp-Hilfe: Tabs auf einer anderen Mundharmonika spielen"></button>
-        <div class="vb-field" id="time-field" hidden>
+        <button type="button" id="harp-chip" data-harp-tool class="info-chip harp-chip" hidden title="Harp-Hilfe: Tabs auf einer anderen Mundharmonika spielen"></button>
+        <div class="vb-field" id="time-field" hidden data-expert>
           <span class="vb-cap">Takt · Tempo</span>
           <button type="button" id="time-chip" class="info-chip time-chip" title="Metronom im Liedtempo an/aus (M)"></button>
         </div>
@@ -335,7 +348,7 @@
           </div>
         </div>
         <button id="tr-reset" type="button" class="link-btn" title="Zurück zur Originaltonart" hidden>Original</button>
-        <div class="vb-field" id="acc-field" hidden>
+        <div class="vb-field" id="acc-field" hidden data-expert>
           <span class="vb-cap" id="acc-cap"><span class="cap-long">Schreibweise</span><span class="cap-short" aria-hidden="true">♯/♭</span></span>
           <button type="button" id="acc-btn" class="acc-btn" aria-pressed="false" aria-describedby="acc-cap"
                   title="Akkorde mit ♯ oder ♭ schreiben – tippen zum Wechseln (wird mit dem Lied gespeichert)"><span id="acc-value">♯/♭</span></button>
@@ -371,7 +384,7 @@
       <header class="dialog-head">
         <h2>Text einfügen</h2>
         <p class="hint">Akkorde über dem Text, z. B. aus Ultimate Guitar, oder ChordPro. Titel und Interpret werden aus der Kopfzeile erkannt („… Chords by …“, „Interpret – Titel“). Mehrere Lieder auf einmal: mit einer Linie <code>---</code> trennen. Tipp: Text einfach mit Strg+V irgendwo in die App einfügen.
-          <button type="button" id="imp-bookmark" class="link-btn">Direkt von Ultimate Guitar übernehmen …</button></p>
+          <button type="button" id="imp-bookmark" class="link-btn" data-expert>Direkt von Ultimate Guitar übernehmen …</button></p>
       </header>
       <div class="dialog-body import-body">
         <div class="import-input">
@@ -406,11 +419,11 @@
             <button type="button" id="pr-only" hidden title="Genau die gefilterten Lieder auswählen, alle anderen abwählen">Nur diese</button>
             <button type="button" id="pr-all">Alle</button>
             <button type="button" id="pr-none">Keine</button>
-            <button type="button" id="pr-az" title="Reihenfolge wieder alphabetisch">A–Z</button>
+            <button type="button" id="pr-az" data-expert title="Reihenfolge wieder alphabetisch">A–Z</button>
           </div>
           <ul id="pr-list" class="pr-list"></ul>
           <p id="pr-count" class="hint"></p>
-          <p class="hint">Reihenfolge mit ↑ ↓ ändern – oder in der Vorschau per Rechtsklick bzw. lang drücken auf ein Lied. Seitenzahlen und Inhaltsverzeichnis passen sich an.</p>
+          <p class="hint" data-expert>Reihenfolge mit ↑ ↓ ändern – oder in der Vorschau per Rechtsklick bzw. lang drücken auf ein Lied. Seitenzahlen und Inhaltsverzeichnis passen sich an.</p>
         </fieldset>
         <div class="pr-right">
         <fieldset>
@@ -419,17 +432,17 @@
           <label>Untertitel <input id="pr-subtitle" placeholder="z. B. Name, Jahr"></label>
           <div class="opt-row"><label class="check"><input type="checkbox" id="pr-cover"> Deckblatt</label><button type="button" class="pin" data-pin="cover" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <div class="opt-row"><label class="check"><input type="checkbox" id="pr-toc"> Inhaltsverzeichnis</label><button type="button" class="pin" data-pin="toc" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
-          <div class="opt-row"><label class="check" title="Seite 1 liegt rechts. In der Vorschau stehen die Seiten aufgeschlagen nebeneinander."><input type="checkbox" id="pr-spreads"> Doppelseiten: Lieder über mehrere Seiten beginnen links</label><button type="button" class="pin" data-pin="spreads" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
-          <div class="opt-row opt-sub"><label class="check"><input type="checkbox" id="pr-blankPages"> dafür Leerseiten einfügen <small>(sonst markiert – Reihenfolge selbst anpassen)</small></label><button type="button" class="pin" data-pin="blankPages" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
-          <div class="opt-row"><label class="check"><input type="checkbox" id="pr-transpose"> gespeicherte Transposition verwenden</label><button type="button" class="pin" data-pin="useSavedTranspose" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row" data-expert><label class="check" title="Seite 1 liegt rechts. In der Vorschau stehen die Seiten aufgeschlagen nebeneinander."><input type="checkbox" id="pr-spreads"> Doppelseiten: Lieder über mehrere Seiten beginnen links</label><button type="button" class="pin" data-pin="spreads" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row opt-sub" data-expert><label class="check"><input type="checkbox" id="pr-blankPages"> dafür Leerseiten einfügen <small>(sonst markiert – Reihenfolge selbst anpassen)</small></label><button type="button" class="pin" data-pin="blankPages" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row" data-expert><label class="check"><input type="checkbox" id="pr-transpose"> gespeicherte Transposition verwenden</label><button type="button" class="pin" data-pin="useSavedTranspose" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <legend class="sub">Seite</legend>
           <div class="opt-row"><label>Papier <select id="pr-paper"><option>A4</option><option>A5</option><option>Letter</option></select></label><button type="button" class="pin" data-pin="paper" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <div class="opt-row"><label>Spalten <select id="pr-columns"><option value="1">1 Spalte</option><option value="2">2 Spalten</option></select></label><button type="button" class="pin" data-pin="columns" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
-          <div class="opt-row"><label>Rand (mm) <input id="pr-margin" type="number" min="5" max="40" step="1"></label><button type="button" class="pin" data-pin="margin" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
+          <div class="opt-row" data-expert><label>Rand (mm) <input id="pr-margin" type="number" min="5" max="40" step="1"></label><button type="button" class="pin" data-pin="margin" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <div class="opt-row"><label class="check"><input type="checkbox" id="pr-pageNumbers"> Seitenzahlen</label><button type="button" class="pin" data-pin="pageNumbers" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <p class="hint">Papier, Spalten, Rand und Seitenzahlen gelten auch für spätere Ausdrucke (siehe Einstellungen). Lieder mit eigener Spaltenzahl (Liedinfo) behalten diese.</p>
         </fieldset>
-        <fieldset>
+        <fieldset data-expert>
           <legend>Schrift <small>(nur für den Druck)</small></legend>
           <div class="opt-row"><label>Text – Schriftart <select id="pr-lyricFont"></select></label><button type="button" class="pin" data-pin="lyricFont" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
           <div class="opt-row"><label>Text – Größe (pt) <input id="pr-lyricSize" type="number" min="7" max="28" step="0.5"></label><button type="button" class="pin" data-pin="lyricSize" aria-pressed="false" title="Als Schnellwahl in der Leiste über der Vorschau zeigen">📌</button></div>
@@ -438,7 +451,7 @@
           <div class="row-end"><button type="button" id="pr-font-reset" class="link-btn">Wie Einstellungen</button></div>
           <p class="hint">Gilt nur für den Druck – die Anzeige am Bildschirm bleibt, wie sie ist.</p>
         </fieldset>
-        <p class="hint pin-hint">📌 heftet eine Option als Schnellwahl in die Leiste über der Druckvorschau.</p>
+        <p class="hint pin-hint" data-expert>📌 heftet eine Option als Schnellwahl in die Leiste über der Druckvorschau.</p>
         </div>
       </div>
       <footer class="dialog-foot">
@@ -459,9 +472,9 @@
         <nav class="st-nav" aria-label="Bereiche">
           <a href="#st-sec-show" class="active"><span>◉</span>Anzeigen</a>
           <a href="#st-sec-text"><span>Aa</span>Liedtext</a>
-          <a href="#st-sec-chords"><span>C<sup>7</sup></span>Akkorde &amp; Harp</a>
-          <a href="#st-sec-abc"><span>♪</span>Noten</a>
-          <a href="#st-sec-head"><span>T</span>Titel &amp; Interpret</a>
+          <a href="#st-sec-chords"><span>C<sup>7</sup></span><em class="st-harp-word">Akkorde<em data-harp-tool>&nbsp;&amp; Harp</em></em></a>
+          <a href="#st-sec-abc" data-expert><span>♪</span>Noten</a>
+          <a href="#st-sec-head" data-expert><span>T</span>Titel &amp; Interpret</a>
           <a href="#st-sec-print"><span>⎙</span>Druck</a>
           <a href="#st-sec-app"><span>ⓘ</span>App</a>
         </nav>
@@ -479,11 +492,11 @@
                 <div class="st-text"><span class="st-title">Griffbilder</span><span class="st-hint">Diagramme aller Akkorde im Liedkopf</span></div>
                 <div class="st-control"><label class="switch"><input id="st-showDiagrams" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
               </div>
-              <div class="st-row">
+              <div class="st-row" data-harp-tool>
                 <div class="st-text"><span class="st-title">Mundharmonika-Tabs</span><span class="st-hint">Kanäle wie [4] [-4] [-3'] über dem Text – in eigener Farbe (unter „Akkorde &amp; Harp-Tabs“)</span></div>
                 <div class="st-control"><label class="switch"><input id="st-showHarp" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
               </div>
-              <div class="st-row st-row-sub" data-needs="showChords showHarp">
+              <div class="st-row st-row-sub" data-needs="showChords showHarp" data-harp-tool>
                 <div class="st-text"><span class="st-title">Akkorde und Harp-Tabs</span><span class="st-hint">Nebeneinander oder untereinander – Akkorde oben, Tabs direkt über dem Text</span></div>
                 <div class="st-control"><select id="st-harpLayout" data-segmented><option value="inline">eine Zeile</option><option value="split">zwei Zeilen</option></select></div>
               </div>
@@ -526,8 +539,8 @@
           </section>
 
           <section class="st-card" id="st-sec-chords">
-            <h3>Akkorde &amp; Harp-Tabs</h3>
-              <div class="st-row">
+            <h3><em class="st-harp-word">Akkorde<em data-harp-tool>&nbsp;&amp; Harp-Tabs</em></em></h3>
+              <div class="st-row" data-expert>
                 <div class="st-text"><span class="st-title">Schrift</span><span class="st-hint">für Akkorde und Harp-Tabs</span></div>
                 <div class="st-control"><select id="st-chordFont"></select></div>
               </div>
@@ -550,7 +563,7 @@
                 <div class="st-text"><span class="st-title">Akkorde fett</span><span class="st-hint">kräftiger hervorheben</span></div>
                 <div class="st-control"><label class="switch"><input id="st-chordBold" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
               </div>
-              <div class="st-row" data-needs="showHarp">
+              <div class="st-row" data-needs="showHarp" data-harp-tool>
                 <div class="st-text"><span class="st-title">Farbe der Harp-Tabs</span><span class="st-hint">Blau ist auch bei Rot-Grün-Schwäche gut von roten Akkorden zu unterscheiden</span></div>
                 <div class="st-control"><span class="color-row" data-for="harpColor">
                   <button type="button" class="swatch" data-color="#1565c0" style="--c:#1565c0" title="Blau"></button>
@@ -563,7 +576,7 @@
               </div>
           </section>
 
-          <section class="st-card" id="st-sec-abc">
+          <section class="st-card" id="st-sec-abc" data-expert>
             <h3>Noten</h3>
               <p class="st-card-hint">Melodie auf Notenlinien ({start_of_abc}) – in Vorschau, Spielmodus und Druck; ▶ spielt sie ab.</p>
               <div class="st-row" data-needs="showAbc">
@@ -584,7 +597,7 @@
               </div>
           </section>
 
-          <section class="st-card" id="st-sec-head">
+          <section class="st-card" id="st-sec-head" data-expert>
             <h3>Titel &amp; Interpret</h3>
               <div class="st-row">
                 <div class="st-text"><span class="st-title">Ausrichtung</span><span class="st-hint">Titel, Interpret, Infozeile und Griffbilder</span></div>
@@ -653,7 +666,7 @@
                 <div class="st-text"><span class="st-title">Spalten</span><span class="st-hint">Zwei Spalten sparen Seiten bei kurzen Zeilen. Einzelne Lieder können das in der Liedinfo ändern.</span></div>
                 <div class="st-control"><select id="st-columns" data-segmented><option value="1">einspaltig</option><option value="2">zweispaltig</option></select></div>
               </div>
-              <div class="st-row">
+              <div class="st-row" data-expert>
                 <div class="st-text"><span class="st-title">Seitenrand</span></div>
                 <div class="st-control"><input id="st-margin" type="range" min="5" max="40" step="1"><output class="range-val" data-for="st-margin" data-unit="mm"></output></div>
               </div>
@@ -665,6 +678,15 @@
 
           <section class="st-card" id="st-sec-app">
             <h3>App</h3>
+              <!-- Funktionsumfang (src/modes.js, ui/modes-ui.js): wirkt sofort, nicht erst mit „Speichern“ -->
+              <div class="st-row st-row-mode">
+                <div class="st-text"><span class="st-title">Expertenmodus</span><span class="st-hint">Zusätzlich: Setlisten, Noten, Metronom und Tempo, ♯/♭-Schreibweise, Gitarren-Tabs und Wiederholungen im Editor, Mehrfachauswahl, WebDAV/Nextcloud, Druck-Feinheiten und Gestaltung von Titel &amp; Interpret. Aus: alles Übrige bleibt – ideal zum Anfangen. Wirkt sofort.</span></div>
+                <div class="st-control"><label class="switch"><input id="st-mode-expert" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="st-row st-row-mode">
+                <div class="st-text"><span class="st-title">Mundharmonika</span><span class="st-hint">Harp-Tabs wie [4] [-4] in den Liedern anzeigen, dazu Harp-Hilfe, Melodie als Harp-Tabs und die Harp-Einstellungen. Aus: Harp-Tabs und Werkzeuge ausgeblendet. Wirkt sofort.</span></div>
+                <div class="st-control"><label class="switch"><input id="st-mode-harp" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label></div>
+              </div>
               <div class="st-row">
                 <div class="st-text"><span class="st-title">Dauerhaft speichern</span><span class="st-hint" id="st-storage-status">Wird geprüft …</span></div>
                 <div class="st-control"><button type="button" id="st-storage-btn" hidden>Anfragen</button></div>
@@ -980,7 +1002,7 @@
                 <div class="segmented" role="radiogroup" aria-label="Speicherort" id="sync-provider">
                   <button type="button" role="radio" data-value="gdrive">Google Drive</button>
                   <button type="button" role="radio" data-value="dropbox">Dropbox</button>
-                  <button type="button" role="radio" data-value="webdav"><span>WebDAV<span class="lbl-wide"> / Nextcloud</span></span></button>
+                  <button type="button" role="radio" data-value="webdav" data-expert><span>WebDAV<span class="lbl-wide"> / Nextcloud</span></span></button>
                 </div>
               </div>
 
@@ -1392,19 +1414,19 @@
           <button type="button" id="pl-tr-down" aria-label="Halbton tiefer">−</button>
           <button type="button" id="pl-tr" class="pl-tr" aria-label="Transposition, tippen: Originaltonart">0</button>
           <button type="button" id="pl-tr-up" aria-label="Halbton höher">+</button>
-          <button type="button" id="pl-acc" class="pl-acc" aria-pressed="false">♯/♭</button>
+          <button type="button" id="pl-acc" data-expert class="pl-acc" aria-pressed="false">♯/♭</button>
         </div>
         <div class="play-group" title="Schriftgröße (+ / −) – wird pro Lied gemerkt">
           <button type="button" id="pl-smaller" aria-label="Schrift kleiner">A−</button>
           <button type="button" id="pl-bigger" aria-label="Schrift größer">A+</button>
         </div>
-        <button type="button" id="pl-metro" class="icon-btn" title="Metronom im Liedtempo (M)" aria-pressed="false"><svg class="icon"><use href="#i-metro"/></svg></button>
+        <button type="button" id="pl-metro" data-expert class="icon-btn" title="Metronom im Liedtempo (M)" aria-pressed="false"><svg class="icon"><use href="#i-metro"/></svg></button>
         <button type="button" id="pl-chords" class="text-btn" title="Gitarren-Akkorde ein/aus (A)" aria-pressed="true">Akk.</button>
         <button type="button" id="pl-diagrams" class="icon-btn" title="Griffbilder ein/aus (G)" aria-pressed="true"><svg class="icon"><use href="#i-grid"/></svg></button>
-        <button type="button" id="pl-harp" class="text-btn" title="Mundharmonika-Tabs ein/aus (H)" aria-pressed="true" hidden>Harp</button>
+        <button type="button" id="pl-harp" data-harp-tool class="text-btn" title="Mundharmonika-Tabs ein/aus (H)" aria-pressed="true" hidden>Harp</button>
         <button type="button" id="pl-tabs" class="text-btn" title="Gitarren-Tabs ein/aus (T)" aria-pressed="true" hidden>Tab</button>
         <button type="button" id="pl-abc" class="text-btn" title="Noten ein/aus" aria-pressed="true" hidden>♪</button>
-        <button type="button" id="pl-cols" class="icon-btn" title="Zwei Spalten nebeneinander, seitenweise blättern (S)" aria-pressed="false"><svg class="icon"><use href="#i-columns"/></svg></button>
+        <button type="button" id="pl-cols" data-expert class="icon-btn" title="Zwei Spalten nebeneinander, seitenweise blättern (S)" aria-pressed="false"><svg class="icon"><use href="#i-columns"/></svg></button>
         <button type="button" id="pl-night" class="icon-btn" title="Nachtmodus (N)" aria-pressed="false"><svg class="icon"><use href="#i-moon"/></svg></button>
         <div class="play-group" title="Scroll-Geschwindigkeit (&lt; / &gt;) – wird pro Lied gemerkt">
           <button type="button" id="pl-slower" aria-label="Langsamer">−</button>

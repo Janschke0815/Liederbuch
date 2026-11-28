@@ -137,7 +137,7 @@ describe('Einstellungen: Gitarren-Akkorde ausblenden', () => {
     expect(sanitize({ showChords: false }).showChords).toBe(false);
   });
   it('aus: Akkorde, Akkord-Abschnitt und Griffbilder weg, Harp-Tabs und Anmerkungen bleiben', () => {
-    const box = mount({ showChords: false });
+    const box = mount({ showChords: false, showHarp: true });
     try {
       expect(box.dataset.chords).toBe('hide');
       expect(shown(box, '.chord:not(.harp):not(.annotation)')).toEqual([]);

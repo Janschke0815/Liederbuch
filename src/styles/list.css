@@ -137,3 +137,18 @@
 }
 #sel-actions { display: inline-flex; align-items: center; gap: .45em; }
 #sel-actions .book-caret { width: .38em; height: .38em; transform: rotate(-135deg) translateY(-20%); }
+
+/* „So geht's los“: deutlicher Hinweis auf Expertenmodus und Mundharmonika (ui/modes-ui.js) */
+.welcome-modes {
+  display: flex; flex-direction: column; gap: .45em; margin-top: .3em; padding: .75em .8em;
+  border: 2px solid var(--accent); border-radius: 10px; background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+.welcome-modes p { margin: 0; font-size: .86em; line-height: 1.4; }
+.welcome-modes-head { display: flex; align-items: center; gap: .45em; font-size: .95em !important; color: var(--accent); }
+.welcome-modes-icon { font-size: 1.15em; color: var(--accent); }
+.welcome .welcome-modes .welcome-modes-btn {
+  display: block; width: 100%; padding: .45em .5em; text-align: center; font-weight: 700; font-size: .86em; overflow-wrap: anywhere;
+  background: var(--accent); border-color: var(--accent); color: var(--on-accent, #fff);
+}
+.welcome-harp-icon { display: inline-grid; place-items: center; width: 1.25em; font-size: 1.2em; font-weight: 700; }
+:root:not([data-mode-noharp]) [data-harp-off-only] { display: none !important; }

@@ -187,3 +187,7 @@ body[data-readonly] #btn-new,
 body[data-readonly] #btn-save,
 body[data-readonly] .snippets { display: none !important; }
 body[data-readonly] #editor { background: var(--surface-2); }
+
+/* ⋯ → „Mehr Funktionen …“ (nur in der einfachen Ansicht) */
+.more-features { color: var(--accent); font-weight: 600; }
+.more-features-icon { display: inline-grid; place-items: center; width: 1.25em; font-size: 1.05em; }

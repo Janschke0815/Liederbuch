@@ -355,7 +355,7 @@ export function setupBooks({ book, repo, toast, beforeSync, beforeSwitch, leaveA
       },
       cloud.googleReady() && { label: 'Einladung öffnen …', icon: 'open', action: () => cloud.join() },
       { label: 'Abo hinzufügen …', icon: 'paste', action: () => openSubscribe?.() },
-      cloud.googleReady() && { label: 'Aus meinem Google Drive …', icon: 'cloud', action: () => cloud.findInDrive() },
+      cloud.googleReady() && { label: 'Aus meinem Google Drive …', icon: 'cloud', expert: true, action: () => cloud.findInDrive() },
     ], { x: r.left, y: r.bottom + 4, title: 'Hinzufügen' }).focusFirst();
   };
   dlg.addEventListener('click', (e) => e.target === dlg && dlg.close());

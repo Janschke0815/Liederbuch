@@ -14,7 +14,7 @@ Version der App – bei jeder veröffentlichten Änderung erhöhen (und das Datu
 
 ### `APP_VERSION`
 
-`= '2.8.2'`
+`= '2.9.0'`
 
 Version der App – bei jeder veröffentlichten Änderung erhöhen (und das Datum anpassen).
 Wird in den Einstellungen und als Hinweis am App-Namen angezeigt, damit man sieht, welche
@@ -23,7 +23,7 @@ Hauptversion.Fahrplan-Punkt.Korrektur
 
 ### `APP_DATE`
 
-`= '2026-11-27'`
+`= '2026-11-28'`
 
 ### `versionLabel(version = APP_VERSION, date = APP_DATE)`
 

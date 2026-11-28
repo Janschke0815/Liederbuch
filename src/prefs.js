@@ -54,6 +54,9 @@ export const PREFS = {
   // Abos
   aboState: { key: 'aboState', def: {} }, // Liederbuch-ID -> { etag, checkedAt, publishedAt, count }
   aboPublished: { key: 'aboPublished', def: {} }, // Liederbuch-ID -> was zuletzt veröffentlicht wurde (inkl. Schlüssel)
+  // Funktionsumfang (src/modes.js) – '' = noch nicht festgelegt, dann entscheidet der erste Start (core/modes.js)
+  uiLevel: { key: 'uiLevel', def: '' }, // 'simple' (einfache Ansicht) | 'expert' (alle Funktionen)
+  harpTools: { key: 'harpTools', def: '' }, // 'on' | 'off' – Mundharmonika-Werkzeuge
   // Einstellungsdialog
   settingsCollapsed: { key: 'settingsCollapsed', def: [] }, // eingeklappte Bereiche
   settingsSampleHidden: { key: 'settingsSampleHidden', def: false },

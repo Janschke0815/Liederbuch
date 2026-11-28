@@ -130,6 +130,33 @@ und fällt nur offline oder bei sehr langsamem Netz (> 3,5 s) auf den Cache zur�
 | Enter | im Dialog: bestätigen (roter Knopf); in großen Textfeldern Strg+Enter |
 | Alt+A / S / R / B / T / N / C / W / H | im Editor: Akkord, Strophe, Refrain, Bridge, Tab, Noten, ↻ Refrain, 2×, Hinweis |
 
+## Einfache Ansicht und Expertenmodus
+
+Zum Anfangen blendet die App aus, was Fachwissen braucht oder nur für Feineinstellungen da ist – nicht,
+was nützlich und selbsterklärend ist. Alles Weitere schaltet **Einstellungen → App → Expertenmodus** ein
+(auch über **⋯ → Mehr Funktionen …** und den Hinweis in „So geht's los“). Der Schalter wirkt sofort.
+
+- **Immer da (auch für Anfänger):** Lieder schreiben, einfügen, ansehen, transponieren, spielen, drucken;
+  Liedinfo mit Titel, Interpret, Tonart, Capo, Capo-Hilfe, Tags und Notiz; Bausteine Akkord, Strophe,
+  Refrain, Bridge, Hinweis und Hilfe; Speichern-Knopf; „Was kann ich spielen?“, Sortierung, Tag-Leiste;
+  Live-Modus; mehrere Liederbücher; Abgleich über Google Drive oder Dropbox; Teilen zum Mitbearbeiten
+  und nur zum Lesen (Abo); Duplizieren; alle Schalter unter „Anzeigen“; Druck-Einstellungen Papier,
+  Spalten, Seitenzahlen.
+- **Nur im Expertenmodus:** Setlisten; Noten (Einstellungen und Baustein); Metronom, Takt, Tempo, Dauer
+  und Spalten in der Liedinfo; ♯/♭-Schreibweise; Bausteine Tab, ↻ Refrain und 2×; Mehrfachauswahl;
+  WebDAV/Nextcloud; Liederbücher aus dem eigenen Drive wiederfinden; Lesezeichen „Ins Liederbuch“;
+  Doppelseiten, Reihenfolge, Rand, Druckschrift und 📌 im Druckdialog; Seitenrand und Gestaltung von
+  Titel & Interpret in den Einstellungen; Schrift der Akkorde; Tastenkürzel-Übersicht und Leiste
+  anpassen; im Spielmodus ♯/♭, Metronom und zwei Spalten.
+- **Mundharmonika** ist ein eigener Schalter daneben (auch „So geht's los“ → *Mit Mundharmonika starten*).
+  Harp-Tabs werden standardmäßig nicht angezeigt; der Schalter schaltet ihre Anzeige mit ein, dazu
+  Harp-Hilfe, „Melodie als Harp-Tabs“ und Farbe der Harp-Tabs.
+- **Der Expertenmodus versteckt nur Werkzeuge, nie Inhalte:** Noten oder Tags in einem Lied bleiben
+  sichtbar. Einladungs-, Abo- und Live-Links funktionieren immer. Tastenkürzel gelten weiter.
+- **Nach dem Update** behält, wer die App schon nutzt (eigene Lieder, Setlisten, weitere Liederbücher,
+  Cloud), alle Funktionen; Mundharmonika ist an, wenn ein Lied Harp-Tabs hat. Neue Nutzer starten mit der
+  einfachen Ansicht.
+
 ## ChordPro-Syntax (Kurzüberblick)
 
 Die vollständige Übersicht öffnet der Knopf **?** über dem Editor. Die Knöpfe daneben
@@ -408,7 +435,8 @@ Capo und Transposition so, dass der Klang gleich bleibt.
 
 Mundharmonika-Töne stehen wie Akkorde in eckigen Klammern über der Silbe und erscheinen in einer
 eigenen Farbe – Standard Blau, das sich auch bei Rot-Grün-Schwäche gut von roten Akkorden abhebt
-(einstellbar unter *Einstellungen → Akkorde & Harp-Tabs*):
+(einstellbar unter *Einstellungen → Akkorde & Harp-Tabs*). Angezeigt werden sie, sobald der Schalter
+**Mundharmonika** an ist (*Einstellungen → App* oder „So geht's los“ → *Mit Mundharmonika starten*):
 
     I [C][4]come from [5]Ala[6]bama with my [G][-5]banjo
     [4] [-4] [5] [6] [6] [-6] [6] [5]
@@ -874,6 +902,9 @@ Einheitliche Schreibweise: `.editorconfig` und `.prettierrc.json` (z. B. `npx pr
 29. ✅ Doppelseiten im Druck (2.8): mehrseitige Lieder beginnen links (Seite 1 = rechts), Vorschau
     aufgeschlagen nebeneinander; Leerseiten automatisch oder Markierung „beginnt rechts“; „Automatisch anordnen“ (A–Z mit kleinsten Umstellungen statt Leerseiten);
     eigene Reihenfolge (↑ ↓ im Druckdialog, Rechtsklick in der Vorschau), Seitenzahlen und Verzeichnis passen sich an
-30. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
+30. ✅ Einfache Ansicht und Expertenmodus (2.9): Schalter unter Einstellungen → App blendet die komplizierteren
+    Funktionen für den Einstieg aus (Inhalte bleiben sichtbar), Mundharmonika als eigener Schalter,
+    deutlicher Hinweis in „So geht's los“ und ⋯ → „Mehr Funktionen …“
+31. Mehrsprachigkeit: alle Texte der Oberfläche in Sprachdateien (`src/i18n/de.js`, Zugriff über `t('schlüssel')`),
     zuerst Englisch; Sprache folgt dem Browser und ist unter Einstellungen → App umstellbar. Schrittweise nach
     Bereichen umbauen (Kopfleiste, Liste, Menü → Dialoge → Hilfetexte); ein Test meldet fehlende Übersetzungen

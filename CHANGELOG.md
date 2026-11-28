@@ -8,6 +8,25 @@ Ab 2.0 (Umstellung auf Vite) zählt der mittlere Teil die Fahrplan-Punkte seit 2
 
 ---
 
+## 2.9.0 – 28.11.2026 · Einfache Ansicht und Expertenmodus
+
+- **Einfache Ansicht für den Anfang:** Ausgeblendet wird nur, was Fachwissen braucht oder Feineinstellung ist.
+  Nützliches und Selbsterklärendes bleibt – z. B. neues Liederbuch, Teilen zum Mitbearbeiten oder nur zum
+  Lesen (Abo), Live-Modus, Dropbox, „Was kann ich spielen?“, Capo-Hilfe, Tags und Notiz, Bridge und Hinweis.
+- **Expertenmodus** (Einstellungen → App) zeigt zusätzlich: Setlisten, Noten, Metronom/Takt/Tempo/Dauer,
+  ♯/♭-Schreibweise, Tab und Wiederholungen im Editor, Mehrfachauswahl, WebDAV/Nextcloud, Druck-Feinheiten
+  und die Gestaltung von Titel & Interpret. Der Schalter wirkt sofort.
+- **Klarere Knöpfe im Editor:** „[A] Akkord“ statt nur „[A]“, Erklärungen zu „?“ (Hilfe) und „↻ Refrain“.
+- **Mundharmonika als eigener Schalter:** Harp-Tabs werden jetzt standardmäßig **nicht** angezeigt. Mit dem
+  Schalter **Mundharmonika** gehen die Anzeige der Harp-Tabs sowie Harp-Hilfe, „Melodie als Harp-Tabs“ und
+  die Harp-Einstellungen an (die Anzeige lässt sich danach wie gewohnt einzeln ausschalten).
+- **Deutlich zu finden:** „So geht's los“ zeigt gleich oben, dass es mehr gibt, mit Knopf **Expertenmodus an**,
+  und hat einen eigenen Eintrag **Mit Mundharmonika starten**; im Menü ⋯ steht **Mehr Funktionen …**.
+- Der Expertenmodus versteckt nur Werkzeuge, nie Inhalte: Noten oder Tags in Liedern bleiben sichtbar,
+  Einladungs-, Abo- und Live-Links funktionieren immer.
+- **Nach dem Update ändert sich für bisherige Nutzer nichts:** Wer schon eigene Lieder, Setlisten, weitere
+  Liederbücher oder die Cloud nutzt, behält den Expertenmodus; Mundharmonika ist an, wenn ein Lied Harp-Tabs hat.
+
 ## 2.8.2 – 27.11.2026 · Druck: nach Tags filtern
 
 - **Liederbuch drucken – nach Tags filtern:** Das Filterfeld findet jetzt auch Tags und schlägt sie beim

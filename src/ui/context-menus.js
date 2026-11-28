@@ -15,6 +15,7 @@ import { openCapoHelp } from './capo-help.js';
 import { openHarpHelp } from './harp-help.js';
 import { shareSong } from './share.js';
 import { setView } from './view.js';
+import { asExpert } from '../modes.js';
 
 /** Abo: „In ‚Mein Liederbuch' kopieren“. */
 const copyMineItem = (song) => ({
@@ -31,7 +32,7 @@ attachContextMenu(listEl, '.song-item', async (btn) => {
     return [
       { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
       { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: () => playSong(id) },
-      { label: 'Auswählen', icon: 'select', hint: 'Strg+Klick', action: () => startSelection(id) },
+      { label: 'Auswählen', icon: 'select', hint: 'Strg+Klick', expert: true, action: () => startSelection(id) },
       '-',
       copyMineItem(song),
       { label: 'Drucken / PDF', icon: 'print', action: () => printSong(song) },
@@ -41,9 +42,9 @@ attachContextMenu(listEl, '.song-item', async (btn) => {
     { label: 'Öffnen', icon: 'eye', action: async () => { await openSong(id); if (isMobile()) setView('preview'); } },
     { label: 'Bearbeiten', icon: 'edit', action: async () => { await openSong(id); editSong(); } },
     { label: 'Spielen', icon: 'stage', hint: 'Doppelklick', action: () => playSong(id) },
-    { label: 'Auswählen', icon: 'select', hint: 'Strg+Klick', action: () => startSelection(id) },
+    { label: 'Auswählen', icon: 'select', hint: 'Strg+Klick', expert: true, action: () => startSelection(id) },
     '-',
-    await setlistMenu(songsById(id)),
+    asExpert(await setlistMenu(songsById(id))),
     { label: 'Duplizieren', icon: 'paste', action: () => duplicateSong(id) },
     { label: 'Teilen …', icon: 'share', action: async () => { await openSong(id); shareSong(); } },
     { label: 'Drucken / PDF', icon: 'print', action: () => printSong(song) },
@@ -85,12 +86,13 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
     { label: 'Originaltonart', disabled: t === 0, action: () => setViewOption({ transpose: 0 }) },
     {
       label: 'Schreibweise',
+      expert: true,
       items: [['auto', 'automatisch'], ['sharp', 'mit ♯'], ['flat', 'mit ♭']].map(([v, l]) => ({
         label: l, checked: acc === v, action: () => setViewOption({ accidentals: v }),
       })),
     },
     { label: 'Capo-Hilfe …', action: openCapoHelp },
-    ...(songHasHarp() ? [{ label: 'Harp-Hilfe …', action: openHarpHelp }] : []),
+    ...(songHasHarp() ? [{ label: 'Harp-Hilfe …', harp: true, action: openHarpHelp }] : []),
     '-',
     { label: 'Spielen', icon: 'stage', hint: 'F', action: () => playSong() },
     ...(readOnly ? [] : [{ label: 'Bearbeiten', icon: 'edit', action: editSong }]),
@@ -99,11 +101,12 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
       items: [
         toggleItem(s, 'Gitarren-Akkorde', 'showChords'),
         toggleItem(s, 'Griffbilder', 'showDiagrams', { disabled: !s.showChords }),
-        toggleItem(s, 'Mundharmonika-Tabs', 'showHarp'),
+        toggleItem(s, 'Mundharmonika-Tabs', 'showHarp', { harp: true }),
         {
           label: 'Harp-Tabs in eigener Zeile',
           checked: s.harpLayout === 'split',
           disabled: !s.showHarp,
+          harp: true,
           action: () => saveSettings({ ...s, harpLayout: s.harpLayout === 'split' ? 'inline' : 'split' }),
         },
         toggleItem(s, 'Gitarren-Tabs', 'showTabs'),
@@ -119,7 +122,7 @@ attachContextMenu($('.preview-scroll'), '#preview', async () => {
       ],
     },
     '-',
-    await setlistMenu(songsById(current.id)),
+    asExpert(await setlistMenu(songsById(current.id))),
     readOnly && copyMineItem(current),
     { label: 'Teilen …', icon: 'share', action: shareSong },
     { label: 'Drucken / PDF', icon: 'print', action: () => printSong({ ...current, chordpro: editor.value }) },

@@ -238,9 +238,8 @@ export function setupSettings({ targets }) {
   };
 
   dlg.addEventListener('close', () => {
-    if (dlg.returnValue === 'ok') {
-      saved = saveSettings(readForm());
-    }
+    // Abbrechen: Stand vom Speicher – der Schalter „Mundharmonika“ (src/modes.js) speichert sofort mit
+    saved = dlg.returnValue === 'ok' ? saveSettings(readForm()) : loadSettings();
     fillForm(saved);
     applyAll(saved);
   });

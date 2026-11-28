@@ -136,3 +136,6 @@ button.settings-sample-label { display: flex; align-items: center; gap: .5em; wi
 /* Wirkt gerade nicht, weil ein übergeordneter Schalter aus ist */
 .st-row.st-off .st-text, .st-row.st-off .st-control { opacity: .45; }
 .st-row.st-off .st-control { pointer-events: none; }
+
+/* '& Harp' in Navigation und Ueberschrift - faellt ohne Mundharmonika weg (src/modes.js) */
+.st-harp-word, .st-harp-word em { font-style: normal; }

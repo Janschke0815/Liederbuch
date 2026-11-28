@@ -40,7 +40,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   showLabels: true,
   showChords: true, // Gitarren-Akkorde über dem Text (aus: nur Text und ggf. Harp-Tabs)
   showDiagrams: true, // Griffbilder im Liedkopf
-  showHarp: true, // Mundharmonika-Tabs wie [-4]
+  showHarp: false, // Mundharmonika-Tabs wie [-4] – geht mit dem Schalter „Mundharmonika“ an (src/modes.js)
   harpColor: '#1565c0', // Blau: auch bei Rot-Grün-Schwäche gut vom Rot der Akkorde zu unterscheiden
   harpLayout: 'inline', // Akkorde und Harp-Tabs: 'inline' = eine Zeile, 'split' = zwei Zeilen
   showTabs: true, // Gitarren-Tabs ({start_of_tab})

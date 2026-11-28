@@ -5,6 +5,9 @@
 //            context?: () => Einträge (eigenes Menü per Rechtsklick/lang drücken/Menütaste auf dem Eintrag),
 //            contextTitle? }
 //          oder '-' für eine Trennlinie
+//          expert: true / harp: true – nur im Expertenmodus bzw. mit Mundharmonika (src/modes.js)
+import { allowedInMode } from './modes.js';
+
 const LONG_PRESS_MS = 520;
 let open = null; // { el, close }
 
@@ -47,7 +50,7 @@ export function showMenu(items, { x, y, title, parentMenu = null } = {}) {
   };
 
   const buttons = [];
-  for (const it of items.filter(Boolean)) {
+  for (const it of items.filter((i) => i && allowedInMode(i))) {
     if (it === '-') {
       if (menu.lastElementChild && !menu.lastElementChild.classList.contains('ctx-sep')) {
         menu.append(Object.assign(document.createElement('div'), { className: 'ctx-sep' }));

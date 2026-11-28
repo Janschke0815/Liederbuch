@@ -112,3 +112,12 @@ input:where(:not([type=checkbox]):not([type=color])), textarea { background: var
 @keyframes ctx-in {
   from { opacity: 0; transform: scale(.97); }
 }
+
+/* Funktionsumfang (src/modes.js): einfache Ansicht blendet Expertenwerkzeuge aus, ohne Mundharmonika die
+   Harp-Werkzeuge. Inhalte der Lieder (Harp-Tabs, Noten, Tags …) bleiben sichtbar. */
+:root[data-mode-simple] [data-expert],
+:root[data-mode-simple] .pr-move,
+:root[data-mode-simple] .print-form .pin,
+:root[data-mode-noharp] [data-harp-tool],
+:root[data-mode-noharp] .abc-harp,
+:root:not([data-mode-simple]) [data-simple-only] { display: none !important; }

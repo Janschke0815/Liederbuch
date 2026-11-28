@@ -24,7 +24,9 @@ const menuBtn = $('#btn-menu');
 const dlg = $('#toolbar-dialog');
 const list = $('#toolbar-list');
 
-const menuItems = () => [...menu.querySelectorAll('button[id]:not([data-fixed])')];
+// Nur Einträge, die im aktuellen Funktionsumfang sichtbar sind (src/modes.js: data-expert, data-harp-tool)
+const menuItems = () => [...menu.querySelectorAll('button[id]:not([data-fixed])')]
+  .filter((b) => !b.matches(':root[data-mode-simple] [data-expert], :root[data-mode-noharp] [data-harp-tool]'));
 const labelOf = (b) => b.querySelector('.label')?.textContent.trim() || b.id;
 const pins = () => cleanPins(prefs.get('toolbarPins'), menuItems().map((b) => b.id));
 const barShown = () => getComputedStyle(bar).display !== 'none';
@@ -139,6 +141,7 @@ attachContextMenu(bar, 'button[data-for]', (b) => pinItems(b.dataset.for, { inBa
 // ---------- Start und Größenänderung ----------
 
 render();
+addEventListener('modeschange', render); // Expertenmodus an/aus: z. B. „Live“ kommt in die Leiste bzw. verschwindet
 // Installieren erscheint erst, wenn der Browser es anbietet
 new MutationObserver(render).observe($('#btn-install'), { attributes: true, attributeFilter: ['hidden'] });
 // Platz ändert sich mit dem Fenster, dem Buchnamen (kommt erst nach dem Start), LIVE- und Cloud-Anzeige
